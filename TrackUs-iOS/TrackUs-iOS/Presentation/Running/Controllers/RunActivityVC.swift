@@ -1,13 +1,13 @@
 //
-//  RunningMateVC.swift
+//  RunActivityVC.swift
 //  TrackUs-iOS
 //
-//  Created by 석기권 on 5/11/24.
+//  Created by 석기권 on 5/13/24.
 //
 
 import UIKit
 
-class RunningMateVC: ViewController {
+class RunActivityVC: UIViewController {
     private lazy var moveButton: UIButton = {
         let btn = UIButton()
         btn.backgroundColor = .blue
@@ -19,29 +19,14 @@ class RunningMateVC: ViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .red
+        self.view.backgroundColor = .purple
         
         self.view.addSubview(moveButton)
         moveButton.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor).isActive = true
         moveButton.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor).isActive = true
     }
     
-    private func setupNavBar() {
-        title = "메이트 모집"
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.white
-        self.navigationController?.navigationBar.standardAppearance = appearance
-        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
-    }
-    
     @objc func moveButtonTapped() {
-        let mateDetailVC = MateDetailVC()
-        mateDetailVC.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(mateDetailVC, animated: true)
-        
+        self.navigationController?.pushViewController(RunningResultVC(), animated: true)
     }
 }
-

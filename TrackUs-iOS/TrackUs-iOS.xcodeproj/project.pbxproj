@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26C2BF12945002CB7DD /* RunActivityVC.swift */; };
+		8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26E2BF12BD2002CB7DD /* LoginVC.swift */; };
+		8280D2712BF13440002CB7DD /* MateDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D2702BF13440002CB7DD /* MateDetailVC.swift */; };
+		8280D2732BF1362E002CB7DD /* MateDetailVC2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D2722BF1362E002CB7DD /* MateDetailVC2.swift */; };
+		8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D2742BF137E2002CB7DD /* RunningResultVC.swift */; };
 		82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45572BEFA947007AE54A /* AppDelegate.swift */; };
 		82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45592BEFA948007AE54A /* SceneDelegate.swift */; };
 		82BE455C2BEFA948007AE54A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE455B2BEFA948007AE54A /* ViewController.swift */; };
@@ -21,6 +26,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8280D26C2BF12945002CB7DD /* RunActivityVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunActivityVC.swift; sourceTree = "<group>"; };
+		8280D26E2BF12BD2002CB7DD /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
+		8280D2702BF13440002CB7DD /* MateDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MateDetailVC.swift; sourceTree = "<group>"; };
+		8280D2722BF1362E002CB7DD /* MateDetailVC2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MateDetailVC2.swift; sourceTree = "<group>"; };
+		8280D2742BF137E2002CB7DD /* RunningResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningResultVC.swift; sourceTree = "<group>"; };
 		82BE45542BEFA947007AE54A /* TrackUs-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TrackUs-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		82BE45572BEFA947007AE54A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		82BE45592BEFA948007AE54A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -159,6 +169,8 @@
 			isa = PBXGroup;
 			children = (
 				82BE457B2BEFB0A0007AE54A /* RunningHomeVC.swift */,
+				8280D2742BF137E2002CB7DD /* RunningResultVC.swift */,
+				8280D26C2BF12945002CB7DD /* RunActivityVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -167,6 +179,8 @@
 			isa = PBXGroup;
 			children = (
 				82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */,
+				8280D2702BF13440002CB7DD /* MateDetailVC.swift */,
+				8280D2722BF1362E002CB7DD /* MateDetailVC2.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -190,6 +204,7 @@
 		82BE457A2BEFB03B007AE54A /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				8280D26E2BF12BD2002CB7DD /* LoginVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -269,8 +284,13 @@
 				82BE457F2BEFB0E4007AE54A /* RunningMateVC.swift in Sources */,
 				82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
+				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
 				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
+				8280D2732BF1362E002CB7DD /* MateDetailVC2.swift in Sources */,
+				8280D2712BF13440002CB7DD /* MateDetailVC.swift in Sources */,
+				8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */,
+				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
 				82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */,
 				82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */,
 			);

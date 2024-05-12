@@ -8,7 +8,7 @@
 import UIKit
 
 final class CustomTabBarVC: UITabBarController {
-    private lazy var mainButton: UIButton = {
+    lazy var mainButton: UIButton = {
         let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
         btn.backgroundColor = .mainBlue
         btn.setTitle("RUN!", for: .normal)
@@ -66,6 +66,8 @@ final class CustomTabBarVC: UITabBarController {
     }
     
     @objc func mainButtonTapped() {
-        print(#function)
+        let viewController = UINavigationController(rootViewController: RunActivityVC())
+        viewController.modalPresentationStyle = .fullScreen
+        present(viewController, animated: false)
     }
 }
