@@ -8,15 +8,16 @@
 import UIKit
 
 final class CustomTabBarVC: UITabBarController {
-    private let mainButton: UIButton = {
-        let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
+    private lazy var mainButton: UIButton = {
+        let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
         btn.backgroundColor = .mainBlue
         btn.setTitle("RUN!", for: .normal)
         btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
-        btn.layer.shadowColor = UIColor.black.cgColor
-        btn.layer.shadowOpacity = 0.2
-        btn.layer.shadowOffset = CGSize(width: 4, height: 4)
         btn.layer.cornerRadius = 18
+        btn.layer.shadowPath = UIBezierPath(roundedRect: btn.bounds, cornerRadius: btn.layer.cornerRadius).cgPath
+        btn.layer.shadowColor = UIColor.black.cgColor
+        btn.layer.shadowOffset = CGSize(width: 3, height: 3)
+        btn.layer.shadowOpacity = 0.4
         btn.addTarget(self, action: #selector(mainButtonTapped), for: .touchUpInside)
         return btn
     }()
@@ -25,13 +26,12 @@ final class CustomTabBarVC: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.tabBar.itemPositioning = .centered
     }
     
     override func loadView() {
         super.loadView()
-        setupMainButton()
         addTabItems()
+        setupMainButton()
     }
     
     func setupMainButton() {
