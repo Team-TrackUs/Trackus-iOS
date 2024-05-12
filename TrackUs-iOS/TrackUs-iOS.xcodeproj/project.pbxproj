@@ -13,6 +13,11 @@
 		82BE455F2BEFA948007AE54A /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 82BE455E2BEFA948007AE54A /* Base */; };
 		82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82BE45602BEFA94A007AE54A /* Assets.xcassets */; };
 		82BE45642BEFA94A007AE54A /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 82BE45632BEFA94A007AE54A /* Base */; };
+		82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE457B2BEFB0A0007AE54A /* RunningHomeVC.swift */; };
+		82BE457F2BEFB0E4007AE54A /* RunningMateVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */; };
+		82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45802BEFB128007AE54A /* MyChatListVC.swift */; };
+		82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45822BEFB137007AE54A /* MyProfileVC.swift */; };
+		82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +29,11 @@
 		82BE45602BEFA94A007AE54A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		82BE45632BEFA94A007AE54A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		82BE45652BEFA94A007AE54A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		82BE457B2BEFB0A0007AE54A /* RunningHomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningHomeVC.swift; sourceTree = "<group>"; };
+		82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningMateVC.swift; sourceTree = "<group>"; };
+		82BE45802BEFB128007AE54A /* MyChatListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyChatListVC.swift; sourceTree = "<group>"; };
+		82BE45822BEFB137007AE54A /* MyProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileVC.swift; sourceTree = "<group>"; };
+		82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,8 +66,9 @@
 		82BE45562BEFA947007AE54A /* TrackUs-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				82BE45572BEFA947007AE54A /* AppDelegate.swift */,
-				82BE45592BEFA948007AE54A /* SceneDelegate.swift */,
+				82BE456E2BEFAE22007AE54A /* Common */,
+				82BE456D2BEFADE5007AE54A /* Model */,
+				82BE456C2BEFADE2007AE54A /* Presentation */,
 				82BE455B2BEFA948007AE54A /* ViewController.swift */,
 				82BE455D2BEFA948007AE54A /* Main.storyboard */,
 				82BE45602BEFA94A007AE54A /* Assets.xcassets */,
@@ -65,6 +76,122 @@
 				82BE45652BEFA94A007AE54A /* Info.plist */,
 			);
 			path = "TrackUs-iOS";
+			sourceTree = "<group>";
+		};
+		82BE456C2BEFADE2007AE54A /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */,
+				82BE45732BEFAFB3007AE54A /* Running */,
+				82BE45722BEFAFB0007AE54A /* Mate */,
+				82BE45712BEFAFAD007AE54A /* Chat */,
+				82BE45702BEFAFAB007AE54A /* Profile */,
+				82BE45752BEFAFF5007AE54A /* Auth */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		82BE456D2BEFADE5007AE54A /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		82BE456E2BEFAE22007AE54A /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				82BE456F2BEFAE74007AE54A /* Core */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		82BE456F2BEFAE74007AE54A /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				82BE45572BEFA947007AE54A /* AppDelegate.swift */,
+				82BE45592BEFA948007AE54A /* SceneDelegate.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		82BE45702BEFAFAB007AE54A /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				82BE45792BEFB035007AE54A /* Controllers */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		82BE45712BEFAFAD007AE54A /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				82BE45782BEFB02F007AE54A /* Controllers */,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		82BE45722BEFAFB0007AE54A /* Mate */ = {
+			isa = PBXGroup;
+			children = (
+				82BE45772BEFB027007AE54A /* Controllers */,
+			);
+			path = Mate;
+			sourceTree = "<group>";
+		};
+		82BE45732BEFAFB3007AE54A /* Running */ = {
+			isa = PBXGroup;
+			children = (
+				82BE45762BEFB020007AE54A /* Controllers */,
+			);
+			path = Running;
+			sourceTree = "<group>";
+		};
+		82BE45752BEFAFF5007AE54A /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				82BE457A2BEFB03B007AE54A /* Controllers */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		82BE45762BEFB020007AE54A /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				82BE457B2BEFB0A0007AE54A /* RunningHomeVC.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		82BE45772BEFB027007AE54A /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		82BE45782BEFB02F007AE54A /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				82BE45802BEFB128007AE54A /* MyChatListVC.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		82BE45792BEFB035007AE54A /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				82BE45822BEFB137007AE54A /* MyProfileVC.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		82BE457A2BEFB03B007AE54A /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Controllers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -139,8 +266,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				82BE455C2BEFA948007AE54A /* ViewController.swift in Sources */,
+				82BE457F2BEFB0E4007AE54A /* RunningMateVC.swift in Sources */,
+				82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */,
+				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
+				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
 				82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */,
+				82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +432,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -328,6 +461,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
