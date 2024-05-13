@@ -4,6 +4,10 @@
 //
 //  Created by 석기권 on 5/13/24.
 //
+// TODO: - 러닝종료 스와이프 구현
+// tanslation x값을 측정
+// 버튼의 leadingAnchor값을 이동한 값만큼 추가
+// leadingAnchor값이 View의 Width - padding보다 큰경우 gestrue하지않음
 
 import UIKit
 import MapKit
@@ -41,6 +45,36 @@ final class RunActivityVC: UIViewController {
         return view
     }()
     
+    private lazy var swipeBox: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(white: 0, alpha: 0.5)
+        view.layer.cornerRadius = 35
+        let label = UILabel()
+        label.text = "밀어서 러닝종료"
+        label.textColor = .lightGray
+        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
+        view.addSubview(actionButton)
+        label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        view.isHidden = true
+        return view
+    }()
+    
+    private lazy var actionButton: UIButton = {
+        let btn = UIButton()
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        btn.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        btn.layer.cornerRadius = 25
+        btn.backgroundColor = .white
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pangestureHandler))
+        btn.addGestureRecognizer(panGesture)
+        return btn
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupMapView()
@@ -51,8 +85,17 @@ final class RunActivityVC: UIViewController {
     
     func setConstraint() {
         self.view.addSubview(overlayView)
+        self.view.addSubview(swipeBox)
+        
         NSLayoutConstraint.activate([
+            swipeBox.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            swipeBox.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            swipeBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            swipeBox.heightAnchor.constraint(equalToConstant: 70),
             
+            actionButton.leadingAnchor.constraint(equalTo: swipeBox.leadingAnchor, constant: 10),
+            actionButton.topAnchor.constraint(equalTo: swipeBox.topAnchor, constant: 10),
+            actionButton.bottomAnchor.constraint(equalTo: swipeBox.bottomAnchor, constant: -10),
         ])
     }
     
@@ -71,6 +114,7 @@ final class RunActivityVC: UIViewController {
     
     func updateOnStart() {
         self.overlayView.isHidden = true
+        self.swipeBox.isHidden = false
     }
     
     func setTimer() {
@@ -86,6 +130,11 @@ final class RunActivityVC: UIViewController {
             self.countLabel.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
         }, completion: nil)
     }
+    
+    @objc func pangestureHandler(recognizer: UIPanGestureRecognizer) {
+        let translation = recognizer.translation(in: actionButton)
+        print(translation)
+    }
 }
 
 extension Int {
@@ -93,6 +142,7 @@ extension Int {
         return String(self)
     }
 }
+
 extension String {
     var asNumber: Int {
         guard let number = Int(self) else { return 0 }
