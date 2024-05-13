@@ -11,6 +11,7 @@ import MapKit
 final class RunningHomeVC: ViewController {
     private var mapView: MKMapView!
     private let locationService = LocationService.shared
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         checkLocationStatus()
