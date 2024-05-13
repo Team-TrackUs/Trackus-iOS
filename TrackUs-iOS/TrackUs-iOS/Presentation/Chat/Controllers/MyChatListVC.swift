@@ -11,12 +11,12 @@ class MyChatListVC: ViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        setupNavBar()
         view.backgroundColor = .green
     }
 
     private func setupNavBar() {
-        title = "채팅 목록"
+        self.navigationItem.title = "채팅 목록"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor.white

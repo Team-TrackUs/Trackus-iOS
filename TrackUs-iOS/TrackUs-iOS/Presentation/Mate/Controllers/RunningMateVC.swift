@@ -18,23 +18,21 @@ class RunningMateVC: ViewController {
     }()
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        
+        super.viewDidLoad()        
         view.backgroundColor = .red
-        
+        setupNavBar()
         self.view.addSubview(moveButton)
         moveButton.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor).isActive = true
         moveButton.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor).isActive = true
     }
     
     private func setupNavBar() {
-        title = "메이트 모집"
+        self.navigationItem.title = "메이트 모집"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
     }
     
     @objc func moveButtonTapped() {
@@ -43,5 +41,7 @@ class RunningMateVC: ViewController {
         self.navigationController?.pushViewController(mateDetailVC, animated: true)
         
     }
+    
+    
 }
 

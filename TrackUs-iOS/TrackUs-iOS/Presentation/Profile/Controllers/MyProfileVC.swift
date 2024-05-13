@@ -11,13 +11,13 @@ class MyProfileVC: ViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        setupNavBar()
         view.backgroundColor = .gray
     }
     
 
     private func setupNavBar() {
-        title = "마이페이지"
+        self.navigationItem.title = "마이페이지"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor.white

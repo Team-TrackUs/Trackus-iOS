@@ -18,7 +18,7 @@ final class CustomTabBarVC: UITabBarController {
         btn.layer.shadowColor = UIColor.black.cgColor
         btn.layer.shadowOffset = CGSize(width: 3, height: 3)
         btn.layer.shadowOpacity = 0.4
-        btn.addTarget(self, action: #selector(mainButtonTapped), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(goToRunActivityVC), for: .touchUpInside)
         return btn
     }()
     
@@ -45,17 +45,17 @@ final class CustomTabBarVC: UITabBarController {
         let chatVC = UINavigationController(rootViewController: MyChatListVC())
         let profileVC = UINavigationController(rootViewController: MyProfileVC())
         
-        homeVC.title = "러닝"
-        mateVC.title = "메이트"
-        chatVC.title = "채팅 목록"
-        profileVC.title = "마이페이지"
+        homeVC.title = "러닝맵"
+        mateVC.title = "모집"
+        chatVC.title = "채팅"
+        profileVC.title = "프로필"
         
         self.setViewControllers([homeVC, mateVC, chatVC, profileVC], animated: false)
         self.modalPresentationStyle = .fullScreen
         self.tabBar.backgroundColor = .white
         
         guard let items = self.tabBar.items else { return }
-        items[0].image = UIImage(resource: .runTabbarIcon)
+        items[0].image = UIImage(systemName: "mappin.and.ellipse")
         
         items[1].image = UIImage(resource: .mateTabbarIcon)
         items[1].titlePositionAdjustment = UIOffset(horizontal: -CGFloat(mainBtnWidth / 2), vertical: 0)
@@ -65,7 +65,7 @@ final class CustomTabBarVC: UITabBarController {
         items[3].image = UIImage(resource: .profileTabbarIcon)
     }
     
-    @objc func mainButtonTapped() {
+    @objc func goToRunActivityVC() {
         let viewController = UINavigationController(rootViewController: RunActivityVC())
         viewController.modalPresentationStyle = .fullScreen
         present(viewController, animated: false)
