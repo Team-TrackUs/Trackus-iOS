@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */; };
 		8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26C2BF12945002CB7DD /* RunActivityVC.swift */; };
 		8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26E2BF12BD2002CB7DD /* LoginVC.swift */; };
 		8280D2712BF13440002CB7DD /* MateDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D2702BF13440002CB7DD /* MateDetailVC.swift */; };
@@ -26,6 +27,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDrawingMapVC.swift; sourceTree = "<group>"; };
 		8280D26C2BF12945002CB7DD /* RunActivityVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunActivityVC.swift; sourceTree = "<group>"; };
 		8280D26E2BF12BD2002CB7DD /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		8280D2702BF13440002CB7DD /* MateDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MateDetailVC.swift; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 				82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */,
 				8280D2702BF13440002CB7DD /* MateDetailVC.swift */,
 				8280D2722BF1362E002CB7DD /* MateDetailVC2.swift */,
+				61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -283,6 +286,7 @@
 				82BE455C2BEFA948007AE54A /* ViewController.swift in Sources */,
 				82BE457F2BEFB0E4007AE54A /* RunningMateVC.swift in Sources */,
 				82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */,
+				61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
 				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
@@ -442,11 +446,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = P4D4ZQC4YF;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "App needs location servers for stuff.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "App needs location servers for stuff.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "App needs location servers for stuff.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -460,6 +469,8 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Trackus.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = TrackUs_Uikit_Development;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -480,6 +491,9 @@
 				DEVELOPMENT_TEAM = P4D4ZQC4YF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "App needs location servers for stuff.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "App needs location servers for stuff.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "App needs location servers for stuff.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

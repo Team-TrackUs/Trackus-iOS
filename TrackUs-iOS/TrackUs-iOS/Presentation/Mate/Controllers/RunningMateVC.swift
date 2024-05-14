@@ -36,7 +36,8 @@ class RunningMateVC: ViewController {
     }
     
     @objc func moveButtonTapped() {
-        let mateDetailVC = MateDetailVC()
+//        let mateDetailVC = MateDetailVC()
+        let mateDetailVC = CourseDrawingMapVC()
         mateDetailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(mateDetailVC, animated: true)
         
