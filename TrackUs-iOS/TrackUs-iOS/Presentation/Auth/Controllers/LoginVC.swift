@@ -72,7 +72,7 @@ class LoginVC: UIViewController {
         button.layer.masksToBounds = true
         
         // 버튼 액션 추가
-        button.addTarget(LoginVC.self, action: #selector(appleLoginButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(appleLoginButtonTapped), for: .touchUpInside)
         
         // 높이 제약
         button.heightAnchor.constraint(equalToConstant: 56).isActive = true
@@ -173,6 +173,7 @@ class LoginVC: UIViewController {
     // MARK: - Apple 로그인 버튼 실행 함수
     @objc func appleLoginButtonTapped() {
         print("Apple 로그인 버튼이 누름")
+        AuthService.shared.startSignInWithAppleFlow()
     }
     
     // MARK: - Kakao 로그인 버튼 실행 함수
@@ -181,7 +182,12 @@ class LoginVC: UIViewController {
     }
 }
 
+extension LoginVC {
+    
+    
+}
 
+/// 배경 그라데이션
 class GradientBackgroundView: UIView {
     
     override class var layerClass: AnyClass {

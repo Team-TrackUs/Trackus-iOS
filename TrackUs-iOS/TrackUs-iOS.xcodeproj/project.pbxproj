@@ -33,6 +33,9 @@
 		988618262BF31874002ACB4E /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 988618252BF31874002ACB4E /* FirebaseStorage */; };
 		988618282BF31874002ACB4E /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 988618272BF31874002ACB4E /* FirebaseStorageCombine-Community */; };
 		9886182A2BF318AA002ACB4E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 988618292BF318AA002ACB4E /* GoogleService-Info.plist */; };
+		988618302BF348C8002ACB4E /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9886182F2BF348C8002ACB4E /* AuthService.swift */; };
+		988618332BF34AE0002ACB4E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988618322BF34AE0002ACB4E /* User.swift */; };
+		988618382BF37E81002ACB4E /* SignUpVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988618372BF37E81002ACB4E /* SignUpVC.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +59,10 @@
 		82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarVC.swift; sourceTree = "<group>"; };
 		988618162BF317EE002ACB4E /* UIImage+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+.swift"; sourceTree = "<group>"; };
 		988618292BF318AA002ACB4E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		9886182F2BF348C8002ACB4E /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		988618322BF34AE0002ACB4E /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOS.entitlements"; sourceTree = "<group>"; };
+		988618372BF37E81002ACB4E /* SignUpVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,8 +103,9 @@
 		82BE45562BEFA947007AE54A /* TrackUs-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */,
+				988618312BF34A6C002ACB4E /* Model */,
 				82BE456E2BEFAE22007AE54A /* Common */,
-				82BE456D2BEFADE5007AE54A /* Model */,
 				82BE456C2BEFADE2007AE54A /* Presentation */,
 				82BE455B2BEFA948007AE54A /* ViewController.swift */,
 				82BE455D2BEFA948007AE54A /* Main.storyboard */,
@@ -120,13 +128,6 @@
 				82BE45752BEFAFF5007AE54A /* Auth */,
 			);
 			path = Presentation;
-			sourceTree = "<group>";
-		};
-		82BE456D2BEFADE5007AE54A /* Model */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Model;
 			sourceTree = "<group>";
 		};
 		82BE456E2BEFAE22007AE54A /* Common */ = {
@@ -227,8 +228,18 @@
 			children = (
 				8280D26E2BF12BD2002CB7DD /* LoginVC.swift */,
 				988618162BF317EE002ACB4E /* UIImage+.swift */,
+				9886182F2BF348C8002ACB4E /* AuthService.swift */,
+				988618372BF37E81002ACB4E /* SignUpVC.swift */,
 			);
 			path = Controllers;
+			sourceTree = "<group>";
+		};
+		988618312BF34A6C002ACB4E /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				988618322BF34AE0002ACB4E /* User.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -320,6 +331,7 @@
 				988618172BF317EE002ACB4E /* UIImage+.swift in Sources */,
 				82BE457F2BEFB0E4007AE54A /* RunningMateVC.swift in Sources */,
 				82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */,
+				988618332BF34AE0002ACB4E /* User.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
 				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
@@ -328,8 +340,10 @@
 				8280D2712BF13440002CB7DD /* MateDetailVC.swift in Sources */,
 				8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
+				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
 				82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */,
 				82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */,
+				988618382BF37E81002ACB4E /* SignUpVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -481,9 +495,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "TrackUs-iOS/TrackUs-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = P4D4ZQC4YF;
+				DEVELOPMENT_TEAM = 4N3558QY8F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -514,9 +529,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "TrackUs-iOS/TrackUs-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = P4D4ZQC4YF;
+				DEVELOPMENT_TEAM = 4N3558QY8F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
