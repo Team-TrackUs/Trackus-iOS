@@ -4,10 +4,10 @@
 //
 //  Created by 석기권 on 5/13/24.
 //
-// TODO: - 러닝종료 스와이프 구현
+// TODO: - 스와이프 구현
 // tanslation x값을 측정
-// 버튼의 leadingAnchor값을 이동한 값만큼 추가
-// leadingAnchor값이 View의 Width - padding보다 큰경우 gestrue하지않음
+// 버튼의 center.x값을 이동한 값만큼 추가
+//  <= center.x
 
 import UIKit
 import MapKit
@@ -51,7 +51,7 @@ final class RunActivityVC: UIViewController {
         view.backgroundColor = UIColor(white: 0, alpha: 0.5)
         view.layer.cornerRadius = 35
         let label = UILabel()
-        label.text = "밀어서 러닝종료"
+        label.text = "밀어서 러닝 종료"
         label.textColor = .lightGray
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -70,6 +70,9 @@ final class RunActivityVC: UIViewController {
         btn.heightAnchor.constraint(equalToConstant: 50).isActive = true
         btn.layer.cornerRadius = 25
         btn.backgroundColor = .white
+        let image = UIImage(systemName: "pause.fill")
+        
+        btn.setImage(image, for: .normal)
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pangestureHandler))
         btn.addGestureRecognizer(panGesture)
         return btn
@@ -131,9 +134,28 @@ final class RunActivityVC: UIViewController {
         }, completion: nil)
     }
     
-    @objc func pangestureHandler(recognizer: UIPanGestureRecognizer) {
-        let translation = recognizer.translation(in: actionButton)
-        print(translation)
+    @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
+        let minX = actionButton.bounds.width / 2 + 10
+        let translation = sender.translation(in: actionButton)
+        
+        let newX = actionButton.center.x + translation.x
+        let maxX = swipeBox.bounds.maxX - CGFloat(35)
+        actionButton.center.x = max(minX, min(newX, maxX))
+        sender.setTranslation(CGPoint.zero, in: actionButton)
+        
+        if sender.state == .ended && newX > maxX * 0.9 {
+            goToResultVC()
+        } else if sender.state == .ended  {
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn) {
+                self.actionButton.center.x = minX
+            }
+        }
+    }
+    
+    func goToResultVC() {
+        let resultVC = RunningResultVC()
+        resultVC.modalPresentationStyle = .fullScreen
+        present(resultVC, animated: true)
     }
 }
 
