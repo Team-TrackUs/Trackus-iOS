@@ -75,7 +75,8 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         button.layer.shadowOffset = CGSize.zero
         button.layer.shadowRadius = 6
         
-        button.addTarget(self, action: #selector(finishDrawCourseButtonTapped), for: .touchUpInside)
+//        button.addTarget(self, action: #selector(finishDrawCourseButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(moveButtonTapped), for: .touchUpInside)
         
         return button
     }()
@@ -164,6 +165,18 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         print("Next CourseMakeView")
     }
     
+    @objc func moveButtonTapped() {
+        let courseRegisterVC = CourseRegisterVC()
+        
+        if testcoords.count >= 2 {
+            courseRegisterVC.hidesBottomBarWhenPushed = true
+            courseRegisterVC.setup(with: testcoords, distance: distance)
+            self.navigationController?.pushViewController(courseRegisterVC, animated: true)
+        } else {
+            addActionToAlert()
+        }
+    }
+    
     
     // MARK: - Helpers
     
@@ -188,7 +201,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         finishDrawCourseButton.widthAnchor.constraint(equalToConstant: 398).isActive = true
         finishDrawCourseButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
         finishDrawCourseButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16).isActive = true
-        finishDrawCourseButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20).isActive = true
+        finishDrawCourseButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         finishDrawCourseButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16).isActive = true
         
         let stack = UIStackView(arrangedSubviews: [oneStepBackButton, courseClearButton])
@@ -337,6 +350,14 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         }
         
         return annotationView
+    }
+    
+    func addActionToAlert() {
+        let alert = UIAlertController(title: "알림", message: "경로를 2개 이상 생성해주세요.", preferredStyle: .alert)
+        let yes = UIAlertAction(title: "확인", style: .default, handler: nil)
+        alert.addAction(yes)
+        
+        present(alert, animated: true, completion: nil)
     }
     
 }
