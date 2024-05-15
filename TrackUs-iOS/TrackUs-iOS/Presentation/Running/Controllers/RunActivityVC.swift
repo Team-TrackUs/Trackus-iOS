@@ -307,10 +307,12 @@ final class RunActivityVC: UIViewController {
         } else {
             updatedOnStart()
         }
+        HapticManager.shared.hapticImpact(style: .light)
         isActive.toggle()
     }
     
     func goToResultVC() {
+        HapticManager.shared.hapticImpact(style: .medium)
         let resultVC = RunningResultVC()
         resultVC.modalPresentationStyle = .fullScreen
         present(resultVC, animated: true)
