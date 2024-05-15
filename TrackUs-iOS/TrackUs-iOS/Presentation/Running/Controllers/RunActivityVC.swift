@@ -7,7 +7,7 @@
 // TODO: - 스와이프 구현
 // tanslation x값을 측정
 // 버튼의 center.x값을 이동한 값만큼 추가
-//  <= center.x
+
 
 import UIKit
 import MapKit
@@ -15,6 +15,8 @@ import MapKit
 final class RunActivityVC: UIViewController {
     private var mapView: MKMapView!
     private let locationService = LocationService.shared
+    private var isActive = true
+    private var timer: Timer?
     
     private lazy var countLabel: UILabel = {
         let label = UILabel()
@@ -75,7 +77,117 @@ final class RunActivityVC: UIViewController {
         btn.setImage(image, for: .normal)
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pangestureHandler))
         btn.addGestureRecognizer(panGesture)
+        btn.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         return btn
+    }()
+    
+    private lazy var kilometerLabel: UILabel = {
+        let label = UILabel()
+        label.text = "0.0 km"
+        label.font = UIFont.systemFont(ofSize: 14)
+        return label
+    }()
+    
+    private lazy var topStackView: UIStackView = {
+        let sv = UIStackView()
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.axis = .horizontal
+        sv.distribution = .equalSpacing
+        let sv2 = UIStackView()
+        sv2.spacing = 10
+        sv2.axis = .horizontal
+        sv2.distribution = .fillProportionally
+        sv2.alignment = .leading
+        let imageView = UIImageView(image: UIImage(systemName: "figure.run"))
+        let label = UILabel()
+        label.text = "현재까지 거리"
+        [imageView, label].forEach {sv2.addArrangedSubview($0)}
+        sv.backgroundColor = .white
+        sv.isHidden = true
+        [sv2, kilometerLabel].forEach {sv.addArrangedSubview($0)}
+        return sv
+    }()
+    
+    private let calorieValue: UILabel = {
+        let label = UILabel()
+        label.text = "0.0"
+        return label
+    }()
+    
+    private let paceValue: UILabel = {
+        let label = UILabel()
+        label.text = "-'--''"
+        return label
+    }()
+    
+    private let timeValue: UILabel = {
+        let label = UILabel()
+        label.text = "00:00"
+        return label
+    }()
+    
+    private let altitudeValue: UILabel = {
+        let label = UILabel()
+        label.text = "0.0m"
+        return label
+    }()
+    
+    private let cadenceValue: UILabel = {
+        let label = UILabel()
+        label.text = "-"
+        return label
+    }()
+    
+    private lazy var centerStackView: UIStackView = {
+        let sv = UIStackView()
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.axis = .horizontal
+        sv.alignment = .center
+        sv.distribution = .equalSpacing
+        let calorieStackVIew = makeCircleStView()
+        let calorieImageView = UIImageView(image: UIImage(systemName: "figure.run.circle.fill"))
+        let calorieLabel = UILabel()
+        calorieLabel.text = "소모 칼로리"
+        [calorieImageView, calorieLabel, calorieValue].forEach {calorieStackVIew.addArrangedSubview($0)}
+        
+        let paceStackVIew = makeCircleStView()
+        let paceImageView = UIImageView(image: UIImage(systemName: "figure.run.circle.fill"))
+        let paceLabel = UILabel()
+        paceLabel.text = "페이스"
+        [paceImageView, paceLabel, paceValue].forEach {paceStackVIew.addArrangedSubview($0)}
+        
+        let timeStackVIew = makeCircleStView()
+        let timeImageView = UIImageView(image: UIImage(systemName: "figure.run.circle.fill"))
+        let timeLabel = UILabel()
+        timeLabel.text = "경과 시간"
+        [timeImageView, timeLabel, timeValue].forEach {timeStackVIew.addArrangedSubview($0)}
+        
+        [calorieStackVIew, paceStackVIew, timeStackVIew].forEach { sv.addArrangedSubview($0) }
+        sv.isHidden = true
+        return sv
+    }()
+    
+    private lazy var bottomStackView: UIStackView = {
+        let sv = UIStackView()
+        sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.axis = .horizontal
+        sv.spacing = 30
+        sv.distribution = .equalSpacing
+        sv.alignment = .center
+        let altitudeStackVIew = makeCircleStView()
+        let altitudeImageView = UIImageView(image: UIImage(systemName: "figure.run.circle.fill"))
+        let altitudeLabel = UILabel()
+        altitudeLabel.text = "고도"
+        [altitudeImageView, altitudeLabel, altitudeValue].forEach {altitudeStackVIew.addArrangedSubview($0)}
+        
+        let cadenceStackVIew = makeCircleStView()
+        let cadenceImageView = UIImageView(image: UIImage(systemName: "figure.run.circle.fill"))
+        let cadenceLabel = UILabel()
+        cadenceLabel.text = "케이던스"
+        [cadenceImageView, cadenceLabel, cadenceValue].forEach {cadenceStackVIew.addArrangedSubview($0)}
+        [altitudeStackVIew, cadenceStackVIew].forEach { sv.addArrangedSubview($0) }
+        sv.isHidden = true
+        return sv
     }()
     
     override func viewDidLoad() {
@@ -89,6 +201,9 @@ final class RunActivityVC: UIViewController {
     func setConstraint() {
         self.view.addSubview(overlayView)
         self.view.addSubview(swipeBox)
+        self.view.addSubview(topStackView)
+        self.view.addSubview(centerStackView)
+        self.view.addSubview(bottomStackView)
         
         NSLayoutConstraint.activate([
             swipeBox.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
@@ -99,6 +214,18 @@ final class RunActivityVC: UIViewController {
             actionButton.leadingAnchor.constraint(equalTo: swipeBox.leadingAnchor, constant: 10),
             actionButton.topAnchor.constraint(equalTo: swipeBox.topAnchor, constant: 10),
             actionButton.bottomAnchor.constraint(equalTo: swipeBox.bottomAnchor, constant: -10),
+            
+            topStackView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            topStackView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            topStackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: -20),
+            
+            centerStackView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            centerStackView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            centerStackView.topAnchor.constraint(equalTo: self.topStackView.bottomAnchor, constant: 20),
+            
+            bottomStackView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            bottomStackView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            bottomStackView.topAnchor.constraint(equalTo: self.centerStackView.bottomAnchor, constant: 20),
         ])
     }
     
@@ -115,17 +242,39 @@ final class RunActivityVC: UIViewController {
         }
     }
     
-    func updateOnStart() {
+    func updatedOnStart() {
         self.overlayView.isHidden = true
         self.swipeBox.isHidden = false
+        self.topStackView.isHidden = false
+        self.centerStackView.isHidden = false
+        self.bottomStackView.isHidden = true
+        self.actionButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+        
+        UIView.animate(withDuration: 0.2) {
+            self.topStackView.axis = .horizontal
+            self.topStackView.distribution = .equalSpacing
+            self.kilometerLabel.font = UIFont.systemFont(ofSize: 14)
+            self.topStackView.spacing = 0
+        }
+    }
+    
+    func updatedOnPause() {
+        self.bottomStackView.isHidden = false
+        self.actionButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        UIView.animate(withDuration: 0.2) {
+            self.topStackView.axis = .vertical
+            self.topStackView.spacing = 14
+            self.topStackView.distribution = .equalSpacing
+            self.kilometerLabel.font = UIFont.boldSystemFont(ofSize: 24)
+        }
     }
     
     func setTimer() {
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             let number = self.countLabel.text!.asNumber
             if number == 1 {
-                self.updateOnStart()
-                return
+                self.updatedOnStart()
+                self.timer?.invalidate()
             }
             self.countLabel.text = (number - 1).asString
         }
@@ -152,10 +301,38 @@ final class RunActivityVC: UIViewController {
         }
     }
     
+    @objc func buttonTapped() {
+        if isActive {
+            updatedOnPause()
+        } else {
+            updatedOnStart()
+        }
+        isActive.toggle()
+    }
+    
     func goToResultVC() {
         let resultVC = RunningResultVC()
         resultVC.modalPresentationStyle = .fullScreen
         present(resultVC, animated: true)
+    }
+}
+
+extension RunActivityVC {
+    func makeCircleStView() -> UIStackView {
+        let circleDiameter: CGFloat = 88.0
+        let view = UIStackView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .white
+        view.layer.cornerRadius = circleDiameter / 2.0
+        view.clipsToBounds = true
+        view.distribution = .equalSpacing
+        view.alignment = .center
+        view.axis = .vertical
+        view.layoutMargins = UIEdgeInsets(top: 7, left: 7, bottom: 7, right: 7)
+        view.isLayoutMarginsRelativeArrangement = true
+        view.widthAnchor.constraint(equalToConstant: circleDiameter).isActive = true
+        view.heightAnchor.constraint(equalToConstant: circleDiameter).isActive = true
+        return view
     }
 }
 
