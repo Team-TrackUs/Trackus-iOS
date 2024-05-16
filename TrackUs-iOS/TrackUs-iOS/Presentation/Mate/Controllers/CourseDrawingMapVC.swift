@@ -19,6 +19,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     var testcoords: [CLLocationCoordinate2D] = []
     var pinAnnotations: [MKPointAnnotation] = []
     var isRegionSet = false
+    var courseRegisterVC: CourseRegisterVC?
     
     var distance: CLLocationDistance = 0
     
@@ -87,6 +88,10 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         super.viewDidLoad()
         
         configureUI()
+        
+        if let courseRegisterVC = navigationController?.viewControllers.first(where: { $0 is CourseRegisterVC }) as? CourseRegisterVC {
+            self.courseRegisterVC = courseRegisterVC
+        }
     }
     
     // MARK: - Selectors
@@ -166,12 +171,15 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     }
     
     @objc func moveButtonTapped() {
-        let courseRegisterVC = CourseRegisterVC()
+        guard let courseRegisterVC = self.courseRegisterVC else {
+            return
+        }
         
         if testcoords.count >= 2 {
-            courseRegisterVC.hidesBottomBarWhenPushed = true
             courseRegisterVC.setup(with: testcoords, distance: distance)
-            self.navigationController?.pushViewController(courseRegisterVC, animated: true)
+            self.navigationController?.popToViewController(courseRegisterVC, animated: true)
+            print("DEBUG: CourseDrawingVC = \(testcoords.count)")
+            print("DEBUG: CourseDrawingVC.CourseRegisterVC = \(courseRegisterVC.testcoords.count)")
         } else {
             addActionToAlert()
         }
@@ -361,3 +369,22 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     }
     
 }
+
+
+//@objc func moveButtonTapped() {
+////        let courseRegisterVC = CourseRegisterVC()
+//    guard let courseRegisterVC = self.courseRegisterVC else {
+//        return
+//    }
+//    
+//    if testcoords.count >= 2 {
+////            courseRegisterVC.hidesBottomBarWhenPushed = true
+//        courseRegisterVC.setup(with: testcoords, distance: distance)
+////            self.navigationController?.pushViewController(courseRegisterVC, animated: true)
+//        self.navigationController?.popViewController(animated: true)
+//        print("DEBUG: \(testcoords.count)")
+//        print("DEBUG: \(courseRegisterVC.testcoords.count)")
+//    } else {
+//        addActionToAlert()
+//    }
+//}

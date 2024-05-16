@@ -12,23 +12,55 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     // MARK: - Properties
     
-    var testcoords: [CLLocationCoordinate2D] = []
-    var distance: CLLocationDistance = 0
-    
-    var personnel: Int = 1
-    var runningStyle: Int = 0 {
+    lazy var testcoords: [CLLocationCoordinate2D] = [] // 좌표배열
+    lazy var distance: CLLocationDistance = 0 // 거리
+    var runningStyle: Int = 0 { // 러닝 스타일
         didSet {
             updateStyleButtonAppearance()
         }
     }
+    var courseTitleString: String = "" // 코스 제목
+    var courseDescriptionString: String = "" // 코스 소개글
+    var personnel: Int = 1 // 인원수
     
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
     var pinAnnotations: [MKPointAnnotation] = [] // mapkit
     
+    let toolBarKeyboard: UIToolbar = {
+        let toolbar = UIToolbar()
+        let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(btnDoneBarTapped))
+        toolbar.sizeToFit()
+        toolbar.items = [flexBarButton, doneButton]
+        toolbar.tintColor = .blue
+        return toolbar
+    }()
+    
     var drawMapView: MKMapView = {
         let mapview = MKMapView()
         return mapview
+    }()
+    
+    private lazy var drawMapButton: UIButton = {
+       let button = UIButton()
+        
+        button.setTitle("코스를 입력해주세요", for: .normal)
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+        button.titleLabel?.textColor = .white
+        button.backgroundColor = .blue
+        button.layer.borderWidth = 1.0
+        button.layer.borderColor = UIColor.gray.cgColor
+        button.addTarget(self, action: #selector(drawMapButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var editMapButton: UIButton = {
+       let button = UIButton()
+        
+        button.setImage(UIImage(named: "pencil_icon"), for: .normal)
+        button.addTarget(self, action: #selector(editMapButtonTapped), for: .touchUpInside)
+        return button
     }()
     
     let scrollView: UIScrollView = {
@@ -50,6 +82,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         label.textColor = .black
         label.textAlignment = .left
         label.text = "러닝스타일"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
     
@@ -58,6 +91,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         label.textColor = .black
         label.textAlignment = .left
         label.text = "코스 제목"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
     
@@ -66,6 +100,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         label.textColor = .black
         label.textAlignment = .left
         label.text = "코스 소개글"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
     
@@ -74,6 +109,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         label.textColor = .black
         label.textAlignment = .left
         label.text = "날짜 설정"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
     
@@ -82,6 +118,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         label.textColor = .black
         label.textAlignment = .left
         label.text = "모집 시간"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
     
@@ -90,6 +127,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         label.textColor = .black
         label.textAlignment = .left
         label.text = "인원 설정"
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
     
@@ -133,7 +171,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return button
     }()
     
-    private let courseTitle: UITextField = {
+    private lazy var courseTitle: UITextField = {
         let title = UITextField()
         title.textColor = .black
         title.font = UIFont.systemFont(ofSize: 16)
@@ -147,10 +185,12 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         title.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
         title.leftViewMode = .always
         
+        title.inputAccessoryView = toolBarKeyboard
+        
         return title
     }()
     
-    private let courseDescription: UITextView = {
+    private lazy var courseDescription: UITextView = {
         let description = UITextView()
         description.textColor = .black
         description.font = UIFont.systemFont(ofSize: 16)
@@ -159,6 +199,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         description.layer.borderWidth = 1.0
         description.layer.borderColor = UIColor.gray.cgColor
         description.textContainerInset = UIEdgeInsets(top: 16, left: 4, bottom: 16, right: 4)
+        description.inputAccessoryView = toolBarKeyboard
         
         return description
     }()
@@ -239,8 +280,8 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         label.text = "\(String(format: "%.2f", distance)) km"
         label.textColor = .white
         label.textAlignment = .center
-        label.frame = CGRect(x: 0, y: 0, width: 80, height: 30)
-        label.layer.cornerRadius = 30 / 2
+        label.frame = CGRect(x: 0, y: 0, width: 80, height: 40)
+        label.layer.cornerRadius = 40 / 2
         label.layer.shadowColor = UIColor.gray.cgColor
         label.layer.shadowOpacity = 1.0
         label.layer.shadowOffset = CGSize.zero
@@ -259,7 +300,16 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         setupPlaceholder()
         
         configureUI()
-        MapConfigureUI()
+        
+        hideKeyboardWhenTappedAround()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(false)
+        
+        if testcoords.count != 0 {
+            configureUI()
+        }
     }
     
     // MARK: - Selectors
@@ -272,6 +322,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     @objc func FastwalkButtonTapped() {
         runningStyle = 1
         print("runningStyle: \(runningStyle)")
+        print("DEBUG: CourseRegisterVC = \(testcoords.count)")
     }
     
     @objc func RunningButtonTapped() {
@@ -302,6 +353,38 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         print("DEBUG: Add course...")
     }
     
+    @objc func btnDoneBarTapped(sender: Any) {
+        view.endEditing(true)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    @objc func drawMapButtonTapped() {
+        let courseDrawingMapVC = CourseDrawingMapVC()
+        courseDrawingMapVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(courseDrawingMapVC, animated: true)
+    }
+    
+    @objc func editMapButtonTapped() {
+        self.testcoords.removeAll()
+        print("DEBUG: \(testcoords.count)")
+        
+        for annotation in pinAnnotations {
+            drawMapView.removeAnnotation(annotation)
+        }
+        pinAnnotations.removeAll()
+        
+        if let overlays = drawMapView.overlays as? [MKPolyline] {
+            drawMapView.removeOverlays(overlays)
+        }
+        
+        let courseDrawingMapVC = CourseDrawingMapVC()
+        courseDrawingMapVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(courseDrawingMapVC, animated: true)
+    }
+    
     // MARK: - Helpers
     
     func configureUI() {
@@ -315,7 +398,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor) // 없애보기
         ])
         
         NSLayoutConstraint.activate([
@@ -335,26 +418,47 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         
         MapConfigureUI()
         
-        contentView.addSubview(drawMapView)
-        drawMapView.translatesAutoresizingMaskIntoConstraints = false
-        drawMapView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 17).isActive = true
-        drawMapView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
-        drawMapView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
-        drawMapView.widthAnchor.constraint(equalToConstant: 398).isActive = true
-        drawMapView.heightAnchor.constraint(equalToConstant: 310).isActive = true
-        drawMapView.layer.cornerRadius = 10
-        
-        drawMapView.addSubview(distanceLabel)
-        distanceLabel.translatesAutoresizingMaskIntoConstraints = false
-        distanceLabel.leftAnchor.constraint(equalTo: drawMapView.leftAnchor, constant: 16).isActive = true
-        distanceLabel.bottomAnchor.constraint(equalTo: drawMapView.bottomAnchor, constant: -30).isActive = true
-        distanceLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        distanceLabel.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        
-        contentView.addSubview(runningStyleLabel)
-        runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
-        runningStyleLabel.topAnchor.constraint(equalTo: drawMapView.bottomAnchor, constant: 27).isActive = true
-        runningStyleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
+        if testcoords.count == 0 {
+            contentView.addSubview(drawMapButton)
+            drawMapButton.translatesAutoresizingMaskIntoConstraints = false
+            drawMapButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 17).isActive = true
+            drawMapButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
+            drawMapButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
+            drawMapButton.widthAnchor.constraint(equalToConstant: 398).isActive = true
+            drawMapButton.heightAnchor.constraint(equalToConstant: 310).isActive = true
+            drawMapButton.layer.cornerRadius = 10
+            
+            contentView.addSubview(runningStyleLabel)
+            runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
+            runningStyleLabel.topAnchor.constraint(equalTo: drawMapButton.bottomAnchor, constant: 27).isActive = true
+            runningStyleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
+        } else {
+            contentView.addSubview(drawMapView)
+            drawMapView.translatesAutoresizingMaskIntoConstraints = false
+            drawMapView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 17).isActive = true
+            drawMapView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
+            drawMapView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
+            drawMapView.widthAnchor.constraint(equalToConstant: 398).isActive = true
+            drawMapView.heightAnchor.constraint(equalToConstant: 310).isActive = true
+            drawMapView.layer.cornerRadius = 10
+            
+            drawMapView.addSubview(editMapButton)
+            editMapButton.translatesAutoresizingMaskIntoConstraints = false
+            editMapButton.rightAnchor.constraint(equalTo: drawMapView.rightAnchor, constant: -8).isActive = true
+            editMapButton.topAnchor.constraint(equalTo: drawMapView.topAnchor, constant: 8).isActive = true
+            
+            drawMapView.addSubview(distanceLabel)
+            distanceLabel.translatesAutoresizingMaskIntoConstraints = false
+            distanceLabel.leftAnchor.constraint(equalTo: drawMapView.leftAnchor, constant: 16).isActive = true
+            distanceLabel.bottomAnchor.constraint(equalTo: drawMapView.bottomAnchor, constant: -30).isActive = true
+            distanceLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
+            distanceLabel.heightAnchor.constraint(equalToConstant: 40).isActive = true
+            
+            contentView.addSubview(runningStyleLabel)
+            runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
+            runningStyleLabel.topAnchor.constraint(equalTo: drawMapView.bottomAnchor, constant: 27).isActive = true
+            runningStyleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
+        }
         
         styleWalkButton.widthAnchor.constraint(equalToConstant: 76).isActive = true
         styleWalkButton.heightAnchor.constraint(equalToConstant: 34).isActive = true
@@ -427,9 +531,9 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         let personnelButtonStack = UIStackView(arrangedSubviews: [personDownButton, personnelLabel, personUpButton])
         personnelButtonStack.axis = .horizontal
         personnelButtonStack.spacing = 8
-        personnelButtonStack.layer.cornerRadius = 8
-        personnelButtonStack.layer.borderColor = UIColor.gray.cgColor
-        personnelButtonStack.layer.borderWidth = 1.0
+//        personnelButtonStack.layer.cornerRadius = 8
+//        personnelButtonStack.layer.borderColor = UIColor.gray.cgColor
+//        personnelButtonStack.layer.borderWidth = 1.0
         
         let personnelStack = UIStackView(arrangedSubviews: [PeopleSettingsLabel, personnelButtonStack])
         personnelStack.axis = .horizontal
@@ -540,19 +644,21 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
 }
 
-// MARK: - MapKit
 extension CourseRegisterVC {
     
+    // MARK: - MapKit
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         // adding map region
-        if !isRegionSet {
-            
-            let center = CLLocationCoordinate2D(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
-            let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-            drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
-            
-            isRegionSet = true
+        if testcoords.count > 0 {
+            if !isRegionSet {
+                
+                let center = CLLocationCoordinate2D(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
+                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+                drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
+                
+                isRegionSet = true
+            }
         }
     }
     
@@ -605,5 +711,11 @@ extension CourseRegisterVC {
     func addPolylineToMap() {
         let polyline = MKPolyline(coordinates: testcoords, count: testcoords.count)
         drawMapView.addOverlay(polyline)
+    }
+    
+    func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(CourseRegisterVC.dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
     }
 }
