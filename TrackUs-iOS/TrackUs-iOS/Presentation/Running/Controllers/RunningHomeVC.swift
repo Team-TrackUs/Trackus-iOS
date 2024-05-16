@@ -8,7 +8,7 @@
 import UIKit
 import MapKit
 
-final class RunningHomeVC: ViewController {
+final class RunningHomeVC: UIViewController {
     private var mapView: MKMapView!
     private let locationService = LocationService.shared
     

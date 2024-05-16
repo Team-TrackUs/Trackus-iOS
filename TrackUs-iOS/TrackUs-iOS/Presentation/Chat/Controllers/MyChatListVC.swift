@@ -7,7 +7,7 @@
 
 import UIKit
 
-class MyChatListVC: ViewController {
+class MyChatListVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
