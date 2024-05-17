@@ -7,7 +7,7 @@
 
 import UIKit
 
-class RunningMateVC: ViewController {
+class RunningMateVC: UIViewController {
     private lazy var moveButton: UIButton = {
         let btn = UIButton()
         btn.backgroundColor = .blue
@@ -37,7 +37,7 @@ class RunningMateVC: ViewController {
     
     @objc func moveButtonTapped() {
         let mateDetailVC = MateDetailVC()
-        mateDetailVC.hidesBottomBarWhenPushed = true
+//        mateDetailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(mateDetailVC, animated: true)
         
     }
