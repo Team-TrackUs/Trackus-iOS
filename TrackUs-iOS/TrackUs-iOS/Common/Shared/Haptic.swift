@@ -2,7 +2,7 @@
 //  Haptic.swift
 //  TrackUs-iOS
 //
-//  Created by 석기권 on 5/16/24.
+//  Created by 석기권 on 5/17/24.
 //
 
 import Foundation

@@ -8,7 +8,6 @@
 // tanslation x값을 측정
 // 버튼의 center.x값을 이동한 값만큼 추가
 
-
 import UIKit
 import MapKit
 
@@ -18,7 +17,6 @@ final class RunActivityVC: UIViewController {
     private let locationService = LocationService.shared
     private var isActive = true
     private var timer: Timer?
-    
     
     private lazy var countLabel: UILabel = {
         let label = UILabel()

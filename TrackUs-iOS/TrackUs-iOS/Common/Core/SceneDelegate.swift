@@ -6,22 +6,22 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    
+    var authListener: AuthStateDidChangeListenerHandle?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let windowScene = (scene as? UIWindowScene) else { return }
-        window = UIWindow(windowScene: windowScene)
         
-        let tabBarVC = CustomTabBarVC()
-        window?.rootViewController = tabBarVC
-        window?.makeKeyAndVisible()
+        LoginCheck()
+        
+        guard let windowScene = (scene as? UIWindowScene) else { return }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -52,6 +52,34 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
-
+    // MARK: - 이전 로그인 여부 확인
+    func LoginCheck() {
+        
+        authListener = Auth.auth().addStateDidChangeListener({ auth, user in
+            // 리스너 등록 해제
+            //Auth.auth().removeStateDidChangeListener(self.authListener!)
+            
+            if user == nil {
+                self.window?.rootViewController = LoginVC()
+                self.window?.makeKeyAndVisible()
+            } else {
+                DispatchQueue.main.async {
+                    // 회원가입 UI 완성 후. 코드 별도 추가
+                    self.startApp()
+                }
+            }
+        })
+    }
+    
+    /// 메인 화면
+    private func startApp() {
+        self.window?.rootViewController = CustomTabBarVC()
+        self.window?.makeKeyAndVisible()
+    }
+    /// 회원가입 화면
+    private func signUp() {
+        self.window?.rootViewController = SignUpVC()
+        self.window?.makeKeyAndVisible()
+    }
 }
 

@@ -37,7 +37,7 @@ class RunningMateVC: UIViewController {
     
     @objc func moveButtonTapped() {
         let mateDetailVC = MateDetailVC()
-        mateDetailVC.hidesBottomBarWhenPushed = true
+//        mateDetailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(mateDetailVC, animated: true)
         
     }
