@@ -7,7 +7,7 @@
 
 import UIKit
 
-class RunningMateVC: ViewController {
+class RunningMateVC: UIViewController {
     private lazy var moveButton: UIButton = {
         let btn = UIButton()
         btn.backgroundColor = .blue
