@@ -10,14 +10,14 @@ import Firebase
 
 class LoginVC: UIViewController {
     
-    let icon: UIImageView = {
+    private lazy var icon: UIImageView = {
         let image = UIImage(named: "trackus_icon")?.resize(width: 90, height: 73)
         //image?.size.width = 30
         return UIImageView(image: image)
     }()
     
     // MARK: - 로그인 화면 문구들
-    let appTitle1Label: UILabel = {
+    private lazy var appTitle1Label: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0 // 여러 줄로 표시
@@ -40,7 +40,8 @@ class LoginVC: UIViewController {
         return label
     }()
     
-    let subLabel: UILabel = {
+    // 로그인 버튼 상단 문구
+    private lazy var subLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0 // 여러 줄로 표시
@@ -52,7 +53,7 @@ class LoginVC: UIViewController {
     }()
     
     // MARK: - Apple 로그인 버튼
-    let appleLoginButton: UIButton = {
+    private lazy var appleLoginButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = .black
@@ -80,7 +81,7 @@ class LoginVC: UIViewController {
     }()
     
     // MARK: - Kakao 로그인 버튼
-    let kakaoLoginButton: UIButton = {
+    private lazy var kakaoLoginButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = #colorLiteral(red: 1, green: 0.8935882449, blue: 0, alpha: 1)
@@ -99,25 +100,33 @@ class LoginVC: UIViewController {
         button.layer.cornerRadius = 8
         button.layer.masksToBounds = true
         // 버튼 액션 추가
-        button.addTarget(LoginVC.self, action: #selector(kakaoLoginButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(kakaoLoginButtonTapped), for: .touchUpInside)
         
         // 높이 제약
         button.heightAnchor.constraint(equalToConstant: 56).isActive = true
         return button
     }()
     
+    // 배경용 그라데이션 뷰
+    private lazy var gradientView: UIView = {
+        let gradientView = GradientBackgroundView()
+        gradientView.translatesAutoresizingMaskIntoConstraints = false
+        return gradientView
+    }()
+    
+    // 센터 로고, 문구 스택뷰
     lazy var titleStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [icon, appTitle1Label])
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .horizontal
         stackView.spacing = 16
         
-        
         //stackView.distribution = .fillEqually
         //stackView.alignment = .fill
         return stackView
     }()
     
+    // 소셜 로그인 버튼 스택뷰
     lazy var buttonStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [ appleLoginButton, kakaoLoginButton])
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -129,25 +138,25 @@ class LoginVC: UIViewController {
         
         return stackView
     }()
+    
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        let gradientView = GradientBackgroundView()
-        gradientView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(gradientView)
+        //view.backgroundColor = .white
+        setupAutoLayout()
+    }
+    
+    // MARK: - 오토레이아웃 세팅
+    private func setupAutoLayout() {
         
+        self.view.addSubview(gradientView)
         NSLayoutConstraint.activate([
             gradientView.topAnchor.constraint(equalTo: view.topAnchor),
             gradientView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             gradientView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             gradientView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        setupAutoLayout()
-    }
-    
-    // MARK: - 오토레이아웃 세팅
-    private func setupAutoLayout() {
         self.view.addSubview(titleStackView)
         NSLayoutConstraint.activate([
             titleStackView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: -80),
@@ -165,14 +174,12 @@ class LoginVC: UIViewController {
         NSLayoutConstraint.activate([
             subLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 30),
             subLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -30),
-            //bottomStackView.heightAnchor.constraint(equalToConstant: 45),
             subLabel.bottomAnchor.constraint(equalTo: buttonStackView.topAnchor, constant: -10)
         ])
     }
     
     // MARK: - Apple 로그인 버튼 실행 함수
     @objc func appleLoginButtonTapped() {
-        print("Apple 로그인 버튼이 누름")
         AuthService.shared.startSignInWithAppleFlow()
     }
     

@@ -11,13 +11,6 @@ import FirebaseAuth
 import CryptoKit
 import AuthenticationServices
 
-enum AuthenticationState {
-    case startapp
-    case unauthenticated
-    case signUpcating
-    case authenticated
-}
-
 final class AuthService: NSObject {
     static let shared = AuthService()
     
@@ -97,11 +90,7 @@ extension AuthService: ASAuthorizationControllerDelegate{
             
             Task {
                 do {
-                    let auth = try await Auth.auth().signIn(with: credential)
-                    //self.userInfo.uid = auth.user.uid
-                    if let accessToken = credential.accessToken {
-                        //self.accessToken = accessToken
-                    }
+                    _ = try await Auth.auth().signIn(with: credential)
                 }
                 catch {
                     print("Error authenticating: \(error.localizedDescription)")
