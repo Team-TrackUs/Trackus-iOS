@@ -38,7 +38,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     var view3 = ProfilePictureInputView()
     var view4 = ProfilePublicView()
     
-    private lazy var subView: UIView = view2
+    private lazy var subView: UIView = view1
     
     var SignUpSteps: [SignUpStep] = [
         // 약관 동의

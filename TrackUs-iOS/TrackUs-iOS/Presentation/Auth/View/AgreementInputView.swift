@@ -56,6 +56,14 @@ class AgreementInputView: UIView {
         return button
     }()
     
+    // 구분선
+    private lazy var lineView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .gray3
+        return view
+    }()
+    
     private lazy var termsButtons: [UIButton] = {
         let buttonTitles = [
             "만 14세 이상입니다",
@@ -110,17 +118,21 @@ class AgreementInputView: UIView {
     private func setupAutoLayout() {
         self.addSubview(buttonStackView)
         
+        buttonStackView.addArrangedSubview(allAgreeButton)
+        buttonStackView.addArrangedSubview(lineView)
+        termsButtons.forEach { button in
+            buttonStackView.addArrangedSubview(button)
+        }
+        
         NSLayoutConstraint.activate([
             buttonStackView.topAnchor.constraint(equalTo: topAnchor),
             buttonStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             buttonStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            buttonStackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            buttonStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            // 구분선 크기 설정
+            lineView.heightAnchor.constraint(equalToConstant: 1),
+            lineView.widthAnchor.constraint(equalTo: buttonStackView.widthAnchor)
         ])
-        
-        buttonStackView.addArrangedSubview(allAgreeButton)
-        termsButtons.forEach { button in
-            buttonStackView.addArrangedSubview(button)
-        }
     }
     
     @objc func allAgreeButtonTapped() {
