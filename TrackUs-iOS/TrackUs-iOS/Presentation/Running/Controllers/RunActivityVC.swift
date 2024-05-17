@@ -7,14 +7,17 @@
 // TODO: - 스와이프 구현
 // tanslation x값을 측정
 // 버튼의 center.x값을 이동한 값만큼 추가
+// TODO: - 라이브트래킹
+// 유저이동 경로 저장
 
 import UIKit
 import MapKit
 
 final class RunActivityVC: UIViewController {
     // MARK: - Properties
-    private var mapView: MKMapView!
     private let locationService = LocationService.shared
+    private let runTrackingManager = RunTrackingManager()
+    private var mapView: MKMapView!
     private var isActive = true
     private var timer: Timer?
     
@@ -224,6 +227,7 @@ final class RunActivityVC: UIViewController {
     }
     
     func updatedOnStart() {
+        startTracking()
         self.overlayView.isHidden = true
         self.swipeBox.isHidden = false
         self.topStackView.isHidden = false
@@ -232,6 +236,7 @@ final class RunActivityVC: UIViewController {
     }
     
     func updatedOnPause() {
+        stopTracking()
         self.actionButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
     }
     
@@ -284,8 +289,6 @@ final class RunActivityVC: UIViewController {
         HapticManager.shared.hapticImpact(style: .light)
         isActive.toggle()
     }
-    
-
 }
 
 extension RunActivityVC {
@@ -304,6 +307,20 @@ extension RunActivityVC {
         view.widthAnchor.constraint(equalToConstant: circleDiameter).isActive = true
         view.heightAnchor.constraint(equalToConstant: circleDiameter).isActive = true
         return view
+    }
+}
+
+extension RunActivityVC: UserLocationDelegate {
+    func userLocationUpated(location: CLLocation) {
+        self.runTrackingManager.addPath(withCoordinate: location.coordinate)
+    }
+    
+    func startTracking() {
+        self.locationService.userLocationDelegate = self
+    }
+    
+    func stopTracking() {
+        self.locationService.userLocationDelegate = nil
     }
 }
 
