@@ -66,14 +66,14 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = .white
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
+//        scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
     
     let contentView : UIView = {
         let contentView = UIView()
         contentView.backgroundColor = .white
-        contentView.translatesAutoresizingMaskIntoConstraints = false
+//        contentView.translatesAutoresizingMaskIntoConstraints = false
         return contentView
     }()
     
@@ -351,6 +351,8 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     @objc func addCourseButtonTapped() {
         print("DEBUG: Add course...")
+        let courseDetailVC = CourseDetailVC()
+        self.navigationController?.pushViewController(courseDetailVC, animated: true)
     }
     
     @objc func btnDoneBarTapped(sender: Any) {
@@ -394,27 +396,24 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         scrollView.backgroundColor = .white
         contentView.backgroundColor = .white
         
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor) // 없애보기
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
-        
+
         NSLayoutConstraint.activate([
-            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             contentView.heightAnchor.constraint(equalToConstant: 1100)
         ])
-        
-//        contentView.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.heightAnchor).isActive = true
-        
-        let contentViewHeight = contentView.heightAnchor.constraint(greaterThanOrEqualTo: view.heightAnchor)
-        contentViewHeight.priority = .defaultLow
-        contentViewHeight.isActive = true
         
         MapConfigureUI()
         
@@ -719,3 +718,12 @@ extension CourseRegisterVC {
         view.addGestureRecognizer(tap)
     }
 }
+
+/*
+ 
+ 1. 텍스트뷰, 텍스트필드 키보드 설정(글을 쓸때 스크롤, 테두리 색, )
+ 2. 데이트피커, 타임피커, 인원설정 버튼 모양(현재 인원설정 버튼에 border 추가시 뷰 망가짐)
+ 3. testcoords.count가 0일때, 코스를 입력해주세요 버튼 UI 생각
+ 4. 코스 등록하기 시 파이어스토어에 코스 정보 올림 + 코스 스크린샷
+ 
+ */
