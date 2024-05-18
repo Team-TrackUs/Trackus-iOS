@@ -13,20 +13,13 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         didSet{
             switch currentStep{
                 case 0:
-                    subView = view1
                     nextStepView()
                 case 1:
-                    subView = view2
                     nextStepView()
-                    //view2.delegate = self
                 case 2:
-                    subView = view3
                     nextStepView()
-                    view3.delegate = self
                 case 3:
-                    subView = view4
                     nextStepView()
-                    view4.delegate = self
                 default:
                     return
             }
@@ -38,7 +31,10 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     var view3 = ProfilePictureInputView()
     var view4 = ProfilePublicView()
     
-    private lazy var subView: UIView = view1
+    // 메인 버튼 하단 위치 제약조건
+    var mainButtonBottomConstraint: NSLayoutConstraint!
+    
+    private lazy var subViews: [UIView] = [view1,view2, view3, view4]
     
     var SignUpSteps: [SignUpStep] = [
         // 약관 동의
@@ -109,7 +105,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     // 제목, 설명 스택뷰
     private lazy var labelStackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, subLabel, subView])
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, subLabel])
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 16
@@ -123,7 +119,15 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         super.viewDidLoad()
         self.view.backgroundColor = .white
         setupAutoLayout()
+        view1.delegate = self
         view2.delegate = self
+        view3.delegate = self
+        view4.delegate = self
+        
+        
+        // 키보드 메소드 등록
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     // MARK: - 오토레이아웃 세팅
@@ -137,47 +141,92 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         
         self.view.addSubview(labelStackView)
         NSLayoutConstraint.activate([
-            labelStackView.topAnchor.constraint(equalTo: progressBar.topAnchor, constant: 32),
+            labelStackView.topAnchor.constraint(equalTo: progressBar.bottomAnchor, constant: 32),
             labelStackView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             labelStackView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
-        //let inputView = SignUpSteps[currentStep].inputView
+        subViews[currentStep].translatesAutoresizingMaskIntoConstraints = false
+                self.view.addSubview(subViews[currentStep])
+                NSLayoutConstraint.activate([
+                    subViews[currentStep].topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
+                    subViews[currentStep].leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+                    subViews[currentStep].trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+                ])
+//        subView.translatesAutoresizingMaskIntoConstraints = false
 //        self.view.addSubview(subView)
 //        NSLayoutConstraint.activate([
-//            subView.bottomAnchor.constraint(equalTo: labelStackView.topAnchor, constant: 20),
+//            subView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
 //            subView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
 //            subView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
 //        ])
-        
+        mainButtonBottomConstraint = mainButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
         self.view.addSubview(mainButton)
         NSLayoutConstraint.activate([
             mainButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             mainButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
             //bottomStackView.heightAnchor.constraint(equalToConstant: 45),
-            mainButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            mainButtonBottomConstraint
         ])
     }
     
     @objc func buttonTeapped() {
         
         currentStep += 1
-        print("currentStep : ", currentStep)
         mainButton.isEnabled = false
         
     }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            // 키보드 높이만큼 MainButton의 bottom constraint 조정
+            mainButtonBottomConstraint.constant = 15 - keyboardSize.height
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+
+    @objc func keyboardWillHide(notification: NSNotification) {
+        // 키보드가 사라질 때 MainButton의 위치를 원래대로 복귀
+        mainButtonBottomConstraint.constant = -10
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
     // 메인 버튼 활성화
-    func MainButtonDidChangeEnabled(_ isAllSelected: Bool) {
-        print("delgate click")
-        mainButton.isEnabled = isAllSelected
+    func MainButtonDidChangeEnabled(_ isEnabled: Bool) {
+        mainButton.isEnabled = isEnabled
+        UIView.animate(withDuration: 0.3) {
+            self.mainButton.layoutIfNeeded()
+        }
     }
     
     // 바뀐 뷰에 맞게 내용 수정
     func nextStepView(){
+        // 다음 뷰로 수정
+        subViews[currentStep-1].removeFromSuperview()
+        let nextView = subViews[currentStep]
+        nextView.frame = self.view.bounds
+        self.view.addSubview(nextView)
+        subViews[currentStep].translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(subViews[currentStep])
+        NSLayoutConstraint.activate([
+            subViews[currentStep].topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
+            subViews[currentStep].leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            subViews[currentStep].trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+        ])
+        
         
         progressBar.setProgress(Float(currentStep+1)/Float(SignUpSteps.count), animated: true)
         titleLabel.text = SignUpSteps[currentStep].title
         subLabel.text = SignUpSteps[currentStep].description
         mainButton.setTitle(SignUpSteps[currentStep].buttonText, for: .normal)
+    }
+    
+    deinit {
+        // 옵저버 제거
+        NotificationCenter.default.removeObserver(self)
     }
 }
 

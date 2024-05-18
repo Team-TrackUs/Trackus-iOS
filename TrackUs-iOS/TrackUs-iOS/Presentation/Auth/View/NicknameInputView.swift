@@ -8,16 +8,22 @@
 import UIKit
 
 // MARK: - 닉네임 view
-class NicknameInputView: UIView {
+class NicknameInputView: UIView, UITextFieldDelegate {
     // MARK: - MainButtonEnable 델리게이트
     weak var delegate: MainButtonEnabledDelegate?
     
+    // 닉네임 조건 확인 여부
     private var isError: Bool = false {
         didSet {
-            updateErrorState()
+            if isError {
+                guidelabel.textColor = .red
+            } else {
+                guidelabel.textColor = .gray2
+            }
         }
     }
     
+    // 메인 버튼 활성화 여부
     private var availability: Bool = false {
         didSet {
             delegate?.MainButtonDidChangeEnabled(availability)
@@ -28,34 +34,65 @@ class NicknameInputView: UIView {
     private let placeholderText = "닉네임을 입력해주세요"
     
     // MARK: - UI Components
+    private lazy var label: UILabel = {
+       let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "닉네임"
+        label.textColor = .gray2
+        label.font = UIFont.systemFont(ofSize: 16)
+        return label
+    }()
+    
     private lazy var textField: UITextField = {
-        let textField = UITextField()
-        textField.frame.size.height = 48
+        var textField = UITextField()
+        textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .clear
         textField.textColor = .gray1
         textField.placeholder = placeholderText
         textField.autocapitalizationType = .none
         textField.autocorrectionType = .no
         textField.spellCheckingType = .no
+        textField.returnKeyType = .next
+        // textField 입력 활성화 - 키보드 자동 열림
+        textField.becomeFirstResponder()
         //textField.borderStyle = .roundedRect
         //textField.delegate = self
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         return textField
     }()
     
-    private lazy var errorLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .red
+    // 구분선
+    private lazy var lineView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .gray3
+        return view
+    }()
+    
+    private lazy var guidelabel: UILabel = {
+       let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "특수문자, 공백 제외 2~10자리"
+        label.textColor = .gray2
         label.font = UIFont.systemFont(ofSize: 12)
-        label.isHidden = true
         return label
     }()
     
     private lazy var characterCountLabel: UILabel = {
         let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = .gray
+        label.textColor = .gray2
         return label
+    }()
+    
+    private lazy var stackView: UIStackView = {
+       let stackView = UIStackView(arrangedSubviews: [label, textField, lineView, guidelabel])
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        stackView.alignment = .leading
+        return stackView
     }()
     
     // MARK: - Initializers
@@ -71,23 +108,23 @@ class NicknameInputView: UIView {
     
     // MARK: - Setup AutoLayout
     private func setupAutoLayout() {
-        addSubview(textField)
-        addSubview(errorLabel)
+        textField.delegate = self
+        
+        addSubview(stackView)
         addSubview(characterCountLabel)
         
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        errorLabel.translatesAutoresizingMaskIntoConstraints = false
-        characterCountLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            textField.topAnchor.constraint(equalTo: topAnchor),
-            textField.leadingAnchor.constraint(equalTo: leadingAnchor),
-            textField.trailingAnchor.constraint(equalTo: trailingAnchor),
+            textField.heightAnchor.constraint(equalToConstant: 32),
             
-            errorLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 8),
-            errorLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stackView.topAnchor.constraint(equalTo: topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
             
-            characterCountLabel.centerYAnchor.constraint(equalTo: textField.centerYAnchor),
+            lineView.heightAnchor.constraint(equalToConstant: 1),
+            lineView.widthAnchor.constraint(equalTo: stackView.widthAnchor),
+            
+            characterCountLabel.centerYAnchor.constraint(equalTo: stackView.centerYAnchor),
             characterCountLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
         ])
     }
@@ -97,37 +134,43 @@ class NicknameInputView: UIView {
         let newText = textField.text ?? ""
         checkText(newText)
         checkAvailability()
-        characterCountLabel.text = "\(newText.count)/\(textLimit)"
+        textCountCheck(text: newText)
     }
     
-    // MARK: - Validation
+    // MARK: - 닉네임 문구 충족 여부 확인
     private func checkText(_ newText: String) {
         let specialCharacters = CharacterSet(charactersIn: "!?@#$%^&*()_+=-<>,.;|/:[]{}")
         
         if newText.count > textLimit || newText.count < 2 || newText.contains(" ") || newText.rangeOfCharacter(from: specialCharacters) != nil {
             isError = true
+            guidelabel.textColor = .red
         } else {
             isError = false
+            guidelabel.textColor = .gray2
         }
     }
     
+    // 닉네임 입력 조건 여부 확인
     private func checkAvailability() {
         availability = !textField.text!.isEmpty && !isError
     }
     
-    // MARK: - Update UI
-    private func updateErrorState() {
-        if isError {
-            errorLabel.text = "닉네임 형식을 확인해주세요."
-            errorLabel.isHidden = false
-            textField.layer.borderColor = UIColor.red.cgColor
-            textField.layer.borderWidth = 1
+    // 닉네임 입력 갯수 확인
+    private func textCountCheck(text: String) {
+        characterCountLabel.text = "\(text.count)/\(textLimit)"
+        if text.count > textLimit {
+            characterCountLabel.textColor = .red
         } else {
-            errorLabel.isHidden = true
-            textField.layer.borderColor = UIColor.clear.cgColor
-            textField.layer.borderWidth = 0
+            characterCountLabel.textColor = .gray2
         }
     }
     
+    // 엔터키 누를 경우 실행 함수
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if availability {
+            textField.resignFirstResponder() // 키보드 숨기기
+        }
+        return true
+    }
 }
 

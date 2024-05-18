@@ -39,6 +39,7 @@ class AgreementInputView: UIView {
         }
     }
     
+    // 전체 동의하기 버튼
     private lazy var allAgreeButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -64,6 +65,7 @@ class AgreementInputView: UIView {
         return view
     }()
     
+    // 약관별 버튼
     private lazy var termsButtons: [UIButton] = {
         let buttonTitles = [
             "만 14세 이상입니다",
