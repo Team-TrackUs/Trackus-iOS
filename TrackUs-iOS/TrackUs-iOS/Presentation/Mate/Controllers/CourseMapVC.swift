@@ -27,7 +27,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
     
     private lazy var distanceLabel: UILabel = {
         let label = UILabel()
-        label.backgroundColor = .blue
+        label.backgroundColor = .mainBlue
         label.text = "\(String(format: "%.2f", distance)) km"
         label.textColor = .white
         label.textAlignment = .center
@@ -141,7 +141,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         if let polyline = overlay as? MKPolyline {
             let testlineRenderer = MKPolylineRenderer(polyline: polyline)
-            testlineRenderer.strokeColor = .blue
+            testlineRenderer.strokeColor = .mainBlue
             testlineRenderer.lineWidth = 5.0
             return testlineRenderer
         }
@@ -168,12 +168,12 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
             let label = UILabel(frame: CGRect(x: -8, y: -8, width: 20, height: 20))
 //            label.text = pin.title ?? ""
             label.text = pin.title ?? "\(testcoords.count + 1)"
-            label.textColor = .blue
+            label.textColor = .mainBlue
             label.textAlignment = .center
             label.font = UIFont.boldSystemFont(ofSize: 12)
             
             label.backgroundColor = .white
-            label.layer.borderColor = UIColor.blue.cgColor
+            label.layer.borderColor = UIColor.mainBlue.cgColor
             label.layer.borderWidth = 2.0
             label.layer.cornerRadius = label.frame.size.width / 2
             

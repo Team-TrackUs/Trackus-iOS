@@ -22,7 +22,7 @@ class CourseDetailVC: UIViewController {
         let button = UIButton()
         button.setImage(UIImage(named: ""), for: .normal)
         button.layer.cornerRadius = 10
-        button.backgroundColor = .blue
+        button.backgroundColor = .mainBlue
         button.addTarget(self, action: #selector(goCourseDetail), for: .touchUpInside)
         return button
     }()
@@ -32,7 +32,7 @@ class CourseDetailVC: UIViewController {
         label.text = "1.3 km"
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: 16)
-        label.backgroundColor = .blue
+        label.backgroundColor = .mainBlue
         label.layer.cornerRadius = 30
         return label
     }()
@@ -49,7 +49,7 @@ class CourseDetailVC: UIViewController {
         let label = UILabel()
         label.text = "인터벌"
         label.font = .boldSystemFont(ofSize: 12)
-        label.backgroundColor = .blue
+        label.backgroundColor = .mainBlue
         label.textColor = .white
         label.textAlignment = .center
         label.layer.frame = CGRect(x: 0, y: 0, width: 63, height: 20)
@@ -103,7 +103,7 @@ class CourseDetailVC: UIViewController {
     
     private let courseEnterButton: UIButton = { // 트랙 참여 버튼
         let button = UIButton(type: .system)
-        button.backgroundColor = .blue
+        button.backgroundColor = .mainBlue
         button.setTitle("트랙 참가하기", for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)

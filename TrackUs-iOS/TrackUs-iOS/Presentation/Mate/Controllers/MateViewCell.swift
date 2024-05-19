@@ -13,6 +13,15 @@ class MateViewCell: UITableViewCell {
     
     static let identifier = "MateViewCell"
     
+    
+    let titleText: String = ""
+    let locationText: String = ""
+    let timeText: String = ""
+    let distanceText: String = ""
+    let dateText: String = ""
+    let peopleLimit: Int = 0
+    var peopleIn: Int = 0
+    
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -28,9 +37,11 @@ class MateViewCell: UITableViewCell {
     private let runningStyleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.clipsToBounds = true
+        label.layer.cornerRadius = 5
         label.textColor = .white
         label.textAlignment = .center
-        label.backgroundColor = .blue
+        label.backgroundColor = .mainBlue
         return label
     }()
     
@@ -58,9 +69,6 @@ class MateViewCell: UITableViewCell {
         return label
     }()
     
-    private var peopleLimit: Int = 0
-    private var peopleIn: Int = 0
-    
     private let peopleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 16)
@@ -73,22 +81,55 @@ class MateViewCell: UITableViewCell {
         return label
     }()
     
-    let locationIcon = UIImageView(image: UIImage(named: "pin_icon"))
-    let timeIcon = UIImageView(image: UIImage(named: "time_icon"))
-    let distanceIcon = UIImageView(image: UIImage(named: "arrowBoth_icon"))
-    let peopleIcon = UIImageView(image: UIImage(named: "people_icon"))
+//    let locationIcon = UIImageView(image: UIImage(named: "pin_icon"))
+//    let timeIcon = UIImageView(image: UIImage(named: "time_icon"))
+//    let distanceIcon = UIImageView(image: UIImage(named: "arrowBoth_icon"))
+//    let peopleIcon = UIImageView(image: UIImage(named: "people_icon"))
+    
+    let locationIcon: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "locationPin_icon"))
+        imageView.layer.transform = CATransform3DMakeScale(1.2, 0.9, 0.9)
+        return imageView
+    }()
+    
+    let timeIcon: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "time_icon"))
+        imageView.layer.transform = CATransform3DMakeScale(1.0, 1.0, 1.0)
+        return imageView
+    }()
+    
+    let distanceIcon: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "arrowBoth_icon"))
+        imageView.layer.transform = CATransform3DMakeScale(1.0, 1.0, 1.0)
+        return imageView
+    }()
+    
+    let peopleIcon: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "people_icon"))
+//        imageView.layer.transform = CATransform3DMakeScale(0.6, 0.6, 0.6)
+        return imageView
+    }()
+    
     
     // MARK: - Lifecycle
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+//    override func awakeFromNib() {
+//        super.awakeFromNib()
+//        // Initialization code
+//    }
+//
+//    override func setSelected(_ selected: Bool, animated: Bool) {
+//        super.setSelected(selected, animated: animated)
+//
+//        // Configure the view for the selected state
+//    }
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier reuseIndentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIndentifier)
+        self.configureUI()
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - Helpers
@@ -106,6 +147,8 @@ class MateViewCell: UITableViewCell {
         runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
         runningStyleLabel.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
         runningStyleLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        runningStyleLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
+        runningStyleLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
         
         self.contentView.addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -114,19 +157,19 @@ class MateViewCell: UITableViewCell {
         
         let locationStack = UIStackView(arrangedSubviews: [locationIcon, locationLabel])
         locationStack.axis = .horizontal
-        locationStack.spacing = 1
+        locationStack.spacing = 5
         
         let timeStack = UIStackView(arrangedSubviews: [timeIcon, timeLabel])
         timeStack.axis = .horizontal
-        timeStack.spacing = 1
+        timeStack.spacing = 5
         
         let distanceStack = UIStackView(arrangedSubviews: [distanceIcon, distanceLabel])
         distanceStack.axis = .horizontal
-        distanceStack.spacing = 1
+        distanceStack.spacing = 5
         
         let peopleStack = UIStackView(arrangedSubviews: [peopleIcon, peopleLabel])
         peopleStack.axis = .horizontal
-        peopleStack.spacing = 1
+        peopleStack.spacing = 5
         
         self.contentView.addSubview(locationStack)
         locationStack.translatesAutoresizingMaskIntoConstraints = false
@@ -145,16 +188,16 @@ class MateViewCell: UITableViewCell {
         
         self.contentView.addSubview(peopleStack)
         peopleStack.translatesAutoresizingMaskIntoConstraints = false
-        peopleStack.topAnchor.constraint(equalTo: locationStack.bottomAnchor, constant: 8).isActive = true
+        peopleStack.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor).isActive = true
         peopleStack.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
         
         self.contentView.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
-        dateLabel.topAnchor.constraint(equalTo: locationStack.bottomAnchor, constant: 8).isActive = true
+        dateLabel.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor).isActive = true
         dateLabel.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
     }
     
-    public func configure(image: UIImage, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLabel: String, dateLabel: String) {
+    public func configure(image: UIImage, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
         
         self.profileImageView.image = image
         self.runningStyleLabel.text = runningStyleLabel
@@ -162,7 +205,7 @@ class MateViewCell: UITableViewCell {
         self.locationLabel.text = locationLabel
         self.timeLabel.text = timeLabel
         self.distanceLabel.text = distanceLabel
-        self.peopleLabel.text = peopleLabel
+        self.peopleLabel.text = "\(peopleIn) / \(peopleLimit)"
         self.dateLabel.text = dateLabel
     }
 

@@ -25,7 +25,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     
     let distanceLabel: UILabel = {
         let label = UILabel()
-        label.backgroundColor = .blue
+        label.backgroundColor = .mainBlue
         label.textColor = .white
         label.textAlignment = .center
         label.frame = CGRect(x: 0, y: 0, width: 80, height: 46)
@@ -63,7 +63,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     
     let finishDrawCourseButton: UIButton = {
         let button = UIButton(type: .system)
-        button.backgroundColor = .blue
+        button.backgroundColor = .mainBlue
         button.setTitle("코스 완성", for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
@@ -317,7 +317,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         if let polyline = overlay as? MKPolyline {
             let testlineRenderer = MKPolylineRenderer(polyline: polyline)
-            testlineRenderer.strokeColor = .blue
+            testlineRenderer.strokeColor = .mainBlue
             testlineRenderer.lineWidth = 5.0
             return testlineRenderer
         }
@@ -344,12 +344,12 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         if let pin = annotation as? MKPointAnnotation {
             let label = UILabel(frame: CGRect(x: -8, y: -8, width: 20, height: 20))
             label.text = pin.title ?? ""
-            label.textColor = .blue
+            label.textColor = .mainBlue
             label.textAlignment = .center
             label.font = UIFont.boldSystemFont(ofSize: 12)
             
             label.backgroundColor = .white
-            label.layer.borderColor = UIColor.blue.cgColor
+            label.layer.borderColor = UIColor.mainBlue.cgColor
             label.layer.borderWidth = 2.0
             label.layer.cornerRadius = label.frame.size.width / 2
             

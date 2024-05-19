@@ -33,7 +33,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(btnDoneBarTapped))
         toolbar.sizeToFit()
         toolbar.items = [flexBarButton, doneButton]
-        toolbar.tintColor = .blue
+        toolbar.tintColor = .mainBlue
         return toolbar
     }()
     
@@ -48,7 +48,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         button.setTitle("코스를 입력해주세요", for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.titleLabel?.textColor = .white
-        button.backgroundColor = .blue
+        button.backgroundColor = .mainBlue
         button.layer.borderWidth = 1.0
         button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(drawMapButtonTapped), for: .touchUpInside)
@@ -256,7 +256,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     private let addCourseButton: UIButton = {
         let button = UIButton(type: .system)
-        button.backgroundColor = .blue
+        button.backgroundColor = .mainBlue
         button.setTitle("코스 등록하기", for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
@@ -276,7 +276,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     private lazy var distanceLabel: UILabel = {
         let label = UILabel()
-        label.backgroundColor = .blue
+        label.backgroundColor = .mainBlue
         label.text = "\(String(format: "%.2f", distance)) km"
         label.textColor = .white
         label.textAlignment = .center
@@ -598,16 +598,16 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     func updateStyleButtonAppearance() {
         styleWalkButton.setTitleColor(runningStyle == 0 ? .white : .gray, for: .normal)
-        styleWalkButton.backgroundColor = runningStyle == 0 ? .blue : .white
+        styleWalkButton.backgroundColor = runningStyle == 0 ? .mainBlue : .white
         
         styleFastWalkButton.setTitleColor(runningStyle == 1 ? .white : .gray, for: .normal)
-        styleFastWalkButton.backgroundColor = runningStyle == 1 ? .blue : .white
+        styleFastWalkButton.backgroundColor = runningStyle == 1 ? .mainBlue : .white
         
         styleRuuningButton.setTitleColor(runningStyle == 2 ? .white : .gray, for: .normal)
-        styleRuuningButton.backgroundColor = runningStyle == 2 ? .blue : .white
+        styleRuuningButton.backgroundColor = runningStyle == 2 ? .mainBlue : .white
         
         styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray, for: .normal)
-        styleSprintButton.backgroundColor = runningStyle == 3 ? .blue : .white
+        styleSprintButton.backgroundColor = runningStyle == 3 ? .mainBlue : .white
     }
     
     func setup(with testCoords: [CLLocationCoordinate2D], distance: CLLocationDistance) {
@@ -664,7 +664,7 @@ extension CourseRegisterVC {
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         if let polyline = overlay as? MKPolyline {
             let testlineRenderer = MKPolylineRenderer(polyline: polyline)
-            testlineRenderer.strokeColor = .blue
+            testlineRenderer.strokeColor = .mainBlue
             testlineRenderer.lineWidth = 5.0
             return testlineRenderer
         }
@@ -691,12 +691,12 @@ extension CourseRegisterVC {
             let label = UILabel(frame: CGRect(x: -8, y: -8, width: 20, height: 20))
 //            label.text = pin.title ?? ""
             label.text = pin.title ?? "\(testcoords.count + 1)"
-            label.textColor = .blue
+            label.textColor = .mainBlue
             label.textAlignment = .center
             label.font = UIFont.boldSystemFont(ofSize: 12)
             
             label.backgroundColor = .white
-            label.layer.borderColor = UIColor.blue.cgColor
+            label.layer.borderColor = UIColor.mainBlue.cgColor
             label.layer.borderWidth = 2.0
             label.layer.cornerRadius = label.frame.size.width / 2
             
