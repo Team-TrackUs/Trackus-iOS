@@ -108,8 +108,8 @@ class RunningMateVC: UIViewController {
         self.view.addSubview(moveButton)
         moveButton.bottomAnchor.constraint(equalTo: tableView.bottomAnchor,constant: -17).isActive = true
         moveButton.rightAnchor.constraint(equalTo: tableView.rightAnchor, constant: -16).isActive = true
-        moveButton.widthAnchor.constraint(equalToConstant: 52).isActive = true
-        moveButton.heightAnchor.constraint(equalToConstant: 52).isActive = true
+        moveButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        moveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
         
     }
     
@@ -143,4 +143,32 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         courseDetailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
     }
+    
+    //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    //        let offsetY = scrollView.contentOffset.y
+    //
+    //        if offsetY > 0 {
+    //            // 스크롤 중인 경우
+    //            self.moveButton.removeConstraints(self.moveButton.constraints)
+    //            self.moveButton.setTitle("", for: .normal)
+    //            self.moveButton.setImage(UIImage(systemName: "plus")?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
+    //            self.moveButton.imageView?.layer.transform = CATransform3DMakeScale(1.5, 1.5, 1.5)
+    //            self.moveButton.backgroundColor = .gray2
+    //            self.moveButton.layer.cornerRadius = 60 / 2
+    //            self.moveButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
+    //            self.moveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
+    //        } else {
+    //            // 스크롤 중이 아닌 경우
+    //            self.moveButton.removeConstraints(self.moveButton.constraints)
+    //            self.moveButton.setTitle("글 쓰기", for: .normal)
+    //            self.moveButton.titleLabel?.textColor = .white
+    //            self.moveButton.titleLabel?.textAlignment = .center
+    //            self.moveButton.titleLabel?.font = .boldSystemFont(ofSize: 16)
+    //            self.moveButton.backgroundColor = .gray2
+    //            self.moveButton.layer.cornerRadius = 50 / 2
+    //            self.moveButton.setImage(nil, for: .normal)
+    //            self.moveButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
+    //            self.moveButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+    //        }
+    //    }
 }
