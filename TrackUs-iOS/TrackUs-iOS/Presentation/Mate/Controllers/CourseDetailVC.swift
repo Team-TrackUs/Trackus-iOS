@@ -18,6 +18,18 @@ class CourseDetailVC: UIViewController {
         return scrollView
     }()
     
+    private let collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 20
+        layout.minimumInteritemSpacing = 10
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .white
+        collectionView.register(MatePeopleListCell.self, forCellWithReuseIdentifier: MatePeopleListCell.identifier)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
+    
     private let mapImageButton: UIButton = { // 코스 지도 이미지
         let button = UIButton()
         button.setImage(UIImage(named: ""), for: .normal)
@@ -41,7 +53,7 @@ class CourseDetailVC: UIViewController {
         let label = UILabel()
         label.text = "2024.01.12"
         label.font = .systemFont(ofSize: 12)
-        label.textColor = .gray
+        label.textColor = .gray2
         return label
     }()
     
@@ -52,9 +64,8 @@ class CourseDetailVC: UIViewController {
         label.backgroundColor = .mainBlue
         label.textColor = .white
         label.textAlignment = .center
-        label.layer.frame = CGRect(x: 0, y: 0, width: 63, height: 20)
-        label.layer.cornerRadius = 20 / 2
-        label.layer.masksToBounds = true
+        label.layer.cornerRadius = 5
+        label.clipsToBounds = true
         return label
     }()
     
@@ -70,27 +81,35 @@ class CourseDetailVC: UIViewController {
         let label = UILabel()
         label.text = "서울숲 카페 거리"
         label.font = .systemFont(ofSize: 12)
-        label.textColor = .gray
+        label.textColor = .gray2
         return label
     }()
     
-    let locationIcon = UIImageView(image: UIImage(named: "pin_icon"))
+    let locationIcon: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "locationPin_icon"))
+        imageView.layer.transform = CATransform3DMakeScale(1.2, 0.9, 0.9)
+        return imageView
+    }()
     
     private let courseTimeLabel: UILabel = { // 코스 시간
         let label = UILabel()
         label.text = "10:02 AM"
         label.font = .systemFont(ofSize: 12)
-        label.textColor = .gray
+        label.textColor = .gray2
         return label
     }()
     
-    let timeIcon = UIImageView(image: UIImage(named: "time_icon"))
+    let timeIcon: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "time_icon"))
+        imageView.layer.transform = CATransform3DMakeScale(1.0, 1.0, 1.0)
+        return imageView
+    }()
     
     private let courseDestriptionLabel: UILabel = { // 코스 소개글
         let label = UILabel()
-        label.text = "여름이 끝나갈 무렵, 늦은 오후의 따스한 햇살이 나뭇잎 사이로 부서지며 공원을 산책하는 사람들의 얼굴에 은은하게 내려앉고, 바람은 살짝 선선해져서 긴 팔 옷을 입어야 할지 고민하게 만들었으며, 아이들은 여전히 놀이터에서 뛰어다니며 즐거운 웃음소리를 내고, 벤치에 앉은 연인들은 서로의 손을 꼭 잡고 낮은 목소리로 이야기를 나누고 있었고, 강아지를 산책시키는 사람들은 가끔 강아지가 지나가는 다람쥐를 쫓아가려는 것을 막느라 애쓰며, 공원 한쪽에서는 아마추어 음악가들이 모여 기타를 치고 노래를 부르며 즉흥적인 공연을 펼치고 있었고, 그 옆에서는 몇몇 사람들이 자전거를 타고 천천히 공원을 도는 여유를 즐기고 있었으며, 공원의 작은 연못에는 오리가 유유히 떠다니며 물속을 헤엄치고 있었고, 해가 서서히 지면서 하늘은 분홍빛과 주황빛으로 물들기 시작하며, 이 모든 장면들이 한데 어우러져 평화롭고 아름다운 일요일 오후의 한 순간을 만들어내고 있었다."
+        label.text = "여름이 끝나갈 무렵, 늦은 오후의 따스한 햇살이 나뭇잎 사이로 부서지며 공원을 산책하는 사람들의 얼굴에 은은하게 내려앉고, 바람은 살짝 선선해져서 긴 팔 옷을 입어야 할지 고민하게 만들었으며, 아이들은 여전히 놀이터에서 뛰어다니며 즐거운 웃음소리를 내고, 벤치에 앉은 연인들은 서로의 손을 꼭 잡고 낮은 목소리로 이야기를 나누고 있었고, 강아지를 산책시키는 사람들은 가끔 강아지가 지나가는 다람쥐를 쫓아가려는 것을 막느라 애쓰며, 공원 한쪽에서는 아마추어 음악가들이 모여 기타를 치고 노래를 부르며 즉흥적인 공연을 펼치고 있었고, 그 옆에서는 몇몇 사람들이 자전거를 타고 천천히 공원을 도는 여유를 즐기고 있었으며, 공원의 작은 연못에는 오리가 유유히 떠다니며 물속을 헤엄치고 있었고, 해가 서서히 지면서 하늘은 분홍빛과 주황빛으로 물들기 시작하며, 이 모든 장면들이 한데 어우러져 평화롭고 아름다운 일요일 오후의 한 순간을 만들어내고 있었다.  여름이 끝나갈 무렵, 늦은 오후의 따스한 햇살이 나뭇잎 사이로 부서지며 공원을 산책하는 사람들의 얼굴에 은은하게 내려앉고, 바람은 살짝 선선해져서 긴 팔 옷을 입어야 할지 고민하게 만들었으며, 아이들은 여전히 놀이터에서 뛰어다니며 즐거운 웃음소리를 내고, 벤치에 앉은 연인들은 서로의 손을 꼭 잡고 낮은 목소리로 이야기를 나누고 있었고, 강아지를 산책시키는 사람들은 가끔 강아지가 지나가는 다람쥐를 쫓아가려는 것을 막느라 애쓰며, 공원 한쪽에서는 아마추어 음악가들이 모여 기타를 치고 노래를 부르며 즉흥적인 공연을 펼치고 있었고, 그 옆에서는 몇몇 사람들이 자전거를 타고 천천히 공원을 도는 여유를 즐기고 있었으며, 공원의 작은 연못에는 오리가 유유히 떠다니며 물속을 헤엄치고 있었고, 해가 서서히 지면서 하늘은 분홍빛과 주황빛으로 물들기 시작하며, 이 모든 장면들이 한데 어우러져 평화롭고 아름다운 일요일 오후의 한 순간을 만들어내고 있었다."
         label.font = .systemFont(ofSize: 14)
-        label.textColor = .darkGray
+        label.textColor = .gray1
         label.numberOfLines = 0
         return label
     }()
@@ -117,14 +136,27 @@ class CourseDetailVC: UIViewController {
     
     private let goChatRoomButton: UIButton = { // 채팅방 이동 버튼
         let button = UIButton(type: .system)
-//        button.backgroundColor = .blue
         button.setImage(UIImage(named: "chatBubble_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
-//        button.imageView?.layer.transform = CATransform3DMakeScale(1.1, 1.3, 1.3)
-//        button.imageView?.layer.transform = CATransform3DMakeScale(1.0, 1.3, 1.3)
         button.imageView?.layer.transform = CATransform3DMakeScale(1.3, 1.3, 1.3)
         button.addTarget(self, action: #selector(goChatRoomButtonTapped), for: .touchUpInside)
         
         return button
+    }()
+    
+    private let personInLabel: UILabel = {
+        let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 12)
+        label.textColor = .mainBlue
+        label.text = "4명"
+        return label
+    }()
+    
+    private let textLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12)
+        label.textColor = .gray1
+        label.text = "의 TrackUs 회원이 이 러닝 모임에 참여중입니다!"
+        return label
     }()
     
     // MARK: - Lifecycle
@@ -132,6 +164,10 @@ class CourseDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupNavBar()
+        
+        collectionView.delegate = self
+        collectionView.dataSource = self
         configureUI()
     }
     
@@ -187,8 +223,8 @@ class CourseDetailVC: UIViewController {
         runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
         runningStyleLabel.topAnchor.constraint(equalTo: mapImageButton.bottomAnchor, constant: 16).isActive = true
         runningStyleLabel.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
-        runningStyleLabel.widthAnchor.constraint(equalToConstant: 63).isActive = true
-        runningStyleLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        runningStyleLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
+        runningStyleLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
         
         let stackView = UIStackView()
         scrollView.addSubview(stackView)
@@ -205,27 +241,13 @@ class CourseDetailVC: UIViewController {
         courseTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         courseTitleLabel.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: 16).isActive = true
         
-        let locationTimeStack = UIStackView()
+        let locationTimeStack = UIStackView(arrangedSubviews: [locationIcon, courseLocationLabel, timeIcon, courseTimeLabel])
         locationTimeStack.axis = .horizontal
         locationTimeStack.spacing = 5
         
         stackView.addArrangedSubview(locationTimeStack)
         locationTimeStack.translatesAutoresizingMaskIntoConstraints = false
         locationTimeStack.leadingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: 16).isActive = true
-    
-        locationTimeStack.addArrangedSubview(locationIcon)
-        locationIcon.contentMode = .scaleAspectFit
-        locationIcon.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        locationIcon.heightAnchor.constraint(equalToConstant: 20).isActive = true
-
-        locationTimeStack.addArrangedSubview(courseLocationLabel)
-
-        locationTimeStack.addArrangedSubview(timeIcon)
-        timeIcon.contentMode = .scaleAspectFit
-        timeIcon.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        timeIcon.heightAnchor.constraint(equalToConstant: 20).isActive = true
-
-        locationTimeStack.addArrangedSubview(courseTimeLabel)
         
         let spacer = UIView()
         locationTimeStack.addArrangedSubview(spacer)
@@ -235,7 +257,20 @@ class CourseDetailVC: UIViewController {
         courseDestriptionLabel.leftAnchor.constraint(equalTo: stackView.leftAnchor, constant: 16).isActive = true
         courseDestriptionLabel.rightAnchor.constraint(equalTo: stackView.rightAnchor, constant: -16).isActive = true
         
-//        let buttonStack = UIStackView(arrangedSubviews: [courseEnterButton, goChatRoomButton])
+        let spacer2 = UIView()
+        let personInStack = UIStackView(arrangedSubviews: [personInLabel, textLabel, spacer2])
+        personInStack.axis = .horizontal
+        personInStack.spacing = 0
+        
+        stackView.addArrangedSubview(personInStack)
+        personInStack.translatesAutoresizingMaskIntoConstraints = false
+        personInStack.leadingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: 16).isActive = true
+        
+        stackView.addArrangedSubview(collectionView)
+        collectionView.leadingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: 16).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: stackView.trailingAnchor, constant: -16).isActive = true
+        collectionView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        
         
         let buttonStack = UIStackView()
         buttonStack.axis = .horizontal
@@ -257,6 +292,38 @@ class CourseDetailVC: UIViewController {
         buttonStack.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor).isActive = true
         buttonStack.rightAnchor.constraint(equalTo: buttonContainer.rightAnchor).isActive = true
     }
+    
+    private func setupNavBar() {
+        self.navigationItem.title = "모집글 상세보기"
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.standardAppearance = appearance
+        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+}
+
+extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
+        return 4
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MatePeopleListCell.identifier, for: indexPath) as? MatePeopleListCell else {
+            fatalError("Unable to dequeue MatePeopleListCell")
+        }
+        cell.configure(image: UIImage(named: "profile_img") ?? UIImage(imageLiteralResourceName: "profile_img"), name: "TrackUs")
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        
+        let itemWidth = collectionView.bounds.height
+        let inset = (collectionView.bounds.width - itemWidth) / 2
+        return UIEdgeInsets(top: 0, left: 10, bottom: 20, right: 10)
+    }
+    
 }
 
 

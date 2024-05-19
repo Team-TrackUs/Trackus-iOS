@@ -56,6 +56,8 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        setupNavBar()
         configureUI()
     }
     
@@ -120,6 +122,15 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         }
         
         addPolylineToMap()
+    }
+    
+    private func setupNavBar() {
+        self.navigationItem.title = "코스 상세보기"
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.standardAppearance = appearance
+        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
     
     // MARK: - MapKit

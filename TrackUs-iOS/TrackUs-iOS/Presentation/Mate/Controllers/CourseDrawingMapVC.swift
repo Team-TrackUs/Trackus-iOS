@@ -87,6 +87,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupNavBar()
         configureUI()
         
         if let courseRegisterVC = navigationController?.viewControllers.first(where: { $0 is CourseRegisterVC }) as? CourseRegisterVC {
@@ -295,6 +296,15 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         let boldItalicFont = UIFont(descriptor: italicFontDescriptor!, size: 16)
         
         distanceLabel.font = boldItalicFont
+    }
+    
+    private func setupNavBar() {
+        self.navigationItem.title = "코스 등록"
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.standardAppearance = appearance
+        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
     
     // MARK: - MapKit

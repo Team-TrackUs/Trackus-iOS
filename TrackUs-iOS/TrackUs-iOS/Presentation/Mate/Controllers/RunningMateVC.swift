@@ -54,6 +54,7 @@ class RunningMateVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupNavBar()
         configureUI()
         tableView.delegate = self
         tableView.dataSource = self
@@ -70,13 +71,15 @@ class RunningMateVC: UIViewController {
     
     @objc func searchButtonTapped() {
         print("DEBUG: 검색 버튼 클릭")
+        let searchVC = SearchVC()
+        searchVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(searchVC, animated: true)
     }
     
     // MARK: - Helpers
     
     func configureUI() {
         view.backgroundColor = .white
-        setupNavBar()
         
         self.view.addSubview(searchButton)
         searchButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true

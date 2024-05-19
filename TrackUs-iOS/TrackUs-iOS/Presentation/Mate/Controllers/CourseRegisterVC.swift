@@ -296,6 +296,8 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupNavBar()
+        
         courseDescription.delegate = self
         setupPlaceholder()
         
@@ -352,6 +354,8 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     @objc func addCourseButtonTapped() {
         print("DEBUG: Add course...")
         let courseDetailVC = CourseDetailVC()
+        self.navigationController?.popToRootViewController(animated: true)
+        courseDetailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
     }
     
@@ -639,6 +643,15 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         }
         
         addPolylineToMap()
+    }
+    
+    private func setupNavBar() {
+        self.navigationItem.title = "모집글 등록"
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.standardAppearance = appearance
+        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
     
 }

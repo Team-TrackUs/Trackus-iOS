@@ -11,6 +11,8 @@
 		61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */; };
 		61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC92BF8F950009E360B /* CourseMapVC.swift */; };
 		61B0DECE2BF92174009E360B /* MateViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DECD2BF92174009E360B /* MateViewCell.swift */; };
+		61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */; };
+		61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DED12BFA668F009E360B /* SearchVC.swift */; };
 		61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */; };
 		822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B52BF1EC2500636CCC /* LocationService.swift */; };
 		822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */; };
@@ -50,6 +52,8 @@
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
 		61B0DEC92BF8F950009E360B /* CourseMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMapVC.swift; sourceTree = "<group>"; };
 		61B0DECD2BF92174009E360B /* MateViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MateViewCell.swift; sourceTree = "<group>"; };
+		61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatePeopleListCell.swift; sourceTree = "<group>"; };
+		61B0DED12BFA668F009E360B /* SearchVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVC.swift; sourceTree = "<group>"; };
 		61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDrawingMapVC.swift; sourceTree = "<group>"; };
 		822E06B52BF1EC2500636CCC /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDelegate.swift; sourceTree = "<group>"; };
@@ -240,6 +244,8 @@
 				61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */,
 				61B0DEC92BF8F950009E360B /* CourseMapVC.swift */,
 				61B0DECD2BF92174009E360B /* MateViewCell.swift */,
+				61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */,
+				61B0DED12BFA668F009E360B /* SearchVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -374,11 +380,13 @@
 				988618332BF34AE0002ACB4E /* User.swift in Sources */,
 				61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
+				61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */,
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
 				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
 				8280D2732BF1362E002CB7DD /* MateDetailVC2.swift in Sources */,
 				8280D2712BF13440002CB7DD /* MateDetailVC.swift in Sources */,
+				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
 				8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
 				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
