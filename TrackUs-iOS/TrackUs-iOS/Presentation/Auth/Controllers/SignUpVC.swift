@@ -107,7 +107,6 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.title = SignUpSteps[currentStep].buttonText
         button.addTarget(self, action: #selector(buttonTeapped), for: .touchUpInside)
-        
         return button
     }()
     
@@ -243,10 +242,11 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         //nextView.frame = self.view.bounds
         self.view.addSubview(nextView)
         nextView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             nextView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 40),
             nextView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            nextView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+            nextView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
         ])
         
         // 각 페이지에 맞게 수정

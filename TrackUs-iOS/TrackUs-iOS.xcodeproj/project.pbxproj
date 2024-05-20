@@ -15,9 +15,11 @@
 		61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DED12BFA668F009E360B /* SearchVC.swift */; };
 		61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */; };
 		821C00AE2BF73DB900B1C022 /* Record.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00AD2BF73DB900B1C022 /* Record.swift */; };
+
 		821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00B12BF7410400B1C022 /* RunTrackingManager.swift */; };
 		822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B52BF1EC2500636CCC /* LocationService.swift */; };
 		822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */; };
+		826248192BFB4D9B0028C221 /* Running.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826248182BFB4D9B0028C221 /* Running.swift */; };
 		82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82707D0E2BF72BD40038E4A7 /* Haptic.swift */; };
 		8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26C2BF12945002CB7DD /* RunActivityVC.swift */; };
 		8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26E2BF12BD2002CB7DD /* LoginVC.swift */; };
@@ -58,6 +60,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+
 		6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseRegisterVC.swift; sourceTree = "<group>"; };
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
 		61B0DEC92BF8F950009E360B /* CourseMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMapVC.swift; sourceTree = "<group>"; };
@@ -66,9 +69,11 @@
 		61B0DED12BFA668F009E360B /* SearchVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVC.swift; sourceTree = "<group>"; };
 		61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDrawingMapVC.swift; sourceTree = "<group>"; };
 		821C00AD2BF73DB900B1C022 /* Record.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Record.swift; sourceTree = "<group>"; };
+
 		821C00B12BF7410400B1C022 /* RunTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunTrackingManager.swift; sourceTree = "<group>"; };
 		822E06B52BF1EC2500636CCC /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDelegate.swift; sourceTree = "<group>"; };
+		826248182BFB4D9B0028C221 /* Running.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Running.swift; sourceTree = "<group>"; };
 		82707D0E2BF72BD40038E4A7 /* Haptic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptic.swift; sourceTree = "<group>"; };
 		8280D26C2BF12945002CB7DD /* RunActivityVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunActivityVC.swift; sourceTree = "<group>"; };
 		8280D26E2BF12BD2002CB7DD /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
@@ -328,7 +333,7 @@
 			isa = PBXGroup;
 			children = (
 				988618322BF34AE0002ACB4E /* User.swift */,
-				821C00AD2BF73DB900B1C022 /* Record.swift */,
+				826248182BFB4D9B0028C221 /* Running.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -453,7 +458,6 @@
 			files = (
 				822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */,
 				822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */,
-				821C00AE2BF73DB900B1C022 /* Record.swift in Sources */,
 				988618172BF317EE002ACB4E /* UIImage+.swift in Sources */,
 				9898034B2BF5F14200F5DFBD /* AgreementInputView.swift in Sources */,
 				9886183A2BF4FFEB002ACB4E /* MainButton.swift in Sources */,
@@ -474,8 +478,12 @@
 				8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
 				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
+
 				9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */,
 				98AB54492BF71B620047310A /* ProfilePictureInputView.swift in Sources */,
+
+				826248192BFB4D9B0028C221 /* Running.swift in Sources */,
+
 				82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */,
 				61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */,
 				82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */,

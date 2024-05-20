@@ -117,6 +117,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         
         
         NSLayoutConstraint.activate([
+            
             textField.heightAnchor.constraint(equalToConstant: 32),
             
             stackView.topAnchor.constraint(equalTo: topAnchor),
