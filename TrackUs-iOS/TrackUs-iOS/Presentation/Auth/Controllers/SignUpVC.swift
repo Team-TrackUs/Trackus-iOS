@@ -13,7 +13,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     var currentStep = 0 {
         didSet{
-            //nextStepView()
+            changeView()
         }
     }
     
@@ -30,7 +30,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     // 메인 버튼 하단 위치 제약조건
     var mainButtonBottomConstraint: NSLayoutConstraint!
     
-    private lazy var subViews: [UIView] = [view1,view2, view3, view4]
+    private lazy var subViews: [UIView] = [view1, view2, view3, view4]
     
     var SignUpSteps: [SignUpStep] = [
         // 약관 동의
@@ -50,6 +50,23 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
                    description: "프로필 공개 상태인 경우 모든 사람이\n러닝 기록과 그룹러닝 참여 내역을 볼 수 있습니다.",
                    buttonText: "TrackUs 시작하기")
     ]
+    
+    // 네비게이션 바
+    private lazy var navigationBar : UINavigationBar = {
+        let navigationBar = UINavigationBar()
+        navigationBar.translatesAutoresizingMaskIntoConstraints = false
+        navigationBar.barTintColor = .white
+        navigationBar.shadowImage = UIImage()
+        
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .gray1
+        
+        let navItem = UINavigationItem(title: "회원가입")
+        navItem.leftBarButtonItem = backButton
+        
+        navigationBar.setItems([navItem], animated: true)
+        return navigationBar
+    }()
     
     // 상단 프로그래스바
     private lazy var progressBar: UIProgressView = {
@@ -86,7 +103,6 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         label.text = SignUpSteps[currentStep].description
         return label
     }()
-    
     
     // 다음으로 버튼
     private lazy var mainButton: UIButton = {
@@ -129,9 +145,18 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     // MARK: - 오토레이아웃 세팅
     private func setupAutoLayout() {
+        self.view.addSubview(navigationBar)
+        
+        // Toolbar Constraints
+        NSLayoutConstraint.activate([
+            navigationBar.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+            navigationBar.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            navigationBar.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            navigationBar.heightAnchor.constraint(equalToConstant: 44) // 표준 네비게이션 바 높이
+        ])
         self.view.addSubview(progressBar)
         NSLayoutConstraint.activate([
-            progressBar.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 80),
+            progressBar.topAnchor.constraint(equalTo: navigationBar.bottomAnchor, constant: 18),
             progressBar.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             progressBar.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
@@ -145,7 +170,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         subViews[currentStep].translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(subViews[currentStep])
         NSLayoutConstraint.activate([
-            subViews[currentStep].topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
+            subViews[currentStep].topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 40),
             subViews[currentStep].leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             subViews[currentStep].trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
@@ -160,12 +185,27 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         ])
     }
     
+    // 이전 버튼 클릭 이벤트
+    @objc private func backButtonTapped() {
+        // 뒤로 가기 버튼 로직 구현
+        if currentStep > 0 {
+            subViews[currentStep].removeFromSuperview()
+            currentStep -= 1
+        }else {
+            // 로그아웃 및 회원탈퇴 추가
+        }
+    }
+    
+    
     // 메인버튼 클릭 이벤트
     @objc func buttonTeapped() {
-        //nextStepView()
-        
-        AuthService.shared.logOut()
-        print("로그아웃 됨")
+        if currentStep < subViews.count-1{
+            // 기존 view 제거
+            subViews[currentStep].removeFromSuperview()
+            currentStep += 1
+        }else {
+            startApp()
+        }
     }
     
     // 키보드 나타날 때
@@ -191,34 +231,48 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     // 메인 버튼 활성화
     func MainButtonDidChangeEnabled(_ isEnabled: Bool) {
         self.isEnabled = isEnabled
+        if currentStep == 2 {
+            mainButton.setTitle(isEnabled ? "다음으로" : "건너뛰기", for: .normal)
+        }
         UIView.animate(withDuration: 0.3) {
             self.mainButton.layoutIfNeeded()
         }
     }
     
     // 바뀐 뷰에 맞게 내용 수정
-    func nextStepView(){
-        currentStep += 1
-        mainButton.isEnabled = false
-        // 기존 view 제거
-        subViews[currentStep-1].removeFromSuperview()
-        // 다음 view 추가
+    private func changeView(){
+        if currentStep < 2 {
+            mainButton.isEnabled = false
+        }
+        // 바꿀 view 추가
         let nextView = subViews[currentStep]
         nextView.frame = self.view.bounds
         self.view.addSubview(nextView)
         nextView.translatesAutoresizingMaskIntoConstraints = false
         //self.view.addSubview(subViews[currentStep])
         NSLayoutConstraint.activate([
-            nextView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
+            nextView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 40),
             nextView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             nextView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
         
-        
+        // 각 페이지에 맞게 수정
         progressBar.setProgress(Float(currentStep+1)/Float(SignUpSteps.count), animated: true)
         titleLabel.text = SignUpSteps[currentStep].title
         subLabel.text = SignUpSteps[currentStep].description
         mainButton.setTitle(SignUpSteps[currentStep].buttonText, for: .normal)
+    }
+    
+    // 회원가입 완료 시 화면 전환
+    private func startApp() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let sceneDelegate = windowScene.delegate as? SceneDelegate,
+              let window = sceneDelegate.window else {
+            return
+        }
+        let customTabBarVC = CustomTabBarVC()
+        window.rootViewController = customTabBarVC
+        window.makeKeyAndVisible()
     }
     
     deinit {
@@ -231,12 +285,18 @@ extension SignUpVC: UITextFieldDelegate {
     // 엔터키 누를 경우 실행 함수
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if isEnabled {
-            nextStepView()
+            changeView()
             textField.resignFirstResponder() // 키보드 숨기기
             return true
         }
         print("알랏 추가")
         return true
+    }
+}
+
+extension SignUpVC: ProfileImageViewDelegate {
+    func didChooseImage(_ image: UIImage?) {
+        
     }
 }
 
