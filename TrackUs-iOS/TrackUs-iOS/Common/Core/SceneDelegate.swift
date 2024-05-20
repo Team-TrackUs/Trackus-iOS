@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import KakaoSDKAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -22,6 +23,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         LoginCheck()
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
+    }
+    
+    // Kakao 로그인 관련
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        if let url = URLContexts.first?.url {
+            if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                _ = AuthController.handleOpenUrl(url: url)
+            }
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -54,18 +64,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     // MARK: - 이전 로그인 여부 확인
     func LoginCheck() {
+//        self.window?.rootViewController = SplashView()
+//        self.window?.makeKeyAndVisible()
         
         authListener = Auth.auth().addStateDidChangeListener({ auth, user in
             // 리스너 등록 해제
             //Auth.auth().removeStateDidChangeListener(self.authListener!)
             
             if user == nil {
-                self.window?.rootViewController = LoginVC()
-                self.window?.makeKeyAndVisible()
+                self.login()
             } else {
                 DispatchQueue.main.async {
                     // 회원가입 UI 완성 후. 코드 별도 추가
-                    self.startApp()
+                    //self.startApp()
+                    self.signUp()
                 }
             }
         })
@@ -74,6 +86,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// 메인 화면
     private func startApp() {
         self.window?.rootViewController = CustomTabBarVC()
+        self.window?.makeKeyAndVisible()
+    }
+    
+    private func login() {
+        self.window?.rootViewController = LoginVC()
         self.window?.makeKeyAndVisible()
     }
     /// 회원가입 화면

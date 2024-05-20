@@ -1,0 +1,11 @@
+//
+//  Config.xcconfig
+//  TrackUs-iOS
+//
+//  Created by 최주원 on 5/19/24.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+KAKAO_NATIVE_APP_KEY = 39f0d14786ada5461217e4284f13d0eb
