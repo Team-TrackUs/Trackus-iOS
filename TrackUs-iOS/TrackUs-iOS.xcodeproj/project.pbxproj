@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		821C00AE2BF73DB900B1C022 /* Record.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00AD2BF73DB900B1C022 /* Record.swift */; };
-		821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00B12BF7410400B1C022 /* RunTrackingManager.swift */; };
 		6193AD182BF34C9C00C59D43 /* CourseRegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */; };
 		61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */; };
 		61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC92BF8F950009E360B /* CourseMapVC.swift */; };
@@ -16,6 +14,8 @@
 		61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */; };
 		61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DED12BFA668F009E360B /* SearchVC.swift */; };
 		61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */; };
+		821C00AE2BF73DB900B1C022 /* Record.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00AD2BF73DB900B1C022 /* Record.swift */; };
+		821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00B12BF7410400B1C022 /* RunTrackingManager.swift */; };
 		822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B52BF1EC2500636CCC /* LocationService.swift */; };
 		822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */; };
 		82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82707D0E2BF72BD40038E4A7 /* Haptic.swift */; };
@@ -48,8 +48,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		821C00AD2BF73DB900B1C022 /* Record.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Record.swift; sourceTree = "<group>"; };
-		821C00B12BF7410400B1C022 /* RunTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunTrackingManager.swift; sourceTree = "<group>"; };
 		6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseRegisterVC.swift; sourceTree = "<group>"; };
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
 		61B0DEC92BF8F950009E360B /* CourseMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMapVC.swift; sourceTree = "<group>"; };
@@ -57,6 +55,8 @@
 		61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatePeopleListCell.swift; sourceTree = "<group>"; };
 		61B0DED12BFA668F009E360B /* SearchVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVC.swift; sourceTree = "<group>"; };
 		61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDrawingMapVC.swift; sourceTree = "<group>"; };
+		821C00AD2BF73DB900B1C022 /* Record.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Record.swift; sourceTree = "<group>"; };
+		821C00B12BF7410400B1C022 /* RunTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunTrackingManager.swift; sourceTree = "<group>"; };
 		822E06B52BF1EC2500636CCC /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDelegate.swift; sourceTree = "<group>"; };
 		82707D0E2BF72BD40038E4A7 /* Haptic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptic.swift; sourceTree = "<group>"; };
@@ -102,6 +102,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		61B0DED32BFB7662009E360B /* View */ = {
+			isa = PBXGroup;
+			children = (
+				61B0DECD2BF92174009E360B /* MateViewCell.swift */,
+				61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
 		821C00B42BF7411200B1C022 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -245,13 +254,12 @@
 		82BE45772BEFB027007AE54A /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				61B0DED32BFB7662009E360B /* View */,
 				82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */,
 				61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */,
 				6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */,
 				61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */,
 				61B0DEC92BF8F950009E360B /* CourseMapVC.swift */,
-				61B0DECD2BF92174009E360B /* MateViewCell.swift */,
-				61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */,
 				61B0DED12BFA668F009E360B /* SearchVC.swift */,
 			);
 			path = Controllers;
@@ -393,9 +401,7 @@
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
 				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
-				8280D2732BF1362E002CB7DD /* MateDetailVC2.swift in Sources */,
 				821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */,
-				8280D2712BF13440002CB7DD /* MateDetailVC.swift in Sources */,
 				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
 				8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
