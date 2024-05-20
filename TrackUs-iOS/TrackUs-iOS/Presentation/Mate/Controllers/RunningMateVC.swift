@@ -142,6 +142,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
+        tableView.deselectRow(at: indexPath, animated: false)
     }
     
     //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
