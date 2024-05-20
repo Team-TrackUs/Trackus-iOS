@@ -155,6 +155,7 @@
 		82BE456E2BEFAE22007AE54A /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				98704C7D2BFB78E9009C0FAF /* Component */,
 				989803482BF5D82800F5DFBD /* Service */,
 				989803472BF5D80700F5DFBD /* Extension */,
 				82BE456F2BEFAE74007AE54A /* Core */,
@@ -253,9 +254,16 @@
 			children = (
 				8280D26E2BF12BD2002CB7DD /* LoginVC.swift */,
 				988618372BF37E81002ACB4E /* SignUpVC.swift */,
-				988618392BF4FFEB002ACB4E /* MainButton.swift */,
 			);
 			path = Controllers;
+			sourceTree = "<group>";
+		};
+		98704C7D2BFB78E9009C0FAF /* Component */ = {
+			isa = PBXGroup;
+			children = (
+				988618392BF4FFEB002ACB4E /* MainButton.swift */,
+			);
+			path = Component;
 			sourceTree = "<group>";
 		};
 		988618312BF34A6C002ACB4E /* Model */ = {

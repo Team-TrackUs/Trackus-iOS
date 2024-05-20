@@ -10,8 +10,7 @@ import UIKit
 /// MainButton - 기본 색상 mainblue
 /// 색상 변경 buttonColor 변경
 /// isEnabled : 활성화 여부
-class MainButton: UIButton {
-    
+class MainButton: UIButton, MainButtonEnabledDelegate {
     var buttonColor: UIColor = .mainBlue
     
     var title: String = "다음으로"{
@@ -39,12 +38,17 @@ class MainButton: UIButton {
     
     private func configureButton() {
         // 버튼의 공통적인 스타일 및 설정을 정의합니다.
-        self.layer.cornerRadius = 30
+        self.layer.cornerRadius = 28
         self.layer.masksToBounds = true
         
         //self.setTitle(title, for: .normal)
         self.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         self.heightAnchor.constraint(equalToConstant: 56).isActive = true
+    }
+    
+    // 메인버튼 활성화 여부
+    func MainButtonDidChangeEnabled(_ isEnabeled: Bool) {
+        self.isEnabled = isEnabeled
     }
 }
 
