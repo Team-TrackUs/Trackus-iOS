@@ -9,20 +9,11 @@ import UIKit
 
 class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
+    var user:User = User(username: "", email: "", status: "")
+    
     var currentStep = 0 {
         didSet{
-            switch currentStep{
-                case 0:
-                    nextStepView()
-                case 1:
-                    nextStepView()
-                case 2:
-                    nextStepView()
-                case 3:
-                    nextStepView()
-                default:
-                    return
-            }
+            //nextStepView()
         }
     }
     
@@ -31,6 +22,11 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     var view3 = ProfilePictureInputView()
     var view4 = ProfilePublicView()
     
+    private var isEnabled: Bool = false{
+        didSet{
+            mainButton.isEnabled = isEnabled
+        }
+    }
     // 메인 버튼 하단 위치 제약조건
     var mainButtonBottomConstraint: NSLayoutConstraint!
     
@@ -121,6 +117,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         setupAutoLayout()
         view1.delegate = self
         view2.delegate = self
+        //view2.textField.delegate = self
         view3.delegate = self
         view4.delegate = self
         
@@ -146,19 +143,13 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
             labelStackView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
         subViews[currentStep].translatesAutoresizingMaskIntoConstraints = false
-                self.view.addSubview(subViews[currentStep])
-                NSLayoutConstraint.activate([
-                    subViews[currentStep].topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
-                    subViews[currentStep].leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-                    subViews[currentStep].trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
-                ])
-//        subView.translatesAutoresizingMaskIntoConstraints = false
-//        self.view.addSubview(subView)
-//        NSLayoutConstraint.activate([
-//            subView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
-//            subView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-//            subView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
-//        ])
+        self.view.addSubview(subViews[currentStep])
+        NSLayoutConstraint.activate([
+            subViews[currentStep].topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
+            subViews[currentStep].leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            subViews[currentStep].trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+        ])
+        
         mainButtonBottomConstraint = mainButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
         self.view.addSubview(mainButton)
         NSLayoutConstraint.activate([
@@ -169,13 +160,15 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         ])
     }
     
+    // 메인버튼 클릭 이벤트
     @objc func buttonTeapped() {
+        //nextStepView()
         
-        currentStep += 1
-        mainButton.isEnabled = false
-        
+        AuthService.shared.logOut()
+        print("로그아웃 됨")
     }
     
+    // 키보드 나타날 때
     @objc func keyboardWillShow(notification: NSNotification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             // 키보드 높이만큼 MainButton의 bottom constraint 조정
@@ -185,7 +178,8 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
             }
         }
     }
-
+    
+    // 키보드 사라질 때
     @objc func keyboardWillHide(notification: NSNotification) {
         // 키보드가 사라질 때 MainButton의 위치를 원래대로 복귀
         mainButtonBottomConstraint.constant = -10
@@ -196,7 +190,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     // 메인 버튼 활성화
     func MainButtonDidChangeEnabled(_ isEnabled: Bool) {
-        mainButton.isEnabled = isEnabled
+        self.isEnabled = isEnabled
         UIView.animate(withDuration: 0.3) {
             self.mainButton.layoutIfNeeded()
         }
@@ -204,17 +198,20 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     // 바뀐 뷰에 맞게 내용 수정
     func nextStepView(){
-        // 다음 뷰로 수정
+        currentStep += 1
+        mainButton.isEnabled = false
+        // 기존 view 제거
         subViews[currentStep-1].removeFromSuperview()
+        // 다음 view 추가
         let nextView = subViews[currentStep]
         nextView.frame = self.view.bounds
         self.view.addSubview(nextView)
-        subViews[currentStep].translatesAutoresizingMaskIntoConstraints = false
-        self.view.addSubview(subViews[currentStep])
+        nextView.translatesAutoresizingMaskIntoConstraints = false
+        //self.view.addSubview(subViews[currentStep])
         NSLayoutConstraint.activate([
-            subViews[currentStep].topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
-            subViews[currentStep].leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            subViews[currentStep].trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+            nextView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 20),
+            nextView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            nextView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
         
         
@@ -227,6 +224,19 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     deinit {
         // 옵저버 제거
         NotificationCenter.default.removeObserver(self)
+    }
+}
+
+extension SignUpVC: UITextFieldDelegate {
+    // 엔터키 누를 경우 실행 함수
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if isEnabled {
+            nextStepView()
+            textField.resignFirstResponder() // 키보드 숨기기
+            return true
+        }
+        print("알랏 추가")
+        return true
     }
 }
 

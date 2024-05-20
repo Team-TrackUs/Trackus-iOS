@@ -185,7 +185,7 @@ class LoginVC: UIViewController {
     
     // MARK: - Kakao 로그인 버튼 실행 함수
     @objc func kakaoLoginButtonTapped() {
-        print("Kakao 로그인 버튼이 누름")
+        AuthService.shared.handleKakaoLogin()
     }
 }
 

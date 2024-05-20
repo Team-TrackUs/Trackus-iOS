@@ -43,7 +43,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         return label
     }()
     
-    private lazy var textField: UITextField = {
+    lazy var textField: UITextField = {
         var textField = UITextField()
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .clear
@@ -53,6 +53,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         textField.autocorrectionType = .no
         textField.spellCheckingType = .no
         textField.returnKeyType = .next
+        textField.clearButtonMode = .whileEditing
         // textField 입력 활성화 - 키보드 자동 열림
         textField.becomeFirstResponder()
         //textField.borderStyle = .roundedRect
@@ -144,9 +145,11 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         if newText.count > textLimit || newText.count < 2 || newText.contains(" ") || newText.rangeOfCharacter(from: specialCharacters) != nil {
             isError = true
             guidelabel.textColor = .red
+            lineView.backgroundColor = .red
         } else {
             isError = false
             guidelabel.textColor = .gray2
+            lineView.backgroundColor = .gray3
         }
     }
     
@@ -166,11 +169,11 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     }
     
     // 엔터키 누를 경우 실행 함수
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if availability {
-            textField.resignFirstResponder() // 키보드 숨기기
-        }
-        return true
-    }
+//    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+//        if availability {
+//            textField.resignFirstResponder() // 키보드 숨기기
+//        }
+//        return true
+//    }
 }
 

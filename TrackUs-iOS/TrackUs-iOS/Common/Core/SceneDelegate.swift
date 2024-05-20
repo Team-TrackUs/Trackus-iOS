@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import KakaoSDKAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -22,6 +23,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         LoginCheck()
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
+    }
+    
+    // Kakao 로그인 관련
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        if let url = URLContexts.first?.url {
+            if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                _ = AuthController.handleOpenUrl(url: url)
+            }
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -60,8 +70,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             //Auth.auth().removeStateDidChangeListener(self.authListener!)
             
             if user == nil {
-                self.window?.rootViewController = LoginVC()
-                self.window?.makeKeyAndVisible()
+                self.login()
             } else {
                 DispatchQueue.main.async {
                     // 회원가입 UI 완성 후. 코드 별도 추가
@@ -75,6 +84,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// 메인 화면
     private func startApp() {
         self.window?.rootViewController = CustomTabBarVC()
+        self.window?.makeKeyAndVisible()
+    }
+    
+    private func login() {
+        self.window?.rootViewController = LoginVC()
         self.window?.makeKeyAndVisible()
     }
     /// 회원가입 화면
