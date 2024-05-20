@@ -59,6 +59,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         //textField.borderStyle = .roundedRect
         //textField.delegate = self
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        textField.layer.zPosition = 999
         return textField
     }()
     

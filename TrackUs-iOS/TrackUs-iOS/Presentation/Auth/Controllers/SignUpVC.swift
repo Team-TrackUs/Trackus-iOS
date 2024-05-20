@@ -209,7 +209,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     @objc func keyboardWillShow(notification: NSNotification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             // 키보드 높이만큼 MainButton의 bottom constraint 조정
-            mainButtonBottomConstraint.constant = 15 - keyboardSize.height
+            mainButtonBottomConstraint.constant = 20 - keyboardSize.height
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
             }
@@ -240,10 +240,9 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         }
         // 바꿀 view 추가
         let nextView = subViews[currentStep]
-        nextView.frame = self.view.bounds
+        //nextView.frame = self.view.bounds
         self.view.addSubview(nextView)
         nextView.translatesAutoresizingMaskIntoConstraints = false
-        //self.view.addSubview(subViews[currentStep])
         NSLayoutConstraint.activate([
             nextView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 40),
             nextView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),

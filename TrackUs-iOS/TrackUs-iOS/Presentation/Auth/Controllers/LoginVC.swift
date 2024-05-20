@@ -64,7 +64,6 @@ class LoginVC: UIViewController {
         button.imageView?.tintColor = .white
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10) // 로고와 문구 사이의 간격 조절
         
-        
         button.setTitle("Apple로 시작하기", for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.setTitleColor(.white, for: .normal)

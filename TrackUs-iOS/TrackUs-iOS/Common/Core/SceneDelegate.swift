@@ -64,6 +64,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     // MARK: - 이전 로그인 여부 확인
     func LoginCheck() {
+//        self.window?.rootViewController = SplashView()
+//        self.window?.makeKeyAndVisible()
         
         authListener = Auth.auth().addStateDidChangeListener({ auth, user in
             // 리스너 등록 해제
@@ -74,8 +76,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             } else {
                 DispatchQueue.main.async {
                     // 회원가입 UI 완성 후. 코드 별도 추가
-                    //self.startApp()
-                    self.signUp()
+                    self.startApp()
+                    //self.signUp()
                 }
             }
         })
