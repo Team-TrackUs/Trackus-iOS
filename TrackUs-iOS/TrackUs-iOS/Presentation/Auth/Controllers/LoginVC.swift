@@ -180,7 +180,7 @@ class LoginVC: UIViewController {
     
     // MARK: - Apple 로그인 버튼 실행 함수
     @objc func appleLoginButtonTapped() {
-        AuthService.shared.startSignInWithAppleFlow()
+        AuthService.shared.handleAppleLogin()
     }
     
     // MARK: - Kakao 로그인 버튼 실행 함수

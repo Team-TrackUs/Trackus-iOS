@@ -43,7 +43,7 @@ class AgreementInputView: UIView {
     private lazy var allAgreeButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("모두 동의합니다.", for: .normal)
+        button.setTitle(" 모두 동의합니다.", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         button.setTitleColor(.gray1, for: .normal)
         
@@ -51,7 +51,6 @@ class AgreementInputView: UIView {
         button.setImage(LogoImage, for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.imageView?.tintColor = isAllSelected ? .mainBlue : .gray3
-        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 12)
         
         button.addTarget(self, action: #selector(allAgreeButtonTapped), for: .touchUpInside)
         return button
@@ -68,10 +67,10 @@ class AgreementInputView: UIView {
     // 약관별 버튼
     private lazy var termsButtons: [UIButton] = {
         let buttonTitles = [
-            "만 14세 이상입니다",
-            "서비스 이용약관 동의",
-            "개인정보 처리방침 동의",
-            "위치정보 서비스 이용약관 동의"
+            " 만 14세 이상입니다",
+            " 서비스 이용약관 동의",
+            " 개인정보 처리방침 동의",
+            " 위치정보 서비스 이용약관 동의"
         ]
         let buttons = buttonTitles.map { title in
             let button = UIButton()
@@ -84,7 +83,6 @@ class AgreementInputView: UIView {
             button.setImage(LogoImage, for: .normal)
             button.imageView?.contentMode = .scaleAspectFit
             button.imageView?.tintColor = .gray3
-            button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 12)
             
             button.addTarget(self, action: #selector(termsButtonTapped(sender:)), for: .touchUpInside)
             return button

@@ -33,9 +33,11 @@ final class AuthService: NSObject {
         }
     }
     
-    // MARK: - apple 로그인
+    // 회원탈퇴
     
-    func startSignInWithAppleFlow() {
+    
+    // MARK: - apple 로그인
+    func handleAppleLogin() {
         let nonce = randomNonceString()
         currentNonce = nonce
         let appleIDProvider = ASAuthorizationAppleIDProvider()

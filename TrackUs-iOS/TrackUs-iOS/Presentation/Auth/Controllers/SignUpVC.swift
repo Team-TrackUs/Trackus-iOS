@@ -22,11 +22,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     var view3 = ProfilePictureInputView()
     var view4 = ProfilePublicView()
     
-    private var isEnabled: Bool = false{
-        didSet{
-            mainButton.isEnabled = isEnabled
-        }
-    }
+    private var isEnabled: Bool = false
     // 메인 버튼 하단 위치 제약조건
     var mainButtonBottomConstraint: NSLayoutConstraint!
     
@@ -135,7 +131,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         view2.delegate = self
         //view2.textField.delegate = self
         view3.delegate = self
-        view4.delegate = self
+        //view4.delegate = self
         
         
         // 키보드 메소드 등록
@@ -193,6 +189,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
             currentStep -= 1
         }else {
             // 로그아웃 및 회원탈퇴 추가
+            AuthService.shared.logOut()
         }
     }
     
@@ -231,11 +228,8 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     // 메인 버튼 활성화
     func MainButtonDidChangeEnabled(_ isEnabled: Bool) {
         self.isEnabled = isEnabled
-        if currentStep == 2 {
-            mainButton.setTitle(isEnabled ? "다음으로" : "건너뛰기", for: .normal)
-        }
-        UIView.animate(withDuration: 0.3) {
-            self.mainButton.layoutIfNeeded()
+        UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
+            self.mainButton.isEnabled = isEnabled
         }
     }
     
@@ -257,10 +251,12 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         ])
         
         // 각 페이지에 맞게 수정
-        progressBar.setProgress(Float(currentStep+1)/Float(SignUpSteps.count), animated: true)
         titleLabel.text = SignUpSteps[currentStep].title
         subLabel.text = SignUpSteps[currentStep].description
         mainButton.setTitle(SignUpSteps[currentStep].buttonText, for: .normal)
+        UIView.animate(withDuration: 0.5, delay: 0, options: [.curveEaseInOut]) {
+            self.progressBar.setProgress(Float(self.currentStep+1)/Float(self.SignUpSteps.count), animated: true)
+        }
     }
     
     // 회원가입 완료 시 화면 전환
