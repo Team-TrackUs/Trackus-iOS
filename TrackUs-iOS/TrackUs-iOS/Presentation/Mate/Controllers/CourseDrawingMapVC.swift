@@ -37,7 +37,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         return label
     }()
     
-    let myLocationButton: UIButton = {
+    private lazy var myLocationButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "location_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(myLocationButtonTapped), for: .touchUpInside)
@@ -45,7 +45,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         return button
     }()
     
-    let courseClearButton: UIButton = {
+    private lazy var courseClearButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "trash_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(courseClearButtonTapped), for: .touchUpInside)
@@ -53,7 +53,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         return button
     }()
     
-    let oneStepBackButton: UIButton = {
+    private lazy var oneStepBackButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "revert_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(oneStepBackButtonTapped), for: .touchUpInside)
@@ -61,7 +61,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         return button
     }()
     
-    let finishDrawCourseButton: UIButton = {
+    private lazy var finishDrawCourseButton: UIButton = {
         let button = UIButton(type: .system)
         button.backgroundColor = .mainBlue
         button.setTitle("코스 완성", for: .normal)

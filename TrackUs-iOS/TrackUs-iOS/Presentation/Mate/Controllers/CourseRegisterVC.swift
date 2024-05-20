@@ -27,7 +27,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     var locationManager = CLLocationManager() // mapkit
     var pinAnnotations: [MKPointAnnotation] = [] // mapkit
     
-    let toolBarKeyboard: UIToolbar = {
+    private lazy var toolBarKeyboard: UIToolbar = {
         let toolbar = UIToolbar()
         let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(btnDoneBarTapped))
@@ -254,7 +254,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return label
     }()
     
-    private let addCourseButton: UIButton = {
+    private lazy var addCourseButton: UIButton = {
         let button = UIButton(type: .system)
         button.backgroundColor = .mainBlue
         button.setTitle("코스 등록하기", for: .normal)

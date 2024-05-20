@@ -22,7 +22,7 @@ class SearchVC: UIViewController {
         return textField
     }()
     
-    let toolBarKeyboard: UIToolbar = {
+    private lazy var toolBarKeyboard: UIToolbar = {
         let toolbar = UIToolbar()
         let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(btnDoneBarTapped))
@@ -102,6 +102,8 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
+        
+        tableView.deselectRow(at: indexPath, animated: false)
     }
     
 }

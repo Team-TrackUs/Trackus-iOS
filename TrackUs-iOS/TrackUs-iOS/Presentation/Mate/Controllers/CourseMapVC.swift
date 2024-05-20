@@ -43,7 +43,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         return label
     }()
     
-    let myLocationButton: UIButton = {
+    private lazy var myLocationButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "location_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(myLocationButtonTapped), for: .touchUpInside)

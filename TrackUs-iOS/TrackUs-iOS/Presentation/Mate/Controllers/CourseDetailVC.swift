@@ -30,7 +30,7 @@ class CourseDetailVC: UIViewController {
         return collectionView
     }()
     
-    private let mapImageButton: UIButton = { // 코스 지도 이미지
+    private lazy var mapImageButton: UIButton = { // 코스 지도 이미지
         let button = UIButton()
         button.setImage(UIImage(named: ""), for: .normal)
         button.layer.cornerRadius = 10
@@ -120,7 +120,7 @@ class CourseDetailVC: UIViewController {
         return view
     }()
     
-    private let courseEnterButton: UIButton = { // 트랙 참여 버튼
+    private lazy var courseEnterButton: UIButton = { // 트랙 참여 버튼
         let button = UIButton(type: .system)
         button.backgroundColor = .mainBlue
         button.setTitle("트랙 참가하기", for: .normal)
@@ -134,7 +134,7 @@ class CourseDetailVC: UIViewController {
         return button
     }()
     
-    private let goChatRoomButton: UIButton = { // 채팅방 이동 버튼
+    private lazy var goChatRoomButton: UIButton = { // 채팅방 이동 버튼
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "chatBubble_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
         button.imageView?.layer.transform = CATransform3DMakeScale(1.3, 1.3, 1.3)
