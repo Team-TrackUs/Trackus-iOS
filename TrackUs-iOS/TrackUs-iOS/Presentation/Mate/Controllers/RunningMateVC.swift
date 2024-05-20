@@ -7,23 +7,110 @@
 
 import UIKit
 
-class RunningMateVC: ViewController {
+class RunningMateVC: UIViewController {
+    
+    // MARK: - Properties
+    
+    private let tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = .systemBackground
+        tableView.allowsSelection = true
+        tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
+        return tableView
+    }()
+    
     private lazy var moveButton: UIButton = {
         let btn = UIButton()
-        btn.backgroundColor = .blue
-        btn.setTitle("move", for: .normal)
+        btn.setImage(UIImage(named: "plus_icon"), for: .normal)
+        btn.imageView?.layer.transform = CATransform3DMakeScale(1.3, 1.3, 1.3)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.addTarget(self, action: #selector(moveButtonTapped), for: .touchUpInside)
         return btn
     }()
     
+    private lazy var searchButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = .white
+        btn.layer.cornerRadius = 40 / 2
+        btn.layer.borderWidth = 1.0
+        btn.layer.borderColor = UIColor.gray2.cgColor
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.addTarget(self, action: #selector(searchButtonTapped), for: .touchUpInside)
+        return btn
+    }()
+    
+    let searchIcon = UIImageView(image: UIImage(systemName: "magnifyingglass")?.withTintColor(.gray2, renderingMode: .alwaysOriginal))
+    
+    let searchLabel: UILabel = {
+        let label = UILabel()
+        label.text = "검색어를 입력해주세요"
+        label.textColor = UIColor.gray2
+        label.font = UIFont.systemFont(ofSize: 12)
+        return label
+    }()
+    
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
-        super.viewDidLoad()        
-        view.backgroundColor = .red
+        super.viewDidLoad()
+        
         setupNavBar()
+        configureUI()
+        tableView.delegate = self
+        tableView.dataSource = self
+    }
+    
+    // MARK: - Selectors
+    
+    @objc func moveButtonTapped() {
+        let mateDetailVC = CourseRegisterVC()
+        mateDetailVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(mateDetailVC, animated: true)
+        
+    }
+    
+    @objc func searchButtonTapped() {
+        print("DEBUG: 검색 버튼 클릭")
+        let searchVC = SearchVC()
+        searchVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(searchVC, animated: true)
+    }
+    
+    // MARK: - Helpers
+    
+    func configureUI() {
+        view.backgroundColor = .white
+        
+        self.view.addSubview(searchButton)
+        searchButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
+        searchButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16).isActive = true
+        searchButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16).isActive = true
+        searchButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        
+        searchButton.addSubview(searchIcon)
+        searchIcon.translatesAutoresizingMaskIntoConstraints = false
+//        searchIcon.topAnchor.constraint(equalTo: searchButton.topAnchor, constant: 8).isActive = true
+        searchIcon.centerYAnchor.constraint(equalTo: searchButton.centerYAnchor).isActive = true
+        searchIcon.trailingAnchor.constraint(equalTo: searchButton.trailingAnchor, constant: -16).isActive = true
+        
+        searchButton.addSubview(searchLabel)
+        searchLabel.translatesAutoresizingMaskIntoConstraints = false
+        searchLabel.centerYAnchor.constraint(equalTo: searchButton.centerYAnchor).isActive = true
+        searchLabel.leadingAnchor.constraint(equalTo: searchButton.leadingAnchor, constant: 16).isActive = true
+        
+        self.view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.topAnchor.constraint(equalTo: searchButton.bottomAnchor, constant: 10).isActive = true
+        tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        
         self.view.addSubview(moveButton)
-        moveButton.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor).isActive = true
-        moveButton.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor).isActive = true
+        moveButton.bottomAnchor.constraint(equalTo: tableView.bottomAnchor,constant: -17).isActive = true
+        moveButton.rightAnchor.constraint(equalTo: tableView.rightAnchor, constant: -16).isActive = true
+        moveButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        moveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        
     }
     
     private func setupNavBar() {
@@ -35,13 +122,54 @@ class RunningMateVC: ViewController {
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
     
-    @objc func moveButtonTapped() {
-        let mateDetailVC = MateDetailVC()
-        mateDetailVC.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(mateDetailVC, animated: true)
-        
-    }
-    
-    
 }
 
+extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 12
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: MateViewCell.identifier, for: indexPath) as? MateViewCell else {
+            fatalError("The tableView could not dequeue a MateViewCell in ViewController")
+        }
+        
+        cell.configure(image: UIImage(named: "profile_img") ?? UIImage(imageLiteralResourceName: "profile_img"), runningStyleLabel: "인터벌", titleLabel: "광명시 러닝 메이트 구합니다", locationLabel: "서울숲카페거리", timeLabel: "10:01 AM", distanceLabel: "1.54km", peopleLimit: 5, peopleIn: 2, dateLabel: "2024년 5월 18일")
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let courseDetailVC = CourseDetailVC()
+        courseDetailVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(courseDetailVC, animated: true)
+        tableView.deselectRow(at: indexPath, animated: false)
+    }
+    
+    //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    //        let offsetY = scrollView.contentOffset.y
+    //
+    //        if offsetY > 0 {
+    //            // 스크롤 중인 경우
+    //            self.moveButton.removeConstraints(self.moveButton.constraints)
+    //            self.moveButton.setTitle("", for: .normal)
+    //            self.moveButton.setImage(UIImage(systemName: "plus")?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
+    //            self.moveButton.imageView?.layer.transform = CATransform3DMakeScale(1.5, 1.5, 1.5)
+    //            self.moveButton.backgroundColor = .gray2
+    //            self.moveButton.layer.cornerRadius = 60 / 2
+    //            self.moveButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
+    //            self.moveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
+    //        } else {
+    //            // 스크롤 중이 아닌 경우
+    //            self.moveButton.removeConstraints(self.moveButton.constraints)
+    //            self.moveButton.setTitle("글 쓰기", for: .normal)
+    //            self.moveButton.titleLabel?.textColor = .white
+    //            self.moveButton.titleLabel?.textAlignment = .center
+    //            self.moveButton.titleLabel?.font = .boldSystemFont(ofSize: 16)
+    //            self.moveButton.backgroundColor = .gray2
+    //            self.moveButton.layer.cornerRadius = 50 / 2
+    //            self.moveButton.setImage(nil, for: .normal)
+    //            self.moveButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
+    //            self.moveButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+    //        }
+    //    }
+}
