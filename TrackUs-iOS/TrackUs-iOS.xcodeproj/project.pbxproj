@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		821C00AE2BF73DB900B1C022 /* Record.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00AD2BF73DB900B1C022 /* Record.swift */; };
+		821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00B12BF7410400B1C022 /* RunTrackingManager.swift */; };
 		6193AD182BF34C9C00C59D43 /* CourseRegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */; };
 		61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */; };
 		61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC92BF8F950009E360B /* CourseMapVC.swift */; };
@@ -46,6 +48,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		821C00AD2BF73DB900B1C022 /* Record.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Record.swift; sourceTree = "<group>"; };
+		821C00B12BF7410400B1C022 /* RunTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunTrackingManager.swift; sourceTree = "<group>"; };
 		6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseRegisterVC.swift; sourceTree = "<group>"; };
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
 		61B0DEC92BF8F950009E360B /* CourseMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMapVC.swift; sourceTree = "<group>"; };
@@ -98,6 +102,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		821C00B42BF7411200B1C022 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				821C00B12BF7410400B1C022 /* RunTrackingManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		822E06B42BF1EC0D00636CCC /* Shared */ = {
 			isa = PBXGroup;
 			children = (
@@ -206,6 +218,7 @@
 		82BE45732BEFAFB3007AE54A /* Running */ = {
 			isa = PBXGroup;
 			children = (
+				821C00B42BF7411200B1C022 /* Services */,
 				82BE45762BEFB020007AE54A /* Controllers */,
 			);
 			path = Running;
@@ -275,6 +288,7 @@
 			isa = PBXGroup;
 			children = (
 				988618322BF34AE0002ACB4E /* User.swift */,
+				821C00AD2BF73DB900B1C022 /* Record.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -366,6 +380,7 @@
 			files = (
 				822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */,
 				822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */,
+				821C00AE2BF73DB900B1C022 /* Record.swift in Sources */,
 				988618172BF317EE002ACB4E /* UIImage+.swift in Sources */,
 				61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */,
 				6193AD182BF34C9C00C59D43 /* CourseRegisterVC.swift in Sources */,
@@ -378,6 +393,9 @@
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
 				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
+				8280D2732BF1362E002CB7DD /* MateDetailVC2.swift in Sources */,
+				821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */,
+				8280D2712BF13440002CB7DD /* MateDetailVC.swift in Sources */,
 				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
 				8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
