@@ -9,14 +9,6 @@ import Foundation
 import Firebase
 
 struct User: Codable{
-    // 임시 테스트 용
-//    var id = ""
-//    var username: String
-//    var email: String
-//    var pushId = ""
-//    var avatarLink = ""
-//    var status: String
-    
     // 이후 모델
     //var uid: String
     var name: String
@@ -51,26 +43,4 @@ struct User: Codable{
     static var currentUid: String {
         return Auth.auth().currentUser!.uid
     }
-    
-//    static var currentUser: User? {
-//        if Auth.auth().currentUser != nil {
-//            if let dictionary = UserDefaults.standard.data(forKey: "currentUser") {
-//                
-//                let decoder = JSONDecoder()
-//                
-//                do {
-//                    let object = try decoder.decode(User.self, from: dictionary)
-//                    return object
-//                } catch {
-//                    print("Error decoding user", error.localizedDescription)
-//                }
-//            }
-//        }
-//        
-//        return nil
-//    }
-    
-//    static func == (lhs: User, rhs: User) -> Bool {
-//        lhs.uid == rhs.uid
-//    }
 }

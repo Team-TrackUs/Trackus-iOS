@@ -35,7 +35,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     
     // MARK: - UI Components
     private lazy var label: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "닉네임"
         label.textColor = .gray2
@@ -55,11 +55,10 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         textField.returnKeyType = .next
         textField.clearButtonMode = .whileEditing
         // textField 입력 활성화 - 키보드 자동 열림
-        textField.becomeFirstResponder()
+        //textField.becomeFirstResponder()
         textField.isUserInteractionEnabled = true
-        //textField.borderStyle = .roundedRect
+        textField.delegate = self
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        textField.layer.zPosition = 999
         return textField
     }()
     
@@ -72,7 +71,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     }()
     
     private lazy var guidelabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "특수문자, 공백 제외 2~10자리"
         label.textColor = .gray2
@@ -89,7 +88,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     }()
     
     private lazy var stackView: UIStackView = {
-       let stackView = UIStackView(arrangedSubviews: [label, textField, lineView, guidelabel])
+        let stackView = UIStackView(arrangedSubviews: [label, textField, lineView, guidelabel])
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 8
@@ -152,7 +151,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         } else {
             isError = false
             guidelabel.textColor = .gray2
-            lineView.backgroundColor = .gray3
+            lineView.backgroundColor = .mainBlue
         }
     }
     
@@ -169,6 +168,16 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         } else {
             characterCountLabel.textColor = .gray2
         }
+    }
+    
+    // 텍스트 필드가 편집을 시작할 때 호출
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        lineView.backgroundColor = .mainBlue
+    }
+    
+    // 텍스트 필드가 편집을 종료할 때 호출
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        lineView.backgroundColor = .gray3
     }
     
     /// 닉네임 반환 함수

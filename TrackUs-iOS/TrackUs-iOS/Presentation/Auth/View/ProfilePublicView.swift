@@ -10,12 +10,6 @@ import UIKit
 // MARK: - 프로필 공개 view
 class ProfilePublicView: UIView {
     
-    private lazy var profilePublic: Bool = true{
-        didSet{
-            
-        }
-    }
-    
     private lazy var label: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
