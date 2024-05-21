@@ -9,10 +9,10 @@ import Foundation
 import CoreLocation
 
 final class RunTrackingManager {
-    private var runningData = Record()
+    private var runningData = Running()
     
     /// 좌표경로 추가
     func addPath(withCoordinate coordinate: CLLocationCoordinate2D) {
-     
+        
     }
 }

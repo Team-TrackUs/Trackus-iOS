@@ -1,15 +1,15 @@
 //
-//  Record.swift
+//  Running.swift
 //  TrackUs-iOS
 //
-//  Created by 석기권 on 5/17/24.
+//  Created by 석기권 on 5/20/24.
 //
 
 import Foundation
 import Firebase
 import CoreLocation
 
-struct Record {
+struct Running {
     var address: String = ""
     var calorie: Double = 0.0
     var distance: Double = 0.0
