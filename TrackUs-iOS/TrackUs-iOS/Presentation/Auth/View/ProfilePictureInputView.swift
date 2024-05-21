@@ -26,12 +26,6 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.isUserInteractionEnabled = true
-//        imageView.layer.cornerRadius = imageView.frame.height/2
-//        imageView.layer.masksToBounds = true
-//        
-//        // 회색 테두리 추가
-//        imageView.layer.borderColor = UIColor.gray3.cgColor
-//        imageView.layer.borderWidth = 1
         return imageView
     }()
     
@@ -70,9 +64,6 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
     }
     // MARK: - Setup AutoLayout
     private func setupAutoLayout() {
-        // 이미지 뷰 설정
-        //imageView.layer.cornerRadius = frame.size.width / 2
-        
         addSubview(imageView)
         addSubview(cameraIcon)
         NSLayoutConstraint.activate([
@@ -104,7 +95,7 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
         }))
         actionSheet.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
         
-        // 현재 뷰 컨트롤러를 찾아서 액션 시트를 표시합니다.
+        // 현재 뷰 컨트롤러를 찾아서 액션 시트를 표시
         if let viewController = findViewController() {
             viewController.present(actionSheet, animated: true, completion: nil)
         }
@@ -135,7 +126,7 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
         picker.dismiss(animated: true, completion: nil)
     }
     
-    // 현재 UIView가 속한 UIViewController를 찾는 메소드
+    // UIView가 속한 UIViewController를 찾기
     private func findViewController() -> UIViewController? {
         var responder: UIResponder? = self
         while let nextResponder = responder?.next {

@@ -171,12 +171,9 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         }
     }
     
-    // 엔터키 누를 경우 실행 함수
-//    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-//        if availability {
-//            textField.resignFirstResponder() // 키보드 숨기기
-//        }
-//        return true
-//    }
+    /// 닉네임 반환 함수
+    func getNickname() -> String {
+        return textField.text ?? ""
+    }
 }
 
