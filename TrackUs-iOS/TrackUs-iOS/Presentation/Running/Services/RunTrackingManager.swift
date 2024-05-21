@@ -9,7 +9,12 @@ import Foundation
 import CoreLocation
 
 final class RunTrackingManager {
-    private var runningData = Running()
+    private var runningModel = Running()
+    
+    var seconds: Int {
+        get { runningModel.seconds }
+        set { runningModel.seconds = newValue }
+    }
     
     /// 좌표경로 추가
     func addPath(withCoordinate coordinate: CLLocationCoordinate2D) {

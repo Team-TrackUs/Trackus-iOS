@@ -8,7 +8,7 @@
 // tanslation x값을 측정
 // 버튼의 center.x값을 이동한 값만큼 추가
 // TODO: - 라이브트래킹
-// 유저이동 경로 저장
+// 타이머 설정
 // TODO: - 디자인변경 적용
 // 러닝중지시 고도, 케이던스 정보추가
 // blurView의 bottomInset을 runInfoStackView + 50으로 설정
@@ -286,7 +286,8 @@ final class RunActivityVC: UIViewController {
     }
     
     func updatedOnStart() {
-        startTracking()
+        self.startTracking()
+        self.startTimer()
         self.overlayView.isHidden = true
         self.swipeBox.isHidden = false
         self.topStackView.isHidden = false
@@ -303,6 +304,7 @@ final class RunActivityVC: UIViewController {
     
     func updatedOnPause() {
         self.stopTracking()
+        self.stopTimer()
         self.actionButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
         self.blurView.isHidden = false
         self.runInfoStackView2.isHidden = false
@@ -330,8 +332,8 @@ final class RunActivityVC: UIViewController {
     func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             if self.count == 1 {
-                self.updatedOnStart()
                 self.timer?.invalidate()
+                self.updatedOnStart()
             }
             self.count -= 1
             self.countLabel.text = self.count.asString
@@ -345,6 +347,17 @@ final class RunActivityVC: UIViewController {
         let resultVC = RunningResultVC()
         resultVC.modalPresentationStyle = .fullScreen
         present(resultVC, animated: true)
+    }
+    
+    func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { _ in
+            self.runTrackingManager.seconds += 1
+            self.timeValue.text = self.runTrackingManager.seconds.toMMSSTimeFormat
+        })
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
     }
     
     // MARK: - Actions
@@ -411,15 +424,4 @@ extension RunActivityVC: UserLocationDelegate {
     }
 }
 
-extension Int {
-    var asString: String {
-        return String(self)
-    }
-}
 
-extension String {
-    var asNumber: Int {
-        guard let number = Int(self) else { return 0 }
-        return number
-    }
-}

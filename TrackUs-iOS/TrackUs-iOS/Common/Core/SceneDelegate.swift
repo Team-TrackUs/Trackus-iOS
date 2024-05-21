@@ -72,12 +72,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             //Auth.auth().removeStateDidChangeListener(self.authListener!)
             
             if user == nil {
-                self.login()
+//                self.login()
+                self.startApp()
             } else {
                 DispatchQueue.main.async {
                     // 회원가입 UI 완성 후. 코드 별도 추가
-                    //self.startApp()
-                    self.signUp()
+                    self.startApp()
+//                    self.signUp()
                 }
             }
         })
