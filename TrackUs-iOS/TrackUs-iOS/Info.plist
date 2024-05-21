@@ -9,7 +9,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>${KAKAO_NATIVE_APP_KEY}</string>
+				<string>kakao${KAKAO_NATIVE_APP_KEY}</string>
 			</array>
 		</dict>
 	</array>

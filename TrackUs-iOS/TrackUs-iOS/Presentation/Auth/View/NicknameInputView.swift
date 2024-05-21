@@ -56,8 +56,8 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         textField.clearButtonMode = .whileEditing
         // textField 입력 활성화 - 키보드 자동 열림
         textField.becomeFirstResponder()
+        textField.isUserInteractionEnabled = true
         //textField.borderStyle = .roundedRect
-        //textField.delegate = self
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         textField.layer.zPosition = 999
         return textField
@@ -110,7 +110,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     
     // MARK: - Setup AutoLayout
     private func setupAutoLayout() {
-        textField.delegate = self
+        //textField.delegate = self
         
         addSubview(stackView)
         addSubview(characterCountLabel)
@@ -118,15 +118,17 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         
         NSLayoutConstraint.activate([
             textField.heightAnchor.constraint(equalToConstant: 32),
+            textField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
             stackView.topAnchor.constraint(equalTo: topAnchor),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
             lineView.heightAnchor.constraint(equalToConstant: 1),
             lineView.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             
-            characterCountLabel.centerYAnchor.constraint(equalTo: stackView.centerYAnchor),
+            characterCountLabel.centerYAnchor.constraint(equalTo: textField.centerYAnchor),
             characterCountLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
         ])
     }

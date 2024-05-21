@@ -129,7 +129,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         setupAutoLayout()
         view1.delegate = self
         view2.delegate = self
-        //view2.textField.delegate = self
+        view2.textField.delegate = self
         view3.delegate = self
         //view4.delegate = self
         
@@ -244,9 +244,13 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         self.view.addSubview(nextView)
         nextView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
+            //nextView.heightAnchor.constraint(equalToConstant: 50),
             nextView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 40),
             nextView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            nextView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+            nextView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
+            
+            //bottomStackView.heightAnchor.constraint(equalToConstant: 45)
+            //nextView.bottomAnchor.constraint(equalTo: mainButton.topAnchor)
         ])
         
         // 각 페이지에 맞게 수정
@@ -280,7 +284,8 @@ extension SignUpVC: UITextFieldDelegate {
     // 엔터키 누를 경우 실행 함수
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if isEnabled {
-            changeView()
+            subViews[currentStep].removeFromSuperview()
+            currentStep += 1
             textField.resignFirstResponder() // 키보드 숨기기
             return true
         }

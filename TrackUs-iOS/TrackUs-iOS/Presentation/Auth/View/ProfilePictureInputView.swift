@@ -19,10 +19,41 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
         let image = UIImage(systemName: "person.crop.circle.fill")
         let imageView = UIImageView(image: image)
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        imageView.heightAnchor.constraint(equalToConstant: 160).isActive = true
+        imageView.widthAnchor.constraint(equalToConstant: 160).isActive = true
         imageView.tintColor = .gray3
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.isUserInteractionEnabled = true
+//        imageView.layer.cornerRadius = imageView.frame.height/2
+//        imageView.layer.masksToBounds = true
+//        
+//        // 회색 테두리 추가
+//        imageView.layer.borderColor = UIColor.gray3.cgColor
+//        imageView.layer.borderWidth = 1
+        return imageView
+    }()
+    
+    
+    private lazy var cameraIcon: UIImageView = {
+        let image = UIImage(systemName: "camera.circle.fill")
+        let imageView = UIImageView(image: image)
+        
+        
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        imageView.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        imageView.tintColor = .gray3
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 20
+        imageView.layer.masksToBounds = true
+        imageView.backgroundColor = .white
+        
+        // 회색 테두리 추가
+        imageView.layer.borderColor = UIColor.white.cgColor
+        imageView.layer.borderWidth = 3
         return imageView
     }()
     private var tapGestureRecognizer: UITapGestureRecognizer!
@@ -43,14 +74,17 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
         //imageView.layer.cornerRadius = frame.size.width / 2
         
         addSubview(imageView)
+        addSubview(cameraIcon)
         NSLayoutConstraint.activate([
-            imageView.heightAnchor.constraint(equalToConstant: 120),
+            imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             imageView.topAnchor.constraint(equalTo: topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            cameraIcon.centerYAnchor.constraint(equalTo: imageView.centerYAnchor, constant: 50),
+            cameraIcon.centerXAnchor.constraint(equalTo: imageView.centerXAnchor, constant: 50)
         ])
         
-        // 탭 제스처 인식기 추가
+        // 탭 제스처 추가
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         imageView.addGestureRecognizer(tapGestureRecognizer)
         
@@ -62,8 +96,11 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
             self.showImagePicker()
         }))
         actionSheet.addAction(UIAlertAction(title: "기본 이미지 설정", style: .destructive, handler: { _ in
-            self.imageView.image = nil // 기본 이미지로 설정
+            self.imageView.image = UIImage(systemName: "person.crop.circle.fill") // 기본 이미지로 설정
+            self.imageView.layer.borderWidth = 0
             self.delegate?.didChooseImage(nil)
+            
+            self.cameraIcon.isHidden = false
         }))
         actionSheet.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
         
@@ -85,7 +122,14 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
     // UIImagePickerControllerDelegate 메소드
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = info[.originalImage] as? UIImage {
+            cameraIcon.isHidden = true
             imageView.image = image
+            imageView.layer.cornerRadius = imageView.frame.height / 2
+            imageView.layer.masksToBounds = true
+            
+            // 회색 테두리 추가
+            imageView.layer.borderColor = UIColor.gray3.cgColor
+            imageView.layer.borderWidth = 1
             delegate?.didChooseImage(image)
         }
         picker.dismiss(animated: true, completion: nil)
