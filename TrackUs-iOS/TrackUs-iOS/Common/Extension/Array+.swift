@@ -7,10 +7,29 @@
 
 import CoreLocation
 import Firebase
+import MapKit
 
 extension Array where Element == CLLocationCoordinate2D {
     var asGeoPoints: [GeoPoint] {
         self.map {GeoPoint(latitude: $0.latitude, longitude: $0.longitude)}
+    }
+    
+    var centerPosition: CLLocationCoordinate2D? {
+        guard !self.isEmpty else {
+            return nil
+        }
+        var totalLatitude: Double = 0
+        var totalLongitude: Double = 0
+        
+        for coordinate in self {
+            totalLatitude += coordinate.latitude
+            totalLongitude += coordinate.longitude
+        }
+        let count = Double(self.count)
+        let averageLatitude = totalLatitude / count
+        let averageLongitude = totalLongitude / count
+        
+        return CLLocationCoordinate2D(latitude: averageLatitude, longitude: averageLongitude)
     }
 }
 

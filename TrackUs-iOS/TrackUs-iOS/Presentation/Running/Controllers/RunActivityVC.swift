@@ -25,6 +25,7 @@ final class RunActivityVC: UIViewController {
     private var timer: Timer?
     private var count = 3
     private var polyline: MKPolyline?
+    private var annotation: MKPointAnnotation?
     
     private lazy var countLabel: UILabel = {
         let label = UILabel()
@@ -280,17 +281,22 @@ final class RunActivityVC: UIViewController {
         self.view.addSubview(mapView)
     }
     
-    func setMapRegion() {
+    func setMapRegion(animated: Bool = true) {
         let defaultSpanValue = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
         if let currentLocation = locationService.currentLocation {
-            mapView.setRegion(.init(center: currentLocation, span: defaultSpanValue), animated: true)
+            mapView.setRegion(.init(center: currentLocation, span: defaultSpanValue), animated: animated)
         }
+    }
+    
+    func setMapRegion(center: CLLocationCoordinate2D, animated: Bool = true) {
+        let defaultSpanValue = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        mapView.setRegion(.init(center: center, span: defaultSpanValue), animated: animated)
     }
     
     func updatedOnStart() {
         self.startTracking()
         self.startTimer()
-        self.hidePolyLine()
+        self.setCameraOnTrackingMode()
         
         self.overlayView.isHidden = true
         self.swipeBox.isHidden = false
@@ -309,7 +315,7 @@ final class RunActivityVC: UIViewController {
     func updatedOnPause() {
         self.stopTracking()
         self.stopTimer()
-        self.showPolyLine()
+        self.setCameraOnPauseMode()
         
         self.actionButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
         self.blurView.isHidden = false
@@ -335,6 +341,13 @@ final class RunActivityVC: UIViewController {
         blurView.layer.mask = maskLayer
     }
     
+    func goToResultVC() {
+        let resultVC = RunningResultVC()
+        resultVC.modalPresentationStyle = .fullScreen
+        present(resultVC, animated: true)
+    }
+    
+    // MARK: - Helpers
     func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
@@ -351,12 +364,6 @@ final class RunActivityVC: UIViewController {
         }, completion: nil)
     }
     
-    func goToResultVC() {
-        let resultVC = RunningResultVC()
-        resultVC.modalPresentationStyle = .fullScreen
-        present(resultVC, animated: true)
-    }
-    
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
@@ -369,19 +376,47 @@ final class RunActivityVC: UIViewController {
         timer?.invalidate()
     }
     
-    func showPolyLine() {
+    func setCameraOnPauseMode() {
+        self.setMapRegionMinimum()
+        self.drawLine()
+    }
+    
+    func setCameraOnTrackingMode() {
+        self.removeLine()
+        self.setMapRegion()
+    }
+    
+    func drawLine() {
         let coordinates = self.runTrackingManager.coordinates
+        guard coordinates.count >= 1 else { return }
+        
         polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
-        guard let polyline = polyline else { return }
+        annotation = MKPointAnnotation()
+        guard let polyline = polyline, let annotation = annotation else { return }
         self.mapView.addOverlay(polyline)
+        
+        annotation.coordinate = coordinates.first!
+        self.mapView.addAnnotation(annotation)
     }
     
-    func hidePolyLine() {
-        guard let polyline = polyline else { return }
+    func removeLine() {
+        guard let polyline = polyline, let annotation = annotation else { return }
         self.mapView.removeOverlay(polyline)
+        self.mapView.removeAnnotation(annotation)
     }
     
-    // MARK: - Actions
+    func setMapRegionMinimum() {
+        if let center = self.runTrackingManager.coordinates.centerPosition {
+            setMapRegion(center: center, animated: false)
+        } else {
+            setMapRegion(animated: false)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: self.runInfoStackView2.frame.maxY, left: 20, bottom: 20, right: 20), animated: false)
+        }
+    }
+    
+    // MARK: - objc Methods
     @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
         let minX = actionButton.bounds.width / 2 + 10
         let translation = sender.translation(in: actionButton)
@@ -412,6 +447,7 @@ final class RunActivityVC: UIViewController {
     }
 }
 
+// MARK: - Extentions
 extension RunActivityVC {
     func makeCircleStView() -> UIStackView {
         let circleDiameter: CGFloat = 88.0
@@ -453,8 +489,8 @@ extension RunActivityVC: MKMapViewDelegate {
             return MKOverlayRenderer()
         }
         let renderer = MKPolylineRenderer(polyline: polyLine)
-        renderer.strokeColor = .orange
-        renderer.lineWidth = 5.0
+        renderer.strokeColor = .green
+        renderer.lineWidth = 6.0
         renderer.alpha = 1.0
         return renderer
     }
