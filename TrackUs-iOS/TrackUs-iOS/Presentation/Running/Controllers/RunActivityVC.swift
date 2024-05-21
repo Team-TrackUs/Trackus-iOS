@@ -347,6 +347,10 @@ final class RunActivityVC: UIViewController {
         present(resultVC, animated: true)
     }
     
+    func updateKilometerUI() {
+        kilometerLabel.text = runTrackingManager.distance.asString(style: .km)
+    }
+    
     // MARK: - Helpers
     func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -470,6 +474,7 @@ extension RunActivityVC {
 extension RunActivityVC: UserLocationDelegate {
     func userLocationUpated(location: CLLocation) {
         self.runTrackingManager.addPath(withCoordinate: location.coordinate)
+        self.updateKilometerUI()
     }
     
     func startTracking() {
