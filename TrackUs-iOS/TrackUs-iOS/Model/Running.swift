@@ -15,8 +15,17 @@ struct Running {
     var distance: Double = 0.0
     var pace: Double = 0.0
     var seconds: Int = 0
-    var coordinates: [GeoPoint] = []
+    var geoPoints: [GeoPoint] = []
     var isGroup: Bool = false
     var routeImageUrl: String = ""
     var createdAt: Date = .now
+    
+    var coordinates: [CLLocationCoordinate2D] {
+        get {
+            geoPoints.asCLCoordinate2D
+        }
+        set(newCoord) {
+            geoPoints = newCoord.asGeoPoints
+        }
+    }
 }

@@ -24,6 +24,7 @@ final class RunActivityVC: UIViewController {
     private var isActive = true
     private var timer: Timer?
     private var count = 3
+    private var polyline: MKPolyline?
     
     private lazy var countLabel: UILabel = {
         let label = UILabel()
@@ -275,6 +276,7 @@ final class RunActivityVC: UIViewController {
     func setupMapView() {
         mapView = MKMapView(frame: self.view.bounds)
         mapView.showsUserLocation = true
+        mapView.delegate = self
         self.view.addSubview(mapView)
     }
     
@@ -288,6 +290,8 @@ final class RunActivityVC: UIViewController {
     func updatedOnStart() {
         self.startTracking()
         self.startTimer()
+        self.hidePolyLine()
+        
         self.overlayView.isHidden = true
         self.swipeBox.isHidden = false
         self.topStackView.isHidden = false
@@ -305,6 +309,8 @@ final class RunActivityVC: UIViewController {
     func updatedOnPause() {
         self.stopTracking()
         self.stopTimer()
+        self.showPolyLine()
+        
         self.actionButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
         self.blurView.isHidden = false
         self.runInfoStackView2.isHidden = false
@@ -330,7 +336,9 @@ final class RunActivityVC: UIViewController {
     }
     
     func setTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            
             if self.count == 1 {
                 self.timer?.invalidate()
                 self.updatedOnStart()
@@ -350,7 +358,8 @@ final class RunActivityVC: UIViewController {
     }
     
     func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
+            guard let self = self else { return }
             self.runTrackingManager.seconds += 1
             self.timeValue.text = self.runTrackingManager.seconds.toMMSSTimeFormat
         })
@@ -358,6 +367,18 @@ final class RunActivityVC: UIViewController {
     
     func stopTimer() {
         timer?.invalidate()
+    }
+    
+    func showPolyLine() {
+        let coordinates = self.runTrackingManager.coordinates
+        polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
+        guard let polyline = polyline else { return }
+        self.mapView.addOverlay(polyline)
+    }
+    
+    func hidePolyLine() {
+        guard let polyline = polyline else { return }
+        self.mapView.removeOverlay(polyline)
     }
     
     // MARK: - Actions
@@ -424,4 +445,17 @@ extension RunActivityVC: UserLocationDelegate {
     }
 }
 
-
+extension RunActivityVC: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        guard let polyLine = overlay as? MKPolyline
+        else {
+            print("can't draw polyline")
+            return MKOverlayRenderer()
+        }
+        let renderer = MKPolylineRenderer(polyline: polyLine)
+        renderer.strokeColor = .orange
+        renderer.lineWidth = 5.0
+        renderer.alpha = 1.0
+        return renderer
+    }
+}

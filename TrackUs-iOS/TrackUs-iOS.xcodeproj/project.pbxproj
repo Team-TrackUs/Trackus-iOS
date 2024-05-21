@@ -36,6 +36,7 @@
 		82C38AC72BFC91A2004819C1 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 82C38AC62BFC91A2004819C1 /* Config.xcconfig */; };
 		82C38AC92BFCA187004819C1 /* String+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AC82BFCA187004819C1 /* String+.swift */; };
 		82C38ACB2BFCA18E004819C1 /* Int+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACA2BFCA18E004819C1 /* Int+.swift */; };
+		82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACE2BFCA57B004819C1 /* Array+.swift */; };
 		9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9866E6172BFB63ED0031E8B6 /* SplashView.swift */; };
 		9885ACF42BF9E8AA00367991 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF32BF9E8AA00367991 /* KakaoSDK */; };
 		9885ACF62BF9E8AA00367991 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF52BF9E8AA00367991 /* KakaoSDKAuth */; };
@@ -92,6 +93,7 @@
 		82C38AC62BFC91A2004819C1 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		82C38AC82BFCA187004819C1 /* String+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+.swift"; sourceTree = "<group>"; };
 		82C38ACA2BFCA18E004819C1 /* Int+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+.swift"; sourceTree = "<group>"; };
+		82C38ACE2BFCA57B004819C1 /* Array+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+.swift"; sourceTree = "<group>"; };
 		9866E6172BFB63ED0031E8B6 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		988618162BF317EE002ACB4E /* UIImage+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+.swift"; sourceTree = "<group>"; };
 		9886182F2BF348C8002ACB4E /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
@@ -344,6 +346,7 @@
 				988618162BF317EE002ACB4E /* UIImage+.swift */,
 				82C38AC82BFCA187004819C1 /* String+.swift */,
 				82C38ACA2BFCA18E004819C1 /* Int+.swift */,
+				82C38ACE2BFCA57B004819C1 /* Array+.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -493,6 +496,7 @@
 				988618382BF37E81002ACB4E /* SignUpVC.swift in Sources */,
 				98AB54472BF71B390047310A /* NicknameInputView.swift in Sources */,
 				61B0DECE2BF92174009E360B /* MateViewCell.swift in Sources */,
+				82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
