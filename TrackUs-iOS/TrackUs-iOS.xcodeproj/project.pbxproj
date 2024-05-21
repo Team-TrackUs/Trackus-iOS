@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61625E342BFBD33300E6D1F3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */; };
 		6193AD182BF34C9C00C59D43 /* CourseRegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */; };
 		61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */; };
 		61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC92BF8F950009E360B /* CourseMapVC.swift */; };
@@ -14,7 +15,6 @@
 		61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */; };
 		61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DED12BFA668F009E360B /* SearchVC.swift */; };
 		61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */; };
-		8209D6912BFBA027007F10FF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8209D6902BFBA027007F10FF /* GoogleService-Info.plist */; };
 		821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00B12BF7410400B1C022 /* RunTrackingManager.swift */; };
 		822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B52BF1EC2500636CCC /* LocationService.swift */; };
 		822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */; };
@@ -27,7 +27,6 @@
 		82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45592BEFA948007AE54A /* SceneDelegate.swift */; };
 		82BE455F2BEFA948007AE54A /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 82BE455E2BEFA948007AE54A /* Base */; };
 		82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82BE45602BEFA94A007AE54A /* Assets.xcassets */; };
-		82BE45642BEFA94A007AE54A /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 82BE45632BEFA94A007AE54A /* Base */; };
 		82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE457B2BEFB0A0007AE54A /* RunningHomeVC.swift */; };
 		82BE457F2BEFB0E4007AE54A /* RunningMateVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */; };
 		82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45802BEFB128007AE54A /* MyChatListVC.swift */; };
@@ -58,6 +57,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		610A031A2BFBCBC900A966C5 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		610A031E2BFBCBDF00A966C5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseRegisterVC.swift; sourceTree = "<group>"; };
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
 		61B0DEC92BF8F950009E360B /* CourseMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMapVC.swift; sourceTree = "<group>"; };
@@ -65,7 +67,6 @@
 		61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatePeopleListCell.swift; sourceTree = "<group>"; };
 		61B0DED12BFA668F009E360B /* SearchVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVC.swift; sourceTree = "<group>"; };
 		61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDrawingMapVC.swift; sourceTree = "<group>"; };
-		8209D6902BFBA027007F10FF /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		821C00B12BF7410400B1C022 /* RunTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunTrackingManager.swift; sourceTree = "<group>"; };
 		822E06B52BF1EC2500636CCC /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDelegate.swift; sourceTree = "<group>"; };
@@ -80,14 +81,12 @@
 		82BE455E2BEFA948007AE54A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		82BE45602BEFA94A007AE54A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		82BE45632BEFA94A007AE54A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		82BE45652BEFA94A007AE54A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82BE457B2BEFB0A0007AE54A /* RunningHomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningHomeVC.swift; sourceTree = "<group>"; };
 		82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningMateVC.swift; sourceTree = "<group>"; };
 		82BE45802BEFB128007AE54A /* MyChatListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyChatListVC.swift; sourceTree = "<group>"; };
 		82BE45822BEFB137007AE54A /* MyProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileVC.swift; sourceTree = "<group>"; };
 		82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarVC.swift; sourceTree = "<group>"; };
 		9866E6172BFB63ED0031E8B6 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
-		9885ACFB2BF9E92300367991 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		988618162BF317EE002ACB4E /* UIImage+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+.swift"; sourceTree = "<group>"; };
 		9886182F2BF348C8002ACB4E /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		988618322BF34AE0002ACB4E /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -176,9 +175,9 @@
 		82BE45562BEFA947007AE54A /* TrackUs-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				82BE45652BEFA94A007AE54A /* Info.plist */,
-				8209D6902BFBA027007F10FF /* GoogleService-Info.plist */,
-				9885ACFB2BF9E92300367991 /* Config.xcconfig */,
+				610A031E2BFBCBDF00A966C5 /* Info.plist */,
+				61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */,
+				610A031A2BFBCBC900A966C5 /* Config.xcconfig */,
 				988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */,
 				988618312BF34A6C002ACB4E /* Model */,
 				82BE456E2BEFAE22007AE54A /* Common */,
@@ -438,9 +437,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */,
-				8209D6912BFBA027007F10FF /* GoogleService-Info.plist in Resources */,
-				82BE45642BEFA94A007AE54A /* Base in Resources */,
 				82BE455F2BEFA948007AE54A /* Base in Resources */,
+				61625E342BFBD33300E6D1F3 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -510,7 +508,6 @@
 /* Begin XCBuildConfiguration section */
 		82BE45662BEFA94A007AE54A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9885ACFB2BF9E92300367991 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -575,7 +572,6 @@
 		};
 		82BE45672BEFA94A007AE54A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9885ACFB2BF9E92300367991 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -633,7 +629,6 @@
 		};
 		82BE45692BEFA94A007AE54A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9885ACFB2BF9E92300367991 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -675,7 +670,6 @@
 		};
 		82BE456A2BEFA94A007AE54A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9885ACFB2BF9E92300367991 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

@@ -19,8 +19,11 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             updateStyleButtonAppearance()
         }
     }
+    
     var courseTitleString: String = "" // 코스 제목
     var courseDescriptionString: String = "" // 코스 소개글
+    var selectedDate: Date = Date() // 날짜
+    var selectedTime: Date = Date() // 시간
     var personnel: Int = 1 // 인원수
     
     var isRegionSet = false // mapkit
@@ -212,21 +215,25 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return label
     }()
     
-    private let datePicker: UIDatePicker = {
+    private lazy var datePicker: UIDatePicker = {
        let picker = UIDatePicker()
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
         picker.locale = Locale(identifier: "ko-KR")
+        picker.timeZone = .autoupdatingCurrent
         picker.backgroundColor = .white
+        picker.addTarget(self, action: #selector(datePickerValue), for: .valueChanged)
         return picker
     }()
     
-    private let timePicker: UIDatePicker = {
+    private lazy var timePicker: UIDatePicker = {
        let picker = UIDatePicker()
         picker.datePickerMode = .time
         picker.preferredDatePickerStyle = .compact
         picker.locale = Locale(identifier: "ko-KR")
+        picker.timeZone = .autoupdatingCurrent
         picker.backgroundColor = .white
+        picker.addTarget(self, action: #selector(timePickerValue), for: .valueChanged)
         return picker
     }()
     
@@ -353,6 +360,21 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     @objc func addCourseButtonTapped() {
         print("DEBUG: Add course...")
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        let dateString = dateFormatter.string(from: selectedDate)
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "HH:mm:ss a"
+        timeFormatter.locale = Locale(identifier: "ko_KR")
+        timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        let timeString = timeFormatter.string(from: selectedTime)
+        
+        print("DEBUG: date \(String(describing: dateString))")
+        print("DEBUG: time \(String(describing: timeString))")
         let courseDetailVC = CourseDetailVC()
         self.navigationController?.popToRootViewController(animated: true)
         courseDetailVC.hidesBottomBarWhenPushed = true
@@ -371,6 +393,14 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         let courseDrawingMapVC = CourseDrawingMapVC()
         courseDrawingMapVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(courseDrawingMapVC, animated: true)
+    }
+    
+    @objc func datePickerValue(_ sender: UIDatePicker) {
+        selectedDate = sender.date
+    }
+    
+    @objc func timePickerValue(_ sender: UIDatePicker) {
+        selectedTime = sender.date
     }
     
     @objc func editMapButtonTapped() {
@@ -653,7 +683,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
-    
 }
 
 extension CourseRegisterVC {
