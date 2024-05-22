@@ -117,31 +117,31 @@ final class RunActivityVC: UIViewController {
         return sv
     }()
     
-    private let calorieValue: UILabel = {
+    private let calorieLabel: UILabel = {
         let label = UILabel()
         label.text = "0.0"
         return label
     }()
     
-    private let paceValue: UILabel = {
+    private let paceLabel: UILabel = {
         let label = UILabel()
         label.text = "-'--''"
         return label
     }()
     
-    private let timeValue: UILabel = {
+    private let timeLabel: UILabel = {
         let label = UILabel()
         label.text = "00:00"
         return label
     }()
     
-    private let altitudeValue: UILabel = {
+    private let altitudeLabel: UILabel = {
         let label = UILabel()
         label.text = "0.0m"
         return label
     }()
     
-    private let cadenceValue: UILabel = {
+    private let cadenceLabel: UILabel = {
         let label = UILabel()
         label.text = "-"
         return label
@@ -157,28 +157,28 @@ final class RunActivityVC: UIViewController {
         let calorieImage = UIImageView()
         calorieImage.image = UIImage(resource: .fireIcon)
         
-        let calorieLabel = UILabel()
-        calorieLabel.text = "소모 칼로리"
-        calorieLabel.font = UIFont.systemFont(ofSize: 12)
-        [calorieImage, calorieLabel, calorieValue].forEach {calorieStackVIew.addArrangedSubview($0)}
+        let calorieInfoLabel = UILabel()
+        calorieInfoLabel.text = "소모 칼로리"
+        calorieInfoLabel.font = UIFont.systemFont(ofSize: 12)
+        [calorieImage, calorieInfoLabel, calorieLabel].forEach {calorieStackVIew.addArrangedSubview($0)}
         
         let paceStackVIew = makeCircleStView()
         let paceImage = UIImageView()
         paceImage.image = UIImage(resource: .pulseIcon)
         
-        let paceLabel = UILabel()
-        paceLabel.font = UIFont.systemFont(ofSize: 12)
-        paceLabel.text = "페이스"
-        [paceImage, paceLabel, paceValue].forEach {paceStackVIew.addArrangedSubview($0)}
+        let paceInfoLabel = UILabel()
+        paceInfoLabel.font = UIFont.systemFont(ofSize: 12)
+        paceInfoLabel.text = "페이스"
+        [paceImage, paceInfoLabel, paceLabel].forEach {paceStackVIew.addArrangedSubview($0)}
         
         let timeStackVIew = makeCircleStView()
         let timeImage = UIImageView()
         timeImage.image = UIImage(resource: .stopwatchIcon)
-        let timeLabel = UILabel()
+        let timeInfoLabel = UILabel()
         
-        timeLabel.text = "경과 시간"
-        timeLabel.font = UIFont.systemFont(ofSize: 12)
-        [timeImage, timeLabel, timeValue].forEach {timeStackVIew.addArrangedSubview($0)}
+        timeInfoLabel.text = "경과 시간"
+        timeInfoLabel.font = UIFont.systemFont(ofSize: 12)
+        [timeImage, timeInfoLabel, timeLabel].forEach {timeStackVIew.addArrangedSubview($0)}
         
         [calorieStackVIew, paceStackVIew, timeStackVIew].forEach { sv.addArrangedSubview($0) }
         sv.isHidden = true
@@ -196,20 +196,20 @@ final class RunActivityVC: UIViewController {
         let altitudeImage = UIImageView()
         altitudeImage.image = UIImage(resource: .altitudeIcon)
         
-        let paltitudeLabel = UILabel()
-        paltitudeLabel.font = UIFont.systemFont(ofSize: 12)
-        paltitudeLabel.text = "고도"
-        [altitudeImage, paltitudeLabel, altitudeValue].forEach {altitudeStackView.addArrangedSubview($0)}
+        let altitudeInfoLabel = UILabel()
+        altitudeInfoLabel.font = UIFont.systemFont(ofSize: 12)
+        altitudeInfoLabel.text = "고도"
+        [altitudeImage, altitudeInfoLabel, altitudeLabel].forEach {altitudeStackView.addArrangedSubview($0)}
         
         let cadanceStackVIew = makeCircleStView()
         let cadanceImage = UIImageView()
         cadanceImage.image = UIImage(resource: .footprintIcon)
-        let cadanceLabel = UILabel()
+        let cadanceInfoLabel = UILabel()
         
-        cadanceLabel.text = "케이던스"
-        cadanceLabel.font = UIFont.systemFont(ofSize: 12)
+        cadanceInfoLabel.text = "케이던스"
+        cadanceInfoLabel.font = UIFont.systemFont(ofSize: 12)
         
-        [cadanceImage, cadanceLabel, cadenceValue].forEach {cadanceStackVIew.addArrangedSubview($0)}
+        [cadanceImage, cadanceInfoLabel, cadenceLabel].forEach {cadanceStackVIew.addArrangedSubview($0)}
         
         [UIView(), altitudeStackView, UIView(), cadanceStackVIew, UIView()].forEach { sv.addArrangedSubview($0) }
         sv.isHidden = true
@@ -352,8 +352,9 @@ final class RunActivityVC: UIViewController {
         present(resultVC, animated: true)
     }
     
-    func updateKilometerUI() {
+    func updateRunningUI() {
         kilometerLabel.text = runTrackingManager.distance.asString(style: .km)
+        paceLabel.text = runTrackingManager.pace.asString(style: .pace)
     }
     
     // MARK: - Helpers
@@ -377,7 +378,7 @@ final class RunActivityVC: UIViewController {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
             self.runTrackingManager.seconds += 1
-            self.timeValue.text = self.runTrackingManager.seconds.toMMSSTimeFormat
+            self.timeLabel.text = self.runTrackingManager.seconds.toMMSSTimeFormat
         })
     }
     
@@ -479,7 +480,7 @@ extension RunActivityVC {
 extension RunActivityVC: UserLocationDelegate {
     func userLocationUpated(location: CLLocation) {
         self.runTrackingManager.addPath(withCoordinate: location.coordinate)
-        self.updateKilometerUI()
+        self.updateRunningUI()
     }
     
     func startTracking() {

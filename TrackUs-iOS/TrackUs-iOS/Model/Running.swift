@@ -14,7 +14,7 @@ struct Running {
     var calorie: Double = 0.0
     var distance: Double = 0.0
     var pace: Double = 0.0
-    var seconds: Int = 0
+    var seconds: Double = 0.0
     var geoPoints: [GeoPoint] = []
     var isGroup: Bool = false
     var routeImageUrl: String = ""
