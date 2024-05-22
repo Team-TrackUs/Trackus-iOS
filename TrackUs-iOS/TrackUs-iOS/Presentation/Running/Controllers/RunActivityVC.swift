@@ -12,6 +12,8 @@
 // TODO: - 디자인변경 적용
 // 러닝중지시 고도, 케이던스 정보추가
 // blurView의 bottomInset을 runInfoStackView + 50으로 설정
+// TODO: - 이동경로가 전부 보이도록 zoom level 설정
+
 
 import UIKit
 import MapKit
@@ -288,9 +290,12 @@ final class RunActivityVC: UIViewController {
         }
     }
     
+    // latitudinalMeters 남북범위
+    // longitudinalMeters 동서범위
     func setMapRegion(center: CLLocationCoordinate2D, animated: Bool = true) {
-        let defaultSpanValue = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-        mapView.setRegion(.init(center: center, span: defaultSpanValue), animated: animated)
+        let range = runTrackingManager.coordinates.totalDistance + 1000
+        let region = MKCoordinateRegion(center: center, latitudinalMeters: CLLocationDistance(floatLiteral: range), longitudinalMeters: range)
+        mapView.setRegion(region, animated: animated)
     }
     
     func updatedOnStart() {
@@ -410,7 +415,7 @@ final class RunActivityVC: UIViewController {
     }
     
     func setMapRegionMinimum() {
-        if let center = self.runTrackingManager.coordinates.centerPosition {
+        if let center = self.runTrackingManager.coordinates.centerPosition, self.runTrackingManager.coordinates.count >= 2 {
             setMapRegion(center: center, animated: false)
         } else {
             setMapRegion(animated: false)
@@ -495,7 +500,7 @@ extension RunActivityVC: MKMapViewDelegate {
         }
         let renderer = MKPolylineRenderer(polyline: polyLine)
         renderer.strokeColor = .green
-        renderer.lineWidth = 6.0
+        renderer.lineWidth = 4.0
         renderer.alpha = 1.0
         return renderer
     }

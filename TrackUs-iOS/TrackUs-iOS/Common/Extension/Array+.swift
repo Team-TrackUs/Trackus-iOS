@@ -31,6 +31,14 @@ extension Array where Element == CLLocationCoordinate2D {
         
         return CLLocationCoordinate2D(latitude: averageLatitude, longitude: averageLongitude)
     }
+    
+    var totalDistance: Double {
+        var distance: Double = 0
+        for i in 0..<self.count - 1 {
+            distance += self[i].distance(to: self[i + 1])
+        }
+        return distance
+    }
 }
 
 extension Array where Element == GeoPoint {
