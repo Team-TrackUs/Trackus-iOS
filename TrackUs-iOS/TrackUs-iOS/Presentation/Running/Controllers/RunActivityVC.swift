@@ -489,9 +489,8 @@ extension RunActivityVC {
 
 extension RunActivityVC: UserLocationDelegate {
     func userLocationUpated(location: CLLocation) {
-        self.runTrackingManager.updateRunningInfo(withCoordinate: location.coordinate)
+        self.runTrackingManager.addPath(withCoordinate: location.coordinate)
         self.mapView.setUserTrackingMode(.follow, animated: true)
-        self.updateRunningUI()
     }
     
     func startTracking() {

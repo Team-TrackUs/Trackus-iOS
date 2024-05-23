@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreLocation
+import CoreMotion
 
 final public class RunTrackingManager {
     private var runningModel = Running()
@@ -28,22 +29,7 @@ final public class RunTrackingManager {
         get { runningModel.pace } 
     }
     
-    func updateRunningInfo(withCoordinate coordinate: CLLocationCoordinate2D) {
-        self.addPath(withCoordinate: coordinate)
-        self.updateDistance()
-        self.updatePace()
-    }
-    
-    private func addPath(withCoordinate coordinate: CLLocationCoordinate2D) {
+    func addPath(withCoordinate coordinate: CLLocationCoordinate2D) {
         self.runningModel.coordinates.append(coordinate)
-    }
-    
-    private func updateDistance() {
-        guard coordinates.count >= 2 else { return }
-        self.runningModel.distance += coordinates[coordinates.count - 1].distance(to: coordinates[coordinates.count - 2])
-    }
-    
-    private func updatePace() {
-        self.runningModel.pace = (runningModel.seconds / 60) / (runningModel.distance / 1000.0)
     }
 }

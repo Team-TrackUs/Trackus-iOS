@@ -6,8 +6,10 @@
 //
 
 import UIKit
+import CoreMotion
 
 final class CustomTabBarVC: UITabBarController {
+    private let pedometer = CMPedometer()
     lazy var mainButton: UIButton = {
         let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
         btn.backgroundColor = .mainBlue
@@ -66,8 +68,21 @@ final class CustomTabBarVC: UITabBarController {
     }
     
     @objc func goToRunActivityVC() {
-        let viewController = UINavigationController(rootViewController: RunActivityVC())
-        viewController.modalPresentationStyle = .fullScreen
-        present(viewController, animated: false)
+        if CMPedometer.authorizationStatus() == .authorized {
+            let viewController = UINavigationController(rootViewController: RunActivityVC())
+            viewController.modalPresentationStyle = .fullScreen
+            present(viewController, animated: false)
+        } else if CMPedometer.authorizationStatus() == .notDetermined {
+            pedometer.startEventUpdates { (_, _) in}
+        } else {
+            self.showAuthorizationAlert()
+        }
+    }
+    
+    func showAuthorizationAlert() {
+        let alert = UIAlertController(title: "권한", message: "설정에서 동작 및 피트니스 권한을 설정 해주세요.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "설정", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
 }
