@@ -28,11 +28,22 @@ final public class RunTrackingManager {
         get { runningModel.pace } 
     }
     
-    /// 좌표 추가
-    func addPath(withCoordinate coordinate: CLLocationCoordinate2D) {
+    func updateRunningInfo(withCoordinate coordinate: CLLocationCoordinate2D) {
+        self.addPath(withCoordinate: coordinate)
+        self.updateDistance()
+        self.updatePace()
+    }
+    
+    private func addPath(withCoordinate coordinate: CLLocationCoordinate2D) {
         self.runningModel.coordinates.append(coordinate)
+    }
+    
+    private func updateDistance() {
         guard coordinates.count >= 2 else { return }
-        self.runningModel.distance += coordinate.distance(to: coordinates[coordinates.count - 2])
+        self.runningModel.distance += coordinates[coordinates.count - 1].distance(to: coordinates[coordinates.count - 2])
+    }
+    
+    private func updatePace() {
         self.runningModel.pace = (runningModel.seconds / 60) / (runningModel.distance / 1000.0)
     }
 }
