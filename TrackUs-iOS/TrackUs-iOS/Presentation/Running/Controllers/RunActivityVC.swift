@@ -286,14 +286,12 @@ final class RunActivityVC: UIViewController {
         mapView = MKMapView(frame: self.view.frame)
         mapView.showsUserLocation = true
         mapView.delegate = self
+        
         self.view.addSubview(mapView)
     }
     
     func setMapRegion(animated: Bool = true) {
-        let defaultSpanValue = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-        if let currentLocation = locationService.currentLocation {
-            mapView.setRegion(.init(center: currentLocation, span: defaultSpanValue), animated: animated)
-        }
+        mapView.setUserTrackingMode(.follow, animated: true)
     }
     
     // latitudinalMeters 남북범위
@@ -308,7 +306,17 @@ final class RunActivityVC: UIViewController {
         self.startTracking()
         self.startTimer()
         self.setCameraOnTrackingMode()
-        
+        self.setStartModeUI()
+    }
+    
+    func updatedOnPause() {
+        self.stopTracking()
+        self.stopTimer()
+        self.setCameraOnPauseMode()
+        self.setPauseModeUI()
+    }
+    
+    func setStartModeUI() {
         self.overlayView.isHidden = true
         self.slideBox.isHidden = false
         self.topStackView.isHidden = false
@@ -323,11 +331,7 @@ final class RunActivityVC: UIViewController {
         }
     }
     
-    func updatedOnPause() {
-        self.stopTracking()
-        self.stopTimer()
-        self.setCameraOnPauseMode()
-        
+    func setPauseModeUI() {
         self.actionButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
         self.blurView.isHidden = false
         self.runInfoStackView2.isHidden = false
@@ -486,6 +490,7 @@ extension RunActivityVC {
 extension RunActivityVC: UserLocationDelegate {
     func userLocationUpated(location: CLLocation) {
         self.runTrackingManager.addPath(withCoordinate: location.coordinate)
+        mapView.setUserTrackingMode(.follow, animated: true)
         self.updateRunningUI()
     }
     
