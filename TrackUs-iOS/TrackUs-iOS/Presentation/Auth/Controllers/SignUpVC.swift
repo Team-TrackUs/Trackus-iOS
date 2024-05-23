@@ -9,13 +9,15 @@ import UIKit
 
 class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
-    var user:User = User(username: "", email: "", status: "")
+    var user: User = User(name: "", isProfilePublic: true, token: "")
     
     var currentStep = 0 {
         didSet{
             changeView()
         }
     }
+    
+    private var image: UIImage?
     
     var view1 = AgreementInputView()
     var view2 = NicknameInputView()
@@ -128,7 +130,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         setupAutoLayout()
         view1.delegate = self
         view2.delegate = self
-        //view2.textField.delegate = self
+//        view2.textField.delegate = self
         view3.delegate = self
         //view4.delegate = self
         
@@ -180,14 +182,15 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         ])
     }
     
+    // MARK: - 버튼 클릭 이벤트
     // 이전 버튼 클릭 이벤트
     @objc private func backButtonTapped() {
-        // 뒤로 가기 버튼 로직 구현
+        // 이전 뷰 다시 띄우기
         if currentStep > 0 {
             subViews[currentStep].removeFromSuperview()
             currentStep -= 1
         }else {
-            // 로그아웃 및 회원탈퇴 추가
+            // 로그아웃 처리
             AuthService.shared.logOut()
         }
     }
@@ -195,11 +198,14 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     // 메인버튼 클릭 이벤트
     @objc func buttonTeapped() {
+        updateUserData()
         if currentStep < subViews.count-1{
             // 기존 view 제거
             subViews[currentStep].removeFromSuperview()
             currentStep += 1
-        }else {
+        }else { // 회원가입
+            // firestore user 데이터 등록
+            AuthService.shared.saveUserData(user: user, image: image)
             startApp()
         }
     }
@@ -224,6 +230,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         }
     }
     
+    // MARK: - UI 관련 메소드
     // 메인 버튼 활성화
     func MainButtonDidChangeEnabled(_ isEnabled: Bool) {
         self.isEnabled = isEnabled
@@ -244,6 +251,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         nextView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
+            //nextView.heightAnchor.constraint(equalToConstant: 50),
             nextView.topAnchor.constraint(equalTo: labelStackView.bottomAnchor, constant: 40),
             nextView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             nextView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
@@ -274,14 +282,28 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         // 옵저버 제거
         NotificationCenter.default.removeObserver(self)
     }
+    // MARK: - 데이터 처리 관련 메소드
+    
+    private func updateUserData() {
+        switch currentStep {
+            case 1:
+                user.name = view2.getNickname()
+            case 3:
+                user.isProfilePublic = view4.getPublic()
+            default:
+                break
+        }
+    }
 }
 
 extension SignUpVC: UITextFieldDelegate {
     // 엔터키 누를 경우 실행 함수
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if isEnabled {
-            changeView()
+            subViews[currentStep].removeFromSuperview()
+            currentStep += 1
             textField.resignFirstResponder() // 키보드 숨기기
+            user.name = view2.getNickname()
             return true
         }
         print("알랏 추가")
@@ -291,7 +313,7 @@ extension SignUpVC: UITextFieldDelegate {
 
 extension SignUpVC: ProfileImageViewDelegate {
     func didChooseImage(_ image: UIImage?) {
-        
+        self.image = image
     }
 }
 

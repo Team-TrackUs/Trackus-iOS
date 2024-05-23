@@ -10,12 +10,6 @@ import UIKit
 // MARK: - 프로필 공개 view
 class ProfilePublicView: UIView {
     
-    private lazy var profilePublic: Bool = true{
-        didSet{
-            
-        }
-    }
-    
     private lazy var label: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -29,7 +23,7 @@ class ProfilePublicView: UIView {
         let toggle = UISwitch()
         toggle.onTintColor = .mainBlue
         toggle.isOn = true
-        toggle.addTarget(self, action: #selector(switchValueChanged(_:)), for: .valueChanged)
+        //toggle.addTarget(self, action: #selector(switchValueChanged(_:)), for: .valueChanged)
         return toggle
     }()
     
@@ -63,13 +57,7 @@ class ProfilePublicView: UIView {
         ])
     }
     
-    @objc func switchValueChanged(_ sender: UISwitch) {
-        if sender.isOn {
-            // 스위치가 켜진 경우 처리할 로직
-            profilePublic = true
-        } else {
-            // 스위치가 꺼진 경우 처리할 로직
-            profilePublic = false
-        }
+    func getPublic() -> Bool{
+        return toggle.isOn
     }
 }
