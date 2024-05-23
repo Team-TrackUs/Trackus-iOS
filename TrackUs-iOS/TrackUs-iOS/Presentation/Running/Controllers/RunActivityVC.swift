@@ -18,6 +18,7 @@
 import UIKit
 import MapKit
 
+
 final class RunActivityVC: UIViewController {
     // MARK: - Properties
     private let locationService = LocationService.shared
@@ -303,27 +304,27 @@ final class RunActivityVC: UIViewController {
     }
     
     func updatedOnStart() {
-        self.startTracking()
-        self.startTimer()
-        self.setCameraOnTrackingMode()
-        self.setStartModeUI()
+        startTracking()
+        startTimer()
+        setCameraOnTrackingMode()
+        setStartModeUI()
     }
     
     func updatedOnPause() {
-        self.stopTracking()
-        self.stopTimer()
-        self.setCameraOnPauseMode()
-        self.setPauseModeUI()
+        stopTracking()
+        stopTimer()
+        setCameraOnPauseMode()
+        setPauseModeUI()
     }
     
     func setStartModeUI() {
-        self.overlayView.isHidden = true
-        self.slideBox.isHidden = false
-        self.topStackView.isHidden = false
-        self.runInfoStackView.isHidden = false
-        self.blurView.isHidden = true
-        self.runInfoStackView2.isHidden = true
-        self.actionButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
+        overlayView.isHidden = true
+        slideBox.isHidden = false
+        topStackView.isHidden = false
+        runInfoStackView.isHidden = false
+        blurView.isHidden = true
+        runInfoStackView2.isHidden = true
+        actionButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         UIView.animate(withDuration: 0.2) {
             self.topStackView.axis = .horizontal
             self.topStackView.spacing = 0
@@ -332,9 +333,9 @@ final class RunActivityVC: UIViewController {
     }
     
     func setPauseModeUI() {
-        self.actionButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        self.blurView.isHidden = false
-        self.runInfoStackView2.isHidden = false
+        actionButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        blurView.isHidden = false
+        runInfoStackView2.isHidden = false
         UIView.animate(withDuration: 0.2) {
             self.topStackView.axis = .vertical
             self.topStackView.spacing = 20
@@ -360,11 +361,6 @@ final class RunActivityVC: UIViewController {
         let resultVC = RunningResultVC()
         resultVC.modalPresentationStyle = .fullScreen
         present(resultVC, animated: true)
-    }
-    
-    func updateRunningUI() {
-        kilometerLabel.text = runTrackingManager.distance.asString(style: .km)
-        paceLabel.text = runTrackingManager.pace.asString(style: .pace)
     }
     
     // MARK: - Helpers
@@ -397,13 +393,13 @@ final class RunActivityVC: UIViewController {
     }
     
     func setCameraOnPauseMode() {
-        self.setMapPreview()
-        self.drawPath()
+        setMapPreview()
+        drawPath()
     }
     
     func setCameraOnTrackingMode() {
-        self.setMapRegion()
-        self.removePath()
+        setMapRegion()
+        removePath()
     }
     
     func drawPath() {
@@ -413,20 +409,20 @@ final class RunActivityVC: UIViewController {
         
         guard coordinates.count >= 1, let annotation = annotation else { return }
         annotation.coordinate = coordinates.first!
-        self.mapView.addAnnotation(annotation)
+        mapView.addAnnotation(annotation)
         
         guard coordinates.count >= 2, let polyline = polyline else { return }
-        self.mapView.addOverlay(polyline)
+        mapView.addOverlay(polyline)
     }
     
     func removePath() {
         guard let polyline = polyline, let annotation = annotation else { return }
-        self.mapView.removeOverlay(polyline)
-        self.mapView.removeAnnotation(annotation)
+        mapView.removeOverlay(polyline)
+        mapView.removeAnnotation(annotation)
     }
     
     func setMapPreview() {
-        if let center = self.runTrackingManager.coordinates.centerPosition, self.runTrackingManager.coordinates.count >= 2 {
+        if let center = runTrackingManager.coordinates.centerPosition, runTrackingManager.coordinates.count >= 2 {
             setMapRange(center: center, animated: false)
         } else {
             setMapRegion(animated: false)
@@ -489,16 +485,23 @@ extension RunActivityVC {
 
 extension RunActivityVC: UserLocationDelegate {
     func userLocationUpated(location: CLLocation) {
-        self.runTrackingManager.addPath(withCoordinate: location.coordinate)
-        self.mapView.setUserTrackingMode(.follow, animated: true)
+        runTrackingManager.coordinates.append(location.coordinate)
+        mapView.setUserTrackingMode(.follow, animated: true)
     }
     
     func startTracking() {
-        self.locationService.userLocationDelegate = self
+        locationService.userLocationDelegate = self
+        runTrackingManager.startRecord { [weak self] in
+            guard let self = self else { return }
+            kilometerLabel.text = runTrackingManager.distance.asString(style: .km)
+            paceLabel.text = runTrackingManager.pace.asString(style: .pace)
+            cadenceLabel.text = runTrackingManager.cadance.asString
+        }
     }
     
     func stopTracking() {
         self.locationService.userLocationDelegate = nil
+        runTrackingManager.stopRecord()
     }
 }
 

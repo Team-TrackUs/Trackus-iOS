@@ -68,21 +68,32 @@ final class CustomTabBarVC: UITabBarController {
     }
     
     @objc func goToRunActivityVC() {
-        if CMPedometer.authorizationStatus() == .authorized {
-            let viewController = UINavigationController(rootViewController: RunActivityVC())
-            viewController.modalPresentationStyle = .fullScreen
-            present(viewController, animated: false)
-        } else if CMPedometer.authorizationStatus() == .notDetermined {
-            pedometer.startEventUpdates { (_, _) in}
-        } else {
-            self.showAuthorizationAlert()
+        CoreLocationService.checkAuthrization { [weak self] status in
+            guard let self = self else { return }
+            if status == .authorized {
+                let viewController = UINavigationController(rootViewController: RunActivityVC())
+                viewController.modalPresentationStyle = .fullScreen
+                self.present(viewController, animated: false)
+            } else if status == .denied {
+                self.showAuthorizationAlert()
+            }
         }
     }
     
     func showAuthorizationAlert() {
         let alert = UIAlertController(title: "권한", message: "설정에서 동작 및 피트니스 권한을 설정 해주세요.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "설정", style: .default, handler: nil))
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+        alert.addAction(UIAlertAction(title: "취소", style: .destructive, handler: nil))
+        alert.addAction(UIAlertAction(title: "설정하러 가기", style: .default, handler: goToAppSettings))
+        
+        self.present(alert, animated: true)
+    }
+    
+    
+    private func goToAppSettings(_ sender: UIAlertAction) {
+        guard let settingURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        
+        if UIApplication.shared.canOpenURL(settingURL) {
+            UIApplication.shared.open(settingURL)
+        }
     }
 }

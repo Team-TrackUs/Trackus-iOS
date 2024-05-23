@@ -15,6 +15,7 @@ struct Running {
     var distance: Double = 0.0
     var pace: Double = 0.0
     var seconds: Double = 0.0
+    var cadance: Int = 0
     var geoPoints: [GeoPoint] = []
     var isGroup: Bool = false
     var routeImageUrl: String = ""
