@@ -24,7 +24,6 @@ extension Double {
             let paceInMinutes = formattedString[formattedString.startIndex]
             let paceSeconds1 = formattedString[formattedString.index(formattedString.startIndex, offsetBy: 2)]
             let paceSeconds2 = formattedString[formattedString.index(formattedString.startIndex, offsetBy: 3)]
-                       print("\(paceInMinutes)'\(paceSeconds1)\(paceSeconds2)''")
             return "\(paceInMinutes)'\(paceSeconds1)\(paceSeconds2)''"
         case .km:
             return String(format: "%.2f km", self / 1000.0)

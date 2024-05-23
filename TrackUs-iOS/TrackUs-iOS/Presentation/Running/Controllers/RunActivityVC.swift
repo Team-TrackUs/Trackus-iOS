@@ -58,16 +58,18 @@ final class RunActivityVC: UIViewController {
         return view
     }()
     
-    private lazy var swipeBox: UIView = {
+    private lazy var slideBox: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = UIColor(white: 0, alpha: 0.5)
         view.layer.cornerRadius = 35
+        
         let label = UILabel()
         label.text = "밀어서 러닝 종료"
         label.textColor = .lightGray
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.translatesAutoresizingMaskIntoConstraints = false
+        
         view.addSubview(label)
         view.addSubview(actionButton)
         label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
@@ -83,6 +85,7 @@ final class RunActivityVC: UIViewController {
         btn.heightAnchor.constraint(equalToConstant: 50).isActive = true
         btn.layer.cornerRadius = 25
         btn.backgroundColor = .white
+        
         let image = UIImage(systemName: "pause.fill")
         
         btn.setImage(image, for: .normal)
@@ -92,7 +95,7 @@ final class RunActivityVC: UIViewController {
         return btn
     }()
     
-    private lazy var kilometerLabel: UILabel = {
+    private let kilometerLabel: UILabel = {
         let label = UILabel()
         label.text = "0.0 km"
         label.font = UIFont.italicSystemFont(ofSize: 24)
@@ -102,18 +105,21 @@ final class RunActivityVC: UIViewController {
     private lazy var topStackView: UIStackView = {
         let sv = UIStackView()
         sv.translatesAutoresizingMaskIntoConstraints = false
+        sv.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 14, bottom: 14, trailing: 14)
         sv.isLayoutMarginsRelativeArrangement = true // margin 적용
-        sv.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 10, trailing: 10)
         sv.axis = .horizontal
         sv.distribution = .equalSpacing
         sv.alignment = .center
-        sv.layer.cornerRadius = 30
+        sv.layer.cornerRadius = 15
         
         let label = UILabel()
         label.text = "🏃‍♂️ 현재까지 거리"
+        
         sv.backgroundColor = .white
         sv.isHidden = true
+        
         [label, kilometerLabel].forEach {sv.addArrangedSubview($0)}
+        
         return sv
     }()
     
@@ -216,7 +222,7 @@ final class RunActivityVC: UIViewController {
         return sv
     }()
     
-    private lazy var blurView: UIView = {
+    private let blurView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
@@ -242,20 +248,20 @@ final class RunActivityVC: UIViewController {
     func setConstraint() {
         self.view.addSubview(overlayView)
         self.view.addSubview(blurView)
-        self.view.addSubview(swipeBox)
+        self.view.addSubview(slideBox)
         self.view.addSubview(topStackView)
         self.view.addSubview(runInfoStackView)
         self.view.addSubview(runInfoStackView2)
         
         NSLayoutConstraint.activate([
-            swipeBox.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            swipeBox.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            swipeBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            swipeBox.heightAnchor.constraint(equalToConstant: 70),
+            slideBox.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            slideBox.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            slideBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            slideBox.heightAnchor.constraint(equalToConstant: 70),
             
-            actionButton.leadingAnchor.constraint(equalTo: swipeBox.leadingAnchor, constant: 10),
-            actionButton.topAnchor.constraint(equalTo: swipeBox.topAnchor, constant: 10),
-            actionButton.bottomAnchor.constraint(equalTo: swipeBox.bottomAnchor, constant: -10),
+            actionButton.leadingAnchor.constraint(equalTo: slideBox.leadingAnchor, constant: 10),
+            actionButton.topAnchor.constraint(equalTo: slideBox.topAnchor, constant: 10),
+            actionButton.bottomAnchor.constraint(equalTo: slideBox.bottomAnchor, constant: -10),
             
             topStackView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             topStackView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
@@ -277,7 +283,7 @@ final class RunActivityVC: UIViewController {
     }
     
     func setupMapView() {
-        mapView = MKMapView(frame: self.view.bounds)
+        mapView = MKMapView(frame: self.view.frame)
         mapView.showsUserLocation = true
         mapView.delegate = self
         self.view.addSubview(mapView)
@@ -292,7 +298,7 @@ final class RunActivityVC: UIViewController {
     
     // latitudinalMeters 남북범위
     // longitudinalMeters 동서범위
-    func setMapRegion(center: CLLocationCoordinate2D, animated: Bool = true) {
+    func setMapRange(center: CLLocationCoordinate2D, animated: Bool = true) {
         let range = runTrackingManager.coordinates.totalDistance + 1000
         let region = MKCoordinateRegion(center: center, latitudinalMeters: CLLocationDistance(floatLiteral: range), longitudinalMeters: range)
         mapView.setRegion(region, animated: animated)
@@ -304,7 +310,7 @@ final class RunActivityVC: UIViewController {
         self.setCameraOnTrackingMode()
         
         self.overlayView.isHidden = true
-        self.swipeBox.isHidden = false
+        self.slideBox.isHidden = false
         self.topStackView.isHidden = false
         self.runInfoStackView.isHidden = false
         self.blurView.isHidden = true
@@ -387,37 +393,37 @@ final class RunActivityVC: UIViewController {
     }
     
     func setCameraOnPauseMode() {
-        self.setMapRegionMinimum()
-        self.drawLine()
+        self.setMapPreview()
+        self.drawPath()
     }
     
     func setCameraOnTrackingMode() {
-        self.removeLine()
         self.setMapRegion()
+        self.removePath()
     }
     
-    func drawLine() {
+    func drawPath() {
         let coordinates = self.runTrackingManager.coordinates
-        guard coordinates.count >= 1 else { return }
-        
-        polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         annotation = MKPointAnnotation()
-        guard let polyline = polyline, let annotation = annotation else { return }
-        self.mapView.addOverlay(polyline)
+        polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         
+        guard coordinates.count >= 1, let annotation = annotation else { return }
         annotation.coordinate = coordinates.first!
         self.mapView.addAnnotation(annotation)
+        
+        guard coordinates.count >= 2, let polyline = polyline else { return }
+        self.mapView.addOverlay(polyline)
     }
     
-    func removeLine() {
+    func removePath() {
         guard let polyline = polyline, let annotation = annotation else { return }
         self.mapView.removeOverlay(polyline)
         self.mapView.removeAnnotation(annotation)
     }
     
-    func setMapRegionMinimum() {
+    func setMapPreview() {
         if let center = self.runTrackingManager.coordinates.centerPosition, self.runTrackingManager.coordinates.count >= 2 {
-            setMapRegion(center: center, animated: false)
+            setMapRange(center: center, animated: false)
         } else {
             setMapRegion(animated: false)
         }
@@ -432,7 +438,7 @@ final class RunActivityVC: UIViewController {
         let translation = sender.translation(in: actionButton)
         
         let newX = actionButton.center.x + translation.x
-        let maxX = swipeBox.bounds.maxX - CGFloat(35)
+        let maxX = slideBox.bounds.maxX - CGFloat(35)
         actionButton.center.x = max(minX, min(newX, maxX))
         sender.setTranslation(CGPoint.zero, in: actionButton)
         
