@@ -51,6 +51,7 @@
 		988618332BF34AE0002ACB4E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988618322BF34AE0002ACB4E /* User.swift */; };
 		988618382BF37E81002ACB4E /* SignUpVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988618372BF37E81002ACB4E /* SignUpVC.swift */; };
 		9886183A2BF4FFEB002ACB4E /* MainButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988618392BF4FFEB002ACB4E /* MainButton.swift */; };
+		98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98887F8D2BFDBDCB006F929E /* ImageCacheManager.swift */; };
 		9898034B2BF5F14200F5DFBD /* AgreementInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9898034A2BF5F14200F5DFBD /* AgreementInputView.swift */; };
 		98AB54472BF71B390047310A /* NicknameInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AB54462BF71B390047310A /* NicknameInputView.swift */; };
 		98AB54492BF71B620047310A /* ProfilePictureInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AB54482BF71B620047310A /* ProfilePictureInputView.swift */; };
@@ -94,6 +95,7 @@
 		988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOS.entitlements"; sourceTree = "<group>"; };
 		988618372BF37E81002ACB4E /* SignUpVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpVC.swift; sourceTree = "<group>"; };
 		988618392BF4FFEB002ACB4E /* MainButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainButton.swift; sourceTree = "<group>"; };
+		98887F8D2BFDBDCB006F929E /* ImageCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheManager.swift; sourceTree = "<group>"; };
 		9898034A2BF5F14200F5DFBD /* AgreementInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgreementInputView.swift; sourceTree = "<group>"; };
 		98AB54462BF71B390047310A /* NicknameInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NicknameInputView.swift; sourceTree = "<group>"; };
 		98AB54482BF71B620047310A /* ProfilePictureInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePictureInputView.swift; sourceTree = "<group>"; };
@@ -176,6 +178,9 @@
 		82BE45562BEFA947007AE54A /* TrackUs-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				82BE45652BEFA94A007AE54A /* Info.plist */,
+				988618292BF318AA002ACB4E /* GoogleService-Info.plist */,
+				9885ACFB2BF9E92300367991 /* Config.xcconfig */,
 				988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */,
 				988618312BF34A6C002ACB4E /* Model */,
 				82BE456E2BEFAE22007AE54A /* Common */,
@@ -183,9 +188,6 @@
 				82BE455D2BEFA948007AE54A /* Main.storyboard */,
 				82BE45602BEFA94A007AE54A /* Assets.xcassets */,
 				82BE45622BEFA94A007AE54A /* LaunchScreen.storyboard */,
-				82BE45652BEFA94A007AE54A /* Info.plist */,
-				988618292BF318AA002ACB4E /* GoogleService-Info.plist */,
-				9885ACFB2BF9E92300367991 /* Config.xcconfig */,
 			);
 			path = "TrackUs-iOS";
 			sourceTree = "<group>";
@@ -345,6 +347,7 @@
 			isa = PBXGroup;
 			children = (
 				9886182F2BF348C8002ACB4E /* AuthService.swift */,
+				98887F8D2BFDBDCB006F929E /* ImageCacheManager.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -471,6 +474,7 @@
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
 				821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */,
 				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
+				98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */,
 				8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
 				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
