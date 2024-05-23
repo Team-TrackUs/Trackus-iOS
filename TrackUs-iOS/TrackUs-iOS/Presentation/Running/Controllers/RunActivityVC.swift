@@ -491,11 +491,14 @@ extension RunActivityVC: UserLocationDelegate {
     
     func startTracking() {
         locationService.userLocationDelegate = self
-        runTrackingManager.startRecord { [weak self] in
-            guard let self = self else { return }
-            kilometerLabel.text = runTrackingManager.distance.asString(style: .km)
-            paceLabel.text = runTrackingManager.pace.asString(style: .pace)
-            cadenceLabel.text = runTrackingManager.cadance.asString
+        // 움직임이 감지될때마다 호출되는 핸들러
+        runTrackingManager.startRecord { runningModel in            
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                kilometerLabel.text = runningModel.distance.asString(style: .km)
+                paceLabel.text = runningModel.pace.asString(style: .pace)
+                cadenceLabel.text = String(runningModel.cadance)
+            }
         }
     }
     
