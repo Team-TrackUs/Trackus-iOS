@@ -20,7 +20,7 @@ final public class RunTrackingManager {
     private var maxAltitude = -99999.0
     private var minAltitude = 99999.0
     private var savedData: [String: Any] = ["distance": 0.0, "steps": 0]
-    
+  
     var coordinates: [CLLocationCoordinate2D] {
         get { runningModel.coordinates }
         set { runningModel.coordinates = newValue }

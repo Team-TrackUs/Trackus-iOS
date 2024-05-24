@@ -13,7 +13,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     static let shared = LocationService()
     let locationManager = CLLocationManager()
     var currentLocation : CLLocationCoordinate2D?
-    var userLocationDelegate: UserLocationDelegate?
+    weak var userLocationDelegate: UserLocationDelegate?
     
     private override init() {
         super.init()

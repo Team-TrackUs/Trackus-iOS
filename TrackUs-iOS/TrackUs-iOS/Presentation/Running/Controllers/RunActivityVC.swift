@@ -358,6 +358,8 @@ final class RunActivityVC: UIViewController {
     }
     
     func goToResultVC() {
+        HapticManager.shared.hapticImpact(style: .medium)
+        stopTracking()
         let resultVC = RunningResultVC()
         resultVC.modalPresentationStyle = .fullScreen
         present(resultVC, animated: true)
@@ -383,8 +385,8 @@ final class RunActivityVC: UIViewController {
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
-            self.runTrackingManager.seconds += 1
-            self.timeLabel.text = self.runTrackingManager.seconds.toMMSSTimeFormat
+            runTrackingManager.seconds += 1
+            timeLabel.text = runTrackingManager.seconds.toMMSSTimeFormat
         })
     }
     
@@ -427,8 +429,9 @@ final class RunActivityVC: UIViewController {
         } else {
             setMapRegion(animated: false)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: self.runInfoStackView2.frame.maxY, left: 20, bottom: 20, right: 20), animated: false)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            guard let self = self else { return }
+            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY, left: 20, bottom: 20, right: 20), animated: false)
         }
     }
     
@@ -443,7 +446,6 @@ final class RunActivityVC: UIViewController {
         sender.setTranslation(CGPoint.zero, in: actionButton)
         
         if sender.state == .ended && newX > maxX * 0.9 {
-            HapticManager.shared.hapticImpact(style: .medium)
             goToResultVC()
         } else if sender.state == .ended  {
             UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn) {
@@ -496,7 +498,7 @@ extension RunActivityVC: UserLocationDelegate {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 kilometerLabel.text = runningModel.distance.asString(style: .km)
-                paceLabel.text = runningModel.pace.asString(style: .pace)                
+                paceLabel.text = runningModel.pace.asString(style: .pace)
                 calorieLabel.text = runningModel.calorie.asString(style: .kcal)
                 cadenceLabel.text = String(runningModel.cadance)
                 guard Int(runningModel.maxAltitude) >= 1 else {
