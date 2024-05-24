@@ -20,11 +20,11 @@ extension Double {
             guard self != 0.0 && self != .infinity && !self.isNaN  else {
                 return "-'--''"
             }
-            let formattedString = String(format: "%.3f", self)
-            let paceInMinutes = formattedString[formattedString.startIndex]
-            let paceSeconds1 = formattedString[formattedString.index(formattedString.startIndex, offsetBy: 2)]
-            let paceSeconds2 = formattedString[formattedString.index(formattedString.startIndex, offsetBy: 3)]
-            return "\(paceInMinutes)'\(paceSeconds1)\(paceSeconds2)''"
+            let formattedString = String(format: "%.2f", self)
+            let component = formattedString.split(separator: ".")
+            let firstComponent = component[0]
+            let secondComponent = component[1]
+            return "\(firstComponent)'\(secondComponent)"
         case .km:
             return String(format: "%.2f km", self / 1000.0)
         case .kcal:
