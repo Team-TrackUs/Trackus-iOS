@@ -28,7 +28,7 @@ extension Double {
         case .km:
             return String(format: "%.2f km", self / 1000.0)
         case .kcal:
-            return ""
+            return String(format: "%.1f", self)
         }
     }
     

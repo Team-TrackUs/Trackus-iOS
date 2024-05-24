@@ -16,7 +16,10 @@ final public class RunTrackingManager {
     private let pedometer = CMPedometer()
     private let altimeter = CMAltimeter()
     private var runningModel = Running()
-    private var savedData: Double = 0.0
+    private var currentAltitude = 0.0
+    private var maxAltitude = -99999.0
+    private var minAltitude = 99999.0
+    private var savedData: [String: Any] = ["distance": 0.0, "steps": 0]
     
     var coordinates: [CLLocationCoordinate2D] {
         get { runningModel.coordinates }
@@ -32,27 +35,40 @@ final public class RunTrackingManager {
     func updateRunInfo(completion: @escaping (Running) -> Void) {
         pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
             guard let self = self else { return }
-            guard let pedometerData = pedometerData, error == nil else { 
+            guard let pedometerData = pedometerData, error == nil else {
                 return
             }
             let currentDistance = pedometerData.distance?.doubleValue ?? 0.0
+            let currentSteps = pedometerData.numberOfSteps.intValue
+            guard let savedSteps = savedData["steps"] as? Int else { return }
             
-            runningModel.distance = currentDistance + savedData
+            runningModel.steps = currentSteps + savedSteps
+            runningModel.distance = currentDistance + (savedData["distance"] as? Double ?? 0.0)
+            runningModel.cadance = Int((Double(currentSteps + savedSteps)) / (runningModel.seconds / 60))
+            runningModel.calorie = Double(runningModel.steps) * 0.04
             runningModel.pace = (runningModel.seconds / 60) / (runningModel.distance / 1000.0)
-            runningModel.cadance = Int(pedometerData.numberOfSteps.doubleValue / (runningModel.seconds / 60))
-            
-            completion(runningModel)
         }
         
-        altimeter.startAbsoluteAltitudeUpdates(to: .main) { altimeterData, error in
-            guard let altimeterData = altimeterData, error == nil else { return }
+        altimeter.startRelativeAltitudeUpdates(to: .main) { [weak self]  altitudeData, error in
+            guard let self = self else { return }
+            guard let altitudeData = altitudeData, error == nil else {
+                return
+            }
+            let measuredAlti = altitudeData.relativeAltitude.doubleValue
+            if measuredAlti > 0 {
+                runningModel.maxAltitude = max(maxAltitude, measuredAlti)
+            } else {
+                runningModel.minAltitude = min(minAltitude, measuredAlti)
+            }
+            completion(runningModel)
         }
     }
     
     /// 핸들러 중지
     func stopRecord() {
         pedometer.stopUpdates()
-        altimeter.stopAbsoluteAltitudeUpdates()
-        savedData = runningModel.distance
+        altimeter.stopRelativeAltitudeUpdates()
+        savedData["distance"] = runningModel.distance
+        savedData["steps"] = runningModel.steps
     }
 }

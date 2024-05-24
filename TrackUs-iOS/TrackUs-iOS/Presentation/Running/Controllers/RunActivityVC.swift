@@ -98,7 +98,7 @@ final class RunActivityVC: UIViewController {
     
     private let kilometerLabel: UILabel = {
         let label = UILabel()
-        label.text = "0.0 km"
+        label.text = "0.00 km"
         label.font = UIFont.italicSystemFont(ofSize: 24)
         return label
     }()
@@ -144,7 +144,7 @@ final class RunActivityVC: UIViewController {
     
     private let altitudeLabel: UILabel = {
         let label = UILabel()
-        label.text = "0.0m"
+        label.text = "-"
         return label
     }()
     
@@ -496,8 +496,13 @@ extension RunActivityVC: UserLocationDelegate {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 kilometerLabel.text = runningModel.distance.asString(style: .km)
-                paceLabel.text = runningModel.pace.asString(style: .pace)
+                paceLabel.text = runningModel.pace.asString(style: .pace)                
+                calorieLabel.text = runningModel.calorie.asString(style: .kcal)
                 cadenceLabel.text = String(runningModel.cadance)
+                guard Int(runningModel.maxAltitude) >= 1 else {
+                    return
+                }
+                altitudeLabel.text = "+ \(Int(runningModel.maxAltitude))m"
             }
         }
     }
