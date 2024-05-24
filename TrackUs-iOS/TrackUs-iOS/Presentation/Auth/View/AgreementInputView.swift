@@ -6,9 +6,20 @@
 //
 
 import UIKit
+import SafariServices
 
 // MARK: - 약관 동의 view
 class AgreementInputView: UIView {
+    
+    // 이용 약관 페이지 url -> 이후 수정
+    private let urls = [
+        // 서비스 이용 약관 동의
+        "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4",
+        // 개인정보 처리방침 동의
+        "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4",
+        //위처정보 서비스 이용약관 동의
+        "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4"
+    ]
     
     var delegate: MainButtonEnabledDelegate?
     
@@ -90,6 +101,26 @@ class AgreementInputView: UIView {
         return buttons
     }()
     
+    // 약관별 버튼
+    private lazy var termsViewButtons: [UIButton] = {
+        let titles = ["보기", "보기", "보기"]
+        return titles.map { title in
+            let button = UIButton()
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.setTitle(title, for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
+            button.setTitleColor(.gray2, for: .normal)
+            button.addTarget(self, action: #selector(termsViewButtonTapped(sender:)), for: .touchUpInside)
+            
+            // 밑줄 추가
+            let attributedString = NSMutableAttributedString(string: title)
+            attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: title.count))
+            button.setAttributedTitle(attributedString, for: .normal)
+            
+            return button
+        }
+    }()
+    
     
     // 제목, 설명 스택뷰
     private lazy var buttonStackView: UIStackView = {
@@ -103,6 +134,16 @@ class AgreementInputView: UIView {
         return stackView
     }()
     
+    private lazy var viewButtonStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .vertical
+        stackView.spacing = 12
+        
+        //stackView.distribution = .fillEqually
+        stackView.alignment = .trailing
+        return stackView
+    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -117,11 +158,16 @@ class AgreementInputView: UIView {
     // MARK: - 오토레이아웃 세팅
     private func setupAutoLayout() {
         self.addSubview(buttonStackView)
+        self.addSubview(viewButtonStackView)
         
         buttonStackView.addArrangedSubview(allAgreeButton)
         buttonStackView.addArrangedSubview(lineView)
         termsButtons.forEach { button in
             buttonStackView.addArrangedSubview(button)
+        }
+        termsViewButtons.forEach { button in
+            button.heightAnchor.constraint(equalToConstant: 20).isActive = true
+            viewButtonStackView.addArrangedSubview(button)
         }
         
         NSLayoutConstraint.activate([
@@ -129,6 +175,10 @@ class AgreementInputView: UIView {
             buttonStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             buttonStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
             buttonStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            
+            viewButtonStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            viewButtonStackView.bottomAnchor.constraint(equalTo: bottomAnchor),
             // 구분선 크기 설정
             lineView.heightAnchor.constraint(equalToConstant: 1),
             lineView.widthAnchor.constraint(equalTo: buttonStackView.widthAnchor)
@@ -155,6 +205,20 @@ class AgreementInputView: UIView {
         let image = UIImage(systemName: imageName)
         allAgreeButton.setImage(image, for: .normal)
         allAgreeButton.imageView?.tintColor = isAllSelected ? .mainBlue : .gray3
+    }
+    
+    // 약관 상세페이지 보기
+    @objc private func termsViewButtonTapped(sender: UIButton) {
+        switch sender {
+            case termsViewButtons[0]:
+                presentSheet(url: urls[0])
+            case termsViewButtons[1]:
+                presentSheet(url: urls[1])
+            case termsViewButtons[2]:
+                presentSheet(url: urls[2])
+            default:
+                return
+        }
     }
     
     @objc private func termsButtonTapped(sender: UIButton) {
@@ -190,5 +254,26 @@ class AgreementInputView: UIView {
         let image = UIImage(systemName: imageName)
         button.setImage(image, for: .normal)
         button.imageView?.tintColor = check ? .mainBlue : .gray3
+    }
+    
+    private func presentSheet(url: String) {
+        guard let viewController = findViewController() else { return }
+        if let url = URL(string: url) {
+            let safariVC = SFSafariViewController(url: url)
+            safariVC.modalPresentationStyle = .pageSheet
+            viewController.present(safariVC, animated: true, completion: nil)
+        }
+    }
+    
+    // UIView가 속한 UIViewController를 찾기
+    private func findViewController() -> UIViewController? {
+        var responder: UIResponder? = self
+        while let nextResponder = responder?.next {
+            if let viewController = nextResponder as? UIViewController {
+                return viewController
+            }
+            responder = nextResponder
+        }
+        return nil
     }
 }
