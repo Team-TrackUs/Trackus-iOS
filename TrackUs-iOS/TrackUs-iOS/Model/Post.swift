@@ -9,34 +9,32 @@ import Foundation
 import Firebase
 import CoreLocation
 
-struct Post {
+struct Post: Codable {
     var uid: String
     var title: String
     var content: String
     var courseRoutes: [GeoPoint]
     var distance: Double
-    var isEdit: Bool
     var numberOfPeoples: Int
     var routeImageUrl: String
     var startDate: Date
     var address: String
-    var whoReportMe: [String]
+    var whoReportAt: [String]
     var createdAt: Date
     var runningStyle: Int
     var members: [String]
     
-    init(uid: String, title: String, content: String, courseRoutes: [GeoPoint], distance: Double, isEdit: Bool, numberOfPeoples: Int, routeImageUrl: String, startDate: Date, address: String, whoReportMe: [String], createdAt: Date, runningStyle: Int, members: [String]) {
+    init(uid: String, title: String, content: String, courseRoutes: [GeoPoint], distance: Double, numberOfPeoples: Int, routeImageUrl: String, startDate: Date, address: String, whoReportAt: [String], createdAt: Date, runningStyle: Int, members: [String]) {
         self.uid = uid
         self.title = title
         self.content = content
         self.courseRoutes = courseRoutes
         self.distance = distance
-        self.isEdit = isEdit
         self.numberOfPeoples = numberOfPeoples
         self.routeImageUrl = routeImageUrl
         self.startDate = startDate
         self.address = address
-        self.whoReportMe = whoReportMe
+        self.whoReportAt = whoReportAt
         self.createdAt = createdAt
         self.runningStyle = runningStyle
         self.members = members

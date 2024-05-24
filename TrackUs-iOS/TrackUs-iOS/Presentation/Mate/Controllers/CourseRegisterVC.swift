@@ -31,7 +31,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
     var pinAnnotations: [MKPointAnnotation] = [] // mapkit
-    
+
     private lazy var toolBarKeyboard: UIToolbar = {
         let toolbar = UIToolbar()
         let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -365,57 +365,66 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     @objc func addCourseButtonTapped() {
         print("DEBUG: Add course...")
         
-        // DateFormatter 설정
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        let dateString = dateFormatter.string(from: selectedDate)
-        
-        // TimeFormatter 설정
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm:ss a"
-        timeFormatter.locale = Locale(identifier: "ko_KR")
-        timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        let timeString = timeFormatter.string(from: selectedTime)
-        
-        let userUID = User.currentUser?.id ?? ""
-        print("DEBUG: 유저 아이디 = \(userUID)")
+        let userUID = User.currentUid
+        print("DEBUG: 유저 UID = \(userUID)")
         let postUID = Firestore.firestore().collection("posts").document().documentID
         
-        // Post 인스턴스 생성
-        var post = Post(uid: postUID, title: courseTitleString, content: courseDescriptionString, courseRoutes: testcoords.map { location in
-            return GeoPoint(latitude: location.latitude, longitude: location.longitude)
-        }, distance: self.distance, isEdit: false, numberOfPeoples: personnel, routeImageUrl: "", startDate: selectedDate, address: "", whoReportMe: [], createdAt: Date(), runningStyle: runningStyle, members: [userUID])
+        // date와 time을 하나 합쳐서 업로드
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul")!
         
-        // 이미지 업로드 후 Post 업데이트
-        mapSnapshot(with: pinAnnotations, polyline: MKPolyline(coordinates: testcoords, count: testcoords.count)) { [weak self] image in
-            guard let self = self else { return }
-            print("DEBUG: Starting image upload...")
+        let dateComponents = calendar.dateComponents([.year, .month, .day], from: selectedDate)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        
+        var combinedComponents = DateComponents()
+        combinedComponents.year = dateComponents.year
+        combinedComponents.month = dateComponents.month
+        combinedComponents.day = dateComponents.day
+        combinedComponents.hour = timeComponents.hour
+        combinedComponents.minute = timeComponents.minute
+        
+        guard let selectedDateTime = calendar.date(from: combinedComponents) else {
+            return
+        }
+        
+        // 주소 입력
+        searchAddress { address in
             
-            DispatchQueue.global(qos: .userInitiated).async {
-                PostService.uploadImage(image: image) { url in
-                    if let url = url {
-                        print("DEBUG: Image uploaded successfully. URL: \(url.absoluteString)")
-                        post.updateRouteImageUrl(newUrl: url.absoluteString)
-                        print("DEBUG: Starting post upload...")
-                        
-                        PostService().uploadPost(post: post) { error in
-                            if let error = error {
-                                print("DEBUG: Failed to upload post: \(error.localizedDescription)")
-                            } else {
-                                print("DEBUG: Post uploded Successfully")
-                                
-                                DispatchQueue.main.async {
-                                    let courseDetailVC = CourseDetailVC()
-                                    self.navigationController?.popToRootViewController(animated: true)
-                                    courseDetailVC.hidesBottomBarWhenPushed = true
-                                    self.navigationController?.pushViewController(courseDetailVC, animated: true)
+            // Post 인스턴스 생성
+            var post = Post(uid: postUID, title: self.courseTitleString, content: self.courseDescriptionString, courseRoutes: self.testcoords.map { location in
+                return GeoPoint(latitude: location.latitude, longitude: location.longitude)
+            }, distance: self.distance, numberOfPeoples: self.personnel, routeImageUrl: "", startDate: selectedDateTime, address: address, whoReportAt: [], createdAt: Date(), runningStyle: self.runningStyle, members: [userUID])
+            
+            // 이미지 업로드 후 Post 업데이트
+            self.mapSnapshot(with: self.pinAnnotations, polyline: MKPolyline(coordinates: self.testcoords, count: self.testcoords.count)) { [weak self] image in
+                guard let self = self else { return }
+                print("DEBUG: Starting image upload...")
+                
+                DispatchQueue.global(qos: .userInitiated).async {
+                    PostService.uploadImage(image: image) { url in
+                        if let url = url {
+                            print("DEBUG: Image uploaded successfully. URL: \(url.absoluteString)")
+                            post.updateRouteImageUrl(newUrl: url.absoluteString)
+                            print("DEBUG: Starting post upload...")
+                            
+                            // Post 업로드
+                            PostService().uploadPost(post: post) { error in
+                                if let error = error {
+                                    print("DEBUG: Failed to upload post: \(error.localizedDescription)")
+                                } else {
+                                    print("DEBUG: Post uploded Successfully")
+                                    
+                                    DispatchQueue.main.async {
+                                        let courseDetailVC = CourseDetailVC()
+                                        self.navigationController?.popToRootViewController(animated: true)
+                                        courseDetailVC.hidesBottomBarWhenPushed = true
+                                        self.navigationController?.pushViewController(courseDetailVC, animated: true)
+                                    }
                                 }
                             }
+                        } else {
+                            print("DEBUG: Image upload failed")
                         }
-                    } else {
-                        print("DEBUG: Image upload failed")
                     }
                 }
             }
@@ -751,8 +760,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             UIGraphicsBeginImageContextWithOptions(image.size, true, image.scale)
             image.draw(at: CGPoint.zero)
             
-            let context = UIGraphicsGetCurrentContext()
-            
             // Polyline 그리기
             let path = UIBezierPath()
             let points = polyline.points()
@@ -807,6 +814,25 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             
             completion(finalImage ?? UIImage())
         }
+    }
+    
+    func searchAddress(completion: @escaping (String) -> Void) {
+        let addLoc = CLLocation(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
+        var address = ""
+
+        CLGeocoder().reverseGeocodeLocation(addLoc, completionHandler: { place, error in
+            if let pm = place?.first {
+                if let administrativeArea = pm.administrativeArea {
+                    address += administrativeArea
+                }
+                if let subLocality = pm.subLocality {
+                    address += " " + subLocality
+                }
+            } else {
+                print("DEBUG: 주소 검색 실패 \(error?.localizedDescription ?? "Unknown error")")
+            }
+            completion(address)
+        })
     }
 }
 
@@ -891,5 +917,19 @@ extension CourseRegisterVC {
  2. 데이트피커, 타임피커, 인원설정 버튼 모양(현재 인원설정 버튼에 border 추가시 뷰 망가짐)
  3. testcoords.count가 0일때, 코스를 입력해주세요 버튼 UI 생각
  4. 코스 등록하기 시 파이어스토어에 코스 정보 올림 + 코스 스크린샷
+ 
+ // DateFormatter 설정
+ let dateFormatter = DateFormatter()
+ dateFormatter.dateFormat = "yyyy-MM-dd"
+ dateFormatter.locale = Locale(identifier: "ko_KR")
+ dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+ let dateString = dateFormatter.string(from: selectedDate)
+ 
+ // TimeFormatter 설정
+ let timeFormatter = DateFormatter()
+ timeFormatter.dateFormat = "HH:mm:ss a"
+ timeFormatter.locale = Locale(identifier: "ko_KR")
+ timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+ let timeString = timeFormatter.string(from: selectedTime)
  
  */

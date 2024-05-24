@@ -41,7 +41,6 @@ class MateViewCell: UITableViewCell {
         label.layer.cornerRadius = 5
         label.textColor = .white
         label.textAlignment = .center
-        label.backgroundColor = .mainBlue
         return label
     }()
     
@@ -201,12 +200,31 @@ class MateViewCell: UITableViewCell {
         
         self.profileImageView.image = image
         self.runningStyleLabel.text = runningStyleLabel
-        self.titleLabel.text = titleLabel
+        
+        if titleLabel.count > 20 {
+            self.titleLabel.text = "\(titleLabel.prefix(20))..."
+        } else {
+            self.titleLabel.text = titleLabel
+        }
+        
         self.locationLabel.text = locationLabel
         self.timeLabel.text = timeLabel
         self.distanceLabel.text = distanceLabel
         self.peopleLabel.text = "\(peopleIn) / \(peopleLimit)"
         self.dateLabel.text = dateLabel
+        
+        switch runningStyleLabel {
+        case "걷기":
+            self.runningStyleLabel.backgroundColor = .walking
+        case "조깅":
+            self.runningStyleLabel.backgroundColor = .jogging
+        case "달리기":
+            self.runningStyleLabel.backgroundColor = .running
+        case "인터벌":
+            self.runningStyleLabel.backgroundColor = .interval
+        default:
+            self.runningStyleLabel.backgroundColor = .mainBlue
+        }
     }
 
 }
