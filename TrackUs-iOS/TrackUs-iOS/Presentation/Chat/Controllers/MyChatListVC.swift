@@ -13,6 +13,7 @@ class MyChatListVC: UIViewController {
         super.viewDidLoad()
         setupNavBar()
         view.backgroundColor = .green
+        setupAutoLayout()
     }
 
     private func setupNavBar() {
@@ -22,6 +23,18 @@ class MyChatListVC: UIViewController {
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+    
+    // MARK: - 오토레이아웃 세팅
+    private func setupAutoLayout() {
+//        self.view.addSubview(imageView)
+//        
+//        NSLayoutConstraint.activate([
+//            imageView.topAnchor.constraint(equalTo: self.view.topAnchor),
+//            imageView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+//            imageView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+//            imageView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+//        ])
     }
 
 }
