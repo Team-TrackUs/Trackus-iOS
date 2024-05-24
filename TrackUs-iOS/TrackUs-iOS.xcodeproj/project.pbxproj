@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		61625E342BFBD33300E6D1F3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */; };
+		61625E382BFE6EE500E6D1F3 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61625E372BFE6EE500E6D1F3 /* Post.swift */; };
+		61625E3A2BFE75A500E6D1F3 /* PostService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61625E392BFE75A500E6D1F3 /* PostService.swift */; };
 		6193AD182BF34C9C00C59D43 /* CourseRegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */; };
 		61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */; };
 		61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC92BF8F950009E360B /* CourseMapVC.swift */; };
@@ -58,8 +60,10 @@
 
 /* Begin PBXFileReference section */
 		610A031A2BFBCBC900A966C5 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		610A031E2BFBCBDF00A966C5 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		61625E352BFCF20100E6D1F3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		61625E372BFE6EE500E6D1F3 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
+		61625E392BFE75A500E6D1F3 /* PostService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostService.swift; sourceTree = "<group>"; };
 		6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseRegisterVC.swift; sourceTree = "<group>"; };
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
 		61B0DEC92BF8F950009E360B /* CourseMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMapVC.swift; sourceTree = "<group>"; };
@@ -175,7 +179,7 @@
 		82BE45562BEFA947007AE54A /* TrackUs-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				610A031E2BFBCBDF00A966C5 /* Info.plist */,
+				61625E352BFCF20100E6D1F3 /* Info.plist */,
 				61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */,
 				610A031A2BFBCBC900A966C5 /* Config.xcconfig */,
 				988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */,
@@ -328,6 +332,7 @@
 			children = (
 				988618322BF34AE0002ACB4E /* User.swift */,
 				826248182BFB4D9B0028C221 /* Running.swift */,
+				61625E372BFE6EE500E6D1F3 /* Post.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -344,6 +349,7 @@
 			isa = PBXGroup;
 			children = (
 				9886182F2BF348C8002ACB4E /* AuthService.swift */,
+				61625E392BFE75A500E6D1F3 /* PostService.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -461,6 +467,7 @@
 				988618332BF34AE0002ACB4E /* User.swift in Sources */,
 				61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
+				61625E382BFE6EE500E6D1F3 /* Post.swift in Sources */,
 				61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */,
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
 				98AB544B2BF71B790047310A /* ProfilePublicView.swift in Sources */,
@@ -473,6 +480,7 @@
 				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
 				9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */,
 				98AB54492BF71B620047310A /* ProfilePictureInputView.swift in Sources */,
+				61625E3A2BFE75A500E6D1F3 /* PostService.swift in Sources */,
 				826248192BFB4D9B0028C221 /* Running.swift in Sources */,
 				82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */,
 				61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */,
@@ -640,6 +648,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
@@ -681,6 +690,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";

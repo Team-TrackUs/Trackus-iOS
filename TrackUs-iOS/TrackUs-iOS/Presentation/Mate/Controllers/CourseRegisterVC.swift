@@ -7,6 +7,8 @@
 
 import UIKit
 import MapKit
+import Firebase
+import FirebaseStorage
 
 class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerDelegate, MKMapViewDelegate {
     
@@ -25,7 +27,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     var selectedDate: Date = Date() // 날짜
     var selectedTime: Date = Date() // 시간
     var personnel: Int = 1 // 인원수
-    
+
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
     var pinAnnotations: [MKPointAnnotation] = [] // mapkit
@@ -46,7 +48,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var drawMapButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         
         button.setTitle("코스를 입력해주세요", for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
@@ -59,7 +61,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var editMapButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         
         button.setImage(UIImage(named: "pencil_icon"), for: .normal)
         button.addTarget(self, action: #selector(editMapButtonTapped), for: .touchUpInside)
@@ -69,14 +71,14 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = .white
-//        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        //        scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
     
     let contentView : UIView = {
         let contentView = UIView()
         contentView.backgroundColor = .white
-//        contentView.translatesAutoresizingMaskIntoConstraints = false
+        //        contentView.translatesAutoresizingMaskIntoConstraints = false
         return contentView
     }()
     
@@ -135,7 +137,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var styleWalkButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         button.setTitle("걷기", for: .normal)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
@@ -145,7 +147,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var styleFastWalkButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         button.setTitle("조깅", for: .normal)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
@@ -155,7 +157,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var styleRuuningButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         button.setTitle("달리기", for: .normal)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
@@ -165,7 +167,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var styleSprintButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         button.setTitle("인터벌", for: .normal)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
@@ -187,6 +189,8 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         
         title.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
         title.leftViewMode = .always
+        
+        title.addTarget(self, action: #selector(titleValue), for: .editingChanged)
         
         title.inputAccessoryView = toolBarKeyboard
         
@@ -216,7 +220,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var datePicker: UIDatePicker = {
-       let picker = UIDatePicker()
+        let picker = UIDatePicker()
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
         picker.locale = Locale(identifier: "ko-KR")
@@ -227,7 +231,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var timePicker: UIDatePicker = {
-       let picker = UIDatePicker()
+        let picker = UIDatePicker()
         picker.datePickerMode = .time
         picker.preferredDatePickerStyle = .compact
         picker.locale = Locale(identifier: "ko-KR")
@@ -238,7 +242,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var personUpButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         button.setTitle("+", for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 24)
@@ -247,7 +251,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var personDownButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         button.setTitle("-", for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 24)
@@ -256,7 +260,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     private lazy var personnelLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.text = String(personnel)
         return label
     }()
@@ -299,7 +303,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }()
     
     // MARK: - Lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -361,24 +365,61 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     @objc func addCourseButtonTapped() {
         print("DEBUG: Add course...")
         
+        // DateFormatter 설정
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         dateFormatter.locale = Locale(identifier: "ko_KR")
         dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         let dateString = dateFormatter.string(from: selectedDate)
         
+        // TimeFormatter 설정
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "HH:mm:ss a"
         timeFormatter.locale = Locale(identifier: "ko_KR")
         timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         let timeString = timeFormatter.string(from: selectedTime)
         
-        print("DEBUG: date \(String(describing: dateString))")
-        print("DEBUG: time \(String(describing: timeString))")
-        let courseDetailVC = CourseDetailVC()
-        self.navigationController?.popToRootViewController(animated: true)
-        courseDetailVC.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(courseDetailVC, animated: true)
+        let userUID = User.currentUser?.id ?? ""
+        print("DEBUG: 유저 아이디 = \(userUID)")
+        let postUID = Firestore.firestore().collection("posts").document().documentID
+        
+        // Post 인스턴스 생성
+        var post = Post(uid: postUID, title: courseTitleString, content: courseDescriptionString, courseRoutes: testcoords.map { location in
+            return GeoPoint(latitude: location.latitude, longitude: location.longitude)
+        }, distance: self.distance, isEdit: false, numberOfPeoples: personnel, routeImageUrl: "", startDate: selectedDate, address: "", whoReportMe: [], createdAt: Date(), runningStyle: runningStyle, members: [userUID])
+        
+        // 이미지 업로드 후 Post 업데이트
+        mapSnapshot(with: pinAnnotations, polyline: MKPolyline(coordinates: testcoords, count: testcoords.count)) { [weak self] image in
+            guard let self = self else { return }
+            print("DEBUG: Starting image upload...")
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                PostService.uploadImage(image: image) { url in
+                    if let url = url {
+                        print("DEBUG: Image uploaded successfully. URL: \(url.absoluteString)")
+                        post.updateRouteImageUrl(newUrl: url.absoluteString)
+                        print("DEBUG: Starting post upload...")
+                        
+                        PostService().uploadPost(post: post) { error in
+                            if let error = error {
+                                print("DEBUG: Failed to upload post: \(error.localizedDescription)")
+                            } else {
+                                print("DEBUG: Post uploded Successfully")
+                                
+                                DispatchQueue.main.async {
+                                    let courseDetailVC = CourseDetailVC()
+                                    self.navigationController?.popToRootViewController(animated: true)
+                                    courseDetailVC.hidesBottomBarWhenPushed = true
+                                    self.navigationController?.pushViewController(courseDetailVC, animated: true)
+                                }
+                            }
+                        }
+                    } else {
+                        print("DEBUG: Image upload failed")
+                    }
+                }
+            }
+        }
     }
     
     @objc func btnDoneBarTapped(sender: Any) {
@@ -401,6 +442,10 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     @objc func timePickerValue(_ sender: UIDatePicker) {
         selectedTime = sender.date
+    }
+    
+    @objc func titleValue(_ sender: UITextField) {
+        courseTitleString = sender.text ?? ""
     }
     
     @objc func editMapButtonTapped() {
@@ -611,6 +656,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
 
     func textViewDidChange(_ textView: UITextView) {
         courseDescriptionPlaceholder.isHidden = !textView.text.isEmpty
+        courseDescriptionString = textView.text
         
 //        // 텍스트뷰 스크롤 없이 height 길어지게끔..
 //        let size = CGSize(width: contentView.frame.width, height: .infinity)
@@ -683,11 +729,90 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
+    
+    // 지도 스냅샷
+    func mapSnapshot(with annotations: [MKAnnotation], polyline: MKPolyline, completion: @escaping (UIImage) -> Void) {
+        let options = MKMapSnapshotter.Options()
+        options.region = MKCoordinateRegion(center: testcoords[testcoords.count / 2], span: MKCoordinateSpan(latitudeDelta: self.distance < 3 ? 0.02 : 0.04, longitudeDelta: self.distance < 3 ? 0.02 : 0.04))
+        options.size = CGSize(width: 300, height: 300)
+        options.mapType = .standard
+        options.showsBuildings = true
+        
+        let snapshotter = MKMapSnapshotter(options: options)
+        snapshotter.start { snapshot, error in
+            guard let snapshot = snapshot else {
+                if let error = error {
+                    print("Error: \(error.localizedDescription)")
+                }
+                return
+            }
+            
+            let image = snapshot.image
+            UIGraphicsBeginImageContextWithOptions(image.size, true, image.scale)
+            image.draw(at: CGPoint.zero)
+            
+            let context = UIGraphicsGetCurrentContext()
+            
+            // Polyline 그리기
+            let path = UIBezierPath()
+            let points = polyline.points()
+            for i in 0..<polyline.pointCount {
+                let point = points[i]
+                let coordinate = point.coordinate
+                let location = snapshot.point(for: coordinate)
+                if i == 0 {
+                    path.move(to: location)
+                } else {
+                    path.addLine(to: location)
+                }
+            }
+            UIColor.mainBlue.setStroke()
+            path.lineWidth = 3
+            path.stroke()
+            
+            // Annotation 그리기
+            for annotation in annotations {
+                let location = snapshot.point(for: annotation.coordinate)
+                let text = annotation.title ?? "\(self.testcoords.count + 1)"
+                
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.boldSystemFont(ofSize: 9),
+                    .foregroundColor: UIColor.mainBlue
+                ]
+                
+                let attributedText = NSAttributedString(string: text ?? "", attributes: attributes)
+                let textSize = attributedText.size()
+                
+                let circleDiameter = max(textSize.width, textSize.height) // 여백 추가
+                let circleRect = CGRect(x: location.x - circleDiameter / 2, y: location.y - circleDiameter / 2, width: circleDiameter, height: circleDiameter)
+                
+                let context = UIGraphicsGetCurrentContext()
+                context?.setFillColor(UIColor.white.cgColor)
+                context?.fillEllipse(in: circleRect)
+                
+                context?.setStrokeColor(UIColor.mainBlue.cgColor)
+                context?.setLineWidth(1.0)
+                context?.strokeEllipse(in: circleRect)
+                
+                let textRect = CGRect(x: circleRect.origin.x + (circleRect.width - textSize.width) / 2,
+                                      y: circleRect.origin.y + (circleRect.height - textSize.height) / 2,
+                                      width: textSize.width, height: textSize.height)
+                
+                attributedText.draw(in: textRect)
+            }
+
+            
+            let finalImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            
+            completion(finalImage ?? UIImage())
+        }
+    }
 }
 
+// MARK: - MapKit
 extension CourseRegisterVC {
     
-    // MARK: - MapKit
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         // adding map region
@@ -731,7 +856,6 @@ extension CourseRegisterVC {
         
         if let pin = annotation as? MKPointAnnotation {
             let label = UILabel(frame: CGRect(x: -8, y: -8, width: 20, height: 20))
-//            label.text = pin.title ?? ""
             label.text = pin.title ?? "\(testcoords.count + 1)"
             label.textColor = .mainBlue
             label.textAlignment = .center
