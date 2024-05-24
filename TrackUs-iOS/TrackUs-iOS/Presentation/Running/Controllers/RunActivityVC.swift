@@ -492,7 +492,7 @@ extension RunActivityVC: UserLocationDelegate {
     func startTracking() {
         locationService.userLocationDelegate = self
         // 움직임이 감지될때마다 호출되는 핸들러
-        runTrackingManager.startRecord { runningModel in            
+        runTrackingManager.updateRunInfo { runningModel in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 kilometerLabel.text = runningModel.distance.asString(style: .km)

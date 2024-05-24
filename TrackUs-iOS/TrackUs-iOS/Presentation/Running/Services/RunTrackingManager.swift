@@ -16,7 +16,8 @@ final public class RunTrackingManager {
     private let pedometer = CMPedometer()
     private let altimeter = CMAltimeter()
     private var runningModel = Running()
-
+    private var savedData: Double = 0.0
+    
     var coordinates: [CLLocationCoordinate2D] {
         get { runningModel.coordinates }
         set { runningModel.coordinates = newValue }
@@ -28,11 +29,15 @@ final public class RunTrackingManager {
     }
     
     /// 운동정보감지 업데이트 핸들러
-    func startRecord(completion: @escaping (Running) -> Void) {
+    func updateRunInfo(completion: @escaping (Running) -> Void) {
         pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
             guard let self = self else { return }
-            guard let pedometerData = pedometerData, error == nil else { return }
-            runningModel.distance = pedometerData.distance?.doubleValue ?? 0.0
+            guard let pedometerData = pedometerData, error == nil else { 
+                return
+            }
+            let currentDistance = pedometerData.distance?.doubleValue ?? 0.0
+            
+            runningModel.distance = currentDistance + savedData
             runningModel.pace = (runningModel.seconds / 60) / (runningModel.distance / 1000.0)
             runningModel.cadance = Int(pedometerData.numberOfSteps.doubleValue / (runningModel.seconds / 60))
             
@@ -41,7 +46,6 @@ final public class RunTrackingManager {
         
         altimeter.startAbsoluteAltitudeUpdates(to: .main) { altimeterData, error in
             guard let altimeterData = altimeterData, error == nil else { return }
-            print(altimeterData.altitude)
         }
     }
     
@@ -49,5 +53,6 @@ final public class RunTrackingManager {
     func stopRecord() {
         pedometer.stopUpdates()
         altimeter.stopAbsoluteAltitudeUpdates()
+        savedData = runningModel.distance
     }
 }
