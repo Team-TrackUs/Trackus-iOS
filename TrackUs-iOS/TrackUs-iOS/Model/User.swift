@@ -11,12 +11,12 @@ import Firebase
 struct User: Codable{
     // 이후 모델
     //var uid: String
-    var name: String
+    var name: String = ""
     var profileImageUrl: String?
-    var isProfilePublic: Bool
+    var isProfilePublic: Bool = true
 
     /// FCM 전송 토큰
-    var token: String
+    var token: String = ""
     
     /// 차단한 사용자 리스트
     var blockedUserList: [String]?
@@ -43,4 +43,28 @@ struct User: Codable{
     static var currentUid: String {
         return Auth.auth().currentUser!.uid
     }
+    init() {
+        
+    }
+    
+//    init?(document: [String: Any]) {
+//        guard let name = document["name"] as? String,
+//              let profileImageUrl = document["profileImageUrl"] as? String?,
+//              let isProfilePublic = document["isProfilePublic"] as? Bool,
+//              let token = document["token"] as? String,
+//              let blockedUserList = document["blockedUserList"] as? [String]?,
+//              let blockingMeList = document["blockingMeList"] as? [String]?,
+//              let reportIDList = document["reportIDList"] as? [String]?,
+//              let isBlock = document["isBlock"] as? Bool else {
+//            return nil
+//        }
+//        self.name = name
+//        self.profileImageUrl = profileImageUrl
+//        self.isProfilePublic = isProfilePublic
+//        self.token = token
+//        self.blockedUserList = blockedUserList
+//        self.blockingMeList = blockingMeList
+//        self.reportIDList = reportIDList
+//        self.isBlock = isBlock
+//    }
 }

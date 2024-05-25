@@ -6,6 +6,7 @@
 //
 
 
+import Foundation
 import Firebase
 import FirebaseAuth
 import FirebaseStorage
@@ -37,7 +38,7 @@ final class AuthService: NSObject {
     /// 회원탈퇴
     
     
-    /// 사용자 이미지 저장 -> 이미지 URL 반환 (String?)
+    /// 사용자 정보 -> 이미지 URL 반환 (String?)
     func saveUserData(user: User, image: UIImage?) {
         // 이미지 저장 -> url 포함 User 저장
         guard let image = image else { return self.storeUserInformation(user: user) }
