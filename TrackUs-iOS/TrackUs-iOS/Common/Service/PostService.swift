@@ -44,11 +44,6 @@ class PostService {
     }
     
     // 포스트 패치
-//    func fetchPost() async throws{
-//        let snapshot = try await Firestore.firestore().collection("posts").getDocuments()
-//        self.posts = try snapshot.documents.compactMap({ try $0.data(as: Post.self) })
-//    }
-    
     func fetchPost() async throws {
         let snapshot = try await Firestore.firestore().collection("posts").getDocuments()
         
@@ -59,16 +54,14 @@ class PostService {
             print("읽어오기 끝!")
             
             do {
-                // Firestore Timestamp를 Swift Date로 변환
+                
                 let startDate = (document["startDate"] as? Timestamp)?.dateValue() ?? Date()
                 
-                // 코스 루트 데이터 가져오기
                 guard let courseRoutesData = document["courseRoutes"] as? [GeoPoint] else {
                     print("DEBUG: Failed to get courseRoutesData for document \(document.documentID)")
                     continue
                 }
                 
-                // 필드에 대한 캐스팅 수행
                 guard let title = document["title"] as? String,
                       let content = document["content"] as? String,
                       let distance = document["distance"] as? Double,
@@ -83,22 +76,6 @@ class PostService {
                     continue
                 }
                 
-                // Print the fetched data for debugging
-                print("DEBUG: Fetched data for document \(document.documentID)")
-                print("UID: \(document.documentID)")
-                print("Title: \(title)")
-                print("Content: \(content)")
-                print("Course Routes: \(courseRoutesData)")
-                print("Distance: \(distance)")
-                print("Number of Peoples: \(numberOfPeoples)")
-                print("Route Image URL: \(routeImageUrl)")
-                print("Address: \(address)")
-                print("Who Report At: \(whoReportAt)")
-                print("Created At Timestamp: \(createdAtTimestamp)")
-                print("Running Style: \(runningStyle)")
-                print("Members: \(members)")
-                
-                // Post 객체 생성
                 let post = Post(
                     uid: document.documentID,
                     title: title,
@@ -115,7 +92,6 @@ class PostService {
                     members: members
                 )
                 
-                // posts 배열에 추가
                 self.posts.append(post)
             } catch {
                 print("DEBUG: Error processing document \(document.documentID) - \(error.localizedDescription)")

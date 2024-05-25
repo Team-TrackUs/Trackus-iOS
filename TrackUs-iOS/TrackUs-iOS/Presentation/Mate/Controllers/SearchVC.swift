@@ -25,7 +25,7 @@ class SearchVC: UIViewController {
     private lazy var toolBarKeyboard: UIToolbar = {
         let toolbar = UIToolbar()
         let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(btnDoneBarTapped))
+        let doneButton = UIBarButtonItem(title: "검색", style: .done, target: self, action: #selector(btnDoneBarTapped))
         toolbar.sizeToFit()
         toolbar.items = [flexBarButton, doneButton]
         toolbar.tintColor = .mainBlue

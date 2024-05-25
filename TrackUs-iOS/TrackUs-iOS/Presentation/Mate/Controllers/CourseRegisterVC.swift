@@ -416,6 +416,21 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                                     
                                     DispatchQueue.main.async {
                                         let courseDetailVC = CourseDetailVC()
+                                        
+                                        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
+                                            
+                                            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
+                                        }
+                                        courseDetailVC.courseTitleLabel.text = post.title
+                                        courseDetailVC.courseDestriptionLabel.text = post.content
+                                        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
+                                        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
+                                        courseDetailVC.runningStyleLabel.text = RunningMateVC().runningStyleString(for: post.runningStyle)
+                                        courseDetailVC.courseLocationLabel.text = post.address
+                                        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
+                                        courseDetailVC.personInLabel.text = "\(post.members.count)명"
+                                        courseDetailVC.members = post.members
+                                        
                                         self.navigationController?.popToRootViewController(animated: true)
                                         courseDetailVC.hidesBottomBarWhenPushed = true
                                         self.navigationController?.pushViewController(courseDetailVC, animated: true)
@@ -593,8 +608,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         courseDescription.widthAnchor.constraint(equalToConstant: 398).isActive = true
         courseDescription.heightAnchor.constraint(equalToConstant: 180).isActive = true
         
-//        courseDescription.isScrollEnabled = false
-        
         let datePickerStack = UIStackView(arrangedSubviews: [datePickerLabel, datePicker])
         datePickerStack.axis = .horizontal
         datePickerStack.spacing = 100
@@ -618,9 +631,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         let personnelButtonStack = UIStackView(arrangedSubviews: [personDownButton, personnelLabel, personUpButton])
         personnelButtonStack.axis = .horizontal
         personnelButtonStack.spacing = 8
-//        personnelButtonStack.layer.cornerRadius = 8
-//        personnelButtonStack.layer.borderColor = UIColor.gray.cgColor
-//        personnelButtonStack.layer.borderWidth = 1.0
         
         let personnelStack = UIStackView(arrangedSubviews: [PeopleSettingsLabel, personnelButtonStack])
         personnelStack.axis = .horizontal
@@ -917,19 +927,5 @@ extension CourseRegisterVC {
  2. 데이트피커, 타임피커, 인원설정 버튼 모양(현재 인원설정 버튼에 border 추가시 뷰 망가짐)
  3. testcoords.count가 0일때, 코스를 입력해주세요 버튼 UI 생각
  4. 코스 등록하기 시 파이어스토어에 코스 정보 올림 + 코스 스크린샷
- 
- // DateFormatter 설정
- let dateFormatter = DateFormatter()
- dateFormatter.dateFormat = "yyyy-MM-dd"
- dateFormatter.locale = Locale(identifier: "ko_KR")
- dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
- let dateString = dateFormatter.string(from: selectedDate)
- 
- // TimeFormatter 설정
- let timeFormatter = DateFormatter()
- timeFormatter.dateFormat = "HH:mm:ss a"
- timeFormatter.locale = Locale(identifier: "ko_KR")
- timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
- let timeString = timeFormatter.string(from: selectedTime)
  
  */

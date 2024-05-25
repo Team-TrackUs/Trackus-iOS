@@ -75,8 +75,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         button.layer.shadowOpacity = 1.0
         button.layer.shadowOffset = CGSize.zero
         button.layer.shadowRadius = 6
-        
-//        button.addTarget(self, action: #selector(finishDrawCourseButtonTapped), for: .touchUpInside)
+
         button.addTarget(self, action: #selector(moveButtonTapped), for: .touchUpInside)
         
         return button
@@ -237,10 +236,10 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     }
     
     func MapConfigureUI() {
-        self.locationManager = CLLocationManager() // 사용자 위치를 가져오는데 필요한 객체
+        self.locationManager = CLLocationManager()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        locationManager.requestWhenInUseAuthorization() // 앱을 처음 열 때 사용자의 위치를 얻을 수 있는 권한을 팝업으로 요청
+        locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
         drawMapView?.delegate = self
         drawMapView?.mapType = MKMapType.standard
@@ -379,22 +378,3 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     }
     
 }
-
-
-//@objc func moveButtonTapped() {
-////        let courseRegisterVC = CourseRegisterVC()
-//    guard let courseRegisterVC = self.courseRegisterVC else {
-//        return
-//    }
-//    
-//    if testcoords.count >= 2 {
-////            courseRegisterVC.hidesBottomBarWhenPushed = true
-//        courseRegisterVC.setup(with: testcoords, distance: distance)
-////            self.navigationController?.pushViewController(courseRegisterVC, animated: true)
-//        self.navigationController?.popViewController(animated: true)
-//        print("DEBUG: \(testcoords.count)")
-//        print("DEBUG: \(courseRegisterVC.testcoords.count)")
-//    } else {
-//        addActionToAlert()
-//    }
-//}

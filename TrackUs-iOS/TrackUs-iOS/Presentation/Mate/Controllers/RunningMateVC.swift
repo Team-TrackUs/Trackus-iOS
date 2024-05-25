@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 class RunningMateVC: UIViewController {
     
@@ -61,9 +62,9 @@ class RunningMateVC: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         
-//        Task {
-//            await fetchPosts()
-//        }
+        Task {
+            await fetchPosts()
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -103,7 +104,6 @@ class RunningMateVC: UIViewController {
         
         searchButton.addSubview(searchIcon)
         searchIcon.translatesAutoresizingMaskIntoConstraints = false
-//        searchIcon.topAnchor.constraint(equalTo: searchButton.topAnchor, constant: 8).isActive = true
         searchIcon.centerYAnchor.constraint(equalTo: searchButton.centerYAnchor).isActive = true
         searchIcon.trailingAnchor.constraint(equalTo: searchButton.trailingAnchor, constant: -16).isActive = true
         
@@ -153,7 +153,7 @@ class RunningMateVC: UIViewController {
             self.posts = postService.posts
             print("DEBUG: 포스트 = \(posts)")
             
-            // 데이터를 가져온 후에 tableView.reloadData() 호출
+            // 데이터를 가져온 후 호출
             tableView.reloadData()
         } catch {
             print("DEBUG: Error fetching posts - \(error.localizedDescription)")
@@ -195,8 +195,26 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let post = posts[indexPath.row]
+        
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
+        
+        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
+            
+            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
+        }
+        courseDetailVC.courseTitleLabel.text = post.title
+        courseDetailVC.courseDestriptionLabel.text = post.content
+        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
+        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
+        courseDetailVC.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
+        courseDetailVC.courseLocationLabel.text = post.address
+        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
+        courseDetailVC.personInLabel.text = "\(post.members.count)명"
+        courseDetailVC.members = post.members
+        
+        
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)
     }

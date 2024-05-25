@@ -80,11 +80,6 @@ class MateViewCell: UITableViewCell {
         return label
     }()
     
-//    let locationIcon = UIImageView(image: UIImage(named: "pin_icon"))
-//    let timeIcon = UIImageView(image: UIImage(named: "time_icon"))
-//    let distanceIcon = UIImageView(image: UIImage(named: "arrowBoth_icon"))
-//    let peopleIcon = UIImageView(image: UIImage(named: "people_icon"))
-    
     let locationIcon: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "locationPin_icon"))
         imageView.layer.transform = CATransform3DMakeScale(1.2, 0.9, 0.9)
@@ -105,23 +100,12 @@ class MateViewCell: UITableViewCell {
     
     let peopleIcon: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "people_icon"))
-//        imageView.layer.transform = CATransform3DMakeScale(0.6, 0.6, 0.6)
         return imageView
     }()
     
     
     // MARK: - Lifecycle
 
-//    override func awakeFromNib() {
-//        super.awakeFromNib()
-//        // Initialization code
-//    }
-//
-//    override func setSelected(_ selected: Bool, animated: Bool) {
-//        super.setSelected(selected, animated: animated)
-//
-//        // Configure the view for the selected state
-//    }
     override init(style: UITableViewCell.CellStyle, reuseIdentifier reuseIndentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIndentifier)
         self.configureUI()

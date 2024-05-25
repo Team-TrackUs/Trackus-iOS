@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MapKit
 
 class CourseDetailVC: UIViewController {
     
@@ -18,7 +19,7 @@ class CourseDetailVC: UIViewController {
         return scrollView
     }()
     
-    private let collectionView: UICollectionView = {
+     let collectionView: UICollectionView = { // 참여인원
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 20
@@ -30,7 +31,10 @@ class CourseDetailVC: UIViewController {
         return collectionView
     }()
     
-    private lazy var mapImageButton: UIButton = { // 코스 지도 이미지
+    var courseCoords: [CLLocationCoordinate2D] = [] // 코스
+    var members: [String] = []
+    
+     lazy var mapImageButton: UIButton = { // 코스 지도 이미지
         let button = UIButton()
         button.setImage(UIImage(named: ""), for: .normal)
         button.layer.cornerRadius = 10
@@ -39,9 +43,8 @@ class CourseDetailVC: UIViewController {
         return button
     }()
     
-    private let distanceLabel: UILabel = { // 코스 거리
+     let distanceLabel: UILabel = { // 코스 거리
         let label = UILabel()
-        label.text = "1.3 km"
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: 16)
         label.backgroundColor = .mainBlue
@@ -49,17 +52,15 @@ class CourseDetailVC: UIViewController {
         return label
     }()
     
-    private let dateLabel: UILabel = { // 코스 날짜
+     let dateLabel: UILabel = { // 코스 날짜
         let label = UILabel()
-        label.text = "2024.01.12"
         label.font = .systemFont(ofSize: 12)
         label.textColor = .gray2
         return label
     }()
     
-    private let runningStyleLabel: UILabel = { // 러닝스타일
+     let runningStyleLabel: UILabel = { // 러닝스타일
         let label = UILabel()
-        label.text = "인터벌"
         label.font = .boldSystemFont(ofSize: 12)
         label.backgroundColor = .mainBlue
         label.textColor = .white
@@ -69,17 +70,15 @@ class CourseDetailVC: UIViewController {
         return label
     }()
     
-    private let courseTitleLabel: UILabel = { // 코스 제목
+     let courseTitleLabel: UILabel = { // 코스 제목
         let label = UILabel()
-        label.text = "30분 가볍게 러닝해요!"
         label.font = .boldSystemFont(ofSize: 20)
         label.textColor = .black
         return label
     }()
     
-    private let courseLocationLabel: UILabel = { // 코스 장소
+     let courseLocationLabel: UILabel = { // 코스 장소
         let label = UILabel()
-        label.text = "서울숲 카페 거리"
         label.font = .systemFont(ofSize: 12)
         label.textColor = .gray2
         return label
@@ -91,9 +90,8 @@ class CourseDetailVC: UIViewController {
         return imageView
     }()
     
-    private let courseTimeLabel: UILabel = { // 코스 시간
+     let courseTimeLabel: UILabel = { // 코스 시간
         let label = UILabel()
-        label.text = "10:02 AM"
         label.font = .systemFont(ofSize: 12)
         label.textColor = .gray2
         return label
@@ -105,9 +103,8 @@ class CourseDetailVC: UIViewController {
         return imageView
     }()
     
-    private let courseDestriptionLabel: UILabel = { // 코스 소개글
+     let courseDestriptionLabel: UILabel = { // 코스 소개글
         let label = UILabel()
-        label.text = "여름이 끝나갈 무렵, 늦은 오후의 따스한 햇살이 나뭇잎 사이로 부서지며 공원을 산책하는 사람들의 얼굴에 은은하게 내려앉고, 바람은 살짝 선선해져서 긴 팔 옷을 입어야 할지 고민하게 만들었으며, 아이들은 여전히 놀이터에서 뛰어다니며 즐거운 웃음소리를 내고, 벤치에 앉은 연인들은 서로의 손을 꼭 잡고 낮은 목소리로 이야기를 나누고 있었고, 강아지를 산책시키는 사람들은 가끔 강아지가 지나가는 다람쥐를 쫓아가려는 것을 막느라 애쓰며, 공원 한쪽에서는 아마추어 음악가들이 모여 기타를 치고 노래를 부르며 즉흥적인 공연을 펼치고 있었고, 그 옆에서는 몇몇 사람들이 자전거를 타고 천천히 공원을 도는 여유를 즐기고 있었으며, 공원의 작은 연못에는 오리가 유유히 떠다니며 물속을 헤엄치고 있었고, 해가 서서히 지면서 하늘은 분홍빛과 주황빛으로 물들기 시작하며, 이 모든 장면들이 한데 어우러져 평화롭고 아름다운 일요일 오후의 한 순간을 만들어내고 있었다.  여름이 끝나갈 무렵, 늦은 오후의 따스한 햇살이 나뭇잎 사이로 부서지며 공원을 산책하는 사람들의 얼굴에 은은하게 내려앉고, 바람은 살짝 선선해져서 긴 팔 옷을 입어야 할지 고민하게 만들었으며, 아이들은 여전히 놀이터에서 뛰어다니며 즐거운 웃음소리를 내고, 벤치에 앉은 연인들은 서로의 손을 꼭 잡고 낮은 목소리로 이야기를 나누고 있었고, 강아지를 산책시키는 사람들은 가끔 강아지가 지나가는 다람쥐를 쫓아가려는 것을 막느라 애쓰며, 공원 한쪽에서는 아마추어 음악가들이 모여 기타를 치고 노래를 부르며 즉흥적인 공연을 펼치고 있었고, 그 옆에서는 몇몇 사람들이 자전거를 타고 천천히 공원을 도는 여유를 즐기고 있었으며, 공원의 작은 연못에는 오리가 유유히 떠다니며 물속을 헤엄치고 있었고, 해가 서서히 지면서 하늘은 분홍빛과 주황빛으로 물들기 시작하며, 이 모든 장면들이 한데 어우러져 평화롭고 아름다운 일요일 오후의 한 순간을 만들어내고 있었다."
         label.font = .systemFont(ofSize: 14)
         label.textColor = .gray1
         label.numberOfLines = 0
@@ -143,11 +140,10 @@ class CourseDetailVC: UIViewController {
         return button
     }()
     
-    private let personInLabel: UILabel = {
+     let personInLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 12)
         label.textColor = .mainBlue
-        label.text = "4명"
         return label
     }()
     
@@ -169,6 +165,7 @@ class CourseDetailVC: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         configureUI()
+        runningStyleColor()
     }
     
     // MARK: - Selectors
@@ -176,6 +173,10 @@ class CourseDetailVC: UIViewController {
     @objc func goCourseDetail() {
         print("DEBUG: 지도클릭")
         let courseMapVC = CourseMapVC()
+        
+        courseMapVC.testcoords = self.courseCoords
+        courseMapVC.distanceLabel.text = self.distanceLabel.text
+        
         self.navigationController?.pushViewController(courseMapVC, animated: true)
     }
     
@@ -213,6 +214,13 @@ class CourseDetailVC: UIViewController {
         mapImageButton.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
         mapImageButton.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         mapImageButton.heightAnchor.constraint(equalToConstant: 310).isActive = true
+        
+        mapImageButton.addSubview(distanceLabel)
+        distanceLabel.translatesAutoresizingMaskIntoConstraints = false
+        distanceLabel.leftAnchor.constraint(equalTo: mapImageButton.leftAnchor, constant: 16).isActive = true
+        distanceLabel.bottomAnchor.constraint(equalTo: mapImageButton.bottomAnchor, constant: -30).isActive = true
+        distanceLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        distanceLabel.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
         scrollView.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -301,12 +309,27 @@ class CourseDetailVC: UIViewController {
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
+    
+    func runningStyleColor() {
+        switch runningStyleLabel.text {
+        case "걷기":
+            self.runningStyleLabel.backgroundColor = .walking
+        case "조깅":
+            self.runningStyleLabel.backgroundColor = .jogging
+        case "달리기":
+            self.runningStyleLabel.backgroundColor = .running
+        case "인터벌":
+            self.runningStyleLabel.backgroundColor = .interval
+        default:
+            self.runningStyleLabel.backgroundColor = .mainBlue
+        }
+    }
 }
 
 extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        return 4
+        return members.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -320,7 +343,6 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         
         let itemWidth = collectionView.bounds.height
-        let inset = (collectionView.bounds.width - itemWidth) / 2
         return UIEdgeInsets(top: 0, left: 10, bottom: 20, right: 10)
     }
     
