@@ -41,6 +41,7 @@ class CourseDetailVC: UIViewController {
             updateView()
         }
     }
+    var memberLimit: Int = 0 // 최대 인원
     
      lazy var mapImageButton: UIButton = { // 코스 지도 이미지
         let button = UIButton()
@@ -127,8 +128,6 @@ class CourseDetailVC: UIViewController {
     
     private lazy var courseEnterButton: UIButton = { // 트랙 참여 버튼
         let button = UIButton(type: .system)
-        button.backgroundColor = .mainBlue
-        button.setTitle("트랙 참여하기", for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.setTitleColor(.white, for: .normal)
@@ -374,6 +373,16 @@ class CourseDetailVC: UIViewController {
             buttonStack.addArrangedSubview(courseEnterButton)
             buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
             buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
+            
+            if members.count >= memberLimit {
+                courseEnterButton.backgroundColor = .systemGray
+                courseEnterButton.setTitle("모집 마감", for: .normal)
+                courseEnterButton.isEnabled = false
+            } else {
+                courseEnterButton.backgroundColor = .mainBlue
+                courseEnterButton.setTitle("트랙 참여하기", for: .normal)
+                courseEnterButton.isEnabled = true
+            }
         }
         
         buttonContainer.addSubview(buttonStack)
@@ -430,6 +439,16 @@ class CourseDetailVC: UIViewController {
             buttonStack.addArrangedSubview(courseEnterButton)
             buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
             buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
+            
+            if members.count >= memberLimit {
+                courseEnterButton.backgroundColor = .systemGray
+                courseEnterButton.setTitle("모집 마감", for: .normal)
+                courseEnterButton.isEnabled = false
+            } else {
+                courseEnterButton.backgroundColor = .mainBlue
+                courseEnterButton.setTitle("트랙 참여하기", for: .normal)
+                courseEnterButton.isEnabled = true
+            }
         }
     }
 }

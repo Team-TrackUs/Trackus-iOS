@@ -103,6 +103,24 @@ class MateViewCell: UITableViewCell {
         return imageView
     }()
     
+    let closingLabel: UILabel = {
+        let label = UILabel()
+        label.text = "마감"
+        label.font = .boldSystemFont(ofSize: 18)
+        label.textColor = .white
+        label.textAlignment = .center
+        return label
+    }()
+    
+    let endLabel: UILabel = {
+        let label = UILabel()
+        label.text = "종료"
+        label.font = .boldSystemFont(ofSize: 18)
+        label.textColor = .white
+        label.textAlignment = .center
+        return label
+    }()
+    
     
     // MARK: - Lifecycle
 
@@ -125,6 +143,12 @@ class MateViewCell: UITableViewCell {
         profileImageView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
         profileImageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
         profileImageView.heightAnchor.constraint(equalToConstant: 87).isActive = true
+        
+        profileImageView.addSubview(closingLabel)
+        closingLabel.translatesAutoresizingMaskIntoConstraints = false
+        closingLabel.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor).isActive = true
+        closingLabel.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor).isActive = true
+        closingLabel.isHidden = true
         
         self.contentView.addSubview(runningStyleLabel)
         runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -208,6 +232,12 @@ class MateViewCell: UITableViewCell {
             self.runningStyleLabel.backgroundColor = .interval
         default:
             self.runningStyleLabel.backgroundColor = .mainBlue
+        }
+        
+        if peopleIn >= peopleLimit {
+            closingLabel.isHidden = false
+        } else {
+            closingLabel.isHidden = true
         }
     }
 

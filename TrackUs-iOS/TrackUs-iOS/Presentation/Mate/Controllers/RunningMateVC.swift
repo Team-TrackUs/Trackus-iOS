@@ -214,6 +214,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         courseDetailVC.personInLabel.text = "\(post.members.count)명"
         courseDetailVC.members = post.members
         courseDetailVC.postUid = post.uid
+        courseDetailVC.memberLimit = post.numberOfPeoples
         
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
