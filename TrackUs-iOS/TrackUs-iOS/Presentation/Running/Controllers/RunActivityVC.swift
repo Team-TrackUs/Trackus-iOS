@@ -162,7 +162,9 @@ final class RunActivityVC: UIViewController {
         sv.distribution = .equalSpacing
         let calorieStackVIew = makeCircleStView()
         let calorieImage = UIImageView()
-        calorieImage.image = UIImage(resource: .fireIcon)
+        calorieImage.image = UIImage(resource: .caloriesIcon)
+        calorieImage.widthAnchor.constraint(equalToConstant: 22).isActive = true
+        calorieImage.heightAnchor.constraint(equalToConstant: 22).isActive = true
         
         let calorieInfoLabel = UILabel()
         calorieInfoLabel.text = "소모 칼로리"
@@ -172,6 +174,8 @@ final class RunActivityVC: UIViewController {
         let paceStackVIew = makeCircleStView()
         let paceImage = UIImageView()
         paceImage.image = UIImage(resource: .pulseIcon)
+        paceImage.widthAnchor.constraint(equalToConstant: 22).isActive = true
+        paceImage.heightAnchor.constraint(equalToConstant: 22).isActive = true
         
         let paceInfoLabel = UILabel()
         paceInfoLabel.font = UIFont.systemFont(ofSize: 12)
@@ -181,6 +185,9 @@ final class RunActivityVC: UIViewController {
         let timeStackVIew = makeCircleStView()
         let timeImage = UIImageView()
         timeImage.image = UIImage(resource: .stopwatchIcon)
+        timeImage.widthAnchor.constraint(equalToConstant: 22).isActive = true
+        timeImage.heightAnchor.constraint(equalToConstant: 22).isActive = true
+        
         let timeInfoLabel = UILabel()
         
         timeInfoLabel.text = "경과 시간"
@@ -279,7 +286,9 @@ final class RunActivityVC: UIViewController {
             blurView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             blurView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             blurView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            blurView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+            blurView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            
+         
         ])
     }
     
