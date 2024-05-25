@@ -12,6 +12,9 @@ class CourseDetailVC: UIViewController {
     
     // MARK: - Properties
     
+    let uid = User.currentUid // 사용자의 UID
+    var postUid: String = ""
+    
     let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = .white
@@ -32,7 +35,12 @@ class CourseDetailVC: UIViewController {
     }()
     
     var courseCoords: [CLLocationCoordinate2D] = [] // 코스
-    var members: [String] = []
+    var members: [String] = [] {
+        didSet {
+            // members 데이터에 변화가 있으면 해당하는 뷰 업데이트
+            updateView()
+        }
+    }
     
      lazy var mapImageButton: UIButton = { // 코스 지도 이미지
         let button = UIButton()
@@ -120,13 +128,27 @@ class CourseDetailVC: UIViewController {
     private lazy var courseEnterButton: UIButton = { // 트랙 참여 버튼
         let button = UIButton(type: .system)
         button.backgroundColor = .mainBlue
-        button.setTitle("트랙 참가하기", for: .normal)
+        button.setTitle("트랙 참여하기", for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 56 / 2
         
         button.addTarget(self, action: #selector(courseEnterButtonTapped), for: .touchUpInside)
+        
+        return button
+    }()
+    
+    private lazy var courseExitButton: UIButton = { // 트랙 나가기 버튼
+        let button = UIButton(type: .system)
+        button.backgroundColor = .mainBlue
+        button.setTitle("트랙 나가기", for: .normal)
+        button.titleLabel?.textAlignment = .center
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 56 / 2
+        
+        button.addTarget(self, action: #selector(courseExitButtonTapped), for: .touchUpInside)
         
         return button
     }()
@@ -155,6 +177,17 @@ class CourseDetailVC: UIViewController {
         return label
     }()
     
+    private lazy var navigationMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        button.tintColor = .black
+        button.addTarget(self, action: #selector(menuButtonTapped), for: .touchUpInside)
+        
+        return button
+    }()
+    
+    let buttonStack = UIStackView()
+    
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -182,10 +215,54 @@ class CourseDetailVC: UIViewController {
     
     @objc func courseEnterButtonTapped() {
         print("DEBUG: 참가하기 클릭")
+        
+        PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
+            self.members = updateMembers
+        }
+    }
+    
+    @objc func courseExitButtonTapped() {
+        print("DEBUG: 나가기 클릭")
+        
+        PostService().exitPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
+            self.members = updateMembers
+        }
     }
     
     @objc func goChatRoomButtonTapped() {
         print("DEBUG: 채팅 버튼 클릭")
+    }
+    
+    @objc func menuButtonTapped() {
+        print("DEBUG: 네비게이션 버튼 클릭")
+        
+        let editAction = UIAlertAction(title: "모집글 수정", style: .default) { action in
+            
+        }
+        
+        let deleteAction = UIAlertAction(title: "모집글 삭제", style: .destructive) { action in
+            
+        }
+        
+        let reportAction = UIAlertAction(title: "모집글 신고", style: .destructive) { action in
+            
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        if members[0] == uid {
+            // 참여인원의 0번째(작성자)라면
+            alert.addAction(editAction)
+            alert.addAction(deleteAction)
+        } else {
+            alert.addAction(reportAction)
+        }
+        
+        alert.addAction(cancelAction)
+        
+        self.present(alert, animated: true)
     }
     
     // MARK: - Helpers
@@ -279,19 +356,25 @@ class CourseDetailVC: UIViewController {
         collectionView.trailingAnchor.constraint(equalTo: stackView.trailingAnchor, constant: -16).isActive = true
         collectionView.heightAnchor.constraint(equalToConstant: 100).isActive = true
         
-        
-        let buttonStack = UIStackView()
         buttonStack.axis = .horizontal
         buttonStack.spacing = 10
         buttonStack.distribution = .fill // dldl
         
-        buttonStack.addArrangedSubview(courseEnterButton)
-        buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
-        buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
+        // 해당 유저가 참여했는지 안했는지
         
-        buttonStack.addArrangedSubview(goChatRoomButton)
-        goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
-        goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
+        if members.contains(uid) {
+            buttonStack.addArrangedSubview(courseExitButton)
+            buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
+            buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
+            
+            buttonStack.addArrangedSubview(goChatRoomButton)
+            goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
+            goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
+        } else {
+            buttonStack.addArrangedSubview(courseEnterButton)
+            buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
+            buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
+        }
         
         buttonContainer.addSubview(buttonStack)
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
@@ -308,6 +391,9 @@ class CourseDetailVC: UIViewController {
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        self.navigationItem.rightBarButtonItem = barButton
     }
     
     func runningStyleColor() {
@@ -322,6 +408,28 @@ class CourseDetailVC: UIViewController {
             self.runningStyleLabel.backgroundColor = .interval
         default:
             self.runningStyleLabel.backgroundColor = .mainBlue
+        }
+    }
+    
+    func updateView() {
+        
+        self.collectionView.reloadData()
+        self.personInLabel.text = "\(members.count)명"
+        
+        buttonStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        if members.contains(uid) {
+            buttonStack.addArrangedSubview(courseExitButton)
+            buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
+            buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
+            
+            buttonStack.addArrangedSubview(goChatRoomButton)
+            goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
+            goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
+        } else {
+            buttonStack.addArrangedSubview(courseEnterButton)
+            buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
+            buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
         }
     }
 }

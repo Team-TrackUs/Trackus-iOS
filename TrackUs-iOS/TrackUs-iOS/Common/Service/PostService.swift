@@ -39,8 +39,26 @@ class PostService {
     }
     
     // 포스트 참여
-    func enterPost() {
-        
+    func enterPost(postUid: String, userUid: String, members: [String], completion: @escaping ([String]) -> Void) {
+        Firestore.firestore().collection("posts").document(postUid).getDocument { snapshot, error in
+            guard let document = try? snapshot?.data(as: Post.self) else { return }
+            Firestore.firestore().collection("posts").document(postUid).updateData(["members": document.members + [userUid]]) { _ in
+                var updatedMembers = members
+                updatedMembers.append(userUid)
+                completion(updatedMembers)
+            }
+        }
+    }
+    
+    // 포스트 나가기
+    func exitPost(postUid: String, userUid: String, members: [String], completion: @escaping ([String]) -> Void) {
+        Firestore.firestore().collection("posts").document(postUid).getDocument { snapshot, error in
+            guard let document = try? snapshot?.data(as: Post.self) else { return }
+            let updatedMembers = document.members.filter { $0 != userUid }
+            Firestore.firestore().collection("posts").document(postUid).updateData(["members": updatedMembers]) { _ in
+                completion(updatedMembers)
+            }
+        }
     }
     
     // 포스트 패치

@@ -213,6 +213,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
         courseDetailVC.personInLabel.text = "\(post.members.count)명"
         courseDetailVC.members = post.members
+        courseDetailVC.postUid = post.uid
         
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)

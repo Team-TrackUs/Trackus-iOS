@@ -15,7 +15,11 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     // MARK: - Properties
     
     lazy var testcoords: [CLLocationCoordinate2D] = [] // 좌표배열
-    lazy var distance: CLLocationDistance = 0 // 거리
+    lazy var distance: CLLocationDistance = 0 { // 거리
+        didSet {
+            distanceUpdate()
+        }
+    }
     var runningStyle: Int = 0 { // 러닝 스타일
         didSet {
             updateStyleButtonAppearance()
@@ -747,6 +751,10 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+    
+    func distanceUpdate() {
+        distanceLabel.text = "\(String(format: "%.2f", distance)) km"
     }
     
     // 지도 스냅샷
