@@ -14,6 +14,7 @@ class CourseDetailVC: UIViewController {
     
     let uid = User.currentUid // 사용자의 UID
     var postUid: String = ""
+    var imageUrl: String = ""
     
     let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -22,7 +23,7 @@ class CourseDetailVC: UIViewController {
         return scrollView
     }()
     
-     let collectionView: UICollectionView = { // 참여인원
+    let collectionView: UICollectionView = { // 참여인원
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 20
@@ -42,33 +43,38 @@ class CourseDetailVC: UIViewController {
         }
     }
     var memberLimit: Int = 0 // 최대 인원
+    var distance: Double = 0.0 // 거리
     
-     lazy var mapImageButton: UIButton = { // 코스 지도 이미지
+    lazy var mapImageButton: UIButton = { // 코스 지도 이미지
         let button = UIButton()
         button.setImage(UIImage(named: ""), for: .normal)
+//        button.imageView?.contentMode = .scaleAspectFill
+        button.clipsToBounds = true
         button.layer.cornerRadius = 10
         button.backgroundColor = .mainBlue
         button.addTarget(self, action: #selector(goCourseDetail), for: .touchUpInside)
         return button
     }()
     
-     let distanceLabel: UILabel = { // 코스 거리
+    let distanceLabel: UILabel = { // 코스 거리
         let label = UILabel()
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: 16)
         label.backgroundColor = .mainBlue
-        label.layer.cornerRadius = 30
+        label.layer.masksToBounds = true
+        label.layer.cornerRadius = 20
+        label.textAlignment = .center
         return label
     }()
     
-     let dateLabel: UILabel = { // 코스 날짜
+    let dateLabel: UILabel = { // 코스 날짜
         let label = UILabel()
         label.font = .systemFont(ofSize: 12)
         label.textColor = .gray2
         return label
     }()
     
-     let runningStyleLabel: UILabel = { // 러닝스타일
+    let runningStyleLabel: UILabel = { // 러닝스타일
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 12)
         label.backgroundColor = .mainBlue
@@ -79,14 +85,14 @@ class CourseDetailVC: UIViewController {
         return label
     }()
     
-     let courseTitleLabel: UILabel = { // 코스 제목
+    let courseTitleLabel: UILabel = { // 코스 제목
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 20)
         label.textColor = .black
         return label
     }()
     
-     let courseLocationLabel: UILabel = { // 코스 장소
+    let courseLocationLabel: UILabel = { // 코스 장소
         let label = UILabel()
         label.font = .systemFont(ofSize: 12)
         label.textColor = .gray2
@@ -99,7 +105,7 @@ class CourseDetailVC: UIViewController {
         return imageView
     }()
     
-     let courseTimeLabel: UILabel = { // 코스 시간
+    let courseTimeLabel: UILabel = { // 코스 시간
         let label = UILabel()
         label.font = .systemFont(ofSize: 12)
         label.textColor = .gray2
@@ -112,7 +118,7 @@ class CourseDetailVC: UIViewController {
         return imageView
     }()
     
-     let courseDestriptionLabel: UILabel = { // 코스 소개글
+    let courseDestriptionLabel: UILabel = { // 코스 소개글
         let label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textColor = .gray1
@@ -161,7 +167,7 @@ class CourseDetailVC: UIViewController {
         return button
     }()
     
-     let personInLabel: UILabel = {
+    let personInLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 12)
         label.textColor = .mainBlue
@@ -188,7 +194,7 @@ class CourseDetailVC: UIViewController {
     let buttonStack = UIStackView()
     
     // MARK: - Lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -241,6 +247,9 @@ class CourseDetailVC: UIViewController {
         
         let deleteAction = UIAlertAction(title: "모집글 삭제", style: .destructive) { action in
             
+            PostService().deletePost(postUid: self.postUid, imageUrl: self.imageUrl) {
+                self.navigationController?.popToRootViewController(animated: true)
+            }
         }
         
         let reportAction = UIAlertAction(title: "모집글 신고", style: .destructive) { action in
@@ -290,6 +299,8 @@ class CourseDetailVC: UIViewController {
         mapImageButton.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
         mapImageButton.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         mapImageButton.heightAnchor.constraint(equalToConstant: 310).isActive = true
+        mapImageButton.contentHorizontalAlignment = .fill
+        mapImageButton.contentVerticalAlignment = .fill
         
         mapImageButton.addSubview(distanceLabel)
         distanceLabel.translatesAutoresizingMaskIntoConstraints = false

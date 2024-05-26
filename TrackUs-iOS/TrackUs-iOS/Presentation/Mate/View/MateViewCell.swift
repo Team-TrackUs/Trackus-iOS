@@ -106,8 +106,8 @@ class MateViewCell: UITableViewCell {
     let closingLabel: UILabel = {
         let label = UILabel()
         label.text = "마감"
-        label.font = .boldSystemFont(ofSize: 18)
-        label.textColor = .white
+        label.font = .boldSystemFont(ofSize: 24)
+        label.textColor = .gray1
         label.textAlignment = .center
         return label
     }()
@@ -115,8 +115,8 @@ class MateViewCell: UITableViewCell {
     let endLabel: UILabel = {
         let label = UILabel()
         label.text = "종료"
-        label.font = .boldSystemFont(ofSize: 18)
-        label.textColor = .white
+        label.font = .boldSystemFont(ofSize: 24)
+        label.textColor = .gray1
         label.textAlignment = .center
         return label
     }()
@@ -204,9 +204,17 @@ class MateViewCell: UITableViewCell {
         dateLabel.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
     }
     
-    public func configure(image: UIImage, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
+    public func configure(image: String, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
         
-        self.profileImageView.image = image
+//        self.profileImageView.image = image
+        // 이미지 추가
+        PostService.downloadImage(urlString: image) { image in
+//            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.profileImageView.image = image
+            }
+        }
+        
         self.runningStyleLabel.text = runningStyleLabel
         
         if titleLabel.count > 20 {

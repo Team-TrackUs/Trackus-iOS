@@ -94,7 +94,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
             fatalError("The tableView could not dequeue a MateViewCell in ViewController")
         }
         
-        cell.configure(image: UIImage(named: "profile_img") ?? UIImage(imageLiteralResourceName: "profile_img"), runningStyleLabel: "인터벌", titleLabel: "광명시 러닝 메이트 구합니다", locationLabel: "서울숲카페거리", timeLabel: "10:01 AM", distanceLabel: "1.54km", peopleLimit: 5, peopleIn: 2, dateLabel: "2024년 5월 18일")
+        cell.configure(image: "gs://newtrackus.appspot.com/posts_image/5CDF87FE-DB10-4640-B82E-8BA587445E7D1716663607.288651", runningStyleLabel: "인터벌", titleLabel: "광명시 러닝 메이트 구합니다", locationLabel: "서울숲카페거리", timeLabel: "10:01 AM", distanceLabel: "1.54km", peopleLimit: 5, peopleIn: 2, dateLabel: "2024년 5월 18일")
         return cell
     }
     

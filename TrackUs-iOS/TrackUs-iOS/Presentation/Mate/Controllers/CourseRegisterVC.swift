@@ -434,6 +434,16 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                                         courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
                                         courseDetailVC.personInLabel.text = "\(post.members.count)명"
                                         courseDetailVC.members = post.members
+                                        courseDetailVC.postUid = post.uid
+                                        courseDetailVC.memberLimit = post.numberOfPeoples
+                                        courseDetailVC.imageUrl = post.routeImageUrl
+                                        
+                                        // 이미지 추가
+                                        PostService.downloadImage(urlString: post.routeImageUrl) { image in
+                                            DispatchQueue.main.async {
+                                                courseDetailVC.mapImageButton.setImage(image, for: .normal)
+                                            }
+                                        }
                                         
                                         self.navigationController?.popToRootViewController(animated: true)
                                         courseDetailVC.hidesBottomBarWhenPushed = true
@@ -762,8 +772,11 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         let options = MKMapSnapshotter.Options()
         options.region = MKCoordinateRegion(center: testcoords[testcoords.count / 2], span: MKCoordinateSpan(latitudeDelta: self.distance < 3 ? 0.02 : 0.04, longitudeDelta: self.distance < 3 ? 0.02 : 0.04))
         options.size = CGSize(width: 300, height: 300)
-        options.mapType = .standard
-        options.showsBuildings = true
+        options.mapType = .mutedStandard
+        options.showsBuildings = false
+        
+        // 이미지를 다크모드로
+//        options.traitCollection = .init(userInterfaceStyle: .dark)
         
         let snapshotter = MKMapSnapshotter(options: options)
         snapshotter.start { snapshot, error in

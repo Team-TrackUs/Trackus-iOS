@@ -190,7 +190,9 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         }
         
         let post = posts[indexPath.row]
-        cell.configure(image: UIImage(named: "profile_img") ?? UIImage(imageLiteralResourceName: "profile_img"), runningStyleLabel: runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
+        // 이미지 String으로 변경
+        // SearchVC에서도 해야함
+        cell.configure(image: post.routeImageUrl, runningStyleLabel: runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
         return cell
     }
     
@@ -206,7 +208,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         }
         courseDetailVC.courseTitleLabel.text = post.title
         courseDetailVC.courseDestriptionLabel.text = post.content
-        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
+        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
         courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
         courseDetailVC.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
         courseDetailVC.courseLocationLabel.text = post.address
@@ -215,6 +217,15 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         courseDetailVC.members = post.members
         courseDetailVC.postUid = post.uid
         courseDetailVC.memberLimit = post.numberOfPeoples
+        courseDetailVC.imageUrl = post.routeImageUrl
+        
+        // 이미지 추가
+        // CourseRegisterVC에서도 해야함
+        PostService.downloadImage(urlString: post.routeImageUrl) { image in
+            DispatchQueue.main.async {
+                courseDetailVC.mapImageButton.setImage(image, for: .normal)
+            }
+        }
         
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)

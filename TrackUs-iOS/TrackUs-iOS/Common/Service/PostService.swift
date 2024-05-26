@@ -117,14 +117,21 @@ class PostService {
         }
     }
     
-    // 포스트 업데이트
-    func updatePost() {
+    // 포스트 수정
+    func editPost() {
         
     }
     
     // 포스트 삭제
-    func deletePost() {
+    func deletePost(postUid: String, imageUrl: String, completion: @escaping () -> ()) {
+        Firestore.firestore().collection("posts").document(postUid).delete { error in
+            completion()
+        }
         
+        let storageReference = Storage.storage().reference(forURL: imageUrl)
+        storageReference.delete { error in
+            completion()
+        }
     }
     
     // 이미지를 스토리지에 업로드
