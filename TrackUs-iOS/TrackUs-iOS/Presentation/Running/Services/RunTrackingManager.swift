@@ -13,8 +13,7 @@ import CoreMotion
  러닝트래킹 매니저
  */
 final public class RunTrackingManager {
-    private let pedometer = CMPedometer()
-    private let altimeter = CMAltimeter()
+    private let coreMotionService = CoreMotionService.shared
     private var runningModel = Running()
     private var currentAltitude = 0.0
     private var maxAltitude = -99999.0
@@ -33,7 +32,7 @@ final public class RunTrackingManager {
     
     /// 운동정보감지 업데이트 핸들러
     func updateRunInfo(completion: @escaping (Running) -> Void) {
-        pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
+        coreMotionService.pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
             
             guard let self = self else { return }
             guard let pedometerData = pedometerData, error == nil else {
@@ -50,7 +49,7 @@ final public class RunTrackingManager {
             runningModel.pace = (runningModel.seconds / 60) / (runningModel.distance / 1000.0)
         }
         
-        altimeter.startRelativeAltitudeUpdates(to: .main) { [weak self]  altitudeData, error in
+        coreMotionService.altimeter.startRelativeAltitudeUpdates(to: .main) { [weak self]  altitudeData, error in
             guard let self = self else { return }
             guard let altitudeData = altitudeData, error == nil else {
                 return
@@ -67,8 +66,8 @@ final public class RunTrackingManager {
     
     /// 핸들러 중지
     func stopRecord() {
-        pedometer.stopUpdates()
-        altimeter.stopRelativeAltitudeUpdates()
+        coreMotionService.pedometer.stopUpdates()
+        coreMotionService.altimeter.stopRelativeAltitudeUpdates()
         savedData["distance"] = runningModel.distance
         savedData["steps"] = runningModel.steps
     }

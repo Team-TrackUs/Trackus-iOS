@@ -21,9 +21,7 @@ import MapKit
 
 final class RunActivityVC: UIViewController {
     // MARK: - Properties
-    deinit {
-        print("DEINIT!!!!!!!!")
-    }
+ 
     private let locationService = LocationService.shared
     private let runTrackingManager = RunTrackingManager()
     private var mapView: MKMapView!

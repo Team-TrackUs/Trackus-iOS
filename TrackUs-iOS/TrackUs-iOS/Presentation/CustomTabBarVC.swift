@@ -68,7 +68,7 @@ final class CustomTabBarVC: UITabBarController {
     }
     
     @objc func goToRunActivityVC() {
-        CoreLocationService.checkAuthrization { [weak self] status in
+        CoreMotionService.shared.checkAuthrization { [weak self] status in
             guard let self = self else { return }
             if status == .authorized {
                 let viewController = UINavigationController(rootViewController: RunActivityVC())
