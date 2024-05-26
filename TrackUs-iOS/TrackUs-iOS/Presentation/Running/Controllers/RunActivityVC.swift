@@ -253,7 +253,7 @@ final class RunActivityVC: UIViewController {
         addGradientLayer()
     }
     
-    // MARK: - UI Methods
+    // MARK: - Helpers
     func setConstraint() {
         self.view.addSubview(overlayView)
         self.view.addSubview(blurView)
@@ -374,7 +374,6 @@ final class RunActivityVC: UIViewController {
         present(resultVC, animated: true)
     }
     
-    // MARK: - Helpers
     func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
