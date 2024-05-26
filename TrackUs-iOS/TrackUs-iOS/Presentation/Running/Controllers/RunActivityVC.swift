@@ -21,6 +21,9 @@ import MapKit
 
 final class RunActivityVC: UIViewController {
     // MARK: - Properties
+    deinit {
+        print("DEINIT!!!!!!!!")
+    }
     private let locationService = LocationService.shared
     private let runTrackingManager = RunTrackingManager()
     private var mapView: MKMapView!
@@ -368,7 +371,6 @@ final class RunActivityVC: UIViewController {
     
     func goToResultVC() {
         HapticManager.shared.hapticImpact(style: .medium)
-        stopTracking()
         let resultVC = RunningResultVC()
         resultVC.modalPresentationStyle = .fullScreen
         present(resultVC, animated: true)
@@ -503,7 +505,9 @@ extension RunActivityVC: UserLocationDelegate {
     func startTracking() {
         locationService.userLocationDelegate = self
         // 움직임이 감지될때마다 호출되는 핸들러
-        runTrackingManager.updateRunInfo { runningModel in
+        runTrackingManager.updateRunInfo { [weak self] runningModel in
+            guard let self = self else { return }
+            
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 kilometerLabel.text = runningModel.distance.asString(style: .km)

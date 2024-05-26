@@ -34,6 +34,7 @@ final public class RunTrackingManager {
     /// 운동정보감지 업데이트 핸들러
     func updateRunInfo(completion: @escaping (Running) -> Void) {
         pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
+            
             guard let self = self else { return }
             guard let pedometerData = pedometerData, error == nil else {
                 return
