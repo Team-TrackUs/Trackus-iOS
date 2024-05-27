@@ -59,8 +59,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     private lazy var navigationBar : UINavigationBar = {
         let navigationBar = UINavigationBar()
         navigationBar.translatesAutoresizingMaskIntoConstraints = false
-        navigationBar.backgroundColor = .clear
-        //navigationBar.barTintColor = .systemBackground
+        navigationBar.barTintColor = .systemBackground
         navigationBar.shadowImage = UIImage()
         
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.backward"), style: .plain, target: self, action: #selector(backButtonTapped))

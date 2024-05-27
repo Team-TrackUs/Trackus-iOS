@@ -39,8 +39,9 @@
 		82C38AD12BFCE0C4004819C1 /* CoreLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */; };
 		82C38AD32BFCE445004819C1 /* Double+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD22BFCE445004819C1 /* Double+.swift */; };
 		9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9866E6172BFB63ED0031E8B6 /* SplashView.swift */; };
-		987F6F1A2C044A43004F6615 /* info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 987F6F192C044A43004F6615 /* info.plist */; };
 		987F6F1E2C0499A0004F6615 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 987F6F1D2C0499A0004F6615 /* GoogleService-Info.plist */; };
+		987F6F262C04D7F9004F6615 /* KakaoSDKCert in Frameworks */ = {isa = PBXBuildFile; productRef = 987F6F252C04D7F9004F6615 /* KakaoSDKCert */; };
+		987F6F282C04D7F9004F6615 /* KakaoSDKCertCore in Frameworks */ = {isa = PBXBuildFile; productRef = 987F6F272C04D7F9004F6615 /* KakaoSDKCertCore */; };
 		9885ACF42BF9E8AA00367991 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF32BF9E8AA00367991 /* KakaoSDK */; };
 		9885ACF62BF9E8AA00367991 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF52BF9E8AA00367991 /* KakaoSDKAuth */; };
 		9885ACF82BF9E8AA00367991 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF72BF9E8AA00367991 /* KakaoSDKCommon */; };
@@ -100,9 +101,9 @@
 		82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreLocation.swift; sourceTree = "<group>"; };
 		82C38AD22BFCE445004819C1 /* Double+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+.swift"; sourceTree = "<group>"; };
 		9866E6172BFB63ED0031E8B6 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
-		987F6F192C044A43004F6615 /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = info.plist; sourceTree = "<group>"; };
 		987F6F1D2C0499A0004F6615 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		9885ACFB2BF9E92300367991 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		987F6F1F2C04CA5D004F6615 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		987F6F292C04DAD1004F6615 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		988618162BF317EE002ACB4E /* UIImage+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+.swift"; sourceTree = "<group>"; };
 		9886182F2BF348C8002ACB4E /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		988618322BF34AE0002ACB4E /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -126,7 +127,9 @@
 				9885ACF82BF9E8AA00367991 /* KakaoSDKCommon in Frameworks */,
 				988618222BF31874002ACB4E /* FirebaseFirestoreSwift in Frameworks */,
 				988618282BF31874002ACB4E /* FirebaseStorageCombine-Community in Frameworks */,
+				987F6F262C04D7F9004F6615 /* KakaoSDKCert in Frameworks */,
 				9886181A2BF31874002ACB4E /* FirebaseAuth in Frameworks */,
+				987F6F282C04D7F9004F6615 /* KakaoSDKCertCore in Frameworks */,
 				988618202BF31874002ACB4E /* FirebaseFirestoreCombine-Community in Frameworks */,
 				988618262BF31874002ACB4E /* FirebaseStorage in Frameworks */,
 				9886181C2BF31874002ACB4E /* FirebaseAuthCombine-Community in Frameworks */,
@@ -195,9 +198,9 @@
 		82BE45562BEFA947007AE54A /* TrackUs-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				987F6F192C044A43004F6615 /* info.plist */,
+				987F6F1F2C04CA5D004F6615 /* Info.plist */,
 				987F6F1D2C0499A0004F6615 /* GoogleService-Info.plist */,
-				9885ACFB2BF9E92300367991 /* Config.xcconfig */,
+				987F6F292C04DAD1004F6615 /* Config.xcconfig */,
 				988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */,
 				988618312BF34A6C002ACB4E /* Model */,
 				82BE456E2BEFAE22007AE54A /* Common */,
@@ -415,6 +418,8 @@
 				9885ACF52BF9E8AA00367991 /* KakaoSDKAuth */,
 				9885ACF72BF9E8AA00367991 /* KakaoSDKCommon */,
 				9885ACF92BF9E8AA00367991 /* KakaoSDKUser */,
+				987F6F252C04D7F9004F6615 /* KakaoSDKCert */,
+				987F6F272C04D7F9004F6615 /* KakaoSDKCertCore */,
 			);
 			productName = "TrackUs-iOS";
 			productReference = 82BE45542BEFA947007AE54A /* TrackUs-iOS.app */;
@@ -462,7 +467,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				987F6F1A2C044A43004F6615 /* info.plist in Resources */,
 				82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */,
 				82BE45642BEFA94A007AE54A /* Base in Resources */,
 				987F6F1E2C0499A0004F6615 /* GoogleService-Info.plist in Resources */,
@@ -544,6 +548,7 @@
 /* Begin XCBuildConfiguration section */
 		82BE45662BEFA94A007AE54A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 987F6F292C04DAD1004F6615 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -595,7 +600,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -608,6 +613,7 @@
 		};
 		82BE45672BEFA94A007AE54A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 987F6F292C04DAD1004F6615 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -653,7 +659,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -665,6 +671,7 @@
 		};
 		82BE45692BEFA94A007AE54A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 987F6F292C04DAD1004F6615 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -674,7 +681,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
@@ -708,6 +715,7 @@
 		};
 		82BE456A2BEFA94A007AE54A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 987F6F292C04DAD1004F6615 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -717,7 +725,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
@@ -792,6 +800,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		987F6F252C04D7F9004F6615 /* KakaoSDKCert */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9885ACF22BF9E8AA00367991 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCert;
+		};
+		987F6F272C04D7F9004F6615 /* KakaoSDKCertCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9885ACF22BF9E8AA00367991 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCertCore;
+		};
 		9885ACF32BF9E8AA00367991 /* KakaoSDK */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 9885ACF22BF9E8AA00367991 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;

@@ -204,7 +204,7 @@ class GradientBackgroundView: UIView {
         super.layoutSubviews()
         
         let gradientLayer = self.layer as! CAGradientLayer
-        gradientLayer.colors = [UIColor.mainBlue.withAlphaComponent(0.5).cgColor, UIColor.white.cgColor]
+        gradientLayer.colors = [UIColor.mainBlue.withAlphaComponent(0.5).cgColor, UIColor.systemBackground.cgColor]
         gradientLayer.startPoint = CGPoint(x: 0, y: 1.5)
         gradientLayer.endPoint = CGPoint(x: 0, y: 0.6)
         gradientLayer.frame = bounds
