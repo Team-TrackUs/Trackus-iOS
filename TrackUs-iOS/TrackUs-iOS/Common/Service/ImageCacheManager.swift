@@ -13,8 +13,18 @@ import UIKit
 final class ImageCacheManager {
     static let shared = ImageCacheManager()
     
-    private let memoryCache = MemoryCache()
-    private let diskCache = DiskCache()
+    private let memoryCache: MemoryCache
+    private let diskCache: DiskCache
+    
+    // 제한 용량
+    private let memoryTotalCostLimit = 20 * 1024 * 1024
+    private let memoryCountLimit = 100
+    private let diskCacheSize: UInt64 = 100 * 1024 * 1024
+    
+    init() {
+        self.memoryCache = MemoryCache(totalCostLimit: memoryTotalCostLimit, countLimit: memoryCountLimit)
+        self.diskCache = DiskCache(diskCacheSize: diskCacheSize)
+    }
     
     /// 이미지 불러오기 -> UIImage 반환
     func loadImage(imageUrl url: String, completionHandler: @escaping (UIImage?) -> Void) {
@@ -137,6 +147,12 @@ final class ImageCacheManager {
 class MemoryCache {
     private let cache = NSCache<NSString, UIImage>()
     
+    // 메모리 캐싱 용량, 갯수 제한
+    init(totalCostLimit: Int, countLimit: Int) {
+        cache.totalCostLimit = totalCostLimit
+        cache.countLimit = countLimit
+    }
+    
     func getImage(forKey key: String) -> UIImage? {
         print("메모리 불러오기 시도")
         return cache.object(forKey: key as NSString)
@@ -152,8 +168,10 @@ class MemoryCache {
 class DiskCache {
     private let fileManager = FileManager.default
     private let cacheDirectory: URL
+    private let diskCacheSize: UInt64
     
-    init() {
+    init(diskCacheSize: UInt64) {
+        self.diskCacheSize = diskCacheSize
         let paths = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
         cacheDirectory = paths[0].appendingPathComponent("ImageCache")
         
@@ -176,6 +194,7 @@ class DiskCache {
         } catch {
             print("이미지 저장 실패: \(error)")
         }
+        cleanUpIfNeeded()
     }
     
     func getImage(forKey key: String) -> UIImage? {
@@ -187,6 +206,38 @@ class DiskCache {
         }
         print("이미지 불러오기 성공: \(fileURL.path)")
         return UIImage(data: data)
+    }
+    
+    // 제한용량 파일 삭제 여부 확인
+    private func cleanUpIfNeeded() {
+        let resourceKeys: [URLResourceKey] = [.isDirectoryKey, .creationDateKey, .fileSizeKey]
+        let fileURLs = (try? fileManager.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: resourceKeys, options: [])) ?? []
+        
+        var cacheSize: UInt64 = 0
+        var files: [(url: URL, size: UInt64, date: Date)] = []
+        
+        // 저장 파일 용량 체크
+        for fileURL in fileURLs {
+            let resourceValues = try? fileURL.resourceValues(forKeys: Set(resourceKeys))
+            if let isDirectory = resourceValues?.isDirectory, !isDirectory,
+               let fileSize = resourceValues?.fileSize.map(UInt64.init),
+               let creationDate = resourceValues?.creationDate {
+                cacheSize += fileSize
+                files.append((url: fileURL, size: fileSize, date: creationDate))
+            }
+        }
+        
+        // 제한 용량보다 작을때까지 오래된 파일 삭제
+        if cacheSize > diskCacheSize {
+            let sortedFiles = files.sorted { $0.date < $1.date }
+            for file in sortedFiles {
+                try? fileManager.removeItem(at: file.url)
+                cacheSize -= file.size
+                if cacheSize <= diskCacheSize {
+                    break
+                }
+            }
+        }
     }
 }
 

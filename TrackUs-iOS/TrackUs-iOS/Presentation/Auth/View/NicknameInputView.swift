@@ -116,6 +116,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         
         
         NSLayoutConstraint.activate([
+            
             textField.heightAnchor.constraint(equalToConstant: 32),
             textField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
