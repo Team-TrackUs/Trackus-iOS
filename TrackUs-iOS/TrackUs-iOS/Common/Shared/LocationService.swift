@@ -13,7 +13,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     static let shared = LocationService()
     let locationManager = CLLocationManager()
     var currentLocation : CLLocationCoordinate2D?
-    var userLocationDelegate: UserLocationDelegate?
+    weak var userLocationDelegate: UserLocationDelegate?
     
     private override init() {
         super.init()
@@ -21,6 +21,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest // 가장 높은수준의 정확도
         locationManager.distanceFilter = 10 // 특정거리를 이동할때마다 업데이트 받도록 filter
         locationManager.startUpdatingLocation()
+        locationManager.allowsBackgroundLocationUpdates = true
         currentLocation = locationManager.location?.coordinate
     }
     

@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         LoginCheck()
         
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let _ = (scene as? UIWindowScene) else { return }
     }
     
     // Kakao 로그인 관련
@@ -70,9 +70,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         authListener = Auth.auth().addStateDidChangeListener({ auth, user in
             // 리스너 등록 해제
             //Auth.auth().removeStateDidChangeListener(self.authListener!)
-            
             if user == nil {
-                self.login()
+//                self.login()
+                self.startApp()
             } else {
                 DispatchQueue.main.async {
                     // 회원가입 UI 완성 후. 코드 별도 추가
