@@ -48,7 +48,8 @@ final public class RunTrackingManager {
             let measuredAlti = altitudeData.relativeAltitude.doubleValue
             if measuredAlti > 0 {
                 runModel.maxAltitude = max(maxAltitude, measuredAlti)
-            } else {
+            }
+            if measuredAlti < 0 {
                 runModel.minAltitude = min(minAltitude, measuredAlti)
             }
             completion(runModel)

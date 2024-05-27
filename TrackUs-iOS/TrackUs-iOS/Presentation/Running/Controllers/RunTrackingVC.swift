@@ -225,7 +225,7 @@ final class RunTrackingVC: UIViewController {
     private let blurView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         view.isHidden = true
         return view
     }()
@@ -362,8 +362,7 @@ final class RunTrackingVC: UIViewController {
         HapticManager.shared.hapticImpact(style: .medium)
         let resultVC = RunningResultVC()
         resultVC.runManager = runManager
-        resultVC.modalPresentationStyle = .fullScreen
-        present(resultVC, animated: true)
+        navigationController?.pushViewController(resultVC, animated: false)
     }
     
     func setTimer() {
@@ -471,7 +470,7 @@ extension RunTrackingVC {
         let circleDiameter: CGFloat = 88.0
         let view = UIStackView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         view.layer.cornerRadius = circleDiameter / 2.0
         view.clipsToBounds = true
         view.distribution = .equalSpacing

@@ -22,6 +22,7 @@ class RunningResultVC: UIViewController {
         bt.translatesAutoresizingMaskIntoConstraints = false
         bt.backgroundColor = .mainBlue
         bt.title = "기록저장"
+        bt.addTarget(self, action: #selector(goToRoot), for: .touchUpInside)
         return bt
     }()
     
@@ -60,17 +61,27 @@ class RunningResultVC: UIViewController {
         bt.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         bt.setTitle("상세보기", for: .normal)
         bt.setTitleColor(.gray1, for: .normal)
-        
+        bt.addTarget(self, action: #selector(goToDetailVC), for: .touchUpInside)
         return bt
     }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         setupTableView()
         setupMapView()
         setConstraint()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
     // MARK: - Helpers
@@ -133,6 +144,18 @@ class RunningResultVC: UIViewController {
             RunInfoModel(title: "상승고도", result: "+ \(Int(runModel.maxAltitude))m"),
         ]
         tableView.reloadData()
+    }
+    
+    // MARK: - objc
+    @objc func goToDetailVC() {
+        let detailVC = RunInfoDetailVC()
+        detailVC.modalPresentationStyle = .fullScreen
+        detailVC.runModel = runManager?.runModel
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
+    
+    @objc func goToRoot() {
+        view.window!.rootViewController?.dismiss(animated: true)
     }
 }
 
