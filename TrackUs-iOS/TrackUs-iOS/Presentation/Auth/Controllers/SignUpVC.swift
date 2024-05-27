@@ -9,7 +9,7 @@ import UIKit
 
 class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
-    var user: User = User(name: "", isProfilePublic: true, token: "")
+    var user = UserManager.shared.user
     
     var currentStep = 0 {
         didSet{
@@ -24,7 +24,13 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     var view3 = ProfilePictureInputView()
     var view4 = ProfilePublicView()
     
-    private var isEnabled: Bool = false
+    private var isEnabled: Bool = false {
+        didSet{
+            UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
+                self.mainButton.isEnabled = self.isEnabled
+            }
+        }
+    }
     // 메인 버튼 하단 위치 제약조건
     var mainButtonBottomConstraint: NSLayoutConstraint!
     
@@ -53,7 +59,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     private lazy var navigationBar : UINavigationBar = {
         let navigationBar = UINavigationBar()
         navigationBar.translatesAutoresizingMaskIntoConstraints = false
-        navigationBar.barTintColor = .white
+        navigationBar.barTintColor = .systemBackground
         navigationBar.shadowImage = UIImage()
         
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
@@ -126,11 +132,11 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .white
+        self.view.backgroundColor = .systemBackground
         setupAutoLayout()
         view1.delegate = self
         view2.delegate = self
-//        view2.textField.delegate = self
+        view2.textField.delegate = self
         view3.delegate = self
         //view4.delegate = self
         
@@ -201,8 +207,13 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         updateUserData()
         if currentStep < subViews.count-1{
             // 기존 view 제거
-            subViews[currentStep].removeFromSuperview()
-            currentStep += 1
+            if currentStep == 1{
+                // 닉네임 중복 확인
+                checkNicknameAvailability()
+            }else {
+                subViews[currentStep].removeFromSuperview()
+                currentStep += 1
+            }
         }else { // 회원가입
             // firestore user 데이터 등록
             AuthService.shared.saveUserData(user: user, image: image)
@@ -234,15 +245,12 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     // 메인 버튼 활성화
     func MainButtonDidChangeEnabled(_ isEnabled: Bool) {
         self.isEnabled = isEnabled
-        UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
-            self.mainButton.isEnabled = isEnabled
-        }
     }
     
     // 바뀐 뷰에 맞게 내용 수정
     private func changeView(){
         if currentStep < 2 {
-            mainButton.isEnabled = false
+            self.isEnabled = false
         }
         // 바꿀 view 추가
         let nextView = subViews[currentStep]
@@ -299,15 +307,52 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
 extension SignUpVC: UITextFieldDelegate {
     // 엔터키 누를 경우 실행 함수
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // 키보드 숨기기
+        
         if isEnabled {
-            subViews[currentStep].removeFromSuperview()
-            currentStep += 1
-            textField.resignFirstResponder() // 키보드 숨기기
-            user.name = view2.getNickname()
-            return true
+            checkNicknameAvailability()
+        } else {
+            displayNicknameFormatErrorAlert()
         }
-        print("알랏 추가")
+        
         return true
+    }
+    // 닉네임 중복 여부 확인
+    func checkNicknameAvailability() {
+        user.name = view2.getNickname()
+        
+        Task {
+            await AuthService.shared.checkUser(name: user.name) { [self] check in
+                if check {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.subViews[self?.currentStep ?? 0].removeFromSuperview()
+                        self?.currentStep += 1
+                    }
+                } else {
+                    displayNicknameDuplicateAlert()
+                }
+            }
+        }
+    }
+    
+    func displayNicknameDuplicateAlert() {
+        DispatchQueue.main.async { [weak self] in
+            let alert = UIAlertController(title: "닉네임 중복",
+                                          message: "이미 등록된 닉네임입니다.\n다시 입력해주시기 바랍니다.",
+                                          preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "확인", style: .default, handler: nil)
+            alert.addAction(okAction)
+            self?.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    func displayNicknameFormatErrorAlert() {
+        let alert = UIAlertController(title: "닉네임 오류",
+                                      message: "닉네임 형식을 다시 확인해주시기 바랍니다.",
+                                      preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "확인", style: .default, handler: nil)
+        alert.addAction(okAction)
+        self.present(alert, animated: true, completion: nil)
     }
 }
 

@@ -68,16 +68,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        self.window?.makeKeyAndVisible()
         
         authListener = Auth.auth().addStateDidChangeListener({ auth, user in
-            // 리스너 등록 해제
-            //Auth.auth().removeStateDidChangeListener(self.authListener!)
             if user == nil {
-//                self.login()
-                self.startApp()
+                self.login()
             } else {
                 DispatchQueue.main.async {
-                    // 회원가입 UI 완성 후. 코드 별도 추가
-                    //self.startApp()
-                    self.signUp()
+                    UserManager.shared.getUserData(uid: user?.uid) { newUser in
+                        print("사용자 정보 불러오기 시작")
+                        if newUser {
+                            self.signUp()
+                        } else {
+                            self.startApp()
+                            // 리스너 등록 해제
+                            Auth.auth().removeStateDidChangeListener(self.authListener!)
+                        }
+                    }
                 }
             }
         })
