@@ -85,6 +85,7 @@ final class AuthService: NSObject {
                 // 이미지 url 저장
                 guard let url = url else { return }
                 var user = user
+                user.uid = uid
                 user.profileImageUrl = url.absoluteString
                 ImageCacheManager.shared.setImage(image: image, url: url.absoluteString)
                 self.storeUserInformation(user: user)
@@ -97,7 +98,8 @@ final class AuthService: NSObject {
     private func storeUserInformation(user: User) {
         let uid = User.currentUid
         // 해당부분 자료형 지정 필요
-        let userData = ["name": user.name,
+        let userData = ["uid": user.uid,
+                        "name": user.name,
                         "isProfilePublic": user.isProfilePublic,
                         "profileImageUrl": user.profileImageUrl as Any,
                         "isBlock": user.isBlock as Any,

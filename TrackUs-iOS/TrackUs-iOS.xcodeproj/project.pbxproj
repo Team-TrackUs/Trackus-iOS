@@ -217,7 +217,6 @@
 				82BE45722BEFAFB0007AE54A /* Mate */,
 				82BE45712BEFAFAD007AE54A /* Chat */,
 				82BE45702BEFAFAB007AE54A /* Profile */,
-				82BE45752BEFAFF5007AE54A /* Auth */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -247,6 +246,7 @@
 		82BE45702BEFAFAB007AE54A /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				82BE45752BEFAFF5007AE54A /* Auth */,
 				82BE45792BEFB035007AE54A /* Controllers */,
 			);
 			path = Profile;

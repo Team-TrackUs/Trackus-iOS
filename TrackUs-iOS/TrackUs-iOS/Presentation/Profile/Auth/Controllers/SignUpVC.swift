@@ -59,7 +59,8 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     private lazy var navigationBar : UINavigationBar = {
         let navigationBar = UINavigationBar()
         navigationBar.translatesAutoresizingMaskIntoConstraints = false
-        navigationBar.barTintColor = .systemBackground
+        navigationBar.backgroundColor = .clear
+        //navigationBar.barTintColor = .systemBackground
         navigationBar.shadowImage = UIImage()
         
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
@@ -92,7 +93,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 24, weight: .bold)
-        label.textColor = UIColor.black
+        label.textColor = UIColor.label
         label.text = SignUpSteps[currentStep].title
         return label
     }()

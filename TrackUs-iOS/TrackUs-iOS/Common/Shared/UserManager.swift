@@ -9,14 +9,10 @@ import Foundation
 import Firebase
 
 /// 사용자 본인 데이터 관리
-///  UserDataM
 class UserManager {
     static let shared = UserManager()
 
     var user: User
-    static var uid: String {
-        Auth.auth().currentUser!.uid
-    }
 
     private init() {
         self.user = User()
