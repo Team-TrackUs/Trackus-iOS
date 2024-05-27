@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         LoginCheck()
         
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+        guard let _ = (scene as? UIWindowScene) else { return }
     }
     
     // Kakao 로그인 관련
@@ -68,7 +68,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        self.window?.makeKeyAndVisible()
         
         authListener = Auth.auth().addStateDidChangeListener({ auth, user in
-            
             if user == nil {
                 self.login()
             } else {

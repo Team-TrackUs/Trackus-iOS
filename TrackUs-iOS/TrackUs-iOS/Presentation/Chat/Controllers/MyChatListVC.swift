@@ -9,12 +9,12 @@ import UIKit
 
 class MyChatListVC: UIViewController {
     
-    private lazy var imageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.memoryloadImage(url: <#T##String#>)
-        //... 추가 필요 코드 작성 ...
-        return imageView
-    }()
+//    private lazy var imageView: UIImageView = {
+//        let imageView = UIImageView()
+//        imageView.memoryloadImage(url: <#T##String#>)
+//        //... 추가 필요 코드 작성 ...
+//        return imageView
+//    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()

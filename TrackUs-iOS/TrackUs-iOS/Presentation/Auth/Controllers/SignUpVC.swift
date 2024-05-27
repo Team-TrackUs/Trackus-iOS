@@ -59,7 +59,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     private lazy var navigationBar : UINavigationBar = {
         let navigationBar = UINavigationBar()
         navigationBar.translatesAutoresizingMaskIntoConstraints = false
-        navigationBar.barTintColor = .white
+        navigationBar.barTintColor = .systemBackground
         navigationBar.shadowImage = UIImage()
         
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
@@ -132,7 +132,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .white
+        self.view.backgroundColor = .systemBackground
         setupAutoLayout()
         view1.delegate = self
         view2.delegate = self
