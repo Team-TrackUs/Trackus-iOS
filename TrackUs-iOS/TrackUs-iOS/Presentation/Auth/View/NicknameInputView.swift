@@ -35,7 +35,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     
     // MARK: - UI Components
     private lazy var label: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "닉네임"
         label.textColor = .gray2
@@ -55,11 +55,10 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         textField.returnKeyType = .next
         textField.clearButtonMode = .whileEditing
         // textField 입력 활성화 - 키보드 자동 열림
-        textField.becomeFirstResponder()
-        //textField.borderStyle = .roundedRect
-        //textField.delegate = self
+        //textField.becomeFirstResponder()
+        textField.isUserInteractionEnabled = true
+        textField.delegate = self
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        textField.layer.zPosition = 999
         return textField
     }()
     
@@ -72,7 +71,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     }()
     
     private lazy var guidelabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "특수문자, 공백 제외 2~10자리"
         label.textColor = .gray2
@@ -89,7 +88,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     }()
     
     private lazy var stackView: UIStackView = {
-       let stackView = UIStackView(arrangedSubviews: [label, textField, lineView, guidelabel])
+        let stackView = UIStackView(arrangedSubviews: [label, textField, lineView, guidelabel])
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 8
@@ -110,7 +109,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     
     // MARK: - Setup AutoLayout
     private func setupAutoLayout() {
-        textField.delegate = self
+        //textField.delegate = self
         
         addSubview(stackView)
         addSubview(characterCountLabel)
@@ -119,15 +118,17 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         NSLayoutConstraint.activate([
             
             textField.heightAnchor.constraint(equalToConstant: 32),
+            textField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
             stackView.topAnchor.constraint(equalTo: topAnchor),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
             lineView.heightAnchor.constraint(equalToConstant: 1),
             lineView.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             
-            characterCountLabel.centerYAnchor.constraint(equalTo: stackView.centerYAnchor),
+            characterCountLabel.centerYAnchor.constraint(equalTo: textField.centerYAnchor),
             characterCountLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
         ])
     }
@@ -151,7 +152,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         } else {
             isError = false
             guidelabel.textColor = .gray2
-            lineView.backgroundColor = .gray3
+            lineView.backgroundColor = .mainBlue
         }
     }
     
@@ -170,10 +171,44 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         }
     }
     
-    // 엔터키 누를 경우 실행 함수
+//    // 텍스트 필드가 편집을 시작할 때 호출
+//    func textFieldDidBeginEditing(_ textField: UITextField) {
+//        lineView.backgroundColor = .mainBlue
+//    }
+//    
+//    // 텍스트 필드가 편집을 종료할 때 호출
+//    func textFieldDidEndEditing(_ textField: UITextField) {
+//        lineView.backgroundColor = .gray3
+//    }
+//    
+    /// 닉네임 반환 함수
+    func getNickname() -> String {
+        return textField.text ?? ""
+    }
+//    // 엔터키 누를 경우 실행 함수
 //    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
 //        if availability {
-//            textField.resignFirstResponder() // 키보드 숨기기
+//            //user.name = view2.getNickname()
+////            if AuthService.shared.checkUser(name: user.name){
+////                subViews[currentStep].removeFromSuperview()
+////                currentStep += 1
+////                textField.resignFirstResponder() // 키보드 숨기기
+////            }else {
+////                let alert = UIAlertController(title: "닉네임 중복",
+////                                              message: "해당 닉네임은 이미 등록된 닉네임입니다.\n 다른 닉네임으로 다시 입력해주시기 바랍니다.",
+////                                              preferredStyle: .alert)
+////                let okAction = UIAlertAction(title: "확인", style: .default, handler: nil)
+////                alert.addAction(okAction)
+////                self.present(alert, animated: true, completion: nil)
+////            }
+//            return true
+//        }else {
+//            let alert = UIAlertController(title: "닉네임 오류",
+//                                          message: "닉네임 형식을 다시 확인해주시기 바랍니다.",
+//                                          preferredStyle: .alert)
+//            let okAction = UIAlertAction(title: "확인", style: .default, handler: nil)
+//            alert.addAction(okAction)
+//            self.present(alert, animated: true, completion: nil)
 //        }
 //        return true
 //    }

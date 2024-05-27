@@ -40,6 +40,8 @@ class MainButton: UIButton, MainButtonEnabledDelegate {
         // 버튼의 공통적인 스타일 및 설정을 정의합니다.
         self.layer.cornerRadius = 28
         self.layer.masksToBounds = true
+        self.backgroundColor = buttonColor
+        self.setTitleColor(.white, for: .normal)
         
         //self.setTitle(title, for: .normal)
         self.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)

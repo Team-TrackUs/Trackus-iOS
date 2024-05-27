@@ -6,8 +6,10 @@
 //
 
 
+import Foundation
 import Firebase
 import FirebaseAuth
+import FirebaseStorage
 import CryptoKit
 import AuthenticationServices
 import KakaoSDKAuth
@@ -22,8 +24,8 @@ final class AuthService: NSObject {
     var window: UIWindow?
     fileprivate var currentNonce: String?
     
-    
-    // 로그아웃
+    // MARK: - 회원관리
+    /// 로그아웃
     func logOut() {
         do {
             try Auth.auth().signOut()
@@ -33,8 +35,81 @@ final class AuthService: NSObject {
         }
     }
     
-    // 회원탈퇴
+    /// 회원탈퇴
     
+    
+    /// 닉네임 중복 확인
+    func checkUser(name: String, completionHandler: @escaping (Bool) -> Void) async {
+        do {
+            let querySnapshot = try await Firestore.firestore().collection("user")
+                .whereField("name", isEqualTo: name).getDocuments()
+            if querySnapshot.isEmpty {
+                completionHandler(true)
+            } else {
+                completionHandler(false)
+            }
+        } catch {
+            completionHandler(true)
+        }
+    }
+    
+    /// 사용자 정보 -> 이미지 URL 반환 (String?)
+    func saveUserData(user: User, image: UIImage?) {
+        // 이미지 저장 -> url 포함 User 저장
+        guard let image = image else { return self.storeUserInformation(user: user) }
+        let uid = User.currentUid
+        let ref = Storage.storage().reference().child("usersImage/\(uid)")
+        
+        // 이미지 비율 줄이기 (용량 감소 목적)
+        guard let resizedImage = image.resizeWithWidth(width: 300) else { return }
+        // 이미지 포멧 JPEG 변경
+        guard let jpegData = resizedImage.jpegData(compressionQuality: 0.5) else { return }
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
+        // 이미지 storage에 저장
+        ref.putData(jpegData, metadata: metadata) { metadata, error in
+            if let error = error {
+                print("Failed to push image to Storage: \(error)")
+                return
+            }
+            // url 받아오기
+            ref.downloadURL { url, error in
+                if let error = error{
+                    print("Failed to retrieve downloadURL: \(error)")
+                    return
+                }
+                print("Successfully stored image with url: \(url?.absoluteString ?? "")")
+                
+                // 이미지 url 저장
+                guard let url = url else { return }
+                var user = user
+                user.profileImageUrl = url.absoluteString
+                ImageCacheManager.shared.setImage(image: image, url: url.absoluteString)
+                self.storeUserInformation(user: user)
+                return
+            }
+        }
+    }
+    
+    /// 사용자 정보 저장
+    private func storeUserInformation(user: User) {
+        let uid = User.currentUid
+        // 해당부분 자료형 지정 필요
+        let userData = ["name": user.name,
+                        "isProfilePublic": user.isProfilePublic,
+                        "profileImageUrl": user.profileImageUrl as Any,
+                        "isBlock": user.isBlock as Any,
+                        "token": user.token] as [String : Any]
+        
+        Firestore.firestore().collection("user").document(uid).setData(userData){ error in
+            if error != nil {
+                return
+            }
+            print("success")
+        }
+    }
     
     // MARK: - apple 로그인
     func handleAppleLogin() {
