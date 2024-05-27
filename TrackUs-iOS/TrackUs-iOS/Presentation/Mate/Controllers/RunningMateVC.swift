@@ -6,10 +6,13 @@
 //
 
 import UIKit
+import CoreLocation
 
 class RunningMateVC: UIViewController {
     
     // MARK: - Properties
+    
+    private var posts = [Post]()
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -58,14 +61,26 @@ class RunningMateVC: UIViewController {
         configureUI()
         tableView.delegate = self
         tableView.dataSource = self
+        
+        Task {
+            await fetchPosts()
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(false)
+        
+        Task {
+            await fetchPosts()
+        }
     }
     
     // MARK: - Selectors
     
     @objc func moveButtonTapped() {
-        let mateDetailVC = CourseRegisterVC()
-        mateDetailVC.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(mateDetailVC, animated: true)
+        let courseRegisterVC = CourseRegisterVC()
+        courseRegisterVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(courseRegisterVC, animated: true)
         
     }
     
@@ -89,7 +104,6 @@ class RunningMateVC: UIViewController {
         
         searchButton.addSubview(searchIcon)
         searchIcon.translatesAutoresizingMaskIntoConstraints = false
-//        searchIcon.topAnchor.constraint(equalTo: searchButton.topAnchor, constant: 8).isActive = true
         searchIcon.centerYAnchor.constraint(equalTo: searchButton.centerYAnchor).isActive = true
         searchIcon.trailingAnchor.constraint(equalTo: searchButton.trailingAnchor, constant: -16).isActive = true
         
@@ -121,12 +135,53 @@ class RunningMateVC: UIViewController {
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
+
+    private func fetchPosts() async {
+        print("DEBUG: Fetching posts...")
+        
+        let postService = PostService()
+        
+        do {
+            print("DEBUG: Trying to fetch posts from Firestore...")
+            
+            // fetchPost 함수 호출 및 완료까지 대기
+            try await postService.fetchPost()
+            
+            print("DEBUG: Posts fetched successfully.")
+            
+            // fetchPost 함수가 완료된 후에 posts 배열 업데이트
+            self.posts = postService.posts
+            print("DEBUG: 포스트 = \(posts)")
+            
+            // 데이터를 가져온 후 호출
+            tableView.reloadData()
+        } catch {
+            print("DEBUG: Error fetching posts - \(error.localizedDescription)")
+            
+            let nsError = error as NSError
+            print("DEBUG: Firestore error - Domain: \(nsError.domain), Code: \(nsError.code), Description: \(nsError.localizedDescription)")
+        }
+    }
     
+    func runningStyleString(for runningStyle: Int) -> String {
+        switch runningStyle {
+        case 0:
+            return "걷기"
+        case 1:
+            return "조깅"
+        case 2:
+            return "달리기"
+        case 3:
+            return "인터벌"
+        default:
+            return "걷기"
+        }
+    }
 }
 
 extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 12
+        return posts.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -134,42 +189,54 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
             fatalError("The tableView could not dequeue a MateViewCell in ViewController")
         }
         
-        cell.configure(image: UIImage(named: "profile_img") ?? UIImage(imageLiteralResourceName: "profile_img"), runningStyleLabel: "인터벌", titleLabel: "광명시 러닝 메이트 구합니다", locationLabel: "서울숲카페거리", timeLabel: "10:01 AM", distanceLabel: "1.54km", peopleLimit: 5, peopleIn: 2, dateLabel: "2024년 5월 18일")
+        let post = posts[indexPath.row]
+        // 이미지 String으로 변경
+        // SearchVC에서도 해야함
+        cell.configure(image: post.routeImageUrl, runningStyleLabel: runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let post = posts[indexPath.row]
+        
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
+        
+        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
+            
+            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
+        }
+        courseDetailVC.courseTitleLabel.text = post.title
+        courseDetailVC.courseDestriptionLabel.text = post.content
+        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
+        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
+        courseDetailVC.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
+        courseDetailVC.courseLocationLabel.text = post.address
+        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
+        courseDetailVC.personInLabel.text = "\(post.members.count)명"
+        courseDetailVC.members = post.members
+        courseDetailVC.postUid = post.uid
+        courseDetailVC.memberLimit = post.numberOfPeoples
+        courseDetailVC.imageUrl = post.routeImageUrl
+        
+        // 이미지 추가
+        // CourseRegisterVC에서도 해야함
+        PostService.downloadImage(urlString: post.routeImageUrl) { image in
+            DispatchQueue.main.async {
+                courseDetailVC.mapImageButton.setImage(image, for: .normal)
+            }
+        }
+        
+        
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)
     }
-    
-    //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    //        let offsetY = scrollView.contentOffset.y
-    //
-    //        if offsetY > 0 {
-    //            // 스크롤 중인 경우
-    //            self.moveButton.removeConstraints(self.moveButton.constraints)
-    //            self.moveButton.setTitle("", for: .normal)
-    //            self.moveButton.setImage(UIImage(systemName: "plus")?.withTintColor(.white, renderingMode: .alwaysOriginal), for: .normal)
-    //            self.moveButton.imageView?.layer.transform = CATransform3DMakeScale(1.5, 1.5, 1.5)
-    //            self.moveButton.backgroundColor = .gray2
-    //            self.moveButton.layer.cornerRadius = 60 / 2
-    //            self.moveButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
-    //            self.moveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
-    //        } else {
-    //            // 스크롤 중이 아닌 경우
-    //            self.moveButton.removeConstraints(self.moveButton.constraints)
-    //            self.moveButton.setTitle("글 쓰기", for: .normal)
-    //            self.moveButton.titleLabel?.textColor = .white
-    //            self.moveButton.titleLabel?.textAlignment = .center
-    //            self.moveButton.titleLabel?.font = .boldSystemFont(ofSize: 16)
-    //            self.moveButton.backgroundColor = .gray2
-    //            self.moveButton.layer.cornerRadius = 50 / 2
-    //            self.moveButton.setImage(nil, for: .normal)
-    //            self.moveButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
-    //            self.moveButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
-    //        }
-    //    }
+}
+
+extension Date {
+    func toString(format: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        return formatter.string(from: self)
+    }
 }

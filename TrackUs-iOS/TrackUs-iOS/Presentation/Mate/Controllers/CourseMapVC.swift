@@ -12,8 +12,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
     
     // MARK: - Properties
     
-    lazy var testcoords: [CLLocationCoordinate2D] = [] // 좌표배열
-    lazy var distance: CLLocationDistance = 0 // 거리
+    var testcoords: [CLLocationCoordinate2D] = [] // 좌표배열
     
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
@@ -25,10 +24,9 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         return mapview
     }()
     
-    private lazy var distanceLabel: UILabel = {
+     lazy var distanceLabel: UILabel = {
         let label = UILabel()
         label.backgroundColor = .mainBlue
-        label.text = "\(String(format: "%.2f", distance)) km"
         label.textColor = .white
         label.textAlignment = .center
         label.font = .boldSystemFont(ofSize: 16)
@@ -100,10 +98,10 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
     
     // 맵 세팅
     func MapConfigureUI() {
-        self.locationManager = CLLocationManager() // 사용자 위치를 가져오는데 필요한 객체
+        self.locationManager = CLLocationManager()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        locationManager.requestWhenInUseAuthorization() // 앱을 처음 열 때 사용자의 위치를 얻을 수 있는 권한을 팝업으로 요청
+        locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
         drawMapView.delegate = self
         drawMapView.mapType = MKMapType.standard
@@ -141,7 +139,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
             if !isRegionSet {
                 
                 let center = CLLocationCoordinate2D(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
-                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03))
                 drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
                 
                 isRegionSet = true
@@ -177,7 +175,6 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         
         if let pin = annotation as? MKPointAnnotation {
             let label = UILabel(frame: CGRect(x: -8, y: -8, width: 20, height: 20))
-//            label.text = pin.title ?? ""
             label.text = pin.title ?? "\(testcoords.count + 1)"
             label.textColor = .mainBlue
             label.textAlignment = .center
