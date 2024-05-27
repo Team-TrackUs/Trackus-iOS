@@ -34,7 +34,6 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
         let image = UIImage(systemName: "camera.circle.fill")
         let imageView = UIImageView(image: image)
         
-        
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.heightAnchor.constraint(equalToConstant: 40).isActive = true
         imageView.widthAnchor.constraint(equalToConstant: 40).isActive = true

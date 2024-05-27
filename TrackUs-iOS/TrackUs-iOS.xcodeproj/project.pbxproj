@@ -35,13 +35,14 @@
 		82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45802BEFB128007AE54A /* MyChatListVC.swift */; };
 		82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45822BEFB137007AE54A /* MyProfileVC.swift */; };
 		82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */; };
-		82C38AC72BFC91A2004819C1 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 82C38AC62BFC91A2004819C1 /* Config.xcconfig */; };
 		82C38AC92BFCA187004819C1 /* String+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AC82BFCA187004819C1 /* String+.swift */; };
 		82C38ACB2BFCA18E004819C1 /* Int+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACA2BFCA18E004819C1 /* Int+.swift */; };
 		82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACE2BFCA57B004819C1 /* Array+.swift */; };
 		82C38AD12BFCE0C4004819C1 /* CoreLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */; };
 		82C38AD32BFCE445004819C1 /* Double+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD22BFCE445004819C1 /* Double+.swift */; };
 		9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9866E6172BFB63ED0031E8B6 /* SplashView.swift */; };
+		987F6F1A2C044A43004F6615 /* info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 987F6F192C044A43004F6615 /* info.plist */; };
+		987F6F1E2C0499A0004F6615 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 987F6F1D2C0499A0004F6615 /* GoogleService-Info.plist */; };
 		9885ACF42BF9E8AA00367991 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF32BF9E8AA00367991 /* KakaoSDK */; };
 		9885ACF62BF9E8AA00367991 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF52BF9E8AA00367991 /* KakaoSDKAuth */; };
 		9885ACF82BF9E8AA00367991 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF72BF9E8AA00367991 /* KakaoSDKCommon */; };
@@ -59,6 +60,8 @@
 		988618332BF34AE0002ACB4E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988618322BF34AE0002ACB4E /* User.swift */; };
 		988618382BF37E81002ACB4E /* SignUpVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988618372BF37E81002ACB4E /* SignUpVC.swift */; };
 		9886183A2BF4FFEB002ACB4E /* MainButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 988618392BF4FFEB002ACB4E /* MainButton.swift */; };
+		98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98887F8D2BFDBDCB006F929E /* ImageCacheManager.swift */; };
+		98887F922C00938F006F929E /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98887F912C00938F006F929E /* UserManager.swift */; };
 		9898034B2BF5F14200F5DFBD /* AgreementInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9898034A2BF5F14200F5DFBD /* AgreementInputView.swift */; };
 		98AB54472BF71B390047310A /* NicknameInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AB54462BF71B390047310A /* NicknameInputView.swift */; };
 		98AB54492BF71B620047310A /* ProfilePictureInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AB54482BF71B620047310A /* ProfilePictureInputView.swift */; };
@@ -98,19 +101,23 @@
 		82BE45802BEFB128007AE54A /* MyChatListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyChatListVC.swift; sourceTree = "<group>"; };
 		82BE45822BEFB137007AE54A /* MyProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileVC.swift; sourceTree = "<group>"; };
 		82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarVC.swift; sourceTree = "<group>"; };
-		82C38AC62BFC91A2004819C1 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		82C38AC82BFCA187004819C1 /* String+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+.swift"; sourceTree = "<group>"; };
 		82C38ACA2BFCA18E004819C1 /* Int+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+.swift"; sourceTree = "<group>"; };
 		82C38ACE2BFCA57B004819C1 /* Array+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+.swift"; sourceTree = "<group>"; };
 		82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreLocation.swift; sourceTree = "<group>"; };
 		82C38AD22BFCE445004819C1 /* Double+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+.swift"; sourceTree = "<group>"; };
 		9866E6172BFB63ED0031E8B6 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		987F6F192C044A43004F6615 /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = info.plist; sourceTree = "<group>"; };
+		987F6F1D2C0499A0004F6615 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		9885ACFB2BF9E92300367991 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		988618162BF317EE002ACB4E /* UIImage+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+.swift"; sourceTree = "<group>"; };
 		9886182F2BF348C8002ACB4E /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		988618322BF34AE0002ACB4E /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOS.entitlements"; sourceTree = "<group>"; };
 		988618372BF37E81002ACB4E /* SignUpVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpVC.swift; sourceTree = "<group>"; };
 		988618392BF4FFEB002ACB4E /* MainButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainButton.swift; sourceTree = "<group>"; };
+		98887F8D2BFDBDCB006F929E /* ImageCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheManager.swift; sourceTree = "<group>"; };
+		98887F912C00938F006F929E /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		9898034A2BF5F14200F5DFBD /* AgreementInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgreementInputView.swift; sourceTree = "<group>"; };
 		98AB54462BF71B390047310A /* NicknameInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NicknameInputView.swift; sourceTree = "<group>"; };
 		98AB54482BF71B620047310A /* ProfilePictureInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePictureInputView.swift; sourceTree = "<group>"; };
@@ -170,6 +177,7 @@
 			children = (
 				822E06B52BF1EC2500636CCC /* LocationService.swift */,
 				82707D0E2BF72BD40038E4A7 /* Haptic.swift */,
+				98887F912C00938F006F929E /* UserManager.swift */,
 				82596A892C034CAC00DA6C70 /* CoreMotion.swift */,
 			);
 			path = Shared;
@@ -378,6 +386,7 @@
 			isa = PBXGroup;
 			children = (
 				9886182F2BF348C8002ACB4E /* AuthService.swift */,
+				98887F8D2BFDBDCB006F929E /* ImageCacheManager.swift */,
 				61625E392BFE75A500E6D1F3 /* PostService.swift */,
 			);
 			path = Service;
@@ -471,10 +480,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				987F6F1A2C044A43004F6615 /* info.plist in Resources */,
 				82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */,
+				82BE45642BEFA94A007AE54A /* Base in Resources */,
 				61625E412C04855F00E6D1F3 /* GoogleService-Info.plist in Resources */,
 				82C38AC72BFC91A2004819C1 /* Config.xcconfig in Resources */,
-				82BE455F2BEFA948007AE54A /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -499,6 +509,7 @@
 				988618332BF34AE0002ACB4E /* User.swift in Sources */,
 				61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
+				98887F922C00938F006F929E /* UserManager.swift in Sources */,
 				61625E382BFE6EE500E6D1F3 /* Post.swift in Sources */,
 				61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */,
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
@@ -508,6 +519,7 @@
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
 				821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */,
 				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
+				98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */,
 				8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
 				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
@@ -692,6 +704,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -735,6 +748,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
