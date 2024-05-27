@@ -9,7 +9,12 @@ import UIKit
 
  class RunInfoCell: UITableViewCell {
     static let identifier = "RunInfoCell"
-    
+     var runInfo: RunInfoModel? {
+         didSet {
+             setupUI()
+         }
+     }
+     
     private let title: UILabel = {
         let label = UILabel()
         label.text = "칼로리"
@@ -17,7 +22,7 @@ import UIKit
         return label
     }()
     
-    private let value: UILabel = {
+    private let result: UILabel = {
         let label = UILabel()
         label.text = "123 kcal"
         return label
@@ -63,7 +68,7 @@ import UIKit
     private func setupViews() {
         contentView.addSubview(stackView)
         stackView.addArrangedSubview(title)
-        stackView.addArrangedSubview(value)
+        stackView.addArrangedSubview(result)
         
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 0),
@@ -72,5 +77,10 @@ import UIKit
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
         ])
     }
+     
+     private func setupUI() {
+         title.text = runInfo?.title
+         result.text = runInfo?.result
+     }
 }
 

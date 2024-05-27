@@ -8,8 +8,14 @@
 import UIKit
 import MapKit
 class RunningResultVC: UIViewController {
-    
     // MARK: - Properties
+    var runManager: RunTrackingManager? {
+        didSet {
+            setupUI()
+        }
+    }
+    private var runInfo: [RunInfoModel] = []
+    
     private var mapView: MKMapView!
     private lazy var saveButton: UIButton = {
         let bt = MainButton()
@@ -86,7 +92,7 @@ class RunningResultVC: UIViewController {
             tableView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
             tableView.topAnchor.constraint(equalTo: kmLabel.bottomAnchor, constant: 20),
-            tableView.heightAnchor.constraint(equalToConstant: 200),
+            tableView.heightAnchor.constraint(equalToConstant: CGFloat(runInfo.count) * 50),
             
             detailButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             detailButton.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 20),
@@ -114,18 +120,32 @@ class RunningResultVC: UIViewController {
         mapView.layer.cornerRadius = 10
         mapView.showsUserLocation = false
     }
+    
+    func setupUI() {
+        guard let runModel = runManager?.runModel else { return }
+        kmLabel.text = runModel.distance.asString(style: .km) // 킬로미터
+        
+        // 테이블뷰 설정
+        runInfo = [
+            RunInfoModel(title: "칼로리", result: "\(runModel.calorie.asString(style: .kcal)) kcal"),
+            RunInfoModel(title: "러닝 타임", result: runModel.seconds.toMMSSTimeFormat),
+            RunInfoModel(title: "페이스", result: runModel.pace.asString(style: .pace)),
+            RunInfoModel(title: "상승고도", result: "+ \(Int(runModel.maxAltitude))m"),
+        ]
+        tableView.reloadData()
+    }
 }
 
 extension RunningResultVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 4
+        return runInfo.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: RunInfoCell.identifier, for: indexPath) as? RunInfoCell else {
             return UITableViewCell()
         }
-
+        cell.runInfo = runInfo[indexPath.row]
         return cell
     }
 }
