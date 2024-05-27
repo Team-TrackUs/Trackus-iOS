@@ -78,9 +78,9 @@ class RunningMateVC: UIViewController {
     // MARK: - Selectors
     
     @objc func moveButtonTapped() {
-        let mateDetailVC = CourseRegisterVC()
-        mateDetailVC.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(mateDetailVC, animated: true)
+        let courseRegisterVC = CourseRegisterVC()
+        courseRegisterVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(courseRegisterVC, animated: true)
         
     }
     
