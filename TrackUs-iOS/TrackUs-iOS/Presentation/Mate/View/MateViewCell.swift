@@ -41,7 +41,6 @@ class MateViewCell: UITableViewCell {
         label.layer.cornerRadius = 5
         label.textColor = .white
         label.textAlignment = .center
-        label.backgroundColor = .mainBlue
         return label
     }()
     
@@ -81,11 +80,6 @@ class MateViewCell: UITableViewCell {
         return label
     }()
     
-//    let locationIcon = UIImageView(image: UIImage(named: "pin_icon"))
-//    let timeIcon = UIImageView(image: UIImage(named: "time_icon"))
-//    let distanceIcon = UIImageView(image: UIImage(named: "arrowBoth_icon"))
-//    let peopleIcon = UIImageView(image: UIImage(named: "people_icon"))
-    
     let locationIcon: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "locationPin_icon"))
         imageView.layer.transform = CATransform3DMakeScale(1.2, 0.9, 0.9)
@@ -106,23 +100,30 @@ class MateViewCell: UITableViewCell {
     
     let peopleIcon: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "people_icon"))
-//        imageView.layer.transform = CATransform3DMakeScale(0.6, 0.6, 0.6)
         return imageView
+    }()
+    
+    let closingLabel: UILabel = {
+        let label = UILabel()
+        label.text = "마감"
+        label.font = .boldSystemFont(ofSize: 24)
+        label.textColor = .gray1
+        label.textAlignment = .center
+        return label
+    }()
+    
+    let endLabel: UILabel = {
+        let label = UILabel()
+        label.text = "종료"
+        label.font = .boldSystemFont(ofSize: 24)
+        label.textColor = .gray1
+        label.textAlignment = .center
+        return label
     }()
     
     
     // MARK: - Lifecycle
 
-//    override func awakeFromNib() {
-//        super.awakeFromNib()
-//        // Initialization code
-//    }
-//
-//    override func setSelected(_ selected: Bool, animated: Bool) {
-//        super.setSelected(selected, animated: animated)
-//
-//        // Configure the view for the selected state
-//    }
     override init(style: UITableViewCell.CellStyle, reuseIdentifier reuseIndentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIndentifier)
         self.configureUI()
@@ -142,6 +143,12 @@ class MateViewCell: UITableViewCell {
         profileImageView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
         profileImageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
         profileImageView.heightAnchor.constraint(equalToConstant: 87).isActive = true
+        
+        profileImageView.addSubview(closingLabel)
+        closingLabel.translatesAutoresizingMaskIntoConstraints = false
+        closingLabel.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor).isActive = true
+        closingLabel.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor).isActive = true
+        closingLabel.isHidden = true
         
         self.contentView.addSubview(runningStyleLabel)
         runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -197,16 +204,49 @@ class MateViewCell: UITableViewCell {
         dateLabel.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
     }
     
-    public func configure(image: UIImage, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
+    public func configure(image: String, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
         
-        self.profileImageView.image = image
+//        self.profileImageView.image = image
+        // 이미지 추가
+        PostService.downloadImage(urlString: image) { image in
+//            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.profileImageView.image = image
+            }
+        }
+        
         self.runningStyleLabel.text = runningStyleLabel
-        self.titleLabel.text = titleLabel
+        
+        if titleLabel.count > 20 {
+            self.titleLabel.text = "\(titleLabel.prefix(20))..."
+        } else {
+            self.titleLabel.text = titleLabel
+        }
+        
         self.locationLabel.text = locationLabel
         self.timeLabel.text = timeLabel
         self.distanceLabel.text = distanceLabel
         self.peopleLabel.text = "\(peopleIn) / \(peopleLimit)"
         self.dateLabel.text = dateLabel
+        
+        switch runningStyleLabel {
+        case "걷기":
+            self.runningStyleLabel.backgroundColor = .walking
+        case "조깅":
+            self.runningStyleLabel.backgroundColor = .jogging
+        case "달리기":
+            self.runningStyleLabel.backgroundColor = .running
+        case "인터벌":
+            self.runningStyleLabel.backgroundColor = .interval
+        default:
+            self.runningStyleLabel.backgroundColor = .mainBlue
+        }
+        
+        if peopleIn >= peopleLimit {
+            closingLabel.isHidden = false
+        } else {
+            closingLabel.isHidden = true
+        }
     }
 
 }
