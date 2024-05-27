@@ -65,6 +65,13 @@ class RunningResultVC: UIViewController {
         return bt
     }()
     
+    private lazy var divider: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .gray3
+        return view
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,6 +99,7 @@ class RunningResultVC: UIViewController {
         view.addSubview(detailButton)
         view.addSubview(mapView)
         view.addSubview(saveButton)
+        view.addSubview(divider)
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
@@ -111,11 +119,16 @@ class RunningResultVC: UIViewController {
             mapView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             mapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
             mapView.topAnchor.constraint(equalTo: detailButton.bottomAnchor, constant: 20),
-            mapView.heightAnchor.constraint(equalToConstant: 230),
+            mapView.heightAnchor.constraint(equalToConstant: 250),
             
             saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
+            divider.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            divider.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            divider.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -14),
+            divider.heightAnchor.constraint(equalToConstant: 1)
         ])
     }
     
@@ -128,7 +141,6 @@ class RunningResultVC: UIViewController {
     func setupMapView() {
         mapView = MKMapView()
         mapView.translatesAutoresizingMaskIntoConstraints = false
-        mapView.layer.cornerRadius = 10
         mapView.showsUserLocation = false
     }
     
