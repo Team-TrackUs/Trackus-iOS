@@ -38,6 +38,21 @@ final class AuthService: NSObject {
     /// 회원탈퇴
     
     
+    /// 닉네임 중복 확인
+    func checkUser(name: String, completionHandler: @escaping (Bool) -> Void) async {
+        do {
+            let querySnapshot = try await Firestore.firestore().collection("user")
+                .whereField("name", isEqualTo: name).getDocuments()
+            if querySnapshot.isEmpty {
+                completionHandler(true)
+            } else {
+                completionHandler(false)
+            }
+        } catch {
+            completionHandler(true)
+        }
+    }
+    
     /// 사용자 정보 -> 이미지 URL 반환 (String?)
     func saveUserData(user: User, image: UIImage?) {
         // 이미지 저장 -> url 포함 User 저장

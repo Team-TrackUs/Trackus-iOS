@@ -171,19 +171,46 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         }
     }
     
-    // 텍스트 필드가 편집을 시작할 때 호출
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        lineView.backgroundColor = .mainBlue
-    }
-    
-    // 텍스트 필드가 편집을 종료할 때 호출
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        lineView.backgroundColor = .gray3
-    }
-    
+//    // 텍스트 필드가 편집을 시작할 때 호출
+//    func textFieldDidBeginEditing(_ textField: UITextField) {
+//        lineView.backgroundColor = .mainBlue
+//    }
+//    
+//    // 텍스트 필드가 편집을 종료할 때 호출
+//    func textFieldDidEndEditing(_ textField: UITextField) {
+//        lineView.backgroundColor = .gray3
+//    }
+//    
     /// 닉네임 반환 함수
     func getNickname() -> String {
         return textField.text ?? ""
     }
+//    // 엔터키 누를 경우 실행 함수
+//    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+//        if availability {
+//            //user.name = view2.getNickname()
+////            if AuthService.shared.checkUser(name: user.name){
+////                subViews[currentStep].removeFromSuperview()
+////                currentStep += 1
+////                textField.resignFirstResponder() // 키보드 숨기기
+////            }else {
+////                let alert = UIAlertController(title: "닉네임 중복",
+////                                              message: "해당 닉네임은 이미 등록된 닉네임입니다.\n 다른 닉네임으로 다시 입력해주시기 바랍니다.",
+////                                              preferredStyle: .alert)
+////                let okAction = UIAlertAction(title: "확인", style: .default, handler: nil)
+////                alert.addAction(okAction)
+////                self.present(alert, animated: true, completion: nil)
+////            }
+//            return true
+//        }else {
+//            let alert = UIAlertController(title: "닉네임 오류",
+//                                          message: "닉네임 형식을 다시 확인해주시기 바랍니다.",
+//                                          preferredStyle: .alert)
+//            let okAction = UIAlertAction(title: "확인", style: .default, handler: nil)
+//            alert.addAction(okAction)
+//            self.present(alert, animated: true, completion: nil)
+//        }
+//        return true
+//    }
 }
 

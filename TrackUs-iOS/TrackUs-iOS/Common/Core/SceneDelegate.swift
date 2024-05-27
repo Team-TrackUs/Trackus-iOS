@@ -68,8 +68,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        self.window?.makeKeyAndVisible()
         
         authListener = Auth.auth().addStateDidChangeListener({ auth, user in
-            // 리스너 등록 해제
-            Auth.auth().removeStateDidChangeListener(self.authListener!)
             
             if user == nil {
                 self.login()
@@ -81,6 +79,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                             self.signUp()
                         } else {
                             self.startApp()
+                            // 리스너 등록 해제
+                            Auth.auth().removeStateDidChangeListener(self.authListener!)
                         }
                     }
                 }
