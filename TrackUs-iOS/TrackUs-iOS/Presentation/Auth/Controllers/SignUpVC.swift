@@ -9,7 +9,7 @@ import UIKit
 
 class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
-    var user = UserDataManager.shared.user
+    var user = UserManager.shared.user
     
     var currentStep = 0 {
         didSet{

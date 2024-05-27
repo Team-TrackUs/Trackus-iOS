@@ -73,7 +73,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 self.login()
             } else {
                 DispatchQueue.main.async {
-                    UserDataManager.shared.getUserData(uid: user?.uid) { newUser in
+                    UserManager.shared.getUserData(uid: user?.uid) { newUser in
                         print("사용자 정보 불러오기 시작")
                         if newUser {
                             self.signUp()

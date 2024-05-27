@@ -9,8 +9,6 @@ import Foundation
 import Firebase
 
 struct User: Codable{
-    // 이후 모델
-    //var uid: String
     var name: String = ""
     var profileImageUrl: String?
     var isProfilePublic: Bool = true

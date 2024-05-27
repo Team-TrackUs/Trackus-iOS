@@ -86,6 +86,7 @@ final class AuthService: NSObject {
                 guard let url = url else { return }
                 var user = user
                 user.profileImageUrl = url.absoluteString
+                ImageCacheManager.shared.setImage(image: image, url: url.absoluteString)
                 self.storeUserInformation(user: user)
                 return
             }
