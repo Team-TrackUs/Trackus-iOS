@@ -21,6 +21,8 @@
 		82596A8C2C0352DE00DA6C70 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 82596A8B2C0352DE00DA6C70 /* Config.xcconfig */; };
 		82596A8E2C0352F300DA6C70 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 82596A8D2C0352F300DA6C70 /* GoogleService-Info.plist */; };
 		826248192BFB4D9B0028C221 /* Running.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826248182BFB4D9B0028C221 /* Running.swift */; };
+		826922E32C045B8B00D506C2 /* RunInfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826922E22C045B8B00D506C2 /* RunInfoCell.swift */; };
+		826922E52C04664000D506C2 /* RunInfoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826922E42C04664000D506C2 /* RunInfoModel.swift */; };
 		82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82707D0E2BF72BD40038E4A7 /* Haptic.swift */; };
 		8280D26D2BF12945002CB7DD /* RunActivityVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26C2BF12945002CB7DD /* RunActivityVC.swift */; };
 		8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26E2BF12BD2002CB7DD /* LoginVC.swift */; };
@@ -94,6 +96,8 @@
 		82596A8F2C0353F700DA6C70 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82596AAE2C035A3100DA6C70 /* RunningWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunningWidgetExtension.entitlements; sourceTree = "<group>"; };
 		826248182BFB4D9B0028C221 /* Running.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Running.swift; sourceTree = "<group>"; };
+		826922E22C045B8B00D506C2 /* RunInfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunInfoCell.swift; sourceTree = "<group>"; };
+		826922E42C04664000D506C2 /* RunInfoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunInfoModel.swift; sourceTree = "<group>"; };
 		82707D0E2BF72BD40038E4A7 /* Haptic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptic.swift; sourceTree = "<group>"; };
 		8280D26C2BF12945002CB7DD /* RunActivityVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunActivityVC.swift; sourceTree = "<group>"; };
 		8280D26E2BF12BD2002CB7DD /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
@@ -159,12 +163,13 @@
 			path = View;
 			sourceTree = "<group>";
 		};
-		821C00B42BF7411200B1C022 /* Services */ = {
+		821C00B42BF7411200B1C022 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				821C00B12BF7410400B1C022 /* RunTrackingManager.swift */,
+				826922E42C04664000D506C2 /* RunInfoModel.swift */,
 			);
-			path = Services;
+			path = Models;
 			sourceTree = "<group>";
 		};
 		822E06B42BF1EC0D00636CCC /* Shared */ = {
@@ -183,6 +188,14 @@
 				822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */,
 			);
 			path = Protocol;
+			sourceTree = "<group>";
+		};
+		826922E12C045AC200D506C2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				826922E22C045B8B00D506C2 /* RunInfoCell.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		82BE454B2BEFA947007AE54A = {
@@ -282,7 +295,8 @@
 		82BE45732BEFAFB3007AE54A /* Running */ = {
 			isa = PBXGroup;
 			children = (
-				821C00B42BF7411200B1C022 /* Services */,
+				826922E12C045AC200D506C2 /* Views */,
+				821C00B42BF7411200B1C022 /* Models */,
 				82BE45762BEFB020007AE54A /* Controllers */,
 			);
 			path = Running;
@@ -499,6 +513,7 @@
 				82BE457F2BEFB0E4007AE54A /* RunningMateVC.swift in Sources */,
 				82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */,
 				988618332BF34AE0002ACB4E /* User.swift in Sources */,
+				826922E32C045B8B00D506C2 /* RunInfoCell.swift in Sources */,
 				61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
 				61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */,
@@ -517,6 +532,7 @@
 				826248192BFB4D9B0028C221 /* Running.swift in Sources */,
 				82C38AD32BFCE445004819C1 /* Double+.swift in Sources */,
 				82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */,
+				826922E52C04664000D506C2 /* RunInfoModel.swift in Sources */,
 				61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */,
 				82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */,
 				82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */,
@@ -684,7 +700,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
+				INFOPLIST_FILE = "/Users/seokkikwon/Desktop/Trackus-iOS/TrackUs-iOS/TrackUs-iOS/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
@@ -727,7 +743,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "TrackUs-iOS/Info.plist";
+				INFOPLIST_FILE = "/Users/seokkikwon/Desktop/Trackus-iOS/TrackUs-iOS/TrackUs-iOS/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱을 이용하려면 위치정보 접근 권한이 필요합니다.";
