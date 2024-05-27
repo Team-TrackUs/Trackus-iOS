@@ -404,56 +404,54 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                 guard let self = self else { return }
                 print("DEBUG: Starting image upload...")
                 
-                DispatchQueue.global(qos: .userInitiated).async {
-                    PostService.uploadImage(image: image) { url in
-                        if let url = url {
-                            print("DEBUG: Image uploaded successfully. URL: \(url.absoluteString)")
-                            post.updateRouteImageUrl(newUrl: url.absoluteString)
-                            print("DEBUG: Starting post upload...")
-                            
-                            // Post 업로드
-                            PostService().uploadPost(post: post) { error in
-                                if let error = error {
-                                    print("DEBUG: Failed to upload post: \(error.localizedDescription)")
-                                } else {
-                                    print("DEBUG: Post uploded Successfully")
+                PostService.uploadImage(image: image) { url in
+                    if let url = url {
+                        print("DEBUG: Image uploaded successfully. URL: \(url.absoluteString)")
+                        post.updateRouteImageUrl(newUrl: url.absoluteString)
+                        print("DEBUG: Starting post upload...")
+                        
+                        // Post 업로드
+                        PostService().uploadPost(post: post) { error in
+                            if let error = error {
+                                print("DEBUG: Failed to upload post: \(error.localizedDescription)")
+                            } else {
+                                print("DEBUG: Post uploded Successfully")
+                                
+                                DispatchQueue.main.async {
+                                    let courseDetailVC = CourseDetailVC()
                                     
-                                    DispatchQueue.main.async {
-                                        let courseDetailVC = CourseDetailVC()
+                                    courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
                                         
-                                        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
-                                            
-                                            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
-                                        }
-                                        courseDetailVC.courseTitleLabel.text = post.title
-                                        courseDetailVC.courseDestriptionLabel.text = post.content
-                                        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
-                                        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-                                        courseDetailVC.runningStyleLabel.text = RunningMateVC().runningStyleString(for: post.runningStyle)
-                                        courseDetailVC.courseLocationLabel.text = post.address
-                                        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
-                                        courseDetailVC.personInLabel.text = "\(post.members.count)명"
-                                        courseDetailVC.members = post.members
-                                        courseDetailVC.postUid = post.uid
-                                        courseDetailVC.memberLimit = post.numberOfPeoples
-                                        courseDetailVC.imageUrl = post.routeImageUrl
-                                        
-                                        // 이미지 추가
-                                        PostService.downloadImage(urlString: post.routeImageUrl) { image in
-                                            DispatchQueue.main.async {
-                                                courseDetailVC.mapImageButton.setImage(image, for: .normal)
-                                            }
-                                        }
-                                        
-                                        self.navigationController?.popToRootViewController(animated: true)
-                                        courseDetailVC.hidesBottomBarWhenPushed = true
-                                        self.navigationController?.pushViewController(courseDetailVC, animated: true)
+                                        return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
                                     }
+                                    courseDetailVC.courseTitleLabel.text = post.title
+                                    courseDetailVC.courseDestriptionLabel.text = post.content
+                                    courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
+                                    courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
+                                    courseDetailVC.runningStyleLabel.text = RunningMateVC().runningStyleString(for: post.runningStyle)
+                                    courseDetailVC.courseLocationLabel.text = post.address
+                                    courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
+                                    courseDetailVC.personInLabel.text = "\(post.members.count)명"
+                                    courseDetailVC.members = post.members
+                                    courseDetailVC.postUid = post.uid
+                                    courseDetailVC.memberLimit = post.numberOfPeoples
+                                    courseDetailVC.imageUrl = post.routeImageUrl
+                                    
+                                    // 이미지 추가
+                                    PostService.downloadImage(urlString: post.routeImageUrl) { image in
+                                        DispatchQueue.main.async {
+                                            courseDetailVC.mapImageButton.setImage(image, for: .normal)
+                                        }
+                                    }
+                                    
+                                    self.navigationController?.popToRootViewController(animated: true)
+                                    courseDetailVC.hidesBottomBarWhenPushed = true
+                                    self.navigationController?.pushViewController(courseDetailVC, animated: true)
                                 }
                             }
-                        } else {
-                            print("DEBUG: Image upload failed")
                         }
+                    } else {
+                        print("DEBUG: Image upload failed")
                     }
                 }
             }
