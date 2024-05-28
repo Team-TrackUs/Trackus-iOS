@@ -159,14 +159,6 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
         courseDetailVC.memberLimit = post.numberOfPeoples
         courseDetailVC.imageUrl = post.routeImageUrl
 
-        // 이미지 추가
-        // CourseRegisterVC에서도 해야함
-        PostService.downloadImage(urlString: post.routeImageUrl) { image in
-            DispatchQueue.main.async {
-                courseDetailVC.mapImageButton.setImage(image, for: .normal)
-            }
-        }
-
         self.searchBar.resignFirstResponder()
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
 
