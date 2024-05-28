@@ -11,7 +11,7 @@ class RunInfoDetailVC: UIViewController {
     // MARK: - Properties
     var runModel: Running? {
         didSet {
-            setTableData()
+            setupUI()
         }
     }
     private var runInfo: [RunInfoModel] = []
@@ -72,9 +72,10 @@ class RunInfoDetailVC: UIViewController {
         ])
     }
     
-    func setTableData() {
+    func setupUI() {
         guard let runModel = runModel else { return }
-        
+        titleLabel.text = "\(runModel.startTime.fullYear) \(runModel.startTime.timeOfDay)러닝"
+        subTitleLabel.text = "\(runModel.startTime.currentTime) - \(runModel.endTime.currentTime)"
         runInfo = [
             RunInfoModel(title: "시간", result: runModel.seconds.toMMSSTimeFormat),
             RunInfoModel(title: "거리(킬로미터)", result: runModel.distance.asString(style: .km)),

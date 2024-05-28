@@ -30,7 +30,6 @@ class RunningResultVC: UIViewController {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "🏃‍♂️ 종로3가 에서 러닝 - 오후 12:32"
         label.textColor = .gray1
         return label
     }()
@@ -148,7 +147,7 @@ class RunningResultVC: UIViewController {
     func setupUI() {
         guard let runModel = runModel else { return }
         kmLabel.text = runModel.distance.asString(style: .km) // 킬로미터
-        titleLabel.text = "🏃‍♂️ \(runModel.address) 에서 러닝 - 오후 12:32"
+        titleLabel.text = "🏃‍♂️ \(runModel.address) 에서 러닝 - \(runModel.startTime.timeOfDay) \(runModel.startTime.currentTime)"
         // 테이블뷰 설정
         runInfo = [
             RunInfoModel(title: "칼로리", result: "\(runModel.calorie.asString(style: .kcal)) kcal"),

@@ -246,7 +246,7 @@ final class RunTrackingVC: UIViewController {
         setMapRegion()
         setConstraint()
         setTimer()
-        setAddress()
+        setRunInfo()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -369,6 +369,7 @@ final class RunTrackingVC: UIViewController {
     }
     
     func goToResultVC() {
+        runModel.setEndTime()
         HapticManager.shared.hapticImpact(style: .medium)
         let resultVC = RunningResultVC()
         resultVC.runModel = runModel
@@ -443,7 +444,8 @@ final class RunTrackingVC: UIViewController {
         }
     }
     
-    func setAddress() {
+    func setRunInfo() {
+        runModel.setStartTime()
         guard let location = locationService.currentLocation?.asCLLocation else {
             return
         }

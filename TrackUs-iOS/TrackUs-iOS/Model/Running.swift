@@ -20,8 +20,9 @@ struct Running: Codable {
     var maxAltitude: Double = 0.0
     var minAltitude: Double = 0.0
     var geoPoints: [GeoPoint] = []
-    var isGroup: Bool = false
     var routeImageUrl: String = ""
+    var startTime: Date!
+    var endTime: Date!
     var createdAt: Timestamp!
     
     var coordinates: [CLLocationCoordinate2D] {
@@ -42,4 +43,11 @@ struct Running: Codable {
         }
     }
     
+    mutating func setStartTime() {
+        startTime = Date()
+    }
+    
+    mutating func setEndTime() {
+        endTime = Date()
+    }
 }
