@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		61625E382BFE6EE500E6D1F3 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61625E372BFE6EE500E6D1F3 /* Post.swift */; };
 		61625E3A2BFE75A500E6D1F3 /* PostService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61625E392BFE75A500E6D1F3 /* PostService.swift */; };
-		61625E412C04855F00E6D1F3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61625E402C04855F00E6D1F3 /* GoogleService-Info.plist */; };
 		6193AD182BF34C9C00C59D43 /* CourseRegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */; };
 		61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */; };
 		61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC92BF8F950009E360B /* CourseMapVC.swift */; };
@@ -28,7 +27,6 @@
 		8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D2742BF137E2002CB7DD /* RunningResultVC.swift */; };
 		82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45572BEFA947007AE54A /* AppDelegate.swift */; };
 		82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45592BEFA948007AE54A /* SceneDelegate.swift */; };
-		82BE455F2BEFA948007AE54A /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 82BE455E2BEFA948007AE54A /* Base */; };
 		82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82BE45602BEFA94A007AE54A /* Assets.xcassets */; };
 		82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE457B2BEFB0A0007AE54A /* RunningHomeVC.swift */; };
 		82BE457F2BEFB0E4007AE54A /* RunningMateVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE457E2BEFB0E4007AE54A /* RunningMateVC.swift */; };
@@ -41,9 +39,10 @@
 		82C38AD12BFCE0C4004819C1 /* CoreLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */; };
 		82C38AD32BFCE445004819C1 /* Double+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD22BFCE445004819C1 /* Double+.swift */; };
 		9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9866E6172BFB63ED0031E8B6 /* SplashView.swift */; };
-		987F6F1E2C0499A0004F6615 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 987F6F1D2C0499A0004F6615 /* GoogleService-Info.plist */; };
 		987F6F262C04D7F9004F6615 /* KakaoSDKCert in Frameworks */ = {isa = PBXBuildFile; productRef = 987F6F252C04D7F9004F6615 /* KakaoSDKCert */; };
 		987F6F282C04D7F9004F6615 /* KakaoSDKCertCore in Frameworks */ = {isa = PBXBuildFile; productRef = 987F6F272C04D7F9004F6615 /* KakaoSDKCertCore */; };
+		987F6F2A2C04E153004F6615 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 987F6F1D2C0499A0004F6615 /* GoogleService-Info.plist */; };
+		987F6F2B2C04E214004F6615 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 82BE455D2BEFA948007AE54A /* Main.storyboard */; };
 		9885ACF42BF9E8AA00367991 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF32BF9E8AA00367991 /* KakaoSDK */; };
 		9885ACF62BF9E8AA00367991 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF52BF9E8AA00367991 /* KakaoSDKAuth */; };
 		9885ACF82BF9E8AA00367991 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF72BF9E8AA00367991 /* KakaoSDKCommon */; };
@@ -73,7 +72,6 @@
 		61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		61625E372BFE6EE500E6D1F3 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		61625E392BFE75A500E6D1F3 /* PostService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostService.swift; sourceTree = "<group>"; };
-		61625E3E2C04848400E6D1F3 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../../../Info.plist; sourceTree = "<group>"; };
 		61625E402C04855F00E6D1F3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseRegisterVC.swift; sourceTree = "<group>"; };
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
@@ -154,6 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */,
+				61625E402C04855F00E6D1F3 /* GoogleService-Info.plist */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -485,10 +484,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				987F6F2B2C04E214004F6615 /* Main.storyboard in Resources */,
+				987F6F2A2C04E153004F6615 /* GoogleService-Info.plist in Resources */,
 				82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */,
-				82BE45642BEFA94A007AE54A /* Base in Resources */,
-				61625E412C04855F00E6D1F3 /* GoogleService-Info.plist in Resources */,
-				82C38AC72BFC91A2004819C1 /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

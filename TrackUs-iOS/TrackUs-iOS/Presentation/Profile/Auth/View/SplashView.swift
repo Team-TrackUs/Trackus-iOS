@@ -11,14 +11,14 @@ class SplashView: UIViewController {
     
     private lazy var image: UIImageView = {
         let image = UIImage(named: "trackus_icon")?.resize(width: 90, height: 73)
-        image?.withTintColor(.white, renderingMode: .alwaysTemplate)
-        //image?.size.width = 30
-        return UIImageView(image: image)
+        let imageView = UIImageView(image: image)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .mainBlue
+        self.view.backgroundColor = .systemBackground
         //view.backgroundColor = .white
         setupAutoLayout()
     }

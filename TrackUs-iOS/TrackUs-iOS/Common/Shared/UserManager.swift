@@ -50,6 +50,5 @@ class UserManager {
                 }
             }
         }
-        completionHandler(true)
     }
 }
