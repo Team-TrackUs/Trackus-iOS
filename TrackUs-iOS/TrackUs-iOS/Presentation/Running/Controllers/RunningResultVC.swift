@@ -71,24 +71,40 @@ class RunningResultVC: UIViewController {
         return view
     }()
     
+    private lazy var mapDetailBtn: UIButton = {
+        let bt = UIButton(type: .custom)
+        bt.translatesAutoresizingMaskIntoConstraints = false
+        bt.setTitle("지도보기", for: .normal)
+        bt.setTitleColor(.black, for: .normal)
+        bt.configuration = .filled()
+        bt.configuration?.baseBackgroundColor = .white
+        bt.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        bt.addTarget(self, action: #selector(goToMapView), for: .touchUpInside)
+        return bt
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.backButtonTitle = "기록"
         view.backgroundColor = .systemBackground
+        let closeBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeButtonTapped))
+        navigationItem.rightBarButtonItem = closeBarButtonItem
+        navigationItem.hidesBackButton = true
         setupTableView()
         setupMapView()
         setConstraint()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(true, animated: animated)
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        self.navigationController?.setNavigationBarHidden(false, animated: animated)
-    }
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+//    }
+//
+//    override func viewWillDisappear(_ animated: Bool) {
+//        super.viewWillDisappear(animated)
+//        self.navigationController?.setNavigationBarHidden(false, animated: animated)
+//    }
     
     // MARK: - Helpers
     func setConstraint() {
@@ -99,6 +115,7 @@ class RunningResultVC: UIViewController {
         view.addSubview(mapView)
         view.addSubview(saveButton)
         view.addSubview(divider)
+        view.addSubview(mapDetailBtn)
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
@@ -127,7 +144,10 @@ class RunningResultVC: UIViewController {
             divider.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             divider.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             divider.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -14),
-            divider.heightAnchor.constraint(equalToConstant: 1)
+            divider.heightAnchor.constraint(equalToConstant: 1),
+            
+            mapDetailBtn.topAnchor.constraint(equalTo: mapView.topAnchor, constant: 10),
+            mapDetailBtn.trailingAnchor.constraint(equalTo: mapView.trailingAnchor, constant: -10),
         ])
     }
     
@@ -141,6 +161,7 @@ class RunningResultVC: UIViewController {
         mapView = MKMapView()
         mapView.translatesAutoresizingMaskIntoConstraints = false
         mapView.showsUserLocation = false
+        mapView.isUserInteractionEnabled = false
         mapView.layer.cornerRadius = 6
     }
     
@@ -170,11 +191,21 @@ class RunningResultVC: UIViewController {
         navigationController?.pushViewController(detailVC, animated: true)
     }
     
+    @objc func goToMapView() {
+        let mapResultVC = MapResultVC()
+        mapResultVC.modalPresentationStyle = .fullScreen
+        navigationController?.pushViewController(mapResultVC, animated: true)
+    }
+    
     @objc func uploadButtonTapped() {
         guard let runModel = runModel else { return }
         recordService.uploadRecord(record: runModel) {
             self.goToRootView()
         }
+    }
+    
+    @objc func closeButtonTapped() {
+        self.goToRootView()
     }
 }
 

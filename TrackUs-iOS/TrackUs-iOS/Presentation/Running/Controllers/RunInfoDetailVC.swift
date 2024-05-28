@@ -43,12 +43,16 @@ class RunInfoDetailVC: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        setupNavBar()
         setTableView()
         setConstraint()
     }
     
     // MARK: - Helpers
+    func setupNavBar() {
+        view.backgroundColor = .systemBackground
+        self.navigationItem.title = "상세 기록"
+    }
     func setTableView() {
         tableView.dataSource = self
         tableView.register(RunInfoCell.self, forCellReuseIdentifier: RunInfoCell.identifier)

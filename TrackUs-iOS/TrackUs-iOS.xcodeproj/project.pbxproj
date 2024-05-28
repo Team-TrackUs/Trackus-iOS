@@ -39,6 +39,7 @@
 		82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */; };
 		82C2145E2C06147D00D15993 /* RecordService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C2145D2C06147D00D15993 /* RecordService.swift */; };
 		82C214622C06312200D15993 /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C214612C06312200D15993 /* Date+.swift */; };
+		82C214642C0639DE00D15993 /* MapResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C214632C0639DE00D15993 /* MapResultVC.swift */; };
 		82C38AC92BFCA187004819C1 /* String+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AC82BFCA187004819C1 /* String+.swift */; };
 		82C38ACB2BFCA18E004819C1 /* Int+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACA2BFCA18E004819C1 /* Int+.swift */; };
 		82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACE2BFCA57B004819C1 /* Array+.swift */; };
@@ -122,6 +123,7 @@
 		82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarVC.swift; sourceTree = "<group>"; };
 		82C2145D2C06147D00D15993 /* RecordService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordService.swift; sourceTree = "<group>"; };
 		82C214612C06312200D15993 /* Date+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+.swift"; sourceTree = "<group>"; };
+		82C214632C0639DE00D15993 /* MapResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapResultVC.swift; sourceTree = "<group>"; };
 		82C38AC82BFCA187004819C1 /* String+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+.swift"; sourceTree = "<group>"; };
 		82C38ACA2BFCA18E004819C1 /* Int+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+.swift"; sourceTree = "<group>"; };
 		82C38ACE2BFCA57B004819C1 /* Array+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+.swift"; sourceTree = "<group>"; };
@@ -340,6 +342,7 @@
 				8280D2742BF137E2002CB7DD /* RunningResultVC.swift */,
 				826922E62C0487B100D506C2 /* RunTrackingVC.swift */,
 				826922E82C04959900D506C2 /* RunInfoDetailVC.swift */,
+				82C214632C0639DE00D15993 /* MapResultVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -552,6 +555,7 @@
 				82C38ACB2BFCA18E004819C1 /* Int+.swift in Sources */,
 				82C214622C06312200D15993 /* Date+.swift in Sources */,
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
+				82C214642C0639DE00D15993 /* MapResultVC.swift in Sources */,
 				826922E72C0487B100D506C2 /* RunTrackingVC.swift in Sources */,
 				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
 				98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */,
