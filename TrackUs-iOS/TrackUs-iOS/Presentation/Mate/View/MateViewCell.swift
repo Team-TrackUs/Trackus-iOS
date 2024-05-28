@@ -217,8 +217,8 @@ class MateViewCell: UITableViewCell {
         
         self.runningStyleLabel.text = runningStyleLabel
         
-        if titleLabel.count > 20 {
-            self.titleLabel.text = "\(titleLabel.prefix(20))..."
+        if titleLabel.count > 15 {
+            self.titleLabel.text = "\(titleLabel.prefix(15))..."
         } else {
             self.titleLabel.text = titleLabel
         }

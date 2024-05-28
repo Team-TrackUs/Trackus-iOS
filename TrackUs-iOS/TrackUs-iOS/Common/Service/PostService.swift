@@ -184,4 +184,15 @@ class PostService {
             completion(UIImage(data: imageData))
         }
     }
+    
+    func fetchMembers(uid: String, completion: @escaping (String?, String?) -> Void) {
+        Firestore.firestore().collection("user").document(uid).getDocument { snapshot, error in
+            guard let data = snapshot?.data() else { return }
+            let name = data["name"] as? String ?? ""
+            let imageUrl = data["profileImageUrl"] as? String ?? ""
+            
+            completion(name, imageUrl)
+            return
+        }
+    }
 }

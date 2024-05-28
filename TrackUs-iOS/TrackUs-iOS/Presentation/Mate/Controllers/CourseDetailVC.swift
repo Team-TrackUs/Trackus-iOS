@@ -490,7 +490,10 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MatePeopleListCell.identifier, for: indexPath) as? MatePeopleListCell else {
             fatalError("Unable to dequeue MatePeopleListCell")
         }
-        cell.configure(image: UIImage(named: "profile_img") ?? UIImage(imageLiteralResourceName: "profile_img"), name: "TrackUs")
+        
+        let memberUid = members[indexPath.item]
+        let isOwner = indexPath.item == 0
+        cell.configure(uid: memberUid, isOwner: isOwner)
         return cell
     }
     
