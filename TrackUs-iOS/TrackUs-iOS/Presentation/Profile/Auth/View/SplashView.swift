@@ -10,7 +10,7 @@ import UIKit
 class SplashView: UIViewController {
     
     private lazy var image: UIImageView = {
-        let image = UIImage(named: "trackus_icon")?.resize(width: 90, height: 73)
+        let image = UIImage(named: "splash_icon")?.resize(width: 90, height: 73)
         let imageView = UIImageView(image: image)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -18,7 +18,14 @@ class SplashView: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .systemBackground
+        
+        if traitCollection.userInterfaceStyle == .dark {
+            // 다크 모드일 때의 색상
+            view.backgroundColor = .black
+        } else {
+            // 라이트 모드일 때의 색상
+            view.backgroundColor = .mainBlue
+        }
         //view.backgroundColor = .white
         setupAutoLayout()
     }

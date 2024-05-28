@@ -42,10 +42,10 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 20
         imageView.layer.masksToBounds = true
-        imageView.backgroundColor = .white
+        imageView.backgroundColor = .systemBackground
         
         // 회색 테두리 추가
-        imageView.layer.borderColor = UIColor.white.cgColor
+        imageView.layer.borderColor = UIColor.systemBackground.cgColor
         imageView.layer.borderWidth = 3
         return imageView
     }()
