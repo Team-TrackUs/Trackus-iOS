@@ -86,11 +86,7 @@ class RunningResultVC: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.backButtonTitle = "기록"
-        view.backgroundColor = .systemBackground
-        let closeBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeButtonTapped))
-        navigationItem.rightBarButtonItem = closeBarButtonItem
-        navigationItem.hidesBackButton = true
+        setupNavBar()
         setupTableView()
         setupMapView()
         setConstraint()
@@ -107,6 +103,14 @@ class RunningResultVC: UIViewController {
 //    }
     
     // MARK: - Helpers
+    func setupNavBar() {
+        view.backgroundColor = .systemBackground
+        let closeBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeButtonTapped))
+        navigationItem.rightBarButtonItem = closeBarButtonItem
+        navigationItem.hidesBackButton = true
+        navigationItem.rightBarButtonItem?.tintColor = .black
+        navigationItem.title = "기록"
+    }
     func setConstraint() {
         view.addSubview(titleLabel)
         view.addSubview(kmLabel)
