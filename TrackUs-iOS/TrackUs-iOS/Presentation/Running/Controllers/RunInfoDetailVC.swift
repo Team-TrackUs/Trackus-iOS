@@ -74,6 +74,7 @@ class RunInfoDetailVC: UIViewController {
     
     func setTableData() {
         guard let runModel = runModel else { return }
+        
         runInfo = [
             RunInfoModel(title: "시간", result: runModel.seconds.toMMSSTimeFormat),
             RunInfoModel(title: "거리(킬로미터)", result: runModel.distance.asString(style: .km)),
@@ -83,6 +84,7 @@ class RunInfoDetailVC: UIViewController {
             RunInfoModel(title: "고도(하강)", result: " \(Int(runModel.minAltitude))" + "m"),
             RunInfoModel(title: "케이던스", result: "\(runModel.cadance)"),
         ]
+        
         tableView.reloadData()
     }
 }

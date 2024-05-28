@@ -66,6 +66,4 @@ class MatePeopleListCell: UICollectionViewCell {
         self.profileImageView.image = image
         self.nameLabel.text = name
     }
-    
-    
 }

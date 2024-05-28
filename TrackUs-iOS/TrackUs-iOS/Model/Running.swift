@@ -9,7 +9,7 @@ import Foundation
 import Firebase
 import CoreLocation
 
-struct Running {
+struct Running: Codable {
     var address: String = ""
     var calorie: Double = 0.0
     var distance: Double = 0.0
@@ -22,7 +22,7 @@ struct Running {
     var geoPoints: [GeoPoint] = []
     var isGroup: Bool = false
     var routeImageUrl: String = ""
-    var createdAt: Date = .now
+    var createdAt: Timestamp!
     
     var coordinates: [CLLocationCoordinate2D] {
         get {
@@ -32,4 +32,14 @@ struct Running {
             geoPoints = newCoord.asGeoPoints
         }
     }
+    
+    var timestamp: Date {
+        get {
+            createdAt!.dateValue()
+        }
+        set {
+            createdAt = Timestamp(date: newValue)
+        }
+    }
+    
 }

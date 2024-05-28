@@ -17,14 +17,12 @@ import UIKit
      
     private let title: UILabel = {
         let label = UILabel()
-        label.text = "칼로리"
         label.textColor = .gray1
         return label
     }()
     
     private let result: UILabel = {
         let label = UILabel()
-        label.text = "123 kcal"
         return label
     }()
     
@@ -46,12 +44,12 @@ import UIKit
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-      
+        
     }
     
     override func awakeFromNib() {
         super.awakeFromNib()
-
+        
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {

@@ -9,7 +9,8 @@ import UIKit
 import MapKit
 class RunningResultVC: UIViewController {
     // MARK: - Properties
-    var runManager: RunTrackingManager? {
+    private let recordService = RecordService.shared
+    var runModel: Running? {
         didSet {
             setupUI()
         }
@@ -22,7 +23,7 @@ class RunningResultVC: UIViewController {
         bt.translatesAutoresizingMaskIntoConstraints = false
         bt.backgroundColor = .mainBlue
         bt.title = "기록저장"
-        bt.addTarget(self, action: #selector(goToRoot), for: .touchUpInside)
+        bt.addTarget(self, action: #selector(uploadButtonTapped), for: .touchUpInside)
         return bt
     }()
     
@@ -37,7 +38,6 @@ class RunningResultVC: UIViewController {
     private lazy var kmLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "3.33 KM"
         if let descriptor = UIFont.systemFont(ofSize: 40, weight: .bold).fontDescriptor.withSymbolicTraits([.traitBold, .traitItalic]) {
             label.font = UIFont(descriptor: descriptor, size: 0)
         } else {
@@ -142,12 +142,13 @@ class RunningResultVC: UIViewController {
         mapView = MKMapView()
         mapView.translatesAutoresizingMaskIntoConstraints = false
         mapView.showsUserLocation = false
+        mapView.layer.cornerRadius = 6
     }
     
     func setupUI() {
-        guard let runModel = runManager?.runModel else { return }
+        guard let runModel = runModel else { return }
         kmLabel.text = runModel.distance.asString(style: .km) // 킬로미터
-        
+        titleLabel.text = "🏃‍♂️ \(runModel.address) 에서 러닝 - 오후 12:32"
         // 테이블뷰 설정
         runInfo = [
             RunInfoModel(title: "칼로리", result: "\(runModel.calorie.asString(style: .kcal)) kcal"),
@@ -158,16 +159,23 @@ class RunningResultVC: UIViewController {
         tableView.reloadData()
     }
     
+    func goToRootView() {
+        view.window!.rootViewController?.dismiss(animated: true)
+    }
+    
     // MARK: - objc
     @objc func goToDetailVC() {
         let detailVC = RunInfoDetailVC()
         detailVC.modalPresentationStyle = .fullScreen
-        detailVC.runModel = runManager?.runModel
+        detailVC.runModel = runModel
         navigationController?.pushViewController(detailVC, animated: true)
     }
     
-    @objc func goToRoot() {
-        view.window!.rootViewController?.dismiss(animated: true)
+    @objc func uploadButtonTapped() {
+        guard let runModel = runModel else { return }
+        recordService.uploadRecord(record: runModel) {
+            self.goToRootView()
+        }
     }
 }
 

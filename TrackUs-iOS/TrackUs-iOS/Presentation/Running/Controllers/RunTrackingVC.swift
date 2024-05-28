@@ -9,18 +9,27 @@ import Foundation
 
 import UIKit
 import MapKit
-
+import CoreMotion
 
 final class RunTrackingVC: UIViewController {
     // MARK: - Properties
+    private let pedometer = CMPedometer()
+    private let altimeter = CMAltimeter()
     private let locationService = LocationService.shared
-    private let runManager = RunTrackingManager()
+    private var runModel = Running() {
+        didSet {
+            updateUI()
+        }
+    }
     private var mapView: MKMapView!
     private var isActive = true
     private var timer: Timer?
     private var count = 3
     private var polyline: MKPolyline?
     private var annotation: MKPointAnnotation?
+    private var tempData: [String: Any] = ["distance": 0.0, "steps": 0]
+    private var maxAltitude = -99999.0
+    private var minAltitude = 99999.0
     
     private lazy var countLabel: UILabel = {
         let label = UILabel()
@@ -230,13 +239,14 @@ final class RunTrackingVC: UIViewController {
         return view
     }()
     
-    // MARK: - Life Cycle
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupMapView()
         setMapRegion()
         setConstraint()
         setTimer()
+        setAddress()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -280,7 +290,7 @@ final class RunTrackingVC: UIViewController {
             blurView.topAnchor.constraint(equalTo: self.view.topAnchor),
             blurView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             
-         
+            
         ])
     }
     
@@ -299,7 +309,7 @@ final class RunTrackingVC: UIViewController {
     // latitudinalMeters 남북범위
     // longitudinalMeters 동서범위
     func setMapRange(center: CLLocationCoordinate2D, animated: Bool = true) {
-        let range = runManager.runModel.coordinates.totalDistance + 1000
+        let range = runModel.coordinates.totalDistance + 1000
         let region = MKCoordinateRegion(center: center, latitudinalMeters: CLLocationDistance(floatLiteral: range), longitudinalMeters: range)
         mapView.setRegion(region, animated: animated)
     }
@@ -361,7 +371,7 @@ final class RunTrackingVC: UIViewController {
     func goToResultVC() {
         HapticManager.shared.hapticImpact(style: .medium)
         let resultVC = RunningResultVC()
-        resultVC.runManager = runManager
+        resultVC.runModel = runModel
         navigationController?.pushViewController(resultVC, animated: false)
     }
     
@@ -384,8 +394,7 @@ final class RunTrackingVC: UIViewController {
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
-            runManager.runModel.seconds += 1
-            timeLabel.text = runManager.runModel.seconds.toMMSSTimeFormat
+            runModel.seconds += 1
         })
     }
     
@@ -404,7 +413,7 @@ final class RunTrackingVC: UIViewController {
     }
     
     func drawPath() {
-        let coordinates = self.runManager.runModel.coordinates
+        let coordinates = runModel.coordinates
         annotation = MKPointAnnotation()
         polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         
@@ -423,7 +432,7 @@ final class RunTrackingVC: UIViewController {
     }
     
     func setMapPreview() {
-        if let center = runManager.runModel.coordinates.centerPosition, runManager.runModel.coordinates.count >= 2 {
+        if let center = runModel.coordinates.centerPosition, runModel.coordinates.count >= 2 {
             setMapRange(center: center, animated: false)
         } else {
             setMapRegion(animated: false)
@@ -431,6 +440,15 @@ final class RunTrackingVC: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             guard let self = self else { return }
             mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY, left: 20, bottom: 20, right: 20), animated: false)
+        }
+    }
+    
+    func setAddress() {
+        guard let location = locationService.currentLocation?.asCLLocation else {
+            return
+        }
+        locationService.reverseGeoCoding(location: location) { address in
+            self.runModel.address = address
         }
     }
     
@@ -486,33 +504,65 @@ extension RunTrackingVC {
 
 extension RunTrackingVC: UserLocationDelegate {
     func userLocationUpated(location: CLLocation) {
-        runManager.runModel.coordinates.append(location.coordinate)
+        runModel.coordinates.append(location.coordinate)
         mapView.setUserTrackingMode(.follow, animated: true)
     }
     
     func startTracking() {
         locationService.userLocationDelegate = self
-        // 움직임이 감지될때마다 호출되는 핸들러
-        runManager.updateRunInfo { [weak self] runModel in
+        pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
             guard let self = self else { return }
+            guard let pedometerData = pedometerData, error == nil else {
+                return
+            }
+            let currentDistance = pedometerData.distance?.doubleValue ?? 0.0
+            let currentSteps = pedometerData.numberOfSteps.intValue
+            guard let beforeData = tempData["steps"] as? Int else { return }
             
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                kilometerLabel.text = runModel.distance.asString(style: .km)
-                paceLabel.text = runModel.pace.asString(style: .pace)
-                calorieLabel.text = runModel.calorie.asString(style: .kcal)
-                cadenceLabel.text = String(runModel.cadance)
-                guard Int(runModel.maxAltitude) >= 1 else {
-                    return
+                runModel.steps = currentSteps + beforeData
+                runModel.distance = currentDistance + (tempData["distance"] as? Double ?? 0.0)
+                runModel.cadance = Int((Double(currentSteps + beforeData)) / (runModel.seconds / 60))
+                runModel.calorie = Double(runModel.steps) * 0.04
+                runModel.pace = (runModel.seconds / 60) / (runModel.distance / 1000.0)
+            }
+        }
+        
+        altimeter.startRelativeAltitudeUpdates(to: .main) { [weak self]  altitudeData, error in
+            guard let self = self else { return }
+            guard let altitudeData = altitudeData, error == nil else {
+                return
+            }
+            let currentAltitue = altitudeData.relativeAltitude.doubleValue
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                if currentAltitue > 0 {
+                    runModel.maxAltitude = max(maxAltitude, currentAltitue)
                 }
-                altitudeLabel.text = "+ \(Int(runModel.maxAltitude))m"
+                if currentAltitue < 0 {
+                    runModel.minAltitude = min(minAltitude, currentAltitue)
+                }
             }
         }
     }
     
     func stopTracking() {
         self.locationService.userLocationDelegate = nil
-        runManager.stopRecord()
+        pedometer.stopUpdates()
+        altimeter.stopRelativeAltitudeUpdates()
+    }
+    
+    func updateUI() {
+            timeLabel.text = runModel.seconds.toMMSSTimeFormat
+            kilometerLabel.text = runModel.distance.asString(style: .km)
+            paceLabel.text = runModel.pace.asString(style: .pace)
+            calorieLabel.text = runModel.calorie.asString(style: .kcal)
+            cadenceLabel.text = String(runModel.cadance)
+            guard Int(runModel.maxAltitude) >= 1 else {
+                return
+            }
+            altitudeLabel.text = "+ \(Int(runModel.maxAltitude))m"
     }
 }
 

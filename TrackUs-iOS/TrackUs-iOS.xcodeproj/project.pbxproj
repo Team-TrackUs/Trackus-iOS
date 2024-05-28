@@ -16,7 +16,6 @@
 		61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */; };
 		61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DED12BFA668F009E360B /* SearchVC.swift */; };
 		61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */; };
-		821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821C00B12BF7410400B1C022 /* RunTrackingManager.swift */; };
 		822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B52BF1EC2500636CCC /* LocationService.swift */; };
 		822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */; };
 		82596A8A2C034CAC00DA6C70 /* CoreMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82596A892C034CAC00DA6C70 /* CoreMotion.swift */; };
@@ -38,6 +37,7 @@
 		82BE45812BEFB128007AE54A /* MyChatListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45802BEFB128007AE54A /* MyChatListVC.swift */; };
 		82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45822BEFB137007AE54A /* MyProfileVC.swift */; };
 		82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */; };
+		82C2145E2C06147D00D15993 /* RecordService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C2145D2C06147D00D15993 /* RecordService.swift */; };
 		82C38AC92BFCA187004819C1 /* String+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AC82BFCA187004819C1 /* String+.swift */; };
 		82C38ACB2BFCA18E004819C1 /* Int+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACA2BFCA18E004819C1 /* Int+.swift */; };
 		82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACE2BFCA57B004819C1 /* Array+.swift */; };
@@ -93,7 +93,6 @@
 		61B0DECF2BFA54AB009E360B /* MatePeopleListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatePeopleListCell.swift; sourceTree = "<group>"; };
 		61B0DED12BFA668F009E360B /* SearchVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVC.swift; sourceTree = "<group>"; };
 		61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDrawingMapVC.swift; sourceTree = "<group>"; };
-		821C00B12BF7410400B1C022 /* RunTrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunTrackingManager.swift; sourceTree = "<group>"; };
 		822E06B52BF1EC2500636CCC /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDelegate.swift; sourceTree = "<group>"; };
 		82596A892C034CAC00DA6C70 /* CoreMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMotion.swift; sourceTree = "<group>"; };
@@ -120,6 +119,7 @@
 		82BE45802BEFB128007AE54A /* MyChatListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyChatListVC.swift; sourceTree = "<group>"; };
 		82BE45822BEFB137007AE54A /* MyProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyProfileVC.swift; sourceTree = "<group>"; };
 		82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBarVC.swift; sourceTree = "<group>"; };
+		82C2145D2C06147D00D15993 /* RecordService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordService.swift; sourceTree = "<group>"; };
 		82C38AC82BFCA187004819C1 /* String+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+.swift"; sourceTree = "<group>"; };
 		82C38ACA2BFCA18E004819C1 /* Int+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+.swift"; sourceTree = "<group>"; };
 		82C38ACE2BFCA57B004819C1 /* Array+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+.swift"; sourceTree = "<group>"; };
@@ -185,7 +185,6 @@
 		821C00B42BF7411200B1C022 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				821C00B12BF7410400B1C022 /* RunTrackingManager.swift */,
 				826922E42C04664000D506C2 /* RunInfoModel.swift */,
 			);
 			path = Models;
@@ -418,6 +417,7 @@
 				9886182F2BF348C8002ACB4E /* AuthService.swift */,
 				98887F8D2BFDBDCB006F929E /* ImageCacheManager.swift */,
 				61625E392BFE75A500E6D1F3 /* PostService.swift */,
+				82C2145D2C06147D00D15993 /* RecordService.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -543,12 +543,12 @@
 				61625E382BFE6EE500E6D1F3 /* Post.swift in Sources */,
 				61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */,
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
+				82C2145E2C06147D00D15993 /* RecordService.swift in Sources */,
 				98AB544B2BF71B790047310A /* ProfilePublicView.swift in Sources */,
 				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
 				82C38ACB2BFCA18E004819C1 /* Int+.swift in Sources */,
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
 				826922E72C0487B100D506C2 /* RunTrackingVC.swift in Sources */,
-				821C00B22BF7410400B1C022 /* RunTrackingManager.swift in Sources */,
 				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
 				98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
