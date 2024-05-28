@@ -35,6 +35,13 @@ class CourseDetailVC: UIViewController {
         return collectionView
     }()
     
+    let divider: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .gray3
+        return view
+    }()
+    
     var courseCoords: [CLLocationCoordinate2D] = [] // 코스
     var members: [String] = [] {
         didSet {
@@ -279,12 +286,18 @@ class CourseDetailVC: UIViewController {
         view.backgroundColor = .white
         view.addSubview(buttonContainer)
         view.addSubview(scrollView)
+        buttonContainer.addSubview(divider)
         
         buttonContainer.translatesAutoresizingMaskIntoConstraints = false
-        buttonContainer.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16).isActive = true
+        buttonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         buttonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        buttonContainer.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16).isActive = true
+        buttonContainer.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         buttonContainer.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        
+        divider.topAnchor.constraint(equalTo: buttonContainer.topAnchor).isActive = true
+        divider.leadingAnchor.constraint(equalTo: buttonContainer.leadingAnchor).isActive = true
+        divider.trailingAnchor.constraint(equalTo: buttonContainer.trailingAnchor).isActive = true
+        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
         
         NSLayoutConstraint.activate([
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -399,9 +412,9 @@ class CourseDetailVC: UIViewController {
         buttonContainer.addSubview(buttonStack)
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         buttonStack.topAnchor.constraint(equalTo: buttonContainer.topAnchor, constant: 10).isActive = true
-        buttonStack.leftAnchor.constraint(equalTo: buttonContainer.leftAnchor).isActive = true
+        buttonStack.leftAnchor.constraint(equalTo: buttonContainer.leftAnchor, constant: 16).isActive = true
         buttonStack.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor).isActive = true
-        buttonStack.rightAnchor.constraint(equalTo: buttonContainer.rightAnchor).isActive = true
+        buttonStack.rightAnchor.constraint(equalTo: buttonContainer.rightAnchor, constant: -16).isActive = true
     }
     
     private func setupNavBar() {

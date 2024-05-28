@@ -289,6 +289,13 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return view
     }()
     
+    private let divider: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .gray3
+        return view
+    }()
+    
     private lazy var distanceLabel: UILabel = {
         let label = UILabel()
         label.backgroundColor = .mainBlue
@@ -658,17 +665,23 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         
         contentView.addSubview(addCourseButtonContainer)
         addCourseButtonContainer.translatesAutoresizingMaskIntoConstraints = false
-        addCourseButtonContainer.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16).isActive = true
+        addCourseButtonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         addCourseButtonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        addCourseButtonContainer.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16).isActive = true
+        addCourseButtonContainer.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         addCourseButtonContainer.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        
+        addCourseButtonContainer.addSubview(divider)
+        divider.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor).isActive = true
+        divider.leadingAnchor.constraint(equalTo: addCourseButtonContainer.leadingAnchor).isActive = true
+        divider.trailingAnchor.constraint(equalTo: addCourseButtonContainer.trailingAnchor).isActive = true
+        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
         
         addCourseButtonContainer.addSubview(addCourseButton)
         addCourseButton.translatesAutoresizingMaskIntoConstraints = false
         addCourseButton.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor, constant: 10).isActive = true
-        addCourseButton.leftAnchor.constraint(equalTo: addCourseButtonContainer.leftAnchor).isActive = true
+        addCourseButton.leftAnchor.constraint(equalTo: addCourseButtonContainer.leftAnchor, constant: 16).isActive = true
         addCourseButton.bottomAnchor.constraint(equalTo: addCourseButtonContainer.bottomAnchor).isActive = true
-        addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor).isActive = true
+        addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor, constant: -16).isActive = true
         
         updateStyleButtonAppearance()
         
