@@ -73,13 +73,17 @@ class RunningResultVC: UIViewController {
     }()
     
     private lazy var mapDetailBtn: UIButton = {
-        let bt = UIButton(type: .custom)
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .white
+        config.baseForegroundColor = .gray2
+        config.image = UIImage(systemName: "map.fill")
+        config.imagePadding = 7
+        var titleAttr = AttributedString("지도뷰")
+        titleAttr.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        config.attributedTitle = titleAttr
+        let bt = UIButton(configuration: config)
         bt.translatesAutoresizingMaskIntoConstraints = false
-        bt.setTitle("지도보기", for: .normal)
-        bt.setTitleColor(.black, for: .normal)
-        bt.configuration = .filled()
-        bt.configuration?.baseBackgroundColor = .white
-        bt.titleLabel?.font = UIFont.boldSystemFont(ofSize: 12)
+        
         bt.addTarget(self, action: #selector(goToMapView), for: .touchUpInside)
         return bt
     }()
