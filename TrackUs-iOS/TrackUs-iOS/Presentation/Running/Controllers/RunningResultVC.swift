@@ -111,11 +111,13 @@ class RunningResultVC: UIViewController {
     // MARK: - Helpers
     func setupNavBar() {
         view.backgroundColor = .systemBackground
+        navigationItem.title = "기록"
         let closeBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeButtonTapped))
         navigationItem.rightBarButtonItem = closeBarButtonItem
         navigationItem.hidesBackButton = true
         navigationItem.rightBarButtonItem?.tintColor = .black
-        navigationItem.title = "기록"
+        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        navigationController?.navigationBar.shadowImage = UIImage()
     }
     func setConstraint() {
         view.addSubview(titleLabel)
@@ -136,7 +138,7 @@ class RunningResultVC: UIViewController {
             tableView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
             tableView.topAnchor.constraint(equalTo: kmLabel.bottomAnchor, constant: 20),
-            tableView.heightAnchor.constraint(equalToConstant: CGFloat(runInfo.count) * 50),
+            tableView.heightAnchor.constraint(equalToConstant: CGFloat(runInfo.count) * 40),
             
             detailButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             detailButton.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 20),
@@ -162,7 +164,7 @@ class RunningResultVC: UIViewController {
     
     func setupTableView() {
         tableView.dataSource = self
-        tableView.rowHeight = 50
+        tableView.rowHeight = 40
         tableView.register(RunInfoCell.self, forCellReuseIdentifier: RunInfoCell.identifier)
     }
     
