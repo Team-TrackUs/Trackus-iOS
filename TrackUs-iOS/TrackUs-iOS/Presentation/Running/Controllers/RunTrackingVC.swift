@@ -306,14 +306,6 @@ final class RunTrackingVC: UIViewController {
         mapView.setUserTrackingMode(.follow, animated: true)
     }
     
-    // latitudinalMeters 남북범위
-    // longitudinalMeters 동서범위
-    func setMapRange(center: CLLocationCoordinate2D, animated: Bool = true) {
-        let range = runModel.coordinates.totalDistance + 1000
-        let region = MKCoordinateRegion(center: center, latitudinalMeters: CLLocationDistance(floatLiteral: range), longitudinalMeters: range)
-        mapView.setRegion(region, animated: animated)
-    }
-    
     func updatedOnStart() {
         startTracking()
         startTimer()
@@ -404,7 +396,7 @@ final class RunTrackingVC: UIViewController {
     }
     
     func setCameraOnPauseMode() {
-        setMapPreview()
+        setPreviewMode()
         drawPath()
     }
     
@@ -432,15 +424,14 @@ final class RunTrackingVC: UIViewController {
         mapView.removeAnnotation(annotation)
     }
     
-    func setMapPreview() {
-        if let center = runModel.coordinates.centerPosition, runModel.coordinates.count >= 2 {
-            setMapRange(center: center, animated: false)
-        } else {
-            setMapRegion(animated: false)
+    func setPreviewMode() {
+        if let region = runModel.coordinates.makeRegionToFit(runModel.coordinates) {
+                mapView.setRegion(region, animated: false)
         }
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             guard let self = self else { return }
-            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY, left: 20, bottom: 20, right: 20), animated: false)
+            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY, left: 0, bottom: 0, right: 0), animated: false)
         }
     }
     

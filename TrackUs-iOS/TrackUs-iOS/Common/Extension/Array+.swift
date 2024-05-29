@@ -5,6 +5,7 @@
 //  Created by 석기권 on 5/21/24.
 //
 
+import Foundation
 import CoreLocation
 import Firebase
 import MapKit
@@ -39,6 +40,39 @@ extension Array where Element == CLLocationCoordinate2D {
         }
         return distance
     }
+    
+    func makeRegionToFit(_ coordinates: [CLLocationCoordinate2D]) -> MKCoordinateRegion? {
+        let maxLatitude = coordinates.map {Double($0.latitude)}.max()
+        let minLatitude = coordinates.map {Double($0.latitude)}.min()
+        let maxLongitude = coordinates.map {Double($0.longitude)}.max()
+        let minLongitude = coordinates.map {Double($0.longitude)}.min()
+        
+        guard let maxLatitude = maxLatitude,
+              let minLatitude = minLatitude,
+              let maxLongitude = maxLongitude,
+              let minLongitude = minLongitude else {
+            return nil
+        }
+        
+        let center: CLLocationCoordinate2D
+        if let providedCenter = coordinates.centerPosition {
+            center = providedCenter
+        } else {
+            return nil
+        }
+        
+        let commLongitude = center.longitude
+        let commLatitude = center.latitude
+        
+        let latitudeDistance = CLLocationCoordinate2D(latitude: CLLocationDegrees(floatLiteral: minLatitude), longitude: commLongitude).distance(to: CLLocationCoordinate2D(latitude: maxLatitude, longitude: commLongitude))
+        let longitudeDistance = CLLocationCoordinate2D(latitude: CLLocationDegrees(floatLiteral: commLatitude), longitude: minLongitude).distance(to: CLLocationCoordinate2D(latitude: commLatitude, longitude: maxLongitude))
+        
+        let maxValue = Swift.max(latitudeDistance, longitudeDistance)
+        
+        let region = MKCoordinateRegion(center: center, latitudinalMeters: maxValue, longitudinalMeters: maxValue)
+        
+        return region
+    }
 }
 
 extension Array where Element == GeoPoint {
@@ -46,3 +80,4 @@ extension Array where Element == GeoPoint {
         self.map {CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)}
     }
 }
+
