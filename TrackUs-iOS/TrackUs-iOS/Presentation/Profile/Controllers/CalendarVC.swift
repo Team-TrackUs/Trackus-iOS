@@ -39,6 +39,9 @@ class CalendarVC: UIViewController {
         view.backgroundColor = .white
         setupViews()
         setupConstraints()
+        if let sheet = sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+        }
     }
     
     private func setupViews() {

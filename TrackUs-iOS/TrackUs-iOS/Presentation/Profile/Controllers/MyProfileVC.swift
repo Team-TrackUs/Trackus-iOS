@@ -186,13 +186,15 @@ class MyProfileVC: UIViewController {
 
     @objc private func dateButtonTapped() {
         let calendarVC = CalendarVC()
+        if #available(iOS 13.0, *) {
+            calendarVC.modalPresentationStyle = .pageSheet
+        }
         calendarVC.didSelectDate = { [weak self] selectedDate in
             self?.currentDate = selectedDate
             self?.updateDateButton()
         }
         present(calendarVC, animated: true, completion: nil)
     }
-
     
     private let previousDateButton: UIButton = {
         let button = UIButton(type: .system)
