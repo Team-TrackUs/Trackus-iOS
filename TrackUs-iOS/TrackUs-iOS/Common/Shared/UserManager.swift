@@ -23,7 +23,7 @@ class UserManager {
     func getUserData(uid: String?, completionHandler: @escaping (Bool) -> Void) {
         guard let uid = uid else { return }
         
-        let _ = Firestore.firestore().collection("user").document(uid).addSnapshotListener { documentSnapshot, error in
+        let _ = Firestore.firestore().collection("users").document(uid).addSnapshotListener { documentSnapshot, error in
             if let error = error {
                 print("Error getting documents: \(error)")
                 print("사용자 데이터 불러오기 실패")

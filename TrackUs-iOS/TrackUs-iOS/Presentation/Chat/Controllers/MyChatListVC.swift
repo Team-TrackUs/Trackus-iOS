@@ -19,15 +19,16 @@ class MyChatListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavBar()
-        view.backgroundColor = .green
+        view.backgroundColor = .systemBackground
         setupAutoLayout()
     }
 
     private func setupNavBar() {
         self.navigationItem.title = "채팅 목록"
+        self.navigationItem.titleView?.tintColor = .label
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.white
+        appearance.backgroundColor = UIColor.systemBackground
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }

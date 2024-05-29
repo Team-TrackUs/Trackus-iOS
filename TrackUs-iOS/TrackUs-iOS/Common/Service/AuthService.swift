@@ -41,7 +41,7 @@ final class AuthService: NSObject {
     /// 닉네임 중복 확인
     func checkUser(name: String, completionHandler: @escaping (Bool) -> Void) async {
         do {
-            let querySnapshot = try await Firestore.firestore().collection("user")
+            let querySnapshot = try await Firestore.firestore().collection("users")
                 .whereField("name", isEqualTo: name).getDocuments()
             if querySnapshot.isEmpty {
                 completionHandler(true)
@@ -105,7 +105,7 @@ final class AuthService: NSObject {
                         "isBlock": user.isBlock as Any,
                         "token": user.token] as [String : Any]
         
-        Firestore.firestore().collection("user").document(uid).setData(userData){ error in
+        Firestore.firestore().collection("users").document(uid).setData(userData){ error in
             if error != nil {
                 return
             }
