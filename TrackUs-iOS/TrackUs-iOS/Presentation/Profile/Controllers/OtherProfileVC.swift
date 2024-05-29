@@ -1,13 +1,14 @@
 //
-//  MyProfileVC.swift
+//  OtherProfileVC.swift
 //  TrackUs-iOS
 //
-//  Created by 석기권 on 5/11/24.
+//  Created by 박소희 on 5/21/24.
 //
+
 
 import UIKit
 
-class MyProfileVC: UIViewController {
+class OtherProfileVC: UIViewController {
 
     // MARK: - 사용자 프로필
     private let profileImageView: UIImageView = {
@@ -30,7 +31,7 @@ class MyProfileVC: UIViewController {
     
     private let editProfileButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("프로필 편집", for: .normal)
+        button.setTitle("1:1 대화", for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = UIColor(named: "Gray3")
         button.layer.cornerRadius = 5
@@ -121,34 +122,6 @@ class MyProfileVC: UIViewController {
         let text = createRunningInfoText(header: "페이스", main: "0'00''", sub: "2'08''")
         return createLabel(withText: text)
     }()
-
-
-    // MARK: - 러닝기록
-    private let segmentControl: UISegmentedControl = {
-        let segment = UISegmentedControl(items: ["기록", "글 목록"])
-        segment.selectedSegmentIndex = 0
-        segment.translatesAutoresizingMaskIntoConstraints = false
-
-
-        let height: CGFloat = 30
-        segment.layer.cornerRadius = height / 2
-        segment.layer.masksToBounds = true
-        
-        segment.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
-        segment.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor(named: "Gray2")!], for: .normal)
-        
-        segment.backgroundColor = .white
-        segment.selectedSegmentTintColor = UIColor(named: "MainBlue")
-        
-        segment.layer.borderColor = UIColor(named: "Gray2")?.cgColor
-        segment.layer.borderWidth = 1.0
-
-        segment.layer.cornerRadius = height / 2
-        segment.layer.masksToBounds = true
-        
-        segment.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-        return segment
-    }()
     
     private let recordsView: UIView = {
         let view = UIView()
@@ -234,20 +207,25 @@ class MyProfileVC: UIViewController {
         profileImageView.layer.cornerRadius = 35
         setupConstraints()
     }
-
+    
     private func setupNavBar() {
-        self.navigationItem.title = "마이페이지"
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        self.navigationItem.leftBarButtonItem = backButton
+        
+        
+        self.navigationItem.title = "프로필 확인"
+        self.navigationItem.setHidesBackButton(false, animated:true)
         
         let settingsButton = UIBarButtonItem(image: UIImage(named: "setting_icon"), style: .plain, target: self, action: #selector(settingsButtonTapped))
         settingsButton.tintColor = .black
         self.navigationItem.rightBarButtonItem = settingsButton
         
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.white
-        self.navigationController?.navigationBar.standardAppearance = appearance
-        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
+    @objc private func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
 
     private func setupViews() {
         view.addSubview(profileImageView)
@@ -301,7 +279,6 @@ class MyProfileVC: UIViewController {
         
         runningStatsContainerView.addSubview(runningStatsView)
         
-        view.addSubview(segmentControl)
         view.addSubview(recordsView)
         view.addSubview(postsView)
         
@@ -331,14 +308,10 @@ class MyProfileVC: UIViewController {
             runningStatsView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             runningStatsView.bottomAnchor.constraint(equalTo: runningStatsContainerView.bottomAnchor, constant: -22),
             
-            
-            segmentControl.topAnchor.constraint(equalTo: runningStatsContainerView.bottomAnchor, constant: 22),
-            segmentControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
             previousDateButton.centerYAnchor.constraint(equalTo: dateButton.centerYAnchor),
             previousDateButton.trailingAnchor.constraint(equalTo: dateButton.leadingAnchor, constant: -10),
             
-            dateButton.topAnchor.constraint(equalTo: segmentControl.bottomAnchor, constant: 27),
+            dateButton.topAnchor.constraint(equalTo: runningStatsView.bottomAnchor, constant: 27),
             dateButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             nextDateButton.centerYAnchor.constraint(equalTo: dateButton.centerYAnchor),
@@ -366,15 +339,6 @@ class MyProfileVC: UIViewController {
         self.navigationController?.pushViewController(myProfileEditVC, animated: true)
     }
     
-    @objc private func segmentChanged() {
-        if segmentControl.selectedSegmentIndex == 0 {
-            recordsView.isHidden = false
-            postsView.isHidden = true
-        } else {
-            recordsView.isHidden = true
-            postsView.isHidden = false
-        }
-    }
     
     private func setupConstraints() {
         let labelsAndViews: [(UILabel, UIView)] = [
@@ -390,5 +354,6 @@ class MyProfileVC: UIViewController {
         }
     }
 }
+
 
 
