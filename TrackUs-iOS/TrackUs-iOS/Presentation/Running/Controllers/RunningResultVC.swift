@@ -102,22 +102,29 @@ class RunningResultVC: UIViewController {
         buttonContainer.layer.addTopBorder()
     }
     
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        self.navigationController?.setNavigationBarHidden(true, animated: animated)
-//    }
-//
-//    override func viewWillDisappear(_ animated: Bool) {
-//        super.viewWillDisappear(animated)
-//        self.navigationController?.setNavigationBarHidden(false, animated: animated)
-//    }
+    //    override func viewWillAppear(_ animated: Bool) {
+    //        super.viewWillAppear(animated)
+    //        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+    //    }
+    //
+    //    override func viewWillDisappear(_ animated: Bool) {
+    //        super.viewWillDisappear(animated)
+    //        self.navigationController?.setNavigationBarHidden(false, animated: animated)
+    //    }
     
     // MARK: - Helpers
     func setupNavBar() {
         view.backgroundColor = .systemBackground
         navigationItem.title = "기록"
-        let closeBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeButtonTapped))
-        navigationItem.rightBarButtonItem = closeBarButtonItem
+        let closeButton = UIButton(type: .system)
+        closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
+        closeButton.tintColor = .black
+        closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
+        let menuBarItem = UIBarButtonItem(customView: closeButton)
+        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
+        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        navigationItem.rightBarButtonItem = menuBarItem
         navigationItem.hidesBackButton = true
         navigationItem.rightBarButtonItem?.tintColor = .black
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
