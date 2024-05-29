@@ -62,24 +62,89 @@ class PostService {
     }
     
     // 포스트 패치
-    func fetchPost() async throws {
-        let snapshot = try await Firestore.firestore().collection("posts").getDocuments()
+//    func fetchPost() async throws {
+//        let snapshot = try await Firestore.firestore().collection("posts").getDocuments()
+//        
+//        for document in snapshot.documents {
+//            print("읽어오기 시작!")
+//            print("\(document.documentID) => \(document.data())")
+//            print("DEBUG: Document data = \(document.data()) ;;")
+//            print("읽어오기 끝!")
+//            
+//            do {
+//                
+//                let startDate = (document["startDate"] as? Timestamp)?.dateValue() ?? Date()
+//                
+//                guard let courseRoutesData = document["courseRoutes"] as? [GeoPoint] else {
+//                    print("DEBUG: Failed to get courseRoutesData for document \(document.documentID)")
+//                    continue
+//                }
+//                
+//                guard let title = document["title"] as? String,
+//                      let content = document["content"] as? String,
+//                      let distance = document["distance"] as? Double,
+//                      let numberOfPeoples = document["numberOfPeoples"] as? Int,
+//                      let routeImageUrl = document["routeImageUrl"] as? String,
+//                      let address = document["address"] as? String,
+//                      let whoReportAt = document["whoReportAt"] as? [String],
+//                      let createdAtTimestamp = document["createdAt"] as? Timestamp,
+//                      let runningStyle = document["runningStyle"] as? Int,
+//                      let members = document["members"] as? [String] else {
+//                    print("DEBUG: Failed to cast data for document \(document.documentID)")
+//                    continue
+//                }
+//                
+//                let post = Post(
+//                    uid: document.documentID,
+//                    title: title,
+//                    content: content,
+//                    courseRoutes: courseRoutesData,
+//                    distance: distance,
+//                    numberOfPeoples: numberOfPeoples,
+//                    routeImageUrl: routeImageUrl,
+//                    startDate: startDate,
+//                    address: address,
+//                    whoReportAt: whoReportAt,
+//                    createdAt: createdAtTimestamp.dateValue(),
+//                    runningStyle: runningStyle,
+//                    members: members
+//                )
+//                
+//                self.posts.append(post)
+//            } catch {
+//                print("DEBUG: Error processing document \(document.documentID) - \(error.localizedDescription)")
+//            }
+//        }
+//    }
+    
+    func fetchPosts(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
         
-        for document in snapshot.documents {
-            print("읽어오기 시작!")
-            print("\(document.documentID) => \(document.data())")
-            print("DEBUG: Document data = \(document.data()) ;;")
-            print("읽어오기 끝!")
+        var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true).limit(to: limit)
+        
+        if let startAfter = startAfter {
+            query = query.start(afterDocument: startAfter)
+        }
+        
+        query.getDocuments { snapshot, error in
+            if let error = error {
+                print("DEBUG: Failed to fetch post = \(error.localizedDescription)")
+                completion(nil,nil,error)
+                return
+            }
             
-            do {
-                
+            guard let documents = snapshot?.documents else {
+                completion([], nil, nil)
+                return
+            }
+            
+            var posts = [Post]()
+            
+            for document in documents {
                 let startDate = (document["startDate"] as? Timestamp)?.dateValue() ?? Date()
-                
                 guard let courseRoutesData = document["courseRoutes"] as? [GeoPoint] else {
                     print("DEBUG: Failed to get courseRoutesData for document \(document.documentID)")
                     continue
                 }
-                
                 guard let title = document["title"] as? String,
                       let content = document["content"] as? String,
                       let distance = document["distance"] as? Double,
@@ -110,10 +175,12 @@ class PostService {
                     members: members
                 )
                 
-                self.posts.append(post)
-            } catch {
-                print("DEBUG: Error processing document \(document.documentID) - \(error.localizedDescription)")
+                posts.append(post)
+                
             }
+            
+            let lastDocumentSnapshot = snapshot?.documents.last
+            completion(posts, lastDocumentSnapshot, nil)
         }
     }
     
