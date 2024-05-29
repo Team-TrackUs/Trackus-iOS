@@ -64,10 +64,11 @@ class RunningResultVC: UIViewController {
         return bt
     }()
     
-    private lazy var divider: UIView = {
+    private lazy var buttonContainer: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .gray3
+        view.backgroundColor = .systemBackground
+        view.addSubview(saveButton)
         return view
     }()
     
@@ -90,6 +91,11 @@ class RunningResultVC: UIViewController {
         setupTableView()
         setupMapView()
         setConstraint()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        buttonContainer.layer.addTopBorder()
     }
     
 //    override func viewWillAppear(_ animated: Bool) {
@@ -117,9 +123,8 @@ class RunningResultVC: UIViewController {
         view.addSubview(tableView)
         view.addSubview(detailButton)
         view.addSubview(mapView)
-        view.addSubview(saveButton)
-        view.addSubview(divider)
         view.addSubview(mapDetailBtn)
+        view.addSubview(buttonContainer)
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
@@ -141,17 +146,17 @@ class RunningResultVC: UIViewController {
             mapView.topAnchor.constraint(equalTo: detailButton.bottomAnchor, constant: 20),
             mapView.heightAnchor.constraint(equalToConstant: 250),
             
-            saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            
-            divider.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            divider.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            divider.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -14),
-            divider.heightAnchor.constraint(equalToConstant: 1),
-            
             mapDetailBtn.topAnchor.constraint(equalTo: mapView.topAnchor, constant: 10),
             mapDetailBtn.trailingAnchor.constraint(equalTo: mapView.trailingAnchor, constant: -10),
+            
+            buttonContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            buttonContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            buttonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            buttonContainer.heightAnchor.constraint(equalToConstant: 66),
+            
+            saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            saveButton.topAnchor.constraint(equalTo: buttonContainer.topAnchor, constant: 10),
         ])
     }
     
@@ -224,5 +229,14 @@ extension RunningResultVC: UITableViewDataSource {
         }
         cell.runInfo = runInfo[indexPath.row]
         return cell
+    }
+}
+
+extension CALayer {
+    func addTopBorder() {
+        let border = CALayer()
+        border.frame = CGRect(x: 0, y: 0, width: frame.width, height: 1)
+        border.backgroundColor = UIColor.gray3.cgColor
+        self.addSublayer(border)
     }
 }
