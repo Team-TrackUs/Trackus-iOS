@@ -14,7 +14,11 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     // MARK: - Properties
     
-    lazy var testcoords: [CLLocationCoordinate2D] = [] // 좌표배열
+    lazy var testcoords: [CLLocationCoordinate2D] = [] { // 좌표배열
+        didSet {
+            updateAddCourseButtonAppearance()
+        }
+    }
     lazy var distance: CLLocationDistance = 0 { // 거리
         didSet {
             distanceUpdate()
@@ -26,11 +30,20 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         }
     }
     
-    var courseTitleString: String = "" // 코스 제목
-    var courseDescriptionString: String = "" // 코스 소개글
+    var courseTitleString: String = "" { // 코스 제목
+        didSet {
+            updateAddCourseButtonAppearance()
+        }
+    }
+    
+    var courseDescriptionString: String = "" { // 코스 소개글
+        didSet {
+            updateAddCourseButtonAppearance()
+        }
+    }
     var selectedDate: Date = Date() // 날짜
     var selectedTime: Date = Date() // 시간
-    var personnel: Int = 1 // 인원수
+    var personnel: Int = 2 // 최소인원수
 
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
@@ -271,11 +284,10 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     private lazy var addCourseButton: UIButton = {
         let button = UIButton(type: .system)
-        button.backgroundColor = .mainBlue
         button.setTitle("코스 등록하기", for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 56 / 2
         
         button.addTarget(self, action: #selector(addCourseButtonTapped), for: .touchUpInside)
@@ -367,7 +379,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }
     
     @objc func personDown() {
-        if personnel > 1 {
+        if personnel > 2 {
             personnel -= 1
             personnelLabel.text = String(personnel)
         }
@@ -677,6 +689,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor, constant: -16).isActive = true
         
         updateStyleButtonAppearance()
+        updateAddCourseButtonAppearance()
         
     }
     
@@ -725,6 +738,16 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         
         styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray, for: .normal)
         styleSprintButton.backgroundColor = runningStyle == 3 ? .mainBlue : .white
+    }
+    
+    func updateAddCourseButtonAppearance() {
+        if testcoords.isEmpty || courseTitleString.isEmpty || courseDescriptionString.isEmpty {
+            addCourseButton.backgroundColor = .systemGray
+            addCourseButton.isEnabled = false
+        } else {
+            addCourseButton.backgroundColor = .mainBlue
+            addCourseButton.isEnabled = true
+        }
     }
     
     func setup(with testCoords: [CLLocationCoordinate2D], distance: CLLocationDistance) {

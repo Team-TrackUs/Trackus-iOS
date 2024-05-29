@@ -25,14 +25,22 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         textField.attributedPlaceholder = NSAttributedString(string: "검색어를 입력해주세요", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray])
         textField.backgroundColor = .white
         textField.frame = CGRect(x: 0, y: 0, width: 300, height: 48)
+        
+        // 검색창 설정
+        textField.returnKeyType = .search
         textField.inputAccessoryView = toolBarKeyboard
+        textField.clearButtonMode = .whileEditing
+        textField.autocorrectionType = .no
+        textField.spellCheckingType = .no
+        textField.autocapitalizationType = .none
+        
         return textField
     }()
 
     private lazy var toolBarKeyboard: UIToolbar = {
         let toolbar = UIToolbar()
         let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(btnDoneBarTapped))
+        let doneButton = UIBarButtonItem(title: "검색", style: .done, target: self, action: #selector(btnDoneBarTapped))
         toolbar.sizeToFit()
         toolbar.items = [flexBarButton, doneButton]
         toolbar.tintColor = .mainBlue
@@ -125,6 +133,17 @@ class SearchVC: UIViewController, UITextFieldDelegate {
             self?.searchResultsPosts = filteredPosts
             self?.tableView.reloadData()
         }
+    }
+    
+    // 키보드 리턴키
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        searchBar.resignFirstResponder()
+        guard let searchText = searchBar.text, !searchText.isEmpty else {
+            print("DEBUG: Search text is nil or empty")
+            return true
+        }
+        searchPosts(for: searchText)
+        return true
     }
 }
 
