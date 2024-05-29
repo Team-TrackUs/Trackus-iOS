@@ -26,7 +26,6 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         textField.backgroundColor = .white
         textField.frame = CGRect(x: 0, y: 0, width: 300, height: 48)
         textField.inputAccessoryView = toolBarKeyboard
-        textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return textField
     }()
 
@@ -62,17 +61,24 @@ class SearchVC: UIViewController, UITextFieldDelegate {
             await fetchPosts()
         }
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let searchText = searchBar.text, !searchText.isEmpty {
+            searchPosts(for: searchText)
+        }
+        tableView.reloadData()
+    }
 
     // MARK: - Selectors
 
     @objc func btnDoneBarTapped(sender: Any) {
         searchBar.resignFirstResponder()
-        view.endEditing(true)
-    }
-
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        guard let searchText = textField.text else { return }
-        filterPosts(for: searchText)
+        guard let searchText = searchBar.text, !searchText.isEmpty else {
+            print("DEBUG: Search text is nil or empty")
+            return
+        }
+        searchPosts(for: searchText)
     }
 
     // MARK: - Helpers
@@ -99,7 +105,6 @@ class SearchVC: UIViewController, UITextFieldDelegate {
     }
 
     private func fetchPosts() async {
-
         let postService = PostService()
 
         do {
@@ -112,13 +117,15 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         }
     }
 
-    private func filterPosts(for searchText: String) {
-        searchResultsPosts = posts.filter { post in
-            return post.title.lowercased().contains(searchText.lowercased())
+    private func searchPosts(for searchText: String) {
+        print("DEBUG: Searching posts for text: \(searchText)")
+        let postService = PostService()
+        postService.searchFilter(searchText: searchText) { [weak self] filteredPosts in
+            print("DEBUG: \(filteredPosts.count) posts found")
+            self?.searchResultsPosts = filteredPosts
+            self?.tableView.reloadData()
         }
-        tableView.reloadData()
     }
-
 }
 
 extension SearchVC: UITableViewDelegate, UITableViewDataSource {
@@ -164,5 +171,4 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
 
         tableView.deselectRow(at: indexPath, animated: false)
     }
-
 }
