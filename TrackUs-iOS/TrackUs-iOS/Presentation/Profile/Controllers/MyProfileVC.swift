@@ -6,23 +6,22 @@
 //
 
 import UIKit
+import Firebase
 
 class MyProfileVC: UIViewController {
 
     // MARK: - 사용자 프로필
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "profile_person_icon")
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 50
         imageView.layer.masksToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
-    
+        
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "TrackUs님"
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -233,6 +232,7 @@ class MyProfileVC: UIViewController {
         updateDateButton()
         profileImageView.layer.cornerRadius = 35
         setupConstraints()
+        fetchUserProfile()
     }
 
     private func setupNavBar() {
@@ -365,6 +365,34 @@ class MyProfileVC: UIViewController {
         let myProfileEditVC = MyProfileEditVC()
         self.navigationController?.pushViewController(myProfileEditVC, animated: true)
     }
+    
+    private func fetchUserProfile() {
+        guard let currentUser = Auth.auth().currentUser else {
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("user").document(currentUser.uid)
+        
+        userRef.getDocument { [weak self] document, error in
+            guard let self = self, let document = document, document.exists else {
+                return
+            }
+            
+            let data = document.data()
+            if let profileImageUrl = data?["profileImageUrl"] as? String {
+                self.profileImageView.loadImage(url: profileImageUrl)
+            } else {
+                self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
+            }
+            
+            if let userName = data?["name"] as? String {
+                self.nameLabel.text = userName
+            }
+        }
+    }
+
+
     
     @objc private func segmentChanged() {
         if segmentControl.selectedSegmentIndex == 0 {
