@@ -15,7 +15,7 @@ class MatePeopleListCell: UICollectionViewCell {
     
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.widthAnchor.constraint(equalToConstant: 61).isActive = true
@@ -32,6 +32,17 @@ class MatePeopleListCell: UICollectionViewCell {
         label.textColor = .gray2
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    private let OwnerCrownView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.widthAnchor.constraint(equalToConstant: 12).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: 12).isActive = true
+        imageView.image = UIImage(named: "crown_icon")
+        imageView.isHidden = true
+        return imageView
     }()
     
     // MARK: - Lifecycle
@@ -60,10 +71,35 @@ class MatePeopleListCell: UICollectionViewCell {
         contentView.addSubview(nameLabel)
         nameLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 8).isActive = true
         nameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
+        
+        contentView.addSubview(OwnerCrownView)
+        OwnerCrownView.leadingAnchor.constraint(equalTo: nameLabel.trailingAnchor, constant: 1).isActive = true
+        OwnerCrownView.centerYAnchor.constraint(equalTo: nameLabel.centerYAnchor).isActive = true
     }
     
-    func configure(image: UIImage, name: String) {
-        self.profileImageView.image = image
-        self.nameLabel.text = name
+    func configure(uid: String, isOwner: Bool) {
+        PostService().fetchMembers(uid: uid) { name, url in
+            
+            // 이미지 존재 확인 없으면 기본 프로필
+            if url == "" {
+                self.profileImageView.image = UIImage(named: "profile_img")
+            } else {
+                self.profileImageView.loadImage(url: url ?? "")
+            }
+            
+            // 이름의 길이 확인 7글자 이상이면 .. 표시
+            if name?.count ?? 1 > 7 {
+                self.nameLabel.text = "\(String(describing: name?.prefix(6))).."
+            } else {
+                self.nameLabel.text = name
+            }
+            
+            // 글쓴이 확인 왕관표시
+            if isOwner {
+                self.OwnerCrownView.isHidden = false
+            } else {
+                self.OwnerCrownView.isHidden = true
+            }
+        }
     }
 }
