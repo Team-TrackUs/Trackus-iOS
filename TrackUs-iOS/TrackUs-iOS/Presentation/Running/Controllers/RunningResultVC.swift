@@ -18,7 +18,7 @@ class RunningResultVC: UIViewController {
     private var runInfo: [RunInfoModel] = []
     private var polyline: MKPolyline?
     private var annotation: MKPointAnnotation?
-    private var mapView: MKMapView!
+    
     
     private lazy var saveButton: UIButton = {
         let bt = MainButton()
@@ -90,14 +90,22 @@ class RunningResultVC: UIViewController {
         return bt
     }()
     
+    private lazy var myMapView: MyMapView = {
+        let mapView = MyMapView()
+        mapView.layer.cornerRadius = 5
+        mapView.clipsToBounds = true
+        mapView.setCoordinate(runModel?.coordinates)
+        mapView.mapView.isUserInteractionEnabled = false
+        mapView.mapView.showsUserLocation = false
+        return mapView
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavBar()
         setupTableView()
-        setupMapView()
         setConstraint()
-        dispalyPath()
     }
     
     override func viewDidLayoutSubviews() {
@@ -134,29 +142,12 @@ class RunningResultVC: UIViewController {
         navigationController?.navigationBar.shadowImage = UIImage()
     }
     
-    func drawPath() {
-        guard let runModel = runModel else {
-            return
-        }
-        
-        let coordinates = runModel.coordinates
-        annotation = MKPointAnnotation()
-        polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
-        
-        guard coordinates.count >= 1, let annotation = annotation else { return }
-        annotation.coordinate = coordinates.first!
-        mapView.addAnnotation(annotation)
-        
-        guard coordinates.count >= 2, let polyline = polyline else { return }
-        mapView.addOverlay(polyline)
-    }
-    
     func setConstraint() {
         view.addSubview(titleLabel)
         view.addSubview(kmLabel)
         view.addSubview(tableView)
         view.addSubview(detailButton)
-        view.addSubview(mapView)
+        view.addSubview(myMapView)
         view.addSubview(mapDetailBtn)
         view.addSubview(buttonContainer)
         
@@ -175,13 +166,13 @@ class RunningResultVC: UIViewController {
             detailButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             detailButton.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 20),
             
-            mapView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            mapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
-            mapView.topAnchor.constraint(equalTo: detailButton.bottomAnchor, constant: 20),
-            mapView.heightAnchor.constraint(equalToConstant: 250),
+            myMapView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            myMapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
+            myMapView.topAnchor.constraint(equalTo: detailButton.bottomAnchor, constant: 20),
+            myMapView.heightAnchor.constraint(equalToConstant: 250),
             
-            mapDetailBtn.topAnchor.constraint(equalTo: mapView.topAnchor, constant: 10),
-            mapDetailBtn.trailingAnchor.constraint(equalTo: mapView.trailingAnchor, constant: -10),
+            mapDetailBtn.topAnchor.constraint(equalTo: myMapView.topAnchor, constant: 10),
+            mapDetailBtn.trailingAnchor.constraint(equalTo: myMapView.trailingAnchor, constant: -10),
             
             buttonContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             buttonContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -200,27 +191,14 @@ class RunningResultVC: UIViewController {
         tableView.register(RunInfoCell.self, forCellReuseIdentifier: RunInfoCell.identifier)
     }
     
-    func setupMapView() {
-        mapView = MKMapView()
-        mapView.translatesAutoresizingMaskIntoConstraints = false
-        mapView.showsUserLocation = false
-        mapView.isUserInteractionEnabled = false
-        mapView.layer.cornerRadius = 6
-        mapView.delegate = self
-    }
-    
-    func dispalyPath() {
-        if let region = runModel?.coordinates.makeRegionToFit() {
-            mapView.setRegion(region, animated: false)
-            drawPath()
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 20,
-                                                                                        left: 20,
-                                                                                        bottom: 20,
-                                                                                        right: 20), animated: false)
-        }
-    }
+//    func setupMapView() {
+//        mapView = MKMapView()
+//        mapView.translatesAutoresizingMaskIntoConstraints = false
+//        mapView.showsUserLocation = false
+//        mapView.isUserInteractionEnabled = false
+//        mapView.layer.cornerRadius = 6
+//        mapView.delegate = self
+//    }
     
     func setupUI() {
         guard let runModel = runModel else { return }
@@ -250,6 +228,7 @@ class RunningResultVC: UIViewController {
     
     @objc func goToMapView() {
         let mapResultVC = MapResultVC()
+        mapResultVC.runModel = runModel
         mapResultVC.modalPresentationStyle = .fullScreen
         navigationController?.pushViewController(mapResultVC, animated: true)
     }
@@ -289,17 +268,4 @@ extension CALayer {
     }
 }
 
-extension RunningResultVC: MKMapViewDelegate {
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        guard let polyLine = overlay as? MKPolyline
-        else {
-            print("can't draw polyline")
-            return MKOverlayRenderer()
-        }
-        let renderer = MKPolylineRenderer(polyline: polyLine)
-        renderer.strokeColor = .green
-        renderer.lineWidth = 4.0
-        renderer.alpha = 1.0
-        return renderer
-    }
-}
+

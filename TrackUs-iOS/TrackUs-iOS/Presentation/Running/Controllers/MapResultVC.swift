@@ -9,18 +9,34 @@ import UIKit
 import MapKit
 
 class MapResultVC: UIViewController {
-    private var mapView: MKMapView!
+    // MARK: - Properties
+    var runModel: Running?
+    private var myMapView: MyMapView!
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavBar()
-        setupMapView()
+        setConstraint()
+        setData()
     }
     
-    func setupMapView() {
-        mapView = MKMapView(frame: self.view.bounds)
-        mapView.showsUserLocation = true
-        self.view.addSubview(mapView)
+    // MARK: - Helpers
+    func setConstraint() {
+        myMapView = MyMapView(frame: view.frame)
+        
+        view.addSubview(myMapView)
+        
+        NSLayoutConstraint.activate([
+            myMapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            myMapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            myMapView.topAnchor.constraint(equalTo: view.topAnchor),
+            myMapView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+    }
+    
+    func setData() {
+        myMapView.setCoordinate(runModel?.coordinates)
     }
     
     func setupNavBar() {

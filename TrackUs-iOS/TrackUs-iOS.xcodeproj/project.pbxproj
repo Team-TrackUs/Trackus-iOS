@@ -45,6 +45,7 @@
 		82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACE2BFCA57B004819C1 /* Array+.swift */; };
 		82C38AD12BFCE0C4004819C1 /* CoreLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */; };
 		82C38AD32BFCE445004819C1 /* Double+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD22BFCE445004819C1 /* Double+.swift */; };
+		82E7638B2C087C220078E5C9 /* MyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E7638A2C087C220078E5C9 /* MyMapView.swift */; };
 		9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9866E6172BFB63ED0031E8B6 /* SplashView.swift */; };
 		9885ACF42BF9E8AA00367991 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF32BF9E8AA00367991 /* KakaoSDK */; };
 		9885ACF62BF9E8AA00367991 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF52BF9E8AA00367991 /* KakaoSDKAuth */; };
@@ -129,6 +130,7 @@
 		82C38ACE2BFCA57B004819C1 /* Array+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+.swift"; sourceTree = "<group>"; };
 		82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreLocation.swift; sourceTree = "<group>"; };
 		82C38AD22BFCE445004819C1 /* Double+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+.swift"; sourceTree = "<group>"; };
+		82E7638A2C087C220078E5C9 /* MyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyMapView.swift; sourceTree = "<group>"; };
 		9866E6172BFB63ED0031E8B6 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		987F6F192C044A43004F6615 /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = info.plist; sourceTree = "<group>"; };
 		988618162BF317EE002ACB4E /* UIImage+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+.swift"; sourceTree = "<group>"; };
@@ -217,6 +219,7 @@
 			isa = PBXGroup;
 			children = (
 				826922E22C045B8B00D506C2 /* RunInfoCell.swift */,
+				82E7638A2C087C220078E5C9 /* MyMapView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -571,6 +574,7 @@
 				61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */,
 				826922E92C04959900D506C2 /* RunInfoDetailVC.swift in Sources */,
 				82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */,
+				82E7638B2C087C220078E5C9 /* MyMapView.swift in Sources */,
 				82BE45852BEFB77C007AE54A /* CustomTabBarVC.swift in Sources */,
 				988618382BF37E81002ACB4E /* SignUpVC.swift in Sources */,
 				98AB54472BF71B390047310A /* NicknameInputView.swift in Sources */,
