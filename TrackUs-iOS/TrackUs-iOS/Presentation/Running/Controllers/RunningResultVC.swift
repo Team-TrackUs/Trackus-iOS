@@ -97,12 +97,12 @@ class RunningResultVC: UIViewController {
         setupTableView()
         setupMapView()
         setConstraint()
+        displayPath()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         buttonContainer.layer.addTopBorder()
-        dispalyPath()
     }
     
     //    override func viewWillAppear(_ animated: Bool) {
@@ -209,12 +209,17 @@ class RunningResultVC: UIViewController {
         mapView.delegate = self
     }
     
-    func dispalyPath() {
+    func displayPath() {
         if let region = runModel?.coordinates.makeRegionToFit() {
             mapView.setRegion(region, animated: false)
             drawPath()
         }
-       
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 20,
+                                                                                        left: 20,
+                                                                                        bottom: 20,
+                                                                                        right: 20), animated: false)
+        }
     }
     
     func setupUI() {
