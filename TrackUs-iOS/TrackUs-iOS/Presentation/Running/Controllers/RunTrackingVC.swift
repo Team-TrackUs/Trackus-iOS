@@ -266,7 +266,7 @@ final class RunTrackingVC: UIViewController {
         NSLayoutConstraint.activate([
             slideBox.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             slideBox.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            slideBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            slideBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
             slideBox.heightAnchor.constraint(equalToConstant: 70),
             
             actionButton.leadingAnchor.constraint(equalTo: slideBox.leadingAnchor, constant: 10),
@@ -425,21 +425,26 @@ final class RunTrackingVC: UIViewController {
     }
     
     func setPreviewMode() {
-        if let region = runModel.coordinates.makeRegionToFit(runModel.coordinates) {
+        if let region = runModel.coordinates.makeRegionToFit() {
                 mapView.setRegion(region, animated: false)
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             guard let self = self else { return }
-            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY, left: 0, bottom: 0, right: 0), animated: false)
+            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY + 20,
+                                                                                        left: 0,
+                                                                                        bottom: slideBox.frame.height + 20,
+                                                                                        right: 0), animated: false)
         }
     }
     
     func setRunInfo() {
         runModel.setStartTime()
+        
         guard let location = locationService.currentLocation?.asCLLocation else {
             return
         }
+        runModel.coordinates.append(location.coordinate)
         locationService.reverseGeoCoding(location: location) { address in
             self.runModel.address = address
         }

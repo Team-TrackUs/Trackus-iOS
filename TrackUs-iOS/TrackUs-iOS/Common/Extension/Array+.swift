@@ -41,11 +41,11 @@ extension Array where Element == CLLocationCoordinate2D {
         return distance
     }
     
-    func makeRegionToFit(_ coordinates: [CLLocationCoordinate2D]) -> MKCoordinateRegion? {
-        let maxLatitude = coordinates.map {Double($0.latitude)}.max()
-        let minLatitude = coordinates.map {Double($0.latitude)}.min()
-        let maxLongitude = coordinates.map {Double($0.longitude)}.max()
-        let minLongitude = coordinates.map {Double($0.longitude)}.min()
+    func makeRegionToFit() -> MKCoordinateRegion? {
+        let maxLatitude = self.map {Double($0.latitude)}.max()
+        let minLatitude = self.map {Double($0.latitude)}.min()
+        let maxLongitude = self.map {Double($0.longitude)}.max()
+        let minLongitude = self.map {Double($0.longitude)}.min()
         
         guard let maxLatitude = maxLatitude,
               let minLatitude = minLatitude,
@@ -55,7 +55,7 @@ extension Array where Element == CLLocationCoordinate2D {
         }
         
         let center: CLLocationCoordinate2D
-        if let providedCenter = coordinates.centerPosition {
+        if let providedCenter = self.centerPosition {
             center = providedCenter
         } else {
             return nil
@@ -69,7 +69,7 @@ extension Array where Element == CLLocationCoordinate2D {
         
         let maxValue = Swift.max(latitudeDistance, longitudeDistance)
         
-        let region = MKCoordinateRegion(center: center, latitudinalMeters: maxValue, longitudinalMeters: maxValue)
+        let region = MKCoordinateRegion(center: center, latitudinalMeters: latitudeDistance, longitudinalMeters: longitudeDistance)
         
         return region
     }

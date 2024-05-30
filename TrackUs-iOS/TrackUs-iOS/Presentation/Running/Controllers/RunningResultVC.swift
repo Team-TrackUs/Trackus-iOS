@@ -16,8 +16,10 @@ class RunningResultVC: UIViewController {
         }
     }
     private var runInfo: [RunInfoModel] = []
-    
+    private var polyline: MKPolyline?
+    private var annotation: MKPointAnnotation?
     private var mapView: MKMapView!
+    
     private lazy var saveButton: UIButton = {
         let bt = MainButton()
         bt.translatesAutoresizingMaskIntoConstraints = false
@@ -100,6 +102,7 @@ class RunningResultVC: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         buttonContainer.layer.addTopBorder()
+        dispalyPath()
     }
     
     //    override func viewWillAppear(_ animated: Bool) {
@@ -124,12 +127,30 @@ class RunningResultVC: UIViewController {
         menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
         menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 16).isActive = true
         menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        navigationItem.rightBarButtonItem = menuBarItem
+        navigationItem.leftBarButtonItem = menuBarItem
         navigationItem.hidesBackButton = true
         navigationItem.rightBarButtonItem?.tintColor = .black
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         navigationController?.navigationBar.shadowImage = UIImage()
     }
+    
+    func drawPath() {
+        guard let runModel = runModel else {
+            return
+        }
+        
+        let coordinates = runModel.coordinates
+        annotation = MKPointAnnotation()
+        polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
+        
+        guard coordinates.count >= 1, let annotation = annotation else { return }
+        annotation.coordinate = coordinates.first!
+        mapView.addAnnotation(annotation)
+        
+        guard coordinates.count >= 2, let polyline = polyline else { return }
+        mapView.addOverlay(polyline)
+    }
+    
     func setConstraint() {
         view.addSubview(titleLabel)
         view.addSubview(kmLabel)
@@ -185,6 +206,15 @@ class RunningResultVC: UIViewController {
         mapView.showsUserLocation = false
         mapView.isUserInteractionEnabled = false
         mapView.layer.cornerRadius = 6
+        mapView.delegate = self
+    }
+    
+    func dispalyPath() {
+        if let region = runModel?.coordinates.makeRegionToFit() {
+            mapView.setRegion(region, animated: false)
+            drawPath()
+        }
+       
     }
     
     func setupUI() {
@@ -251,5 +281,20 @@ extension CALayer {
         border.frame = CGRect(x: 0, y: 0, width: frame.width, height: 1)
         border.backgroundColor = UIColor.gray3.cgColor
         self.addSublayer(border)
+    }
+}
+
+extension RunningResultVC: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        guard let polyLine = overlay as? MKPolyline
+        else {
+            print("can't draw polyline")
+            return MKOverlayRenderer()
+        }
+        let renderer = MKPolylineRenderer(polyline: polyLine)
+        renderer.strokeColor = .green
+        renderer.lineWidth = 4.0
+        renderer.alpha = 1.0
+        return renderer
     }
 }
