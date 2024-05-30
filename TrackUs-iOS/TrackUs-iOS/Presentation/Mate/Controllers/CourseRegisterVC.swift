@@ -386,10 +386,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }
     
     @objc func addCourseButtonTapped() {
-        print("DEBUG: Add course...")
-        
         let userUID = User.currentUid
-        print("DEBUG: 유저 UID = \(userUID)")
         let postUID = Firestore.firestore().collection("posts").document().documentID
         
         // date와 time을 하나 합쳐서 업로드
@@ -421,21 +418,15 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             // 이미지 업로드 후 Post 업데이트
             self.mapSnapshot(with: self.pinAnnotations, polyline: MKPolyline(coordinates: self.testcoords, count: self.testcoords.count)) { [weak self] image in
                 guard let self = self else { return }
-                print("DEBUG: Starting image upload...")
-                
                 PostService.uploadImage(image: image) { url in
                     if let url = url {
-                        print("DEBUG: Image uploaded successfully. URL: \(url.absoluteString)")
                         post.updateRouteImageUrl(newUrl: url.absoluteString)
-                        print("DEBUG: Starting post upload...")
                         
                         // Post 업로드
                         PostService().uploadPost(post: post) { error in
                             if let error = error {
                                 print("DEBUG: Failed to upload post: \(error.localizedDescription)")
                             } else {
-                                print("DEBUG: Post uploded Successfully")
-                                
                                 DispatchQueue.main.async {
                                     let courseDetailVC = CourseDetailVC()
                                     

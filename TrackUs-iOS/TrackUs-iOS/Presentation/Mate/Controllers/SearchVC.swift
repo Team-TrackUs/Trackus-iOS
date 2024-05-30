@@ -65,9 +65,6 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         tableView.delegate = self
         tableView.dataSource = self
         searchBar.becomeFirstResponder()
-//        Task {
-//            await fetchPosts()
-//        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -112,24 +109,9 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
 
-//    private func fetchPosts() async {
-//        let postService = PostService()
-//
-//        do {
-//            try await postService.fetchPost()
-//            self.posts = postService.posts
-//            tableView.reloadData()
-//        } catch {
-//            let nsError = error as NSError
-//            print("DEBUG: Firestore error - Domain: \(nsError.domain), Code: \(nsError.code), Description: \(nsError.localizedDescription)")
-//        }
-//    }
-
     private func searchPosts(for searchText: String) {
-        print("DEBUG: Searching posts for text: \(searchText)")
         let postService = PostService()
         postService.searchFilter(searchText: searchText) { [weak self] filteredPosts in
-            print("DEBUG: \(filteredPosts.count) posts found")
             self?.searchResultsPosts = filteredPosts
             self?.tableView.reloadData()
         }

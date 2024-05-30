@@ -211,14 +211,11 @@ class CourseDetailVC: UIViewController {
         collectionView.dataSource = self
         configureUI()
         runningStyleColor()
-        
-        print("DEBUG: \(courseCoords)")
     }
     
     // MARK: - Selectors
     
     @objc func goCourseDetail(_ sender: UITapGestureRecognizer) {
-        print("DEBUG: 지도클릭")
         let courseMapVC = CourseMapVC()
         
         courseMapVC.testcoords = self.courseCoords
@@ -228,28 +225,22 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func courseEnterButtonTapped() {
-        print("DEBUG: 참가하기 클릭")
-        
         PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
             self.members = updateMembers
         }
     }
     
     @objc func courseExitButtonTapped() {
-        print("DEBUG: 나가기 클릭")
-        
         PostService().exitPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
             self.members = updateMembers
         }
     }
     
     @objc func goChatRoomButtonTapped() {
-        print("DEBUG: 채팅 버튼 클릭")
+        
     }
     
     @objc func menuButtonTapped() {
-        print("DEBUG: 네비게이션 버튼 클릭")
-        
         let editAction = UIAlertAction(title: "모집글 수정", style: .default) { action in
             
         }

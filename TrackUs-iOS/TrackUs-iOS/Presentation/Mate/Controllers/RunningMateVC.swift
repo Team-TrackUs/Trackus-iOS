@@ -17,12 +17,16 @@ class RunningMateVC: UIViewController {
     private var posts = [Post]()
     private var isLoadingMore = false
     private var isPagingComplete = false
+    let refreshView = RefreshView()
+    
+    private var deletedPostUIDs = [String]()
     
     private lazy var refreshControl : UIRefreshControl = {
         let control = UIRefreshControl()
         control.addTarget(self, action: #selector(refreshPosts), for: .valueChanged)
-        control.tintColor = UIColor.mainBlue
-        control.attributedTitle = NSAttributedString(string: "모집글 새로고침", attributes: [.foregroundColor: UIColor.mainBlue])
+        control.tintColor = UIColor.clear
+        control.attributedTitle = NSAttributedString(string: "모집글 새로고침", attributes: [.foregroundColor: UIColor.clear])
+        
         return control
     }()
     
@@ -107,6 +111,12 @@ class RunningMateVC: UIViewController {
         fetchPosts()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        fetchPosts()
+    }
+    
     // MARK: - Selectors
     
     @objc func moveButtonTapped() {
@@ -129,8 +139,17 @@ class RunningMateVC: UIViewController {
     }
     
     @objc func refreshPosts() {
+        
         HapticManager.shared.hapticImpact(style: .light)
+        
+        refreshView.startTextRotation()
+        
         fetchPosts()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            self.refreshView.stopTextRotation()
+            self.refreshControl.endRefreshing()
+        }
     }
     
     // MARK: - Helpers
@@ -161,6 +180,8 @@ class RunningMateVC: UIViewController {
         tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
+        tableView.backgroundView = refreshView
+        
         tableView.tableFooterView = footer
         tableView.refreshControl = refreshControl
         
@@ -189,11 +210,11 @@ class RunningMateVC: UIViewController {
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
-
-    @objc private func fetchPosts() {
+    
+    func fetchPosts() {
         let postService = PostService()
         
-        postService.fetchPosts(startAfter: lastDocumentSnapshot, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
+        postService.fetchPosts(startAfter: nil, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
             guard let self = self else { return }
             
             if let error = error {
@@ -203,24 +224,19 @@ class RunningMateVC: UIViewController {
             }
             
             if let resultPosts = resultPosts {
-                
-                let newPosts = resultPosts.filter { post in
-                    !self.posts.contains(where: { $0.uid == post.uid })
+                self.posts = resultPosts.filter { post in
+                    !self.deletedPostUIDs.contains(post.uid)
                 }
                 
-                self.posts.append(contentsOf: newPosts)
                 self.lastDocumentSnapshot = lastDocumentSnapshot
-                posts.sort { $0.createdAt > $1.createdAt }
+                self.posts.sort { $0.createdAt > $1.createdAt }
                 self.tableView.reloadData()
+                self.isPagingComplete = false
             } else {
                 print("DEBUG: No posts found")
                 self.refreshControl.endRefreshing()
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.refreshControl.endRefreshing()
-            }
         }
-        
     }
     
     private func fetchMorePosts() {
