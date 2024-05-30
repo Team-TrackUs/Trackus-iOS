@@ -97,7 +97,7 @@ class RunningResultVC: UIViewController {
         setupTableView()
         setupMapView()
         setConstraint()
-        displayPath()
+        dispalyPath()
     }
     
     override func viewDidLayoutSubviews() {
@@ -209,7 +209,7 @@ class RunningResultVC: UIViewController {
         mapView.delegate = self
     }
     
-    func displayPath() {
+    func dispalyPath() {
         if let region = runModel?.coordinates.makeRegionToFit() {
             mapView.setRegion(region, animated: false)
             drawPath()
