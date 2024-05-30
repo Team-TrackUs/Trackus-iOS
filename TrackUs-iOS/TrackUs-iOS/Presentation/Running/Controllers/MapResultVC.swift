@@ -30,7 +30,7 @@ class MapResultVC: UIViewController {
         NSLayoutConstraint.activate([
             myMapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             myMapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            myMapView.topAnchor.constraint(equalTo: view.topAnchor),
+            myMapView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             myMapView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
     }

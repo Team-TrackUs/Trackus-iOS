@@ -27,6 +27,7 @@ final class RunTrackingVC: UIViewController {
     private var count = 3
     private var polyline: MKPolyline?
     private var annotation: MKPointAnnotation?
+    private var annotation2: MKPointAnnotation?
     private var tempData: [String: Any] = ["distance": 0.0, "steps": 0]
     private var maxAltitude = -99999.0
     private var minAltitude = 99999.0
@@ -406,19 +407,23 @@ final class RunTrackingVC: UIViewController {
     }
     
     func drawPath() {
+        mapView.showsUserLocation = false
         let coordinates = runModel.coordinates
         annotation = MKPointAnnotation()
+        annotation2 = MKPointAnnotation()
         polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         
         guard coordinates.count >= 1, let annotation = annotation else { return }
         annotation.coordinate = coordinates.first!
         mapView.addAnnotation(annotation)
         
-        guard coordinates.count >= 2, let polyline = polyline else { return }
+        guard coordinates.count >= 2, let polyline = polyline, let annotation2 = annotation2 else { return }
         mapView.addOverlay(polyline)
+        mapView.addAnnotation(annotation2)
     }
     
     func removePath() {
+        mapView.showsUserLocation = true
         guard let polyline = polyline, let annotation = annotation else { return }
         mapView.removeOverlay(polyline)
         mapView.removeAnnotation(annotation)
@@ -507,6 +512,7 @@ extension RunTrackingVC: UserLocationDelegate {
     }
     
     func startTracking() {
+        locationService.allowBackgroundUpdates = true
         locationService.userLocationDelegate = self
         pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
             guard let self = self else { return }
@@ -546,6 +552,7 @@ extension RunTrackingVC: UserLocationDelegate {
     }
     
     func stopTracking() {
+        locationService.allowBackgroundUpdates = false
         self.locationService.userLocationDelegate = nil
         pedometer.stopUpdates()
         altimeter.stopRelativeAltitudeUpdates()
