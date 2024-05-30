@@ -62,24 +62,34 @@ class PostService {
     }
     
     // 포스트 패치
-    func fetchPost() async throws {
-        let snapshot = try await Firestore.firestore().collection("posts").getDocuments()
+    func fetchPosts(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
         
-        for document in snapshot.documents {
-            print("읽어오기 시작!")
-            print("\(document.documentID) => \(document.data())")
-            print("DEBUG: Document data = \(document.data()) ;;")
-            print("읽어오기 끝!")
+        var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true).limit(to: limit)
+        
+        if let startAfter = startAfter {
+            query = query.start(afterDocument: startAfter)
+        }
+        
+        query.getDocuments { snapshot, error in
+            if let error = error {
+                print("DEBUG: Failed to fetch post = \(error.localizedDescription)")
+                completion(nil,nil,error)
+                return
+            }
             
-            do {
-                
+            guard let documents = snapshot?.documents else {
+                completion([], nil, nil)
+                return
+            }
+            
+            var posts = [Post]()
+            
+            for document in documents {
                 let startDate = (document["startDate"] as? Timestamp)?.dateValue() ?? Date()
-                
                 guard let courseRoutesData = document["courseRoutes"] as? [GeoPoint] else {
                     print("DEBUG: Failed to get courseRoutesData for document \(document.documentID)")
                     continue
                 }
-                
                 guard let title = document["title"] as? String,
                       let content = document["content"] as? String,
                       let distance = document["distance"] as? Double,
@@ -110,10 +120,12 @@ class PostService {
                     members: members
                 )
                 
-                self.posts.append(post)
-            } catch {
-                print("DEBUG: Error processing document \(document.documentID) - \(error.localizedDescription)")
+                posts.append(post)
+                
             }
+            
+            let lastDocumentSnapshot = snapshot?.documents.last
+            completion(posts, lastDocumentSnapshot, nil)
         }
     }
     
@@ -147,7 +159,7 @@ class PostService {
         metaData.contentType = "image/jpeg"
         
         let imageName = UUID().uuidString + String(Date().timeIntervalSince1970)
-
+        
         let firebaseReference = Storage.storage().reference().child("posts_image").child(imageName)
         firebaseReference.putData(imageData, metadata: metaData) { metaData, error in
             if let error = error {
@@ -165,7 +177,7 @@ class PostService {
                 completion(url)
                 
                 // 이미지 setImage
-//                ImageCacheManager.shared.setImage(imageData, forkey: url.absoluteString)
+                // ImageCacheManager.shared.setImage(imageData, forkey: url.absoluteString)
                 
             }
         }
@@ -183,5 +195,80 @@ class PostService {
             }
             completion(UIImage(data: imageData))
         }
+    }
+    
+    // 모집글 참여인원의 프로필이미지와 이름 가져오기
+    func fetchMembers(uid: String, completion: @escaping (String?, String?) -> Void) {
+        Firestore.firestore().collection("user").document(uid).getDocument { snapshot, error in
+            guard let data = snapshot?.data() else { return }
+            let name = data["name"] as? String ?? ""
+            let imageUrl = data["profileImageUrl"] as? String ?? ""
+            
+            completion(name, imageUrl)
+            return
+        }
+    }
+    
+    // 검색어 필터링
+    func searchFilter(searchText: String, completion: @escaping ([Post]) -> Void) {
+        let searchToken = searchText.lowercased()
+        
+        Firestore.firestore().collection("posts")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("DEBUG: Search Error \(error.localizedDescription)")
+                    completion([])
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    print("DEBUG: No documents found for searchText: \(searchText)")
+                    completion([])
+                    return
+                }
+                
+                print("DEBUG: \(documents.count) documents found for searchText: \(searchText)")
+                
+                var filterPosts = [Post]()
+                documents.forEach { document in
+                    let data = document.data()
+                    
+                    guard let title = data["title"] as? String,
+                          let content = data["content"] as? String,
+                          let courseRoutes = data["courseRoutes"] as? [GeoPoint],
+                          let distance = data["distance"] as? Double,
+                          let numberOfPeoples = data["numberOfPeoples"] as? Int,
+                          let routeImageUrl = data["routeImageUrl"] as? String,
+                          let startDateTimestamp = data["startDate"] as? Timestamp,
+                          let address = data["address"] as? String,
+                          let whoReportAt = data["whoReportAt"] as? [String],
+                          let createdAtTimestamp = data["createdAt"] as? Timestamp,
+                          let runningStyle = data["runningStyle"] as? Int,
+                          let members = data["members"] as? [String] else {
+                        print("DEBUG: Invalid document data for documentID: \(document.documentID)")
+                        return
+                    }
+                    
+                    // 검색어가 제목에 포함되어 있는지 확인
+                    if title.lowercased().contains(searchToken) {
+                        let post = Post(uid: document.documentID,
+                                        title: title,
+                                        content: content,
+                                        courseRoutes: courseRoutes,
+                                        distance: distance,
+                                        numberOfPeoples: numberOfPeoples,
+                                        routeImageUrl: routeImageUrl,
+                                        startDate: startDateTimestamp.dateValue(),
+                                        address: address,
+                                        whoReportAt: whoReportAt,
+                                        createdAt: createdAtTimestamp.dateValue(),
+                                        runningStyle: runningStyle,
+                                        members: members)
+                        
+                        filterPosts.append(post)
+                    }
+                }
+                completion(filterPosts)
+            }
     }
 }

@@ -16,6 +16,10 @@ class CourseDetailVC: UIViewController {
     var postUid: String = ""
     var imageUrl: String = ""
     
+    var isRegionSet = false // mapkit
+    var locationManager = CLLocationManager() // mapkit
+    var pinAnnotations: [MKPointAnnotation] = [] // mapkit
+    
     let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = .white
@@ -35,6 +39,13 @@ class CourseDetailVC: UIViewController {
         return collectionView
     }()
     
+    let divider: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .gray3
+        return view
+    }()
+    
     var courseCoords: [CLLocationCoordinate2D] = [] // 코스
     var members: [String] = [] {
         didSet {
@@ -45,15 +56,9 @@ class CourseDetailVC: UIViewController {
     var memberLimit: Int = 0 // 최대 인원
     var distance: Double = 0.0 // 거리
     
-    lazy var mapImageButton: UIButton = { // 코스 지도 이미지
-        let button = UIButton()
-        button.setImage(UIImage(named: ""), for: .normal)
-//        button.imageView?.contentMode = .scaleAspectFill
-        button.clipsToBounds = true
-        button.layer.cornerRadius = 10
-        button.backgroundColor = .mainBlue
-        button.addTarget(self, action: #selector(goCourseDetail), for: .touchUpInside)
-        return button
+    var preMapView: MKMapView = { // 지도 미리보기
+        let mapview = MKMapView()
+        return mapview
     }()
     
     let distanceLabel: UILabel = { // 코스 거리
@@ -193,6 +198,8 @@ class CourseDetailVC: UIViewController {
     
     let buttonStack = UIStackView()
     
+    lazy var preMapViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(goCourseDetail(_:)))
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -208,8 +215,7 @@ class CourseDetailVC: UIViewController {
     
     // MARK: - Selectors
     
-    @objc func goCourseDetail() {
-        print("DEBUG: 지도클릭")
+    @objc func goCourseDetail(_ sender: UITapGestureRecognizer) {
         let courseMapVC = CourseMapVC()
         
         courseMapVC.testcoords = self.courseCoords
@@ -219,28 +225,22 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func courseEnterButtonTapped() {
-        print("DEBUG: 참가하기 클릭")
-        
         PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
             self.members = updateMembers
         }
     }
     
     @objc func courseExitButtonTapped() {
-        print("DEBUG: 나가기 클릭")
-        
         PostService().exitPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
             self.members = updateMembers
         }
     }
     
     @objc func goChatRoomButtonTapped() {
-        print("DEBUG: 채팅 버튼 클릭")
+        
     }
     
     @objc func menuButtonTapped() {
-        print("DEBUG: 네비게이션 버튼 클릭")
-        
         let editAction = UIAlertAction(title: "모집글 수정", style: .default) { action in
             
         }
@@ -279,12 +279,18 @@ class CourseDetailVC: UIViewController {
         view.backgroundColor = .white
         view.addSubview(buttonContainer)
         view.addSubview(scrollView)
+        buttonContainer.addSubview(divider)
         
         buttonContainer.translatesAutoresizingMaskIntoConstraints = false
-        buttonContainer.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16).isActive = true
+        buttonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         buttonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        buttonContainer.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16).isActive = true
+        buttonContainer.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         buttonContainer.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        
+        divider.topAnchor.constraint(equalTo: buttonContainer.topAnchor).isActive = true
+        divider.leadingAnchor.constraint(equalTo: buttonContainer.leadingAnchor).isActive = true
+        divider.trailingAnchor.constraint(equalTo: buttonContainer.trailingAnchor).isActive = true
+        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
         
         NSLayoutConstraint.activate([
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -293,30 +299,31 @@ class CourseDetailVC: UIViewController {
             scrollView.bottomAnchor.constraint(equalTo: buttonContainer.topAnchor)
         ])
         
-        scrollView.addSubview(mapImageButton)
-        mapImageButton.translatesAutoresizingMaskIntoConstraints = false
-        mapImageButton.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 16).isActive = true
-        mapImageButton.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
-        mapImageButton.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
-        mapImageButton.heightAnchor.constraint(equalToConstant: 310).isActive = true
-        mapImageButton.contentHorizontalAlignment = .fill
-        mapImageButton.contentVerticalAlignment = .fill
+        scrollView.addSubview(preMapView)
+        preMapView.translatesAutoresizingMaskIntoConstraints = false
+        preMapView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 16).isActive = true
+        preMapView.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
+        preMapView.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
+        preMapView.heightAnchor.constraint(equalToConstant: 310).isActive = true
+        preMapView.addGestureRecognizer(preMapViewTapGesture)
         
-        mapImageButton.addSubview(distanceLabel)
+        MapConfigureUI()
+        
+        preMapView.addSubview(distanceLabel)
         distanceLabel.translatesAutoresizingMaskIntoConstraints = false
-        distanceLabel.leftAnchor.constraint(equalTo: mapImageButton.leftAnchor, constant: 16).isActive = true
-        distanceLabel.bottomAnchor.constraint(equalTo: mapImageButton.bottomAnchor, constant: -30).isActive = true
+        distanceLabel.leftAnchor.constraint(equalTo: preMapView.leftAnchor, constant: 16).isActive = true
+        distanceLabel.bottomAnchor.constraint(equalTo: preMapView.bottomAnchor, constant: -30).isActive = true
         distanceLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
         distanceLabel.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
         scrollView.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
-        dateLabel.topAnchor.constraint(equalTo: mapImageButton.bottomAnchor, constant: 16).isActive = true
+        dateLabel.topAnchor.constraint(equalTo: preMapView.bottomAnchor, constant: 16).isActive = true
         dateLabel.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
         
         scrollView.addSubview(runningStyleLabel)
         runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
-        runningStyleLabel.topAnchor.constraint(equalTo: mapImageButton.bottomAnchor, constant: 16).isActive = true
+        runningStyleLabel.topAnchor.constraint(equalTo: preMapView.bottomAnchor, constant: 16).isActive = true
         runningStyleLabel.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         runningStyleLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
         runningStyleLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
@@ -399,9 +406,9 @@ class CourseDetailVC: UIViewController {
         buttonContainer.addSubview(buttonStack)
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         buttonStack.topAnchor.constraint(equalTo: buttonContainer.topAnchor, constant: 10).isActive = true
-        buttonStack.leftAnchor.constraint(equalTo: buttonContainer.leftAnchor).isActive = true
+        buttonStack.leftAnchor.constraint(equalTo: buttonContainer.leftAnchor, constant: 16).isActive = true
         buttonStack.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor).isActive = true
-        buttonStack.rightAnchor.constraint(equalTo: buttonContainer.rightAnchor).isActive = true
+        buttonStack.rightAnchor.constraint(equalTo: buttonContainer.rightAnchor, constant: -16).isActive = true
     }
     
     private func setupNavBar() {
@@ -474,16 +481,112 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MatePeopleListCell.identifier, for: indexPath) as? MatePeopleListCell else {
             fatalError("Unable to dequeue MatePeopleListCell")
         }
-        cell.configure(image: UIImage(named: "profile_img") ?? UIImage(imageLiteralResourceName: "profile_img"), name: "TrackUs")
+        
+        let memberUid = members[indexPath.item]
+        let isOwner = indexPath.item == 0
+        cell.configure(uid: memberUid, isOwner: isOwner)
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         
-        let itemWidth = collectionView.bounds.height
         return UIEdgeInsets(top: 0, left: 10, bottom: 20, right: 10)
     }
     
+}
+
+extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
+    
+    // 맵 세팅
+    func MapConfigureUI() {
+        self.locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+        preMapView.delegate = self
+        preMapView.mapType = MKMapType.mutedStandard
+        preMapView.isZoomEnabled = false
+        preMapView.isScrollEnabled = false
+        preMapView.center = view.center
+        preMapView.showsUserLocation = false
+        
+        for (index, coord) in courseCoords.enumerated() {
+            let pin = MKPointAnnotation()
+            pin.coordinate = coord
+            let pinTitle = "\(index + 1)" // 핀의 제목을 인덱스로 설정
+            pin.title = pinTitle
+            preMapView.addAnnotation(pin)
+            pinAnnotations.append(pin)
+        }
+        
+        addPolylineToMap()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+        // adding map region
+        if courseCoords.count > 0 {
+            if !isRegionSet {
+                
+                let center = CLLocationCoordinate2D(latitude: courseCoords[0].latitude, longitude: courseCoords[0].longitude)
+                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03))
+                preMapView.setRegion(region, animated: true) // 위치를 코스의 시작위치로
+                
+                isRegionSet = true
+            }
+        }
+    }
+    
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        if let polyline = overlay as? MKPolyline {
+            let testlineRenderer = MKPolylineRenderer(polyline: polyline)
+            testlineRenderer.strokeColor = .mainBlue
+            testlineRenderer.lineWidth = 5.0
+            return testlineRenderer
+        }
+        
+        return MKOverlayRenderer(overlay: overlay)
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        guard !(annotation is MKUserLocation) else {
+            return nil
+        }
+        
+        let identifier = "pinAnnotation"
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+        
+        if annotationView == nil {
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+            annotationView?.canShowCallout = false
+        } else {
+            annotationView?.annotation = annotation
+        }
+        
+        if let pin = annotation as? MKPointAnnotation {
+            let label = UILabel(frame: CGRect(x: -8, y: -8, width: 20, height: 20))
+            label.text = pin.title ?? "\(courseCoords.count + 1)"
+            label.textColor = .mainBlue
+            label.textAlignment = .center
+            label.font = UIFont.boldSystemFont(ofSize: 12)
+            
+            label.backgroundColor = .white
+            label.layer.borderColor = UIColor.mainBlue.cgColor
+            label.layer.borderWidth = 2.0
+            label.layer.cornerRadius = label.frame.size.width / 2
+            
+            label.clipsToBounds = true
+            annotationView?.addSubview(label)
+        }
+        
+        return annotationView
+    }
+    
+    func addPolylineToMap() {
+        let polyline = MKPolyline(coordinates: courseCoords, count: courseCoords.count)
+        preMapView.addOverlay(polyline)
+    }
 }
 
 

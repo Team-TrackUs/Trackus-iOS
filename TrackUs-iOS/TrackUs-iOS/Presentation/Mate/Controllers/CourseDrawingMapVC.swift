@@ -113,8 +113,6 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
             testcoords.append(locationCoordinate)
             pinAnnotations.append(myPin)
             
-            print(testcoords)
-            
             if testcoords.count >= 2 {
                 let previousLocation = CLLocation(latitude: testcoords[testcoords.count - 2].latitude, longitude: testcoords[testcoords.count - 2].longitude)
                 let currentLocation = CLLocation(latitude: locationCoordinate.latitude, longitude: locationCoordinate.longitude)
@@ -166,10 +164,6 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         }
     }
     
-    @objc func finishDrawCourseButtonTapped() {
-        print("Next CourseMakeView")
-    }
-    
     @objc func moveButtonTapped() {
         guard let courseRegisterVC = self.courseRegisterVC else {
             return
@@ -178,8 +172,6 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         if testcoords.count >= 2 {
             courseRegisterVC.setup(with: testcoords, distance: distance)
             self.navigationController?.popToViewController(courseRegisterVC, animated: true)
-            print("DEBUG: CourseDrawingVC = \(testcoords.count)")
-            print("DEBUG: CourseDrawingVC.CourseRegisterVC = \(courseRegisterVC.testcoords.count)")
         } else {
             addActionToAlert()
         }
