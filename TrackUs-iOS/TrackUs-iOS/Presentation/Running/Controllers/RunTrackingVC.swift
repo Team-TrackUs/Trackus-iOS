@@ -415,18 +415,19 @@ final class RunTrackingVC: UIViewController {
         
         guard coordinates.count >= 1, let annotation = annotation else { return }
         annotation.coordinate = coordinates.first!
+        annotation2?.coordinate = coordinates.last!
         mapView.addAnnotation(annotation)
         
         guard coordinates.count >= 2, let polyline = polyline, let annotation2 = annotation2 else { return }
         mapView.addOverlay(polyline)
-        mapView.addAnnotation(annotation2)
+        mapView.addAnnotations([annotation, annotation2])
     }
     
     func removePath() {
         mapView.showsUserLocation = true
-        guard let polyline = polyline, let annotation = annotation else { return }
+        guard let polyline = polyline, let annotation = annotation, let annotation2 = annotation2 else { return }
         mapView.removeOverlay(polyline)
-        mapView.removeAnnotation(annotation)
+        mapView.removeAnnotations([annotation, annotation2])
     }
     
     func setPreviewMode() {
@@ -553,9 +554,11 @@ extension RunTrackingVC: UserLocationDelegate {
     
     func stopTracking() {
         locationService.allowBackgroundUpdates = false
-        self.locationService.userLocationDelegate = nil
+        locationService.userLocationDelegate = nil
         pedometer.stopUpdates()
         altimeter.stopRelativeAltitudeUpdates()
+        tempData["steps"] = runModel.steps
+        tempData["distance"] = runModel.distance
     }
     
     func updateUI() {

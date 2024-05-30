@@ -7,7 +7,7 @@
 
 import UIKit
 import MapKit
-class RunningResultVC: UIViewController {
+class RunningResultVC: ExtensionVC {
     // MARK: - Properties
     private let recordService = RecordService.shared
     var runModel: Running? {
@@ -18,7 +18,8 @@ class RunningResultVC: UIViewController {
     private var runInfo: [RunInfoModel] = []
     private var polyline: MKPolyline?
     private var annotation: MKPointAnnotation?
-    
+    private var image: UIImage?
+    weak var sv: UIView?
     
     private lazy var saveButton: UIButton = {
         let bt = MainButton()
@@ -80,7 +81,7 @@ class RunningResultVC: UIViewController {
         config.baseForegroundColor = .gray2
         config.image = UIImage(systemName: "map.fill")
         config.imagePadding = 7
-        var titleAttr = AttributedString("지도뷰")
+        var titleAttr = AttributedString("지도 보기")
         titleAttr.font = UIFont.systemFont(ofSize: 12, weight: .bold)
         config.attributedTitle = titleAttr
         let bt = UIButton(configuration: config)
@@ -191,15 +192,6 @@ class RunningResultVC: UIViewController {
         tableView.register(RunInfoCell.self, forCellReuseIdentifier: RunInfoCell.identifier)
     }
     
-//    func setupMapView() {
-//        mapView = MKMapView()
-//        mapView.translatesAutoresizingMaskIntoConstraints = false
-//        mapView.showsUserLocation = false
-//        mapView.isUserInteractionEnabled = false
-//        mapView.layer.cornerRadius = 6
-//        mapView.delegate = self
-//    }
-    
     func setupUI() {
         guard let runModel = runModel else { return }
         kmLabel.text = runModel.distance.asString(style: .km) // 킬로미터
@@ -212,6 +204,13 @@ class RunningResultVC: UIViewController {
             RunInfoModel(title: "상승고도", result: "+ \(Int(runModel.maxAltitude))m"),
         ]
         tableView.reloadData()
+    }
+    
+    func getImageFromMapView() async -> UIImage? {
+            guard let image = UIImage.imageFromView(view: self.myMapView) else {
+                return nil
+            }
+        return image
     }
     
     func goToRootView() {
@@ -234,9 +233,14 @@ class RunningResultVC: UIViewController {
     }
     
     @objc func uploadButtonTapped() {
-        guard let runModel = runModel else { return }
-        recordService.uploadRecord(record: runModel) {
-            self.goToRootView()
+        Task {
+            defer {
+                sv?.removeFromSuperview()
+            }
+            sv = UIViewController.displaySpinner(onView: self.view)
+            guard let runModel = runModel, let image = await getImageFromMapView() else { return }
+            await recordService.uploadRecord(record: runModel, image: image)
+            goToRootView()
         }
     }
     
@@ -268,4 +272,39 @@ extension CALayer {
     }
 }
 
+// 선구님 로딩뷰로 대체예정!
+class ExtensionVC: UIViewController {
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Do any additional setup after loading the view.
+    }
+
+}
+
+extension UIViewController {
+    class func displaySpinner(onView: UIView) -> UIView {
+        let spinnerView = UIView.init(frame: UIScreen.main.bounds)
+         
+         spinnerView.backgroundColor = UIColor(white: 0, alpha: 0.3)
+         
+         let ai = UIActivityIndicatorView.init(style: .medium)
+         ai.startAnimating()
+         ai.color = .white
+         ai.center = spinnerView.center
+         
+         DispatchQueue.main.async {
+             spinnerView.addSubview(ai)
+             onView.addSubview(spinnerView)
+         }
+         
+         return spinnerView
+     }
+     
+     class func removeSpinner(spinner: UIView) {
+         DispatchQueue.main.async {
+             spinner.removeFromSuperview()
+         }
+     }
+}

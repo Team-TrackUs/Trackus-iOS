@@ -50,4 +50,12 @@ struct Running: Codable {
     mutating func setEndTime() {
         endTime = Date()
     }
+    
+    mutating func setTime() {
+        timestamp = Date()
+    }
+    
+    mutating func setUrl(_ url: String) {
+        routeImageUrl = url
+    }
 }

@@ -12,15 +12,18 @@ final public class RecordService {
     static let shared = RecordService()
     private init() {}
     
-    func uploadRecord(record: Running, completion: @escaping () -> ()) {
+    func uploadRecord(record: Running, image: UIImage) async {
         let uid = User.currentUid
         var record = record
-        record.timestamp = Date()
+        
         do {
+            let url = try await ImageUploader.uploadImageAsyncChaching(image: image, type: .record)
+            record.setUrl(url)
+            record.setTime()
             try Firestore.firestore().collection("user").document(uid).collection("records").addDocument(from: record)
-            completion()
-        } catch {
             
+        } catch {
+            print(#function + "upload failed")
         }
     }
     
