@@ -325,6 +325,8 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return label
     }()
     
+    let loadingView = LoadingView()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -386,6 +388,10 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }
     
     @objc func addCourseButtonTapped() {
+        
+        loadingView.isHidden = false
+        loadingView.startAnimation()
+        
         let userUID = User.currentUid
         let postUID = Firestore.firestore().collection("posts").document().documentID
         
@@ -413,7 +419,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             // Post 인스턴스 생성
             var post = Post(uid: postUID, title: self.courseTitleString, content: self.courseDescriptionString, courseRoutes: self.testcoords.map { location in
                 return GeoPoint(latitude: location.latitude, longitude: location.longitude)
-            }, distance: self.distance, numberOfPeoples: self.personnel, routeImageUrl: "", startDate: selectedDateTime, address: address, whoReportAt: [], createdAt: Date(), runningStyle: self.runningStyle, members: [userUID])
+            }, distance: self.distance, numberOfPeoples: self.personnel, routeImageUrl: "", startDate: selectedDateTime, address: address, whoReportAt: [], createdAt: Date(), runningStyle: self.runningStyle, members: [userUID], ownerUid: userUID)
             
             // 이미지 업로드 후 Post 업데이트
             self.mapSnapshot(with: self.pinAnnotations, polyline: MKPolyline(coordinates: self.testcoords, count: self.testcoords.count)) { [weak self] image in
@@ -446,10 +452,13 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                                     courseDetailVC.postUid = post.uid
                                     courseDetailVC.memberLimit = post.numberOfPeoples
                                     courseDetailVC.imageUrl = post.routeImageUrl
+                                    courseDetailVC.ownerUid = post.ownerUid
                                     
                                     self.navigationController?.popToRootViewController(animated: true)
                                     courseDetailVC.hidesBottomBarWhenPushed = true
                                     self.navigationController?.pushViewController(courseDetailVC, animated: true)
+                                    
+                                    ImageCacheManager.shared.setImage(image: image, url: post.routeImageUrl)
                                 }
                             }
                         }
@@ -513,6 +522,12 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         view.backgroundColor = .white
         scrollView.backgroundColor = .white
         contentView.backgroundColor = .white
+        
+        view.addSubview(loadingView)
+        loadingView.translatesAutoresizingMaskIntoConstraints = false
+        loadingView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        loadingView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        loadingView.isHidden = true
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false

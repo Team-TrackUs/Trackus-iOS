@@ -142,14 +142,15 @@ class RunningMateVC: UIViewController {
         
         HapticManager.shared.hapticImpact(style: .light)
         
-        refreshView.startTextRotation()
+//        refreshView.startTextRotation()
         
         fetchPosts()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.refreshView.stopTextRotation()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+//            self.refreshView.stopTextRotation()
             self.refreshControl.endRefreshing()
         }
+        refreshView.updateText()
     }
     
     // MARK: - Helpers
@@ -333,6 +334,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
         courseDetailVC.postUid = post.uid
         courseDetailVC.memberLimit = post.numberOfPeoples
         courseDetailVC.imageUrl = post.routeImageUrl
+        courseDetailVC.ownerUid = post.ownerUid
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)

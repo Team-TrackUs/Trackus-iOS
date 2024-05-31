@@ -30,7 +30,8 @@ class PostService {
             "whoReportAt" : post.whoReportAt,
             "createdAt" : post.createdAt,
             "runningStyle" : post.runningStyle,
-            "members" : post.members
+            "members" : post.members,
+            "ownerUid" : post.ownerUid
         ] as [String : Any]
         
         Firestore.firestore().collection("posts").document(post.uid).setData(postData) { error in
@@ -99,7 +100,8 @@ class PostService {
                       let whoReportAt = document["whoReportAt"] as? [String],
                       let createdAtTimestamp = document["createdAt"] as? Timestamp,
                       let runningStyle = document["runningStyle"] as? Int,
-                      let members = document["members"] as? [String] else {
+                      let members = document["members"] as? [String],
+                      let ownerUid = document["ownerUid"] as? String else {
                     print("DEBUG: Failed to cast data for document \(document.documentID)")
                     continue
                 }
@@ -117,7 +119,8 @@ class PostService {
                     whoReportAt: whoReportAt,
                     createdAt: createdAtTimestamp.dateValue(),
                     runningStyle: runningStyle,
-                    members: members
+                    members: members, 
+                    ownerUid: ownerUid
                 )
                 
                 posts.append(post)
@@ -244,7 +247,8 @@ class PostService {
                           let whoReportAt = data["whoReportAt"] as? [String],
                           let createdAtTimestamp = data["createdAt"] as? Timestamp,
                           let runningStyle = data["runningStyle"] as? Int,
-                          let members = data["members"] as? [String] else {
+                          let members = data["members"] as? [String],
+                          let ownerUid = data["ownerUid"] as? String else {
                         print("DEBUG: Invalid document data for documentID: \(document.documentID)")
                         return
                     }
@@ -263,7 +267,8 @@ class PostService {
                                         whoReportAt: whoReportAt,
                                         createdAt: createdAtTimestamp.dateValue(),
                                         runningStyle: runningStyle,
-                                        members: members)
+                                        members: members, 
+                                        ownerUid: ownerUid)
                         
                         filterPosts.append(post)
                     }

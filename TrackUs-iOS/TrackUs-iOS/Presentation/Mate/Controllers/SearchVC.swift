@@ -166,6 +166,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
         courseDetailVC.postUid = post.uid
         courseDetailVC.memberLimit = post.numberOfPeoples
         courseDetailVC.imageUrl = post.routeImageUrl
+        courseDetailVC.ownerUid = post.ownerUid
 
         self.searchBar.resignFirstResponder()
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
