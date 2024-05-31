@@ -773,7 +773,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         drawMapView.mapType = MKMapType.standard
         drawMapView.isZoomEnabled = true
         drawMapView.isScrollEnabled = true
-        drawMapView.center = view.center
+//        drawMapView.center = view.center
         
         for (index, coord) in testcoords.enumerated() {
             let pin = MKPointAnnotation()
@@ -803,7 +803,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     // 지도 스냅샷
     func mapSnapshot(with annotations: [MKAnnotation], polyline: MKPolyline, completion: @escaping (UIImage) -> Void) {
         let options = MKMapSnapshotter.Options()
-        options.region = MKCoordinateRegion(center: testcoords[testcoords.count / 2], span: MKCoordinateSpan(latitudeDelta: self.distance < 3 ? 0.02 : 0.04, longitudeDelta: self.distance < 3 ? 0.02 : 0.04))
+        options.region = testcoords.makeRegionToFit() ?? MKCoordinateRegion(center: testcoords[testcoords.count / 2], span: MKCoordinateSpan(latitudeDelta: self.distance < 3 ? 0.02 : 0.04, longitudeDelta: self.distance < 3 ? 0.02 : 0.04))
         options.size = CGSize(width: 300, height: 300)
         options.mapType = .mutedStandard
         options.showsBuildings = false
@@ -909,8 +909,7 @@ extension CourseRegisterVC {
         if testcoords.count > 0 {
             if !isRegionSet {
                 
-                let center = CLLocationCoordinate2D(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
-                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+                guard let region = testcoords.makeRegionToFit() else { return }
                 drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
                 
                 isRegionSet = true

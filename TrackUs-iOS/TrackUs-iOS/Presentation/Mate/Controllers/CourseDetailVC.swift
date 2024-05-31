@@ -540,7 +540,6 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         preMapView.mapType = MKMapType.mutedStandard
         preMapView.isZoomEnabled = false
         preMapView.isScrollEnabled = false
-        preMapView.center = view.center
         preMapView.showsUserLocation = false
         
         for (index, coord) in courseCoords.enumerated() {
@@ -561,8 +560,7 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         if courseCoords.count > 0 {
             if !isRegionSet {
                 
-                let center = CLLocationCoordinate2D(latitude: courseCoords[0].latitude, longitude: courseCoords[0].longitude)
-                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03))
+                guard let region = courseCoords.makeRegionToFit() else { return }
                 preMapView.setRegion(region, animated: true) // 위치를 코스의 시작위치로
                 
                 isRegionSet = true
