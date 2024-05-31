@@ -1,35 +1,36 @@
 //
-//  RunActivityVC.swift
+//  RunTrackingVC.swift
 //  TrackUs-iOS
 //
-//  Created by 석기권 on 5/13/24.
+//  Created by 석기권 on 5/27/24.
 //
-// TODO: - 스와이프 구현
-// tanslation x값을 측정
-// 버튼의 center.x값을 이동한 값만큼 추가
-// TODO: - 라이브트래킹
-// 타이머 설정
-// TODO: - 디자인변경 적용
-// 러닝중지시 고도, 케이던스 정보추가
-// blurView의 bottomInset을 runInfoStackView + 50으로 설정
-// TODO: - 이동경로가 전부 보이도록 zoom level 설정
 
+import Foundation
 
 import UIKit
 import MapKit
+import CoreMotion
 
-
-final class RunActivityVC: UIViewController {
+final class RunTrackingVC: UIViewController {
     // MARK: - Properties
- 
+    private let pedometer = CMPedometer()
+    private let altimeter = CMAltimeter()
     private let locationService = LocationService.shared
-    private let runTrackingManager = RunTrackingManager()
+    private var runModel = Running() {
+        didSet {
+            updateUI()
+        }
+    }
     private var mapView: MKMapView!
     private var isActive = true
     private var timer: Timer?
     private var count = 3
     private var polyline: MKPolyline?
     private var annotation: MKPointAnnotation?
+    private var annotation2: MKPointAnnotation?
+    private var tempData: [String: Any] = ["distance": 0.0, "steps": 0]
+    private var maxAltitude = -99999.0
+    private var minAltitude = 99999.0
     
     private lazy var countLabel: UILabel = {
         let label = UILabel()
@@ -234,18 +235,19 @@ final class RunActivityVC: UIViewController {
     private let blurView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         view.isHidden = true
         return view
     }()
     
-    // MARK: - Life Cycle
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupMapView()
         setMapRegion()
         setConstraint()
         setTimer()
+        setRunInfo()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -253,7 +255,7 @@ final class RunActivityVC: UIViewController {
         addGradientLayer()
     }
     
-    // MARK: - UI Methods
+    // MARK: - Helpers
     func setConstraint() {
         self.view.addSubview(overlayView)
         self.view.addSubview(blurView)
@@ -265,7 +267,7 @@ final class RunActivityVC: UIViewController {
         NSLayoutConstraint.activate([
             slideBox.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             slideBox.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            slideBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            slideBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
             slideBox.heightAnchor.constraint(equalToConstant: 70),
             
             actionButton.leadingAnchor.constraint(equalTo: slideBox.leadingAnchor, constant: 10),
@@ -289,7 +291,7 @@ final class RunActivityVC: UIViewController {
             blurView.topAnchor.constraint(equalTo: self.view.topAnchor),
             blurView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             
-         
+            
         ])
     }
     
@@ -303,14 +305,6 @@ final class RunActivityVC: UIViewController {
     
     func setMapRegion(animated: Bool = true) {
         mapView.setUserTrackingMode(.follow, animated: true)
-    }
-    
-    // latitudinalMeters 남북범위
-    // longitudinalMeters 동서범위
-    func setMapRange(center: CLLocationCoordinate2D, animated: Bool = true) {
-        let range = runTrackingManager.coordinates.totalDistance + 1000
-        let region = MKCoordinateRegion(center: center, latitudinalMeters: CLLocationDistance(floatLiteral: range), longitudinalMeters: range)
-        mapView.setRegion(region, animated: animated)
     }
     
     func updatedOnStart() {
@@ -368,13 +362,13 @@ final class RunActivityVC: UIViewController {
     }
     
     func goToResultVC() {
+        runModel.setEndTime()
         HapticManager.shared.hapticImpact(style: .medium)
         let resultVC = RunningResultVC()
-        resultVC.modalPresentationStyle = .fullScreen
-        present(resultVC, animated: true)
+        resultVC.runModel = runModel
+        navigationController?.pushViewController(resultVC, animated: false)
     }
     
-    // MARK: - Helpers
     func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
@@ -394,8 +388,7 @@ final class RunActivityVC: UIViewController {
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
-            runTrackingManager.seconds += 1
-            timeLabel.text = runTrackingManager.seconds.toMMSSTimeFormat
+            runModel.seconds += 1
         })
     }
     
@@ -404,7 +397,7 @@ final class RunActivityVC: UIViewController {
     }
     
     func setCameraOnPauseMode() {
-        setMapPreview()
+        setPreviewMode()
         drawPath()
     }
     
@@ -414,33 +407,52 @@ final class RunActivityVC: UIViewController {
     }
     
     func drawPath() {
-        let coordinates = self.runTrackingManager.coordinates
+        mapView.showsUserLocation = false
+        let coordinates = runModel.coordinates
         annotation = MKPointAnnotation()
+        annotation2 = MKPointAnnotation()
         polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         
         guard coordinates.count >= 1, let annotation = annotation else { return }
         annotation.coordinate = coordinates.first!
+        annotation2?.coordinate = coordinates.last!
         mapView.addAnnotation(annotation)
         
-        guard coordinates.count >= 2, let polyline = polyline else { return }
+        guard coordinates.count >= 2, let polyline = polyline, let annotation2 = annotation2 else { return }
         mapView.addOverlay(polyline)
+        mapView.addAnnotations([annotation, annotation2])
     }
     
     func removePath() {
-        guard let polyline = polyline, let annotation = annotation else { return }
+        mapView.showsUserLocation = true
+        guard let polyline = polyline, let annotation = annotation, let annotation2 = annotation2 else { return }
         mapView.removeOverlay(polyline)
-        mapView.removeAnnotation(annotation)
+        mapView.removeAnnotations([annotation, annotation2])
     }
     
-    func setMapPreview() {
-        if let center = runTrackingManager.coordinates.centerPosition, runTrackingManager.coordinates.count >= 2 {
-            setMapRange(center: center, animated: false)
-        } else {
-            setMapRegion(animated: false)
+    func setPreviewMode() {
+        if let region = runModel.coordinates.makeRegionToFit() {
+                mapView.setRegion(region, animated: false)
         }
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             guard let self = self else { return }
-            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY, left: 20, bottom: 20, right: 20), animated: false)
+            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY + 20,
+                                                                                        left: 0,
+                                                                                        bottom: slideBox.frame.height + 20,
+                                                                                        right: 0), animated: false)
+        }
+    }
+    
+    func setRunInfo() {
+        runModel.setStartTime()
+        
+        guard let location = locationService.currentLocation?.asCLLocation else {
+            return
+        }
+        runModel.coordinates.append(location.coordinate)
+        locationService.reverseGeoCoding(location: location) { address in
+            self.runModel.address = address
         }
     }
     
@@ -475,12 +487,12 @@ final class RunActivityVC: UIViewController {
 }
 
 // MARK: - Extentions
-extension RunActivityVC {
+extension RunTrackingVC {
     func makeCircleStView() -> UIStackView {
         let circleDiameter: CGFloat = 88.0
         let view = UIStackView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         view.layer.cornerRadius = circleDiameter / 2.0
         view.clipsToBounds = true
         view.distribution = .equalSpacing
@@ -494,39 +506,75 @@ extension RunActivityVC {
     }
 }
 
-extension RunActivityVC: UserLocationDelegate {
+extension RunTrackingVC: UserLocationDelegate {
     func userLocationUpated(location: CLLocation) {
-        runTrackingManager.coordinates.append(location.coordinate)
+        runModel.coordinates.append(location.coordinate)
         mapView.setUserTrackingMode(.follow, animated: true)
     }
     
     func startTracking() {
+        locationService.allowBackgroundUpdates = true
         locationService.userLocationDelegate = self
-        // 움직임이 감지될때마다 호출되는 핸들러
-        runTrackingManager.updateRunInfo { [weak self] runningModel in
+        pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
             guard let self = self else { return }
+            guard let pedometerData = pedometerData, error == nil else {
+                return
+            }
+            let currentDistance = pedometerData.distance?.doubleValue ?? 0.0
+            let currentSteps = pedometerData.numberOfSteps.intValue
+            guard let beforeData = tempData["steps"] as? Int else { return }
             
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                kilometerLabel.text = runningModel.distance.asString(style: .km)
-                paceLabel.text = runningModel.pace.asString(style: .pace)
-                calorieLabel.text = runningModel.calorie.asString(style: .kcal)
-                cadenceLabel.text = String(runningModel.cadance)
-                guard Int(runningModel.maxAltitude) >= 1 else {
-                    return
+                runModel.steps = currentSteps + beforeData
+                runModel.distance = currentDistance + (tempData["distance"] as? Double ?? 0.0)
+                runModel.cadance = Int((Double(currentSteps + beforeData)) / (runModel.seconds / 60))
+                runModel.calorie = Double(runModel.steps) * 0.04
+                runModel.pace = (runModel.seconds / 60) / (runModel.distance / 1000.0)
+            }
+        }
+        
+        altimeter.startRelativeAltitudeUpdates(to: .main) { [weak self]  altitudeData, error in
+            guard let self = self else { return }
+            guard let altitudeData = altitudeData, error == nil else {
+                return
+            }
+            let currentAltitue = altitudeData.relativeAltitude.doubleValue
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                if currentAltitue > 0 {
+                    runModel.maxAltitude = max(maxAltitude, currentAltitue)
                 }
-                altitudeLabel.text = "+ \(Int(runningModel.maxAltitude))m"
+                if currentAltitue < 0 {
+                    runModel.minAltitude = min(minAltitude, currentAltitue)
+                }
             }
         }
     }
     
     func stopTracking() {
-        self.locationService.userLocationDelegate = nil
-        runTrackingManager.stopRecord()
+        locationService.allowBackgroundUpdates = false
+        locationService.userLocationDelegate = nil
+        pedometer.stopUpdates()
+        altimeter.stopRelativeAltitudeUpdates()
+        tempData["steps"] = runModel.steps
+        tempData["distance"] = runModel.distance
+    }
+    
+    func updateUI() {
+            timeLabel.text = runModel.seconds.toMMSSTimeFormat
+            kilometerLabel.text = runModel.distance.asString(style: .km)
+            paceLabel.text = runModel.pace.asString(style: .pace)
+            calorieLabel.text = runModel.calorie.asString(style: .kcal)
+            cadenceLabel.text = String(runModel.cadance)
+            guard Int(runModel.maxAltitude) >= 1 else {
+                return
+            }
+            altitudeLabel.text = "+ \(Int(runModel.maxAltitude))m"
     }
 }
 
-extension RunActivityVC: MKMapViewDelegate {
+extension RunTrackingVC: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         guard let polyLine = overlay as? MKPolyline
         else {
