@@ -40,13 +40,28 @@ class PostService {
     }
     
     // 포스트 참여
-    func enterPost(postUid: String, userUid: String, members: [String], completion: @escaping ([String]) -> Void) {
+    func enterPost(postUid: String, userUid: String, members: [String], completion: @escaping ([String]?, Error?) -> Void) {
         Firestore.firestore().collection("posts").document(postUid).getDocument { snapshot, error in
-            guard let document = try? snapshot?.data(as: Post.self) else { return }
-            Firestore.firestore().collection("posts").document(postUid).updateData(["members": document.members + [userUid]]) { _ in
-                var updatedMembers = members
-                updatedMembers.append(userUid)
-                completion(updatedMembers)
+            guard let document = try? snapshot?.data(as: Post.self), error == nil else {
+                completion(nil, error)
+                return
+            }
+            
+            if document.members.count >= document.numberOfPeoples {
+                let capacityError = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Post is already full"])
+                completion(nil, capacityError)
+                return
+            }
+            
+            var updatedMembers = document.members
+            updatedMembers.append(userUid)
+            
+            Firestore.firestore().collection("posts").document(postUid).updateData(["members": updatedMembers]) { updateError in
+                if let updateError = updateError {
+                    completion(nil, updateError)
+                } else {
+                    completion(updatedMembers, nil)
+                }
             }
         }
     }

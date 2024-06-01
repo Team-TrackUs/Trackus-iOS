@@ -58,6 +58,7 @@ class CourseDetailVC: UIViewController {
     
     var preMapView: MKMapView = { // 지도 미리보기
         let mapview = MKMapView()
+        mapview.layer.cornerRadius = 10
         return mapview
     }()
     
@@ -252,8 +253,14 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func courseEnterButtonTapped() {
-        PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
-            self.members = updateMembers
+        PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updatedMembers, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                
+                self.showAlert(title: "", message: "해당 모집글에 인원이 다 찼습니다.", action: "참여")
+            } else if let updatedMembers = updatedMembers {
+                self.members = updatedMembers
+            }
         }
     }
     
@@ -534,12 +541,12 @@ class CourseDetailVC: UIViewController {
             
             if let error = error {
                 print("DEBUG: Error FetchPostDetail")
-                self.showAlert(title: "오류", message: "모집글을 불러오지 못했습니다.")
+                self.showAlert(title: "오류", message: "모집글을 불러오지 못했습니다.", action: "삭제")
                 return
             }
             
             guard let post = post else {
-                self.showAlert(title: "", message: "삭제된 모집글입니다.")
+                self.showAlert(title: "", message: "삭제된 모집글입니다.", action: "삭제")
                 return
             }
             
@@ -577,12 +584,24 @@ class CourseDetailVC: UIViewController {
         }
     }
     
-    func showAlert(title: String, message: String) {
+    func showAlert(title: String, message: String, action: String) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let action = UIAlertAction(title: "확인", style: .default) { _ in
-            self.navigationController?.popViewController(animated: true)
+        
+        switch action {
+        case "삭제":
+            let okAction = UIAlertAction(title: "확인", style: .default) { _ in
+                self.navigationController?.popViewController(animated: true)
+            }
+            alertController.addAction(okAction)
+        case "참여":
+            let okAction = UIAlertAction(title: "확인", style: .default) { _ in
+                self.fetchPostDetail()
+            }
+            alertController.addAction(okAction)
+        default:
+            break
         }
-        alertController.addAction(action)
+        
         self.present(alertController, animated: true, completion: nil)
     }
 }
@@ -645,8 +664,11 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
             if !isRegionSet {
                 
                 guard let region = courseCoords.makeRegionToFit() else { return }
-                preMapView.setRegion(region, animated: true) // 위치를 코스의 시작위치로
+                preMapView.setRegion(region, animated: false) // 위치를 코스의 시작위치로
                 
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.preMapView.setVisibleMapRect(self.preMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: false)
+                }
                 isRegionSet = true
             }
         }

@@ -21,8 +21,7 @@ class LoadingView: UIView {
     // MARK: - Lifecycle
     
     override init(frame: CGRect) {
-        let fixedFrame = UIScreen.main.bounds
-        super.init(frame: frame)
+        super.init(frame: UIScreen.main.bounds)
         
         configureUI()
         startAnimation()
@@ -36,7 +35,7 @@ class LoadingView: UIView {
     
     func configureUI() {
         
-        backgroundColor = UIColor.clear
+        backgroundColor = UIColor(white: 0, alpha: 0.3)
         
         let totalWidth = CGFloat(3) * circleSize + CGFloat(2) * circleSpacing
         let startX = (bounds.width - totalWidth) / 2.0
@@ -48,7 +47,7 @@ class LoadingView: UIView {
                                      width: circleSize,
                                      height: circleSize)
             let circleView = UIView(frame: circleFrame)
-            circleView.backgroundColor = .gray
+            circleView.backgroundColor = .white
             circleView.layer.cornerRadius = circleSize / 2
             addSubview(circleView)
             circles.append(circleView)

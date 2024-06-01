@@ -557,8 +557,10 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         
         view.addSubview(loadingView)
         loadingView.translatesAutoresizingMaskIntoConstraints = false
-        loadingView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        loadingView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        loadingView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        loadingView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        loadingView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        loadingView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         loadingView.isHidden = true
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -906,7 +908,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                 
                 attributedText.draw(in: textRect)
             }
-
             
             let finalImage = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
@@ -946,6 +947,12 @@ extension CourseRegisterVC {
                 
                 guard let region = testcoords.makeRegionToFit() else { return }
                 drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.drawMapView.setVisibleMapRect(self.drawMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40,
+                                                                                                          left: 40,
+                                                                                                          bottom: 40,
+                                                                                                          right: 40), animated: false)
+                }
                 
                 isRegionSet = true
             }
