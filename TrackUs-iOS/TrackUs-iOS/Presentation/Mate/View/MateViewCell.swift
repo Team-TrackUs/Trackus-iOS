@@ -13,7 +13,6 @@ class MateViewCell: UITableViewCell {
     
     static let identifier = "MateViewCell"
     
-    
     let titleText: String = ""
     let locationText: String = ""
     let timeText: String = ""
@@ -206,10 +205,7 @@ class MateViewCell: UITableViewCell {
     
     public func configure(image: String, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
         
-//        self.profileImageView.image = image
-        // 이미지 추가
         PostService.downloadImage(urlString: image) { image in
-//            guard let self = self else { return }
             DispatchQueue.main.async {
                 self.profileImageView.image = image
             }

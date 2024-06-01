@@ -64,18 +64,49 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return mapview
     }()
     
-    private lazy var drawMapButton: UIButton = {
-        let button = UIButton()
+    private lazy var drawMapButton: MKMapView = {
+        let mapView = MKMapView()
+        mapView.delegate = self
+        mapView.layer.borderWidth = 1.0
+        mapView.layer.borderColor = UIColor.gray.cgColor
         
-        button.setTitle("코스를 입력해주세요", for: .normal)
-        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        button.titleLabel?.textColor = .white
-        button.backgroundColor = .mainBlue
-        button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
-        button.addTarget(self, action: #selector(drawMapButtonTapped), for: .touchUpInside)
-        return button
+        var mapRegion = MKCoordinateRegion()
+        mapRegion.center = mapView.userLocation.coordinate
+        mapRegion.span = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        
+        mapView.setRegion(mapRegion, animated: true)
+        
+        let overlayView = UIView()
+        overlayView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let label = UILabel()
+        label.text = "코스를 입력해주세요"
+        label.font = UIFont.boldSystemFont(ofSize: 16)
+        label.textColor = .white
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        mapView.addSubview(overlayView)
+        overlayView.addSubview(label)
+        
+        NSLayoutConstraint.activate([
+            overlayView.topAnchor.constraint(equalTo: mapView.topAnchor),
+            overlayView.leadingAnchor.constraint(equalTo: mapView.leadingAnchor),
+            overlayView.trailingAnchor.constraint(equalTo: mapView.trailingAnchor),
+            overlayView.bottomAnchor.constraint(equalTo: mapView.bottomAnchor)
+        ])
+        
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: overlayView.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: overlayView.centerYAnchor)
+        ])
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(drawMapButtonTapped))
+        mapView.addGestureRecognizer(tapGesture)
+        
+        return mapView
     }()
+
     
     private lazy var editMapButton: UIButton = {
         let button = UIButton()
@@ -510,6 +541,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         }
         
         let courseDrawingMapVC = CourseDrawingMapVC()
+        courseDrawingMapVC.testcoords = testcoords
         courseDrawingMapVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(courseDrawingMapVC, animated: true)
     }
@@ -773,6 +805,9 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         drawMapView.mapType = MKMapType.standard
         drawMapView.isZoomEnabled = true
         drawMapView.isScrollEnabled = true
+        drawMapButton.showsUserLocation = true
+        drawMapButton.isZoomEnabled = false
+        drawMapButton.isScrollEnabled = false
 //        drawMapView.center = view.center
         
         for (index, coord) in testcoords.enumerated() {

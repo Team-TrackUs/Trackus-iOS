@@ -63,7 +63,7 @@ class PostService {
     }
     
     // 포스트 패치
-    func fetchPosts(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
+    func fetchPostTable(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
         
         var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true).limit(to: limit)
         
@@ -129,6 +129,59 @@ class PostService {
             
             let lastDocumentSnapshot = snapshot?.documents.last
             completion(posts, lastDocumentSnapshot, nil)
+        }
+    }
+    
+    // 해당 게시물 정보 불러오기
+    func fetchPost(uid: String, completion: @escaping (Post?, Error?) -> Void) {
+        Firestore.firestore().collection("posts").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                print("DEBUG: Failed to fetch post = \(error.localizedDescription)")
+                completion(nil, error)
+                return
+            }
+            
+            guard let document = snapshot?.data() else {
+                completion(nil, nil)
+                return
+            }
+            
+            guard let title = document["title"] as? String,
+                  let content = document["content"] as? String,
+                  let courseRoutes = document["courseRoutes"] as? [GeoPoint],
+                  let distance = document["distance"] as? Double,
+                  let numberOfPeoples = document["numberOfPeoples"] as? Int,
+                  let routeImageUrl = document["routeImageUrl"] as? String,
+                  let startDate = (document["startDate"] as? Timestamp)?.dateValue(),
+                  let address = document["address"] as? String,
+                  let whoReportAt = document["whoReportAt"] as? [String],
+                  let createdAt = (document["createdAt"] as? Timestamp)?.dateValue(),
+                  let runningStyle = document["runningStyle"] as? Int,
+                  let members = document["members"] as? [String],
+                  let ownerUid = document["ownerUid"] as? String else {
+                print("DEBUG: Failed to cast data for document \(uid)")
+                completion(nil, nil)
+                return
+            }
+            
+            let post = Post(
+                uid: uid,
+                title: title,
+                content: content,
+                courseRoutes: courseRoutes,
+                distance: distance,
+                numberOfPeoples: numberOfPeoples,
+                routeImageUrl: routeImageUrl,
+                startDate: startDate,
+                address: address,
+                whoReportAt: whoReportAt,
+                createdAt: createdAt,
+                runningStyle: runningStyle,
+                members: members,
+                ownerUid: ownerUid
+            )
+            
+            completion(post, nil)
         }
     }
     

@@ -215,7 +215,7 @@ class RunningMateVC: UIViewController {
     func fetchPosts() {
         let postService = PostService()
         
-        postService.fetchPosts(startAfter: nil, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
+        postService.fetchPostTable(startAfter: nil, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
             guard let self = self else { return }
             
             if let error = error {
@@ -250,7 +250,7 @@ class RunningMateVC: UIViewController {
 
         let postService = PostService()
 
-        postService.fetchPosts(startAfter: lastDocumentSnapshot, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
+        postService.fetchPostTable(startAfter: lastDocumentSnapshot, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
             guard let self = self else { return }
 
             if let error = error {
@@ -318,23 +318,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
         
-        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
-            
-            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
-        }
-        courseDetailVC.courseTitleLabel.text = post.title
-        courseDetailVC.courseDestriptionLabel.text = post.content
-        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
-        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-        courseDetailVC.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
-        courseDetailVC.courseLocationLabel.text = post.address
-        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
-        courseDetailVC.personInLabel.text = "\(post.members.count)명"
-        courseDetailVC.members = post.members
         courseDetailVC.postUid = post.uid
-        courseDetailVC.memberLimit = post.numberOfPeoples
-        courseDetailVC.imageUrl = post.routeImageUrl
-        courseDetailVC.ownerUid = post.ownerUid
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)

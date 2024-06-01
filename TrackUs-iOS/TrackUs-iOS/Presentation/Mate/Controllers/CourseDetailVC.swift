@@ -194,6 +194,22 @@ class CourseDetailVC: UIViewController {
         return button
     }()
     
+    private lazy var mapDetailBtn: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .white
+        config.baseForegroundColor = .gray2
+        config.image = UIImage(systemName: "map.fill")
+        config.imagePadding = 7
+        var titleAttr = AttributedString("지도 보기")
+        titleAttr.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        config.attributedTitle = titleAttr
+        let bt = UIButton(configuration: config)
+        bt.translatesAutoresizingMaskIntoConstraints = false
+        
+        bt.addTarget(self, action: #selector(goCourseDetail(_:)), for: .touchUpInside)
+        return bt
+    }()
+    
     var ownerUid: String = ""
     
     let buttonStack = UIStackView()
@@ -209,10 +225,19 @@ class CourseDetailVC: UIViewController {
         
         collectionView.delegate = self
         collectionView.dataSource = self
+        
+        fetchPostDetail()
+        MapConfigureUI()
+        
         configureUI()
         runningStyleColor()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
-        print("DEBUG: OwnerUid = \(ownerUid)")
+        fetchPostDetail()
+        MapConfigureUI()
     }
     
     // MARK: - Selectors
@@ -316,14 +341,16 @@ class CourseDetailVC: UIViewController {
         preMapView.heightAnchor.constraint(equalToConstant: 310).isActive = true
         preMapView.addGestureRecognizer(preMapViewTapGesture)
         
-        MapConfigureUI()
-        
         preMapView.addSubview(distanceLabel)
         distanceLabel.translatesAutoresizingMaskIntoConstraints = false
         distanceLabel.leftAnchor.constraint(equalTo: preMapView.leftAnchor, constant: 16).isActive = true
         distanceLabel.bottomAnchor.constraint(equalTo: preMapView.bottomAnchor, constant: -30).isActive = true
         distanceLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
         distanceLabel.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        
+        preMapView.addSubview(mapDetailBtn)
+        mapDetailBtn.rightAnchor.constraint(equalTo: preMapView.rightAnchor, constant: -16).isActive = true
+        mapDetailBtn.bottomAnchor.constraint(equalTo: preMapView.bottomAnchor, constant: -30).isActive = true
         
         scrollView.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -500,6 +527,63 @@ class CourseDetailVC: UIViewController {
                 courseEnterButton.isEnabled = true
             }
         }
+    }
+    
+    func fetchPostDetail() {
+        PostService().fetchPost(uid: postUid) { post, error in
+            
+            if let error = error {
+                print("DEBUG: Error FetchPostDetail")
+                self.showAlert(title: "오류", message: "모집글을 불러오지 못했습니다.")
+                return
+            }
+            
+            guard let post = post else {
+                self.showAlert(title: "", message: "삭제된 모집글입니다.")
+                return
+            }
+            
+            self.courseCoords = post.courseRoutes.map { geoPoint in
+                
+                return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
+            }
+            self.courseTitleLabel.text = post.title
+            self.courseDestriptionLabel.text = post.content
+            self.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
+            self.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
+            self.runningStyleLabel.text = self.runningStyleString(for: post.runningStyle)
+            self.courseLocationLabel.text = post.address
+            self.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
+            self.personInLabel.text = "\(String(describing: post.members.count))명"
+            self.members = post.members
+            self.memberLimit = post.numberOfPeoples
+            self.imageUrl = post.routeImageUrl
+            self.ownerUid = post.ownerUid
+        }
+    }
+    
+    func runningStyleString(for runningStyle: Int) -> String {
+        switch runningStyle {
+        case 0:
+            return "걷기"
+        case 1:
+            return "조깅"
+        case 2:
+            return "달리기"
+        case 3:
+            return "인터벌"
+        default:
+            return "걷기"
+        }
+    }
+    
+    func showAlert(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: "확인", style: .default) { _ in
+            self.navigationController?.popViewController(animated: true)
+        }
+        alertController.addAction(action)
+        self.present(alertController, animated: true, completion: nil)
     }
 }
 
