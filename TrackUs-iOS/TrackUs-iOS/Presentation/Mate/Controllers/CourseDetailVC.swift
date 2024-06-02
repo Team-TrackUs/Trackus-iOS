@@ -219,6 +219,10 @@ class CourseDetailVC: UIViewController {
     
     let skeletonView = MateDetailSkeletonView()
     
+    var fetchComplete = false
+    var mapUIComplete = false
+    var viewUIComplete = false
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -244,6 +248,10 @@ class CourseDetailVC: UIViewController {
         fetchPostDetail()
         runningStyleColor()
         MapConfigureUI()
+        
+        if fetchComplete && mapUIComplete && viewUIComplete {
+            self.hideSkeletonViewWithFadeIn()
+        }
     }
     
     // MARK: - Selectors
@@ -473,6 +481,8 @@ class CourseDetailVC: UIViewController {
         buttonStack.leftAnchor.constraint(equalTo: buttonContainer.leftAnchor, constant: 16).isActive = true
         buttonStack.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor).isActive = true
         buttonStack.rightAnchor.constraint(equalTo: buttonContainer.rightAnchor, constant: -16).isActive = true
+        
+        viewUIComplete = true
     }
     
     private func setupNavBar() {
@@ -579,6 +589,7 @@ class CourseDetailVC: UIViewController {
                 self.ownerUid = post.ownerUid
             }
         }
+        fetchComplete = true
     }
     
     func runningStyleString(for runningStyle: Int) -> String {
@@ -707,10 +718,11 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         
         addPolylineToMap()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-//            self.skeletonView.isHidden = true
-            self.hideSkeletonViewWithFadeIn()
-        }
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//            self.hideSkeletonViewWithFadeIn()
+//        }
+        
+        mapUIComplete = true
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

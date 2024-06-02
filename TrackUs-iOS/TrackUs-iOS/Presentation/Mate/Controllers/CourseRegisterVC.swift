@@ -177,9 +177,9 @@ class CourseRegisterVC: UIViewController {
     private lazy var styleWalkButton: UIButton = {
         let button = UIButton()
         button.setTitle("걷기", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(walkButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -187,9 +187,9 @@ class CourseRegisterVC: UIViewController {
     private lazy var styleFastWalkButton: UIButton = {
         let button = UIButton()
         button.setTitle("조깅", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(FastwalkButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -197,9 +197,9 @@ class CourseRegisterVC: UIViewController {
     private lazy var styleRuuningButton: UIButton = {
         let button = UIButton()
         button.setTitle("달리기", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(RunningButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -207,9 +207,9 @@ class CourseRegisterVC: UIViewController {
     private lazy var styleSprintButton: UIButton = {
         let button = UIButton()
         button.setTitle("인터벌", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(sprintButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -717,15 +717,19 @@ class CourseRegisterVC: UIViewController {
     func updateStyleButtonAppearance() {
         styleWalkButton.setTitleColor(runningStyle == 0 ? .white : .gray, for: .normal)
         styleWalkButton.backgroundColor = runningStyle == 0 ? .walking : .white
+        styleWalkButton.layer.borderColor = runningStyle == 0 ? UIColor.walking.cgColor : UIColor.gray1.cgColor
         
         styleFastWalkButton.setTitleColor(runningStyle == 1 ? .white : .gray, for: .normal)
         styleFastWalkButton.backgroundColor = runningStyle == 1 ? .jogging : .white
+        styleFastWalkButton.layer.borderColor = runningStyle == 1 ? UIColor.jogging.cgColor : UIColor.gray1.cgColor
         
         styleRuuningButton.setTitleColor(runningStyle == 2 ? .white : .gray, for: .normal)
         styleRuuningButton.backgroundColor = runningStyle == 2 ? .running : .white
+        styleRuuningButton.layer.borderColor = runningStyle == 2 ? UIColor.running.cgColor : UIColor.gray1.cgColor
         
         styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray, for: .normal)
         styleSprintButton.backgroundColor = runningStyle == 3 ? .interval : .white
+        styleSprintButton.layer.borderColor = runningStyle == 3 ? UIColor.interval.cgColor : UIColor.gray1.cgColor
     }
     
     func updateAddCourseButtonAppearance() {
