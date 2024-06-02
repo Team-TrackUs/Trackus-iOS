@@ -44,11 +44,11 @@ class CourseRegisterVC: UIViewController {
     var selectedDate: Date = Date() // 날짜
     var selectedTime: Date = Date() // 시간
     var personnel: Int = 2 // 최소인원수
-
+    
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
     var pinAnnotations: [MKPointAnnotation] = [] // mapkit
-
+    
     private lazy var toolBarKeyboard: UIToolbar = {
         let toolbar = UIToolbar()
         let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -252,7 +252,7 @@ class CourseRegisterVC: UIViewController {
     
     private let courseDescriptionPlaceholder: UILabel = {
         let label = UILabel()
-        label.text = "코스에 대한 자세한 설명을 입력해주세요"
+        label.text = "코스에 대한 자세한 설명을 입력해주세요."
         label.font = UIFont.systemFont(ofSize: 16)
         label.textColor = .gray
         return label
@@ -489,8 +489,13 @@ class CourseRegisterVC: UIViewController {
                                     courseDetailVC.imageUrl = post.routeImageUrl
                                     courseDetailVC.ownerUid = post.ownerUid
                                     
-                                    self.navigationController?.popToRootViewController(animated: true)
-                                    courseDetailVC.hidesBottomBarWhenPushed = true
+                                    if let xmark = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate) {
+                                        let dismissButton = UIBarButtonItem(image: xmark, style: .plain, target: self, action: #selector(self.closeModal))
+                                        
+                                        dismissButton.tintColor = .gray1
+                                        
+                                        courseDetailVC.navigationItem.leftBarButtonItem = dismissButton
+                                    }
                                     self.navigationController?.pushViewController(courseDetailVC, animated: true)
                                     
                                     ImageCacheManager.shared.setImage(image: image, url: post.routeImageUrl)
@@ -550,6 +555,10 @@ class CourseRegisterVC: UIViewController {
         self.navigationController?.pushViewController(courseDrawingMapVC, animated: true)
     }
     
+    @objc func closeModal() {
+        dismiss(animated: true, completion: nil)
+    }
+    
     // MARK: - Helpers
     
     func configureUI() {
@@ -599,7 +608,7 @@ class CourseRegisterVC: UIViewController {
             drawMapButton.heightAnchor.constraint(equalToConstant: 310).isActive = true
             drawMapButton.widthAnchor.constraint(equalTo: addCourseButton.widthAnchor).isActive = true
             drawMapButton.layer.cornerRadius = 10
-
+            
             scrollView.addSubview(runningStyleLabel)
             runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
             runningStyleLabel.topAnchor.constraint(equalTo: drawMapButton.bottomAnchor, constant: 27).isActive = true
@@ -613,25 +622,25 @@ class CourseRegisterVC: UIViewController {
             drawMapView.heightAnchor.constraint(equalToConstant: 310).isActive = true
             drawMapView.widthAnchor.constraint(equalTo: addCourseButton.widthAnchor).isActive = true
             drawMapView.layer.cornerRadius = 10
-
+            
             drawMapView.addSubview(editMapButton)
             editMapButton.translatesAutoresizingMaskIntoConstraints = false
             editMapButton.trailingAnchor.constraint(equalTo: drawMapView.trailingAnchor, constant: -8).isActive = true
             editMapButton.topAnchor.constraint(equalTo: drawMapView.topAnchor, constant: 8).isActive = true
-
+            
             drawMapView.addSubview(distanceLabel)
             distanceLabel.translatesAutoresizingMaskIntoConstraints = false
             distanceLabel.leadingAnchor.constraint(equalTo: drawMapView.leadingAnchor, constant: 16).isActive = true
             distanceLabel.bottomAnchor.constraint(equalTo: drawMapView.bottomAnchor, constant: -30).isActive = true
             distanceLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
             distanceLabel.heightAnchor.constraint(equalToConstant: 40).isActive = true
-
+            
             scrollView.addSubview(runningStyleLabel)
             runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
             runningStyleLabel.topAnchor.constraint(equalTo: drawMapView.bottomAnchor, constant: 27).isActive = true
             runningStyleLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
         }
-
+        
         
         styleWalkButton.widthAnchor.constraint(equalToConstant: 76).isActive = true
         styleWalkButton.heightAnchor.constraint(equalToConstant: 34).isActive = true
@@ -652,7 +661,7 @@ class CourseRegisterVC: UIViewController {
         stack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
         stack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         stack.topAnchor.constraint(equalTo: runningStyleLabel.bottomAnchor, constant: 12).isActive = true
-
+        
         let textStack = UIStackView()
         textStack.axis = .vertical
         textStack.spacing = 13
@@ -665,7 +674,7 @@ class CourseRegisterVC: UIViewController {
         courseDescription.widthAnchor.constraint(equalToConstant: 398).isActive = true
         courseDescription.heightAnchor.constraint(equalToConstant: 180).isActive = true
         textStack.addArrangedSubview(courseDescription)
-
+        
         scrollView.addSubview(textStack)
         textStack.translatesAutoresizingMaskIntoConstraints = false
         textStack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
@@ -782,6 +791,13 @@ class CourseRegisterVC: UIViewController {
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        
+        if let xmark = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate) {
+            let closeButton = UIBarButtonItem(image: xmark, style: .plain, target: self, action: #selector(closeModal))
+            closeButton.tintColor = .gray1
+            
+            navigationItem.leftBarButtonItem = closeButton
+        }
     }
     
     func distanceUpdate() {
@@ -797,7 +813,7 @@ class CourseRegisterVC: UIViewController {
         options.showsBuildings = false
         
         // 이미지를 다크모드로
-//        options.traitCollection = .init(userInterfaceStyle: .dark)
+        //        options.traitCollection = .init(userInterfaceStyle: .dark)
         
         let snapshotter = MKMapSnapshotter(options: options)
         snapshotter.start { snapshot, error in
@@ -870,7 +886,7 @@ class CourseRegisterVC: UIViewController {
     func searchAddress(completion: @escaping (String) -> Void) {
         let addLoc = CLLocation(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
         var address = ""
-
+        
         CLGeocoder().reverseGeocodeLocation(addLoc, completionHandler: { place, error in
             if let pm = place?.first {
                 if let subLocality = pm.subLocality {
@@ -988,7 +1004,7 @@ extension CourseRegisterVC: UITextViewDelegate, UITextFieldDelegate {
         
         courseDescriptionPlaceholder.isHidden = !courseDescription.text.isEmpty
     }
-
+    
     func textViewDidChange(_ textView: UITextView) {
         courseDescriptionPlaceholder.isHidden = !textView.text.isEmpty
         courseDescriptionString = textView.text
@@ -1008,7 +1024,5 @@ extension CourseRegisterVC: UITextViewDelegate, UITextFieldDelegate {
                 }
             }
         }
-        
     }
-    
 }

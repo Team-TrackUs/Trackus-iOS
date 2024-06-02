@@ -120,9 +120,11 @@ class RunningMateVC: UIViewController {
     // MARK: - Selectors
     
     @objc func moveButtonTapped() {
+        HapticManager.shared.hapticImpact(style: .light)
         let courseRegisterVC = CourseRegisterVC()
-        courseRegisterVC.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(courseRegisterVC, animated: true)
+        let navController = UINavigationController(rootViewController: courseRegisterVC)
+        navController.modalPresentationStyle = .fullScreen
+        self.present(navController, animated: true, completion: nil)
     }
     
     @objc func searchButtonTapped() {
@@ -141,13 +143,9 @@ class RunningMateVC: UIViewController {
     @objc func refreshPosts() {
         
         HapticManager.shared.hapticImpact(style: .light)
-        
-//        refreshView.startTextRotation()
-        
         fetchPosts()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-//            self.refreshView.stopTextRotation()
             self.refreshControl.endRefreshing()
         }
         refreshView.updateText()
@@ -241,33 +239,33 @@ class RunningMateVC: UIViewController {
     }
     
     private func fetchMorePosts() {
-
+        
         guard !isPagingComplete && !isLoadingMore else {
             return
         }
-
+        
         isLoadingMore = true
-
+        
         let postService = PostService()
-
+        
         postService.fetchPostTable(startAfter: lastDocumentSnapshot, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
             guard let self = self else { return }
-
+            
             if let error = error {
                 print("DEBUG: Error fetching posts = \(error.localizedDescription)")
                 self.isLoadingMore = false
                 return
             }
-
+            
             if let resultPosts = resultPosts {
                 if resultPosts.isEmpty || resultPosts.count < self.pageSize {
                     self.isPagingComplete = true
                 }
-
+                
                 let newPosts = resultPosts.filter { post in
                     !self.posts.contains(where: { $0.uid == post.uid })
                 }
-
+                
                 self.posts.append(contentsOf: newPosts)
                 self.lastDocumentSnapshot = lastDocumentSnapshot
                 self.posts.sort { $0.createdAt > $1.createdAt }
