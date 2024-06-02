@@ -27,9 +27,7 @@ class ChatRoomManager {
                 title: "",
                 members: [User.currentUid: true, "user2": true],
                 usersUnreadCountInfo: ["user1": 0, User.currentUid: 6],
-                latestMessage: LastetMessage(timestamp: Date(), text: "Hey Alice!"),
-                toUser: "user2",
-                fromUser: "user1"
+                latestMessage: LastetMessage(timestamp: Date(), text: "Hey Alice!")
             ),
             Chat(
                 uid: "chat2",
@@ -37,9 +35,7 @@ class ChatRoomManager {
                 title: "그룹채팅 (3명)",
                 members: [User.currentUid: true,"user1": true, "user3": true, "user4": true],
                 usersUnreadCountInfo: [User.currentUid: 6, "user1": 2, "user3": 0, "user4": 1],
-                latestMessage: LastetMessage(timestamp: Date(), text: "Next meeting at 5 PM."),
-                toUser: nil,
-                fromUser: nil
+                latestMessage: LastetMessage(timestamp: Date(), text: "Next meeting at 5 PM.")
             ),
             Chat(
                 uid: "chat3",
@@ -47,18 +43,14 @@ class ChatRoomManager {
                 title: "",
                 members: ["user1": true, User.currentUid: true],
                 usersUnreadCountInfo: [User.currentUid: 1, "user5": 0],
-                latestMessage: LastetMessage(timestamp: Date(), text: "See you tomorrow!"),
-                toUser: "user5",
-                fromUser: "user1"
+                latestMessage: LastetMessage(timestamp: Date(), text: "See you tomorrow!")
             ),
             Chat(
                 uid: "chat4",
                 group: true,
                 title: "그룹 더미 2(3명, 나간사람 1)",
                 members: [User.currentUid: true, "user1": true, "user2": true, "user3": false],
-                usersUnreadCountInfo: [User.currentUid: 0, "user1": 0, "user2": 3],
-                toUser: nil,
-                fromUser: nil
+                usersUnreadCountInfo: [User.currentUid: 0, "user1": 0, "user2": 3]
             )
         ]
         self.chatRooms = dummyChats
@@ -90,10 +82,11 @@ class ChatRoomManager {
     }
     // MARK: - 채팅방 리스너 관련
     // 채팅방 listener 추가
-    func subscribeToUpdates() {
+    func subscribeToUpdates(completionHandler: @escaping () -> Void) {
         let currentUid = User.currentUid
-        ref.whereField("members", arrayContains: currentUid).addSnapshotListener() { [weak self] (snapshot, _) in
+        ref.whereField("members.\(currentUid)", isEqualTo: true).addSnapshotListener() { [weak self] (snapshot, _) in
             self?.storeChatRooms(snapshot, currentUid)
+            completionHandler()
         }
     }
     
@@ -111,12 +104,19 @@ class ChatRoomManager {
 
                     return nil
                 }.sorted {
-                    if let date1 = $0.latestMessage?.timestamp, let date2 = $1.latestMessage?.timestamp {
-                        return date1 > date2
+                    guard let date1 = $0.latestMessage?.timestamp, let date2 = $1.latestMessage?.timestamp else {
+                        return $0.title < $1.title
                     }
-                    return $0.title < $1.title
+                    return date1 > date2
                 }
-            ?? []
+            ?? [Chat(
+                uid: "chat1",
+                group: false,
+                title: "",
+                members: [User.currentUid: true, "user1": true],
+                usersUnreadCountInfo: ["user1": 0, User.currentUid: 6],
+                latestMessage: LastetMessage(timestamp: Date(), text: "Hey Alice!")
+            )]
         }
     }
     
@@ -130,7 +130,6 @@ class ChatRoomManager {
                 text: flm.text.isEmpty ? "사진을 보냈습니다." : flm.text
             )
         }
-        let members = firestoreChatRoom.members
         _ = firestoreChatRoom.members.map { memberId in
             memberUserInfo(uid: memberId.key)
         }
@@ -158,12 +157,7 @@ class ChatRoomManager {
                 return
             }
             do {
-                var userInfo = try document.data(as: User.self)
-//                if userInfo.isBlock {
-//                    userInfo.username = "정지 회원"
-//                    userInfo.profileImageUrl = nil
-//                    userInfo.token = nil
-//                }
+                let userInfo = try document.data(as: User.self)
                 self.userInfo[uid] = userInfo
             } catch {
                 print("Error decoding document: \(error)")

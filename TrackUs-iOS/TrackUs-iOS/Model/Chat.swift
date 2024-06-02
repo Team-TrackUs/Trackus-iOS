@@ -22,9 +22,6 @@ struct Chat {
     // 메세지 안읽은 갯수
     var usersUnreadCountInfo: [String: Int]
     var latestMessage: LastetMessage?
-    // 개인 채팅 경우에만 사용
-    var toUser: String?
-    var fromUser: String?
 }
 
 // 최근 메세지

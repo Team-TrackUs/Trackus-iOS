@@ -23,7 +23,12 @@ class MyChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        chat.dummyData()
+        //chat.dummyData()
+        chat.subscribeToUpdates(){
+            DispatchQueue.main.async {
+                self.chatListTableView.reloadData()
+            }
+        }
         setupNavBar()
         view.backgroundColor = .systemBackground
         chatListTableView.delegate = self
@@ -91,7 +96,17 @@ class MyChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // 셀 반환 갯수
-        return chat.chatRooms.count
+        if chat.chatRooms.count == 0 {
+            let label = UILabel(frame: tableView.bounds)
+            label.text = "참여한 채팅방이 없습니다"
+            label.textAlignment = .center
+            label.textColor = .gray3
+            tableView.backgroundView = label
+            return 0
+        } else {
+            tableView.backgroundView = nil
+            return chat.chatRooms.count
+        }
+        //return chat.chatRooms.count
     }
 }

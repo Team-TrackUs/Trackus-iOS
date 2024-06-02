@@ -51,7 +51,7 @@ class ChatRoomCell: UITableViewCell {
         private lazy var membersCountlabel: UILabel = {
             let label = UILabel()
             label.translatesAutoresizingMaskIntoConstraints = false
-            label.font = .systemFont(ofSize: 12, weight: .regular)
+            label.font = .systemFont(ofSize: 14, weight: .regular)
             label.textColor = .gray1
             return label
         }()
