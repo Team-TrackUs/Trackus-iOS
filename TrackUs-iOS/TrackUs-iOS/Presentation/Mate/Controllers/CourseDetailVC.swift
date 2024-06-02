@@ -217,10 +217,14 @@ class CourseDetailVC: UIViewController {
     
     lazy var preMapViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(goCourseDetail(_:)))
     
+    let skeletonView = MateDetailSkeletonView()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        skeletonView.isHidden = false
         
         setupNavBar()
         
@@ -228,18 +232,18 @@ class CourseDetailVC: UIViewController {
         collectionView.dataSource = self
         
         fetchPostDetail()
-        MapConfigureUI()
+        runningStyleColor()
         
         configureUI()
-        runningStyleColor()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        configureUI()
         fetchPostDetail()
-        MapConfigureUI()
         runningStyleColor()
+        MapConfigureUI()
     }
     
     // MARK: - Selectors
@@ -320,6 +324,13 @@ class CourseDetailVC: UIViewController {
         view.addSubview(buttonContainer)
         view.addSubview(scrollView)
         buttonContainer.addSubview(divider)
+        
+        view.addSubview(skeletonView)
+        skeletonView.translatesAutoresizingMaskIntoConstraints = false
+        skeletonView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        skeletonView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        skeletonView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        skeletonView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
         buttonContainer.translatesAutoresizingMaskIntoConstraints = false
         buttonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
@@ -636,6 +647,14 @@ class CourseDetailVC: UIViewController {
             completion(address)
         })
     }
+    
+    private func hideSkeletonViewWithFadeIn() {
+            UIView.animate(withDuration: 0.2, animations: {
+                self.skeletonView.alpha = 0.0
+            }) { _ in
+                self.skeletonView.isHidden = true
+            }
+        }
 }
 
 extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -687,6 +706,11 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         }
         
         addPolylineToMap()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//            self.skeletonView.isHidden = true
+            self.hideSkeletonViewWithFadeIn()
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -698,7 +722,7 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
                 guard let region = courseCoords.makeRegionToFit() else { return }
                 preMapView.setRegion(region, animated: false) // 위치를 코스의 시작위치로
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                DispatchQueue.main.asyncAfter(deadline: .now()) {
                     self.preMapView.setVisibleMapRect(self.preMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: false)
                 }
                 isRegionSet = true
@@ -756,11 +780,3 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         preMapView.addOverlay(polyline)
     }
 }
-
-
-/*
- 
- "4명의 TrackUs 회원이 이 러닝 모임에 참여중입니다!"
- 참여한 사람의 이미지와 이름 Cell을 만들기
- 
- */
