@@ -44,6 +44,10 @@ class CourseRegisterVC: UIViewController {
     var selectedDate: Date = Date() // 날짜
     var selectedTime: Date = Date() // 시간
     var personnel: Int = 2 // 최소인원수
+    var members: [String] = [] // 참여인원
+    var postUid: String = "" // 모집글 Uid
+    var isEdit: Bool = false
+    var imageUrl: String = ""
     
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
@@ -214,7 +218,7 @@ class CourseRegisterVC: UIViewController {
         return button
     }()
     
-    private lazy var courseTitle: UITextField = {
+    lazy var courseTitle: UITextField = {
         let title = UITextField()
         title.textColor = .black
         title.font = UIFont.systemFont(ofSize: 16)
@@ -235,7 +239,7 @@ class CourseRegisterVC: UIViewController {
         return title
     }()
     
-    private lazy var courseDescription: UITextView = {
+    lazy var courseDescription: UITextView = {
         let description = UITextView()
         description.textColor = .black
         description.font = UIFont.systemFont(ofSize: 16)
@@ -306,13 +310,10 @@ class CourseRegisterVC: UIViewController {
     
     private lazy var addCourseButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("코스 등록하기", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.layer.cornerRadius = 56 / 2
-        
-        button.addTarget(self, action: #selector(addCourseButtonTapped), for: .touchUpInside)
         
         return button
     }()
@@ -510,6 +511,69 @@ class CourseRegisterVC: UIViewController {
         }
     }
     
+    @objc func editCourseButtonTapped() {
+        loadingView.isHidden = false
+        loadingView.startAnimation()
+        
+        let userUID = User.currentUid
+        
+        // date와 time을 하나 합쳐서 업로드
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        
+        let dateComponents = calendar.dateComponents([.year, .month, .day], from: selectedDate)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        
+        var combinedComponents = DateComponents()
+        combinedComponents.year = dateComponents.year
+        combinedComponents.month = dateComponents.month
+        combinedComponents.day = dateComponents.day
+        combinedComponents.hour = timeComponents.hour
+        combinedComponents.minute = timeComponents.minute
+        
+        guard let selectedDateTime = calendar.date(from: combinedComponents) else {
+            return
+        }
+        
+        // 주소 입력
+        searchAddress { address in
+            
+            // Post 인스턴스 생성
+            var post = Post(uid: self.postUid, title: self.courseTitleString, content: self.courseDescriptionString, courseRoutes: self.testcoords.map { location in
+                return GeoPoint(latitude: location.latitude, longitude: location.longitude)
+            }, distance: self.distance, numberOfPeoples: self.personnel, routeImageUrl: self.imageUrl, startDate: selectedDateTime, address: address, whoReportAt: [], createdAt: Date(), runningStyle: self.runningStyle, members: self.members, ownerUid: userUID)
+            
+            // 이미지 삭제
+            PostService().deleteImage(imageUrl: self.imageUrl)
+            
+            // 이미지 업로드 후 Post 업데이트
+            self.mapSnapshot(with: self.pinAnnotations, polyline: MKPolyline(coordinates: self.testcoords, count: self.testcoords.count)) { [weak self] image in
+                guard let self = self else { return }
+                PostService.uploadImage(image: image) { url in
+                    if let url = url {
+                        post.updateRouteImageUrl(newUrl: url.absoluteString)
+                        
+                        // Post 업로드
+                        PostService().uploadPost(post: post) { error in
+                            if let error = error {
+                                print("DEBUG: Failed to upload post: \(error.localizedDescription)")
+                            } else {
+                                DispatchQueue.main.async {
+                                    
+                                    self.dismiss(animated: true)
+                                    
+                                    ImageCacheManager.shared.setImage(image: image, url: post.routeImageUrl)
+                                }
+                            }
+                        }
+                    } else {
+                        print("DEBUG: Image upload failed")
+                    }
+                }
+            }
+        }
+    }
+    
     @objc func btnDoneBarTapped(sender: Any) {
         view.endEditing(true)
     }
@@ -587,6 +651,8 @@ class CourseRegisterVC: UIViewController {
         addCourseButton.leftAnchor.constraint(equalTo: addCourseButtonContainer.leftAnchor, constant: 16).isActive = true
         addCourseButton.bottomAnchor.constraint(equalTo: addCourseButtonContainer.bottomAnchor).isActive = true
         addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor, constant: -16).isActive = true
+        addCourseButton.setTitle(isEdit ? "코스 수정하기" : "코스 등록하기", for: .normal)
+        addCourseButton.addTarget(self, action: isEdit ? #selector(editCourseButtonTapped) : #selector(addCourseButtonTapped), for: .touchUpInside)
         
         divider.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor).isActive = true
         divider.leadingAnchor.constraint(equalTo: addCourseButtonContainer.leadingAnchor).isActive = true
@@ -785,7 +851,12 @@ class CourseRegisterVC: UIViewController {
     }
     
     private func setupNavBar() {
-        self.navigationItem.title = "모집글 등록"
+        if isEdit {
+            self.navigationItem.title = "모집글 수정"
+        } else {
+            self.navigationItem.title = "모집글 등록"
+        }
+        
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor.white

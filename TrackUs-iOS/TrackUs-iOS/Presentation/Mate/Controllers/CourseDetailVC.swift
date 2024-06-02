@@ -302,7 +302,21 @@ class CourseDetailVC: UIViewController {
     
     @objc func menuButtonTapped() {
         let editAction = UIAlertAction(title: "모집글 수정", style: .default) { action in
+            let courseRegisterVC = CourseRegisterVC()
             
+            courseRegisterVC.testcoords = self.courseCoords
+            courseRegisterVC.courseTitle.text = self.courseTitleLabel.text!
+            courseRegisterVC.courseDescription.text = self.courseDestriptionLabel.text!
+            courseRegisterVC.members = self.members
+            courseRegisterVC.personnel = self.memberLimit
+            courseRegisterVC.distance = self.distance
+            courseRegisterVC.postUid = self.postUid
+            courseRegisterVC.isEdit = true
+            courseRegisterVC.imageUrl = self.imageUrl
+            
+            let navController = UINavigationController(rootViewController: courseRegisterVC)
+            navController.modalPresentationStyle = .fullScreen
+            self.present(navController, animated: true, completion: nil)
         }
         
         let reportAction = UIAlertAction(title: "모집글 신고", style: .destructive) { action in
@@ -577,7 +591,8 @@ class CourseDetailVC: UIViewController {
             self.searchAddress { address in
                 self.courseTitleLabel.text = post.title
                 self.courseDestriptionLabel.text = post.content
-                self.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
+                self.distance = post.distance
+                self.distanceLabel.text = "\(String(format: "%.2f", self.distance)) km"
                 self.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
                 self.runningStyleLabel.text = self.runningStyleString(for: post.runningStyle)
                 self.courseLocationLabel.text = address
@@ -717,10 +732,6 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         }
         
         addPolylineToMap()
-        
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-//            self.hideSkeletonViewWithFadeIn()
-//        }
         
         mapUIComplete = true
     }

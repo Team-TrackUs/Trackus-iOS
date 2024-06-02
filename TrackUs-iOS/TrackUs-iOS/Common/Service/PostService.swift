@@ -201,8 +201,26 @@ class PostService {
     }
     
     // 포스트 수정
-    func editPost() {
+    func editPost(post: Post, completion: @escaping (Error?) -> Void) {
+        let postData = [
+            "title" : post.title,
+            "content" : post.content,
+            "courseRoutes" : post.courseRoutes,
+            "distance" : post.distance,
+            "numberOfPeoples" : post.numberOfPeoples,
+            "routeImageUrl" : post.routeImageUrl,
+            "startDate" : post.startDate,
+            "address" : post.address,
+            "whoReportAt" : post.whoReportAt,
+            "createdAt" : post.createdAt,
+            "runningStyle" : post.runningStyle,
+            "members" : post.members,
+            "ownerUid" : post.ownerUid
+        ] as [String : Any]
         
+        Firestore.firestore().collection("posts").document(post.uid).updateData(postData) { error in
+            completion(error)
+        }
     }
     
     // 포스트 삭제
@@ -211,10 +229,12 @@ class PostService {
             completion()
         }
         
-        let storageReference = Storage.storage().reference(forURL: imageUrl)
-        storageReference.delete { error in
-            completion()
-        }
+        deleteImage(imageUrl: imageUrl)
+        
+//        let storageReference = Storage.storage().reference(forURL: imageUrl)
+//        storageReference.delete { error in
+//            completion()
+//        }
     }
     
     // 이미지를 스토리지에 업로드
@@ -265,6 +285,14 @@ class PostService {
                 return
             }
             completion(UIImage(data: imageData))
+        }
+    }
+    
+    // 이미지를 스토리지에서 삭제
+    func deleteImage(imageUrl: String) {
+        let storageReference = Storage.storage().reference(forURL: imageUrl)
+        storageReference.delete { error in
+            print("DEBUG: Image Delete Failed = \(String(describing: error?.localizedDescription))")
         }
     }
     
