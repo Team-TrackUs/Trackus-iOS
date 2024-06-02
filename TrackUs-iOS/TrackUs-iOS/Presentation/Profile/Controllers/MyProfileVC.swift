@@ -31,7 +31,7 @@ class MyProfileVC: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle("프로필 편집", for: .normal)
         button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = UIColor(named: "Gray3")
+        button.backgroundColor = .gray3
         button.layer.cornerRadius = 5
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         button.addTarget(self, action: #selector(editProfileButtonTapped), for: .touchUpInside)
@@ -50,7 +50,7 @@ class MyProfileVC: UIViewController {
     
     private let runningStatsContainerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "Gray3")
+        view.backgroundColor = .gray3
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -71,7 +71,7 @@ class MyProfileVC: UIViewController {
         view.layer.cornerRadius = 10
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor.gray3.cgColor
-        view.layer.shadowColor = UIColor.gray1.cgColor
+        view.layer.shadowColor = UIColor.gray2.cgColor
         view.layer.shadowOpacity = 0.2
         view.layer.shadowOffset = CGSize(width: 0, height: 2)
         view.layer.shadowRadius = 4
@@ -123,28 +123,11 @@ class MyProfileVC: UIViewController {
 
 
     // MARK: - 러닝기록
-    private let segmentControl: UISegmentedControl = {
-        let segment = UISegmentedControl(items: ["기록", "글 목록"])
+    private lazy var segmentControl: CustomSegmentedControl = {
+        let segment = CustomSegmentedControl()
+        segment.segments = ["기록", "글 목록"]
         segment.selectedSegmentIndex = 0
         segment.translatesAutoresizingMaskIntoConstraints = false
-
-
-        let height: CGFloat = 30
-        segment.layer.cornerRadius = height / 2
-        segment.layer.masksToBounds = true
-        
-        segment.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
-        segment.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor(named: "Gray2")!], for: .normal)
-        
-        segment.backgroundColor = .white
-        segment.selectedSegmentTintColor = UIColor(named: "MainBlue")
-        
-        segment.layer.borderColor = UIColor(named: "Gray2")?.cgColor
-        segment.layer.borderWidth = 1.0
-
-        segment.layer.cornerRadius = height / 2
-        segment.layer.masksToBounds = true
-        
         segment.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         return segment
     }()
@@ -394,7 +377,6 @@ class MyProfileVC: UIViewController {
         }
     }
 
-
     
     @objc private func segmentChanged() {
         if segmentControl.selectedSegmentIndex == 0 {
@@ -422,3 +404,13 @@ class MyProfileVC: UIViewController {
 }
 
 
+class CustomSegmentedControl: UISegmentedControl {
+    var segments: [String] = [] {
+        didSet {
+            removeAllSegments()
+            for (index, segment) in segments.enumerated() {
+                insertSegment(withTitle: segment, at: index, animated: false)
+            }
+        }
+    }
+}

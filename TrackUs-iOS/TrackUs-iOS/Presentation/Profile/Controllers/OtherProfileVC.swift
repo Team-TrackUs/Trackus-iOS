@@ -5,25 +5,23 @@
 //  Created by 박소희 on 5/21/24.
 //
 
-
 import UIKit
+import Firebase
 
 class OtherProfileVC: UIViewController {
 
     // MARK: - 사용자 프로필
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "profile_person_icon")
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 50
         imageView.layer.masksToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
-    
+        
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "TrackUs님"
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -31,9 +29,9 @@ class OtherProfileVC: UIViewController {
     
     private let editProfileButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("1:1 대화", for: .normal)
+        button.setTitle("프로필 편집", for: .normal)
         button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = UIColor(named: "Gray3")
+        button.backgroundColor = .gray3
         button.layer.cornerRadius = 5
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         button.addTarget(self, action: #selector(editProfileButtonTapped), for: .touchUpInside)
@@ -52,7 +50,7 @@ class OtherProfileVC: UIViewController {
     
     private let runningStatsContainerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "Gray3")
+        view.backgroundColor = .gray3
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -73,7 +71,7 @@ class OtherProfileVC: UIViewController {
         view.layer.cornerRadius = 10
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor.gray3.cgColor
-        view.layer.shadowColor = UIColor.gray1.cgColor
+        view.layer.shadowColor = UIColor.gray2.cgColor
         view.layer.shadowOpacity = 0.2
         view.layer.shadowOffset = CGSize(width: 0, height: 2)
         view.layer.shadowRadius = 4
@@ -122,7 +120,7 @@ class OtherProfileVC: UIViewController {
         let text = createRunningInfoText(header: "페이스", main: "0'00''", sub: "2'08''")
         return createLabel(withText: text)
     }()
-    
+
     private let recordsView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -160,13 +158,15 @@ class OtherProfileVC: UIViewController {
 
     @objc private func dateButtonTapped() {
         let calendarVC = CalendarVC()
+        if #available(iOS 13.0, *) {
+            calendarVC.modalPresentationStyle = .pageSheet
+        }
         calendarVC.didSelectDate = { [weak self] selectedDate in
             self?.currentDate = selectedDate
             self?.updateDateButton()
         }
         present(calendarVC, animated: true, completion: nil)
     }
-
     
     private let previousDateButton: UIButton = {
         let button = UIButton(type: .system)
@@ -206,26 +206,22 @@ class OtherProfileVC: UIViewController {
         updateDateButton()
         profileImageView.layer.cornerRadius = 35
         setupConstraints()
+        fetchUserProfile()
     }
-    
+
     private func setupNavBar() {
-        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
-        backButton.tintColor = .black
-        self.navigationItem.leftBarButtonItem = backButton
-        
-        
-        self.navigationItem.title = "프로필 확인"
-        self.navigationItem.setHidesBackButton(false, animated:true)
+        self.navigationItem.title = "마이페이지"
         
         let settingsButton = UIBarButtonItem(image: UIImage(named: "setting_icon"), style: .plain, target: self, action: #selector(settingsButtonTapped))
         settingsButton.tintColor = .black
         self.navigationItem.rightBarButtonItem = settingsButton
         
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.standardAppearance = appearance
+        self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
-    @objc private func backButtonTapped() {
-        self.navigationController?.popViewController(animated: true)
-    }
-    
 
     private func setupViews() {
         view.addSubview(profileImageView)
@@ -278,7 +274,7 @@ class OtherProfileVC: UIViewController {
         runningStatsView.addArrangedSubview(horizontalStackView2)
         
         runningStatsContainerView.addSubview(runningStatsView)
-        
+
         view.addSubview(recordsView)
         view.addSubview(postsView)
         
@@ -308,10 +304,11 @@ class OtherProfileVC: UIViewController {
             runningStatsView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             runningStatsView.bottomAnchor.constraint(equalTo: runningStatsContainerView.bottomAnchor, constant: -22),
             
+            
             previousDateButton.centerYAnchor.constraint(equalTo: dateButton.centerYAnchor),
             previousDateButton.trailingAnchor.constraint(equalTo: dateButton.leadingAnchor, constant: -10),
             
-            dateButton.topAnchor.constraint(equalTo: runningStatsView.bottomAnchor, constant: 27),
+            dateButton.topAnchor.constraint(equalTo: runningStatsContainerView.bottomAnchor, constant: 25),
             dateButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             nextDateButton.centerYAnchor.constraint(equalTo: dateButton.centerYAnchor),
@@ -339,6 +336,32 @@ class OtherProfileVC: UIViewController {
         self.navigationController?.pushViewController(myProfileEditVC, animated: true)
     }
     
+    private func fetchUserProfile() {
+        guard let currentUser = Auth.auth().currentUser else {
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("user").document(currentUser.uid)
+        
+        userRef.getDocument { [weak self] document, error in
+            guard let self = self, let document = document, document.exists else {
+                return
+            }
+            
+            let data = document.data()
+            if let profileImageUrl = data?["profileImageUrl"] as? String {
+                self.profileImageView.loadImage(url: profileImageUrl)
+            } else {
+                self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
+            }
+            
+            if let userName = data?["name"] as? String {
+                self.nameLabel.text = userName
+            }
+        }
+    }
+
     
     private func setupConstraints() {
         let labelsAndViews: [(UILabel, UIView)] = [
@@ -354,6 +377,3 @@ class OtherProfileVC: UIViewController {
         }
     }
 }
-
-
-

@@ -6,8 +6,20 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
 
 class SettingVC: UIViewController {
+    
+    let authService = AuthService.shared
+    
+    private func performLogout() {
+        authService.logOut()
+        print("로그아웃 완료")
+        
+        let loginVC = LoginVC()
+        navigationController?.setViewControllers([loginVC], animated: true)
+    }
 
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
@@ -189,8 +201,12 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
             let withdrawalVC = WithdrawalVC()
             navigationController?.pushViewController(withdrawalVC, animated: true)
         case 4:
-            let withdrawalVC = WithdrawalVC()
-            navigationController?.pushViewController(withdrawalVC, animated: true)
+            if indexPath.row == 0 {
+                performLogout()
+            } else {
+                let withdrawalVC = WithdrawalVC()
+                navigationController?.pushViewController(withdrawalVC, animated: true)
+            }
         default:
             break
         }

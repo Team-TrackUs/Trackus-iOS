@@ -35,7 +35,7 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "회원 탈퇴시 아래 사항을 꼭 확인해 주세요."
         label.font = UIFont.systemFont(ofSize: 12, weight: .light)
-        label.textColor = .mainBlue
+        label.textColor = .red
         return label
     }()
     
@@ -82,7 +82,7 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         textView.layer.borderColor = UIColor(named: "Gray3")?.cgColor
         textView.layer.cornerRadius = 5.0
         textView.font = UIFont.systemFont(ofSize: 12)
-        textView.textColor = UIColor(named: "Gray1")
+        textView.textColor = .gray1
         textView.text = "탈퇴 사유를 작성해주세요."
         textView.textContainerInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
         return textView
@@ -93,7 +93,7 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "안내 사항 확인 후 탈퇴에 동의합니다."
         label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = .black
+        label.textColor = .gray1
         return label
     }()
     
@@ -215,7 +215,7 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         radioButton.backgroundColor = isRadioButtonSelected ? UIColor(named: "mainBlue") : .clear
         if isRadioButtonSelected {
             radioButton.setImage(UIImage(systemName: "circle.fill"), for: .normal)
-            radioButton.tintColor = UIColor(named: "mainBlue")
+            radioButton.tintColor = .mainBlue
         } else {
             radioButton.setImage(nil, for: .normal)
         }
