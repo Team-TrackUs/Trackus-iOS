@@ -267,9 +267,7 @@ class CourseDetailVC: UIViewController {
     @objc func courseExitButtonTapped() {
         
         if ownerUid == uid {
-            PostService().deletePost(postUid: self.postUid, imageUrl: self.imageUrl) {
-                self.navigationController?.popToRootViewController(animated: true)
-            }
+            showAlert(title: "", message: "모집글을 삭제 하시겠습니까?", action: "삭제")
         } else {
             PostService().exitPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
                 self.members = updateMembers
@@ -541,12 +539,12 @@ class CourseDetailVC: UIViewController {
             
             if let error = error {
                 print("DEBUG: Error FetchPostDetail")
-                self.showAlert(title: "오류", message: "모집글을 불러오지 못했습니다.", action: "삭제")
+                self.showAlert(title: "오류", message: "모집글을 불러오지 못했습니다.", action: "상태")
                 return
             }
             
             guard let post = post else {
-                self.showAlert(title: "", message: "삭제된 모집글입니다.", action: "삭제")
+                self.showAlert(title: "", message: "삭제된 모집글입니다.", action: "상태")
                 return
             }
             
@@ -588,16 +586,28 @@ class CourseDetailVC: UIViewController {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         
         switch action {
-        case "삭제":
+        case "상태":
             let okAction = UIAlertAction(title: "확인", style: .default) { _ in
                 self.navigationController?.popViewController(animated: true)
             }
             alertController.addAction(okAction)
+            
         case "참여":
             let okAction = UIAlertAction(title: "확인", style: .default) { _ in
                 self.fetchPostDetail()
             }
             alertController.addAction(okAction)
+            
+        case "삭제":
+            let okAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
+                PostService().deletePost(postUid: self.postUid, imageUrl: self.imageUrl) {
+                    self.navigationController?.popToRootViewController(animated: true)
+                }
+            }
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+            alertController.addAction(okAction)
+            alertController.addAction(cancelAction)
+            
         default:
             break
         }

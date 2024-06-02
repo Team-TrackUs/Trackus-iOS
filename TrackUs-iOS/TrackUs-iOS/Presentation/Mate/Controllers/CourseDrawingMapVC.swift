@@ -222,7 +222,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         distanceLabel.clipsToBounds = true
         distanceLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 15).isActive = true
         distanceLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        distanceLabel.text = "0.00 km"
+//        distanceLabel.text = "0.00 km"
         configureDistanceLabel()
         
     }
