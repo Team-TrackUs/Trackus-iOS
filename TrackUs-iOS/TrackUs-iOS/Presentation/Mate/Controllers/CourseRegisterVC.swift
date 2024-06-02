@@ -14,7 +14,11 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     // MARK: - Properties
     
-    lazy var testcoords: [CLLocationCoordinate2D] = [] // 좌표배열
+    lazy var testcoords: [CLLocationCoordinate2D] = [] { // 좌표배열
+        didSet {
+            updateAddCourseButtonAppearance()
+        }
+    }
     lazy var distance: CLLocationDistance = 0 { // 거리
         didSet {
             distanceUpdate()
@@ -26,11 +30,20 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         }
     }
     
-    var courseTitleString: String = "" // 코스 제목
-    var courseDescriptionString: String = "" // 코스 소개글
+    var courseTitleString: String = "" { // 코스 제목
+        didSet {
+            updateAddCourseButtonAppearance()
+        }
+    }
+    
+    var courseDescriptionString: String = "" { // 코스 소개글
+        didSet {
+            updateAddCourseButtonAppearance()
+        }
+    }
     var selectedDate: Date = Date() // 날짜
     var selectedTime: Date = Date() // 시간
-    var personnel: Int = 1 // 인원수
+    var personnel: Int = 2 // 최소인원수
 
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
@@ -271,11 +284,10 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     private lazy var addCourseButton: UIButton = {
         let button = UIButton(type: .system)
-        button.backgroundColor = .mainBlue
         button.setTitle("코스 등록하기", for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 56 / 2
         
         button.addTarget(self, action: #selector(addCourseButtonTapped), for: .touchUpInside)
@@ -286,6 +298,13 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     private let addCourseButtonContainer: UIView = {
         let view = UIView()
         view.backgroundColor = .white
+        return view
+    }()
+    
+    private let divider: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .gray3
         return view
     }()
     
@@ -360,17 +379,14 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }
     
     @objc func personDown() {
-        if personnel > 1 {
+        if personnel > 2 {
             personnel -= 1
             personnelLabel.text = String(personnel)
         }
     }
     
     @objc func addCourseButtonTapped() {
-        print("DEBUG: Add course...")
-        
         let userUID = User.currentUid
-        print("DEBUG: 유저 UID = \(userUID)")
         let postUID = Firestore.firestore().collection("posts").document().documentID
         
         // date와 time을 하나 합쳐서 업로드
@@ -402,21 +418,15 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             // 이미지 업로드 후 Post 업데이트
             self.mapSnapshot(with: self.pinAnnotations, polyline: MKPolyline(coordinates: self.testcoords, count: self.testcoords.count)) { [weak self] image in
                 guard let self = self else { return }
-                print("DEBUG: Starting image upload...")
-                
                 PostService.uploadImage(image: image) { url in
                     if let url = url {
-                        print("DEBUG: Image uploaded successfully. URL: \(url.absoluteString)")
                         post.updateRouteImageUrl(newUrl: url.absoluteString)
-                        print("DEBUG: Starting post upload...")
                         
                         // Post 업로드
                         PostService().uploadPost(post: post) { error in
                             if let error = error {
                                 print("DEBUG: Failed to upload post: \(error.localizedDescription)")
                             } else {
-                                print("DEBUG: Post uploded Successfully")
-                                
                                 DispatchQueue.main.async {
                                     let courseDetailVC = CourseDetailVC()
                                     
@@ -436,13 +446,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                                     courseDetailVC.postUid = post.uid
                                     courseDetailVC.memberLimit = post.numberOfPeoples
                                     courseDetailVC.imageUrl = post.routeImageUrl
-                                    
-                                    // 이미지 추가
-                                    PostService.downloadImage(urlString: post.routeImageUrl) { image in
-                                        DispatchQueue.main.async {
-                                            courseDetailVC.mapImageButton.setImage(image, for: .normal)
-                                        }
-                                    }
                                     
                                     self.navigationController?.popToRootViewController(animated: true)
                                     courseDetailVC.hidesBottomBarWhenPushed = true
@@ -658,19 +661,26 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         
         contentView.addSubview(addCourseButtonContainer)
         addCourseButtonContainer.translatesAutoresizingMaskIntoConstraints = false
-        addCourseButtonContainer.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16).isActive = true
+        addCourseButtonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         addCourseButtonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        addCourseButtonContainer.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16).isActive = true
+        addCourseButtonContainer.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         addCourseButtonContainer.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        
+        addCourseButtonContainer.addSubview(divider)
+        divider.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor).isActive = true
+        divider.leadingAnchor.constraint(equalTo: addCourseButtonContainer.leadingAnchor).isActive = true
+        divider.trailingAnchor.constraint(equalTo: addCourseButtonContainer.trailingAnchor).isActive = true
+        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
         
         addCourseButtonContainer.addSubview(addCourseButton)
         addCourseButton.translatesAutoresizingMaskIntoConstraints = false
         addCourseButton.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor, constant: 10).isActive = true
-        addCourseButton.leftAnchor.constraint(equalTo: addCourseButtonContainer.leftAnchor).isActive = true
+        addCourseButton.leftAnchor.constraint(equalTo: addCourseButtonContainer.leftAnchor, constant: 16).isActive = true
         addCourseButton.bottomAnchor.constraint(equalTo: addCourseButtonContainer.bottomAnchor).isActive = true
-        addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor).isActive = true
+        addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor, constant: -16).isActive = true
         
         updateStyleButtonAppearance()
+        updateAddCourseButtonAppearance()
         
     }
     
@@ -719,6 +729,16 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         
         styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray, for: .normal)
         styleSprintButton.backgroundColor = runningStyle == 3 ? .mainBlue : .white
+    }
+    
+    func updateAddCourseButtonAppearance() {
+        if testcoords.isEmpty || courseTitleString.isEmpty || courseDescriptionString.isEmpty {
+            addCourseButton.backgroundColor = .systemGray
+            addCourseButton.isEnabled = false
+        } else {
+            addCourseButton.backgroundColor = .mainBlue
+            addCourseButton.isEnabled = true
+        }
     }
     
     func setup(with testCoords: [CLLocationCoordinate2D], distance: CLLocationDistance) {
