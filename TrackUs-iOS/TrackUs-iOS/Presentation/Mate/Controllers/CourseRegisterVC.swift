@@ -560,7 +560,20 @@ class CourseRegisterVC: UIViewController {
                             } else {
                                 DispatchQueue.main.async {
                                     
-                                    self.dismiss(animated: true)
+                                    let courseDetailVC = CourseDetailVC()
+                                    courseDetailVC.hidesBottomBarWhenPushed = true
+                                    
+                                    if let xmark = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate) {
+                                        let dismissButton = UIBarButtonItem(image: xmark, style: .plain, target: self, action: #selector(self.closeModal))
+                                        
+                                        dismissButton.tintColor = .gray1
+                                        
+                                        courseDetailVC.navigationItem.leftBarButtonItem = dismissButton
+                                    }
+                                    
+                                    courseDetailVC.postUid = post.uid
+                                    
+                                    self.navigationController?.pushViewController(courseDetailVC, animated: true)
                                     
                                     ImageCacheManager.shared.setImage(image: image, url: post.routeImageUrl)
                                 }

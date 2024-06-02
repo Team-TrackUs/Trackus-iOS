@@ -195,22 +195,6 @@ class CourseDetailVC: UIViewController {
         return button
     }()
     
-    private lazy var mapDetailBtn: UIButton = {
-        var config = UIButton.Configuration.filled()
-        config.baseBackgroundColor = .white
-        config.baseForegroundColor = .gray2
-        config.image = UIImage(systemName: "map.fill")
-        config.imagePadding = 7
-        var titleAttr = AttributedString("지도 보기")
-        titleAttr.font = UIFont.systemFont(ofSize: 12, weight: .bold)
-        config.attributedTitle = titleAttr
-        let bt = UIButton(configuration: config)
-        bt.translatesAutoresizingMaskIntoConstraints = false
-        
-        bt.addTarget(self, action: #selector(goCourseDetail(_:)), for: .touchUpInside)
-        return bt
-    }()
-    
     var ownerUid: String = ""
     
     let buttonStack = UIStackView()
@@ -302,11 +286,19 @@ class CourseDetailVC: UIViewController {
     
     @objc func menuButtonTapped() {
         let editAction = UIAlertAction(title: "모집글 수정", style: .default) { action in
+            
+            // 네비게이션 Pop
+            self.navigationController?.popToRootViewController(animated: true)
+            // 모달인경우 dismiss
+            self.dismiss(animated: true)
+            
             let courseRegisterVC = CourseRegisterVC()
             
             courseRegisterVC.testcoords = self.courseCoords
             courseRegisterVC.courseTitle.text = self.courseTitleLabel.text!
+            courseRegisterVC.courseTitleString = self.courseTitleLabel.text!
             courseRegisterVC.courseDescription.text = self.courseDestriptionLabel.text!
+            courseRegisterVC.courseDescriptionString = self.courseDestriptionLabel.text!
             courseRegisterVC.members = self.members
             courseRegisterVC.personnel = self.memberLimit
             courseRegisterVC.distance = self.distance
@@ -386,10 +378,6 @@ class CourseDetailVC: UIViewController {
         distanceLabel.bottomAnchor.constraint(equalTo: preMapView.bottomAnchor, constant: -30).isActive = true
         distanceLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
         distanceLabel.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        
-        preMapView.addSubview(mapDetailBtn)
-        mapDetailBtn.rightAnchor.constraint(equalTo: preMapView.rightAnchor, constant: -16).isActive = true
-        mapDetailBtn.bottomAnchor.constraint(equalTo: preMapView.bottomAnchor, constant: -30).isActive = true
         
         scrollView.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -675,12 +663,12 @@ class CourseDetailVC: UIViewController {
     }
     
     private func hideSkeletonViewWithFadeIn() {
-            UIView.animate(withDuration: 0.2, animations: {
-                self.skeletonView.alpha = 0.0
-            }) { _ in
-                self.skeletonView.isHidden = true
-            }
+        UIView.animate(withDuration: 0.2, animations: {
+            self.skeletonView.alpha = 0.0
+        }) { _ in
+            self.skeletonView.isHidden = true
         }
+    }
 }
 
 extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
