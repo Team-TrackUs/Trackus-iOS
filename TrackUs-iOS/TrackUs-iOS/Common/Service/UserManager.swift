@@ -42,6 +42,7 @@ class UserManager {
                     // user 데이터 처리
                     DispatchQueue.main.async {
                         self.user = user
+                        print(user.uid)
                     }
                     completionHandler(false)
                 } catch {

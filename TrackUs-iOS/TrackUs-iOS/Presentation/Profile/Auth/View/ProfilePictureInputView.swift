@@ -112,7 +112,7 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
     // UIImagePickerControllerDelegate 메소드
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = info[.originalImage] as? UIImage {
-            cameraIcon.isHidden = true
+            //cameraIcon.isHidden = true
             imageView.image = image
             imageView.layer.cornerRadius = imageView.frame.height / 2
             imageView.layer.masksToBounds = true

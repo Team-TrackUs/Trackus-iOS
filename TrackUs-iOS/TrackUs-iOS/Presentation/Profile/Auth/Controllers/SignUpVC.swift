@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SignUpVC: UIViewController, MainButtonEnabledDelegate {
+final class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     var user = UserManager.shared.user
     

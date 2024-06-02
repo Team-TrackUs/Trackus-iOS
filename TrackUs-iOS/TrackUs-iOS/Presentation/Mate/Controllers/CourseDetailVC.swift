@@ -236,6 +236,7 @@ class CourseDetailVC: UIViewController {
     
     @objc func goChatRoomButtonTapped() {
         print("DEBUG: 채팅 버튼 클릭")
+        
     }
     
     @objc func menuButtonTapped() {

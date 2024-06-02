@@ -8,7 +8,7 @@
 import UIKit
 import Firebase
 
-class LoginVC: UIViewController {
+final class LoginVC: UIViewController {
     
     private lazy var icon: UIImageView = {
         let image = UIImage(named: "trackus_icon")?.resize(width: 90, height: 73)

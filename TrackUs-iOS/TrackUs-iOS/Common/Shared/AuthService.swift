@@ -98,7 +98,7 @@ final class AuthService: NSObject {
     private func storeUserInformation(user: User) {
         let uid = User.currentUid
         // 해당부분 자료형 지정 필요
-        let userData = ["uid": user.uid,
+        let userData = ["uid": User.currentUid,
                         "name": user.name,
                         "isProfilePublic": user.isProfilePublic,
                         "profileImageUrl": user.profileImageUrl as Any,

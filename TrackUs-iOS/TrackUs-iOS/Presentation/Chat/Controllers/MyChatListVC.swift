@@ -7,19 +7,26 @@
 
 import UIKit
 
-class MyChatListVC: UIViewController {
+class MyChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-//    private lazy var imageView: UIImageView = {
-//        let imageView = UIImageView()
-//        imageView.memoryloadImage(url: <#T##String#>)
-//        //... 추가 필요 코드 작성 ...
-//        return imageView
-//    }()
+    var chat = ChatRoomManager.shared
+    
+    private lazy var chatListTableView: UITableView = {
+       let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(ChatRoomCell.self, forCellReuseIdentifier: "ChatRoomCell")
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.rowHeight = 72
+        return tableView
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        chat.dummyData()
         setupNavBar()
         view.backgroundColor = .systemBackground
+        chatListTableView.delegate = self
         setupAutoLayout()
     }
 
@@ -35,14 +42,56 @@ class MyChatListVC: UIViewController {
     
     // MARK: - 오토레이아웃 세팅
     private func setupAutoLayout() {
-//        self.view.addSubview(imageView)
-//        
-//        NSLayoutConstraint.activate([
-//            imageView.topAnchor.constraint(equalTo: self.view.topAnchor),
-//            imageView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-//            imageView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-//            imageView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-//        ])
+        self.view.addSubview(chatListTableView)
+        
+        NSLayoutConstraint.activate([
+            chatListTableView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            chatListTableView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            chatListTableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            chatListTableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+        ])
     }
+    
+    // MARK: - view 관련 함수
+//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        if chatViewModel.chatRooms.count == 0 {
+//            let label = UILabel(frame: tableView.bounds)
+//            label.text = "참여한 채팅방이 없습니다"
+//            label.textAlignment = .center
+//            label.textColor = .gray
+//            tableView.backgroundView = label
+//            return 0
+//        } else {
+//            tableView.backgroundView = nil
+//            return chatViewModel.chatRooms.count
+//        }
+//    }
 
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatRoomCell", for: indexPath) as! ChatRoomCell
+        let chatRoom = chat.chatRooms[indexPath.row]
+        cell.configure(with: chatRoom, users: chat.userInfo)
+        return cell
+    }
+        
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//            let chatRoom = chatViewModel.chatRooms[indexPath.row]
+//            router.push(ChatViewModel(chatRoom: chatRoom, users: chatViewModel.users))
+//            chatViewModel.currentChatRoom = chatRoom.id
+        }
+        
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "나가기") { (action, view, completionHandler) in
+//            let chatRoom = self.chatViewModel.chatRooms[indexPath.row]
+//            self.chatViewModel.deleteChatRoom(chatRoomID: chatRoom.id)
+            completionHandler(true)
+        }
+//        deleteAction.backgroundColor = .red
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // 셀 반환 갯수
+        return chat.chatRooms.count
+    }
 }
