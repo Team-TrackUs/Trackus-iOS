@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		615ADADC2C04D45D005CAC75 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 82BE455D2BEFA948007AE54A /* Main.storyboard */; };
-		615ADADE2C059D5D005CAC75 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 615ADADD2C059D5D005CAC75 /* Config.xcconfig */; };
 		615ADAE22C07802B005CAC75 /* RefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615ADAE12C07802B005CAC75 /* RefreshView.swift */; };
 		61625E382BFE6EE500E6D1F3 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61625E372BFE6EE500E6D1F3 /* Post.swift */; };
 		61625E3A2BFE75A500E6D1F3 /* PostService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61625E392BFE75A500E6D1F3 /* PostService.swift */; };
@@ -89,13 +88,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		615ADADA2C04D361005CAC75 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		615ADADD2C059D5D005CAC75 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Config.xcconfig; path = ../../../Config.xcconfig; sourceTree = "<group>"; };
 		615ADAE12C07802B005CAC75 /* RefreshView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshView.swift; sourceTree = "<group>"; };
 		61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		61625E372BFE6EE500E6D1F3 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		61625E392BFE75A500E6D1F3 /* PostService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostService.swift; sourceTree = "<group>"; };
-		61625E402C04855F00E6D1F3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseRegisterVC.swift; sourceTree = "<group>"; };
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
 		61B0DEC92BF8F950009E360B /* CourseMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMapVC.swift; sourceTree = "<group>"; };
@@ -183,6 +180,7 @@
 			children = (
 				61625E332BFBD33300E6D1F3 /* GoogleService-Info.plist */,
 				987F6F192C044A43004F6615 /* info.plist */,
+				615ADADD2C059D5D005CAC75 /* Config.xcconfig */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -530,11 +528,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				615ADADE2C059D5D005CAC75 /* Config.xcconfig in Resources */,
 				615ADADC2C04D45D005CAC75 /* Main.storyboard in Resources */,
 				82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */,
 				82596A8E2C0352F300DA6C70 /* GoogleService-Info.plist in Resources */,
-				82BE455F2BEFA948007AE54A /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -622,7 +618,7 @@
 /* Begin XCBuildConfiguration section */
 		82BE45662BEFA94A007AE54A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 615ADADD2C059D5D005CAC75 /* Config.xcconfig */;
+			baseConfigurationReference = 82596A8B2C0352DE00DA6C70 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -687,7 +683,7 @@
 		};
 		82BE45672BEFA94A007AE54A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 615ADADD2C059D5D005CAC75 /* Config.xcconfig */;
+			baseConfigurationReference = 82596A8B2C0352DE00DA6C70 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -745,7 +741,7 @@
 		};
 		82BE45692BEFA94A007AE54A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 615ADADD2C059D5D005CAC75 /* Config.xcconfig */;
+			baseConfigurationReference = 82596A8B2C0352DE00DA6C70 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -790,7 +786,7 @@
 		};
 		82BE456A2BEFA94A007AE54A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 615ADADD2C059D5D005CAC75 /* Config.xcconfig */;
+			baseConfigurationReference = 82596A8B2C0352DE00DA6C70 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
