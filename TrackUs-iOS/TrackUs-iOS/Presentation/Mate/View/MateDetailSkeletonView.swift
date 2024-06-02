@@ -11,6 +11,8 @@ class MateDetailSkeletonView: UIView {
     
     // MARK: - Properties
     
+    
+    
     // MARK: - Lifecycle
     
     override init(frame: CGRect) {

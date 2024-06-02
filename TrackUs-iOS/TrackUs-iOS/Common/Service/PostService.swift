@@ -298,8 +298,6 @@ class PostService {
                     return
                 }
                 
-                print("DEBUG: \(documents.count) documents found for searchText: \(searchText)")
-                
                 var filterPosts = [Post]()
                 documents.forEach { document in
                     let data = document.data()

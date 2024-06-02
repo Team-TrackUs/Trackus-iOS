@@ -422,6 +422,7 @@ class CourseRegisterVC: UIViewController {
     }
     
     @objc func addCourseButtonTapped() {
+        // + 주원님 채팅방 생성
         
         loadingView.isHidden = false
         loadingView.startAnimation()
@@ -715,16 +716,16 @@ class CourseRegisterVC: UIViewController {
     
     func updateStyleButtonAppearance() {
         styleWalkButton.setTitleColor(runningStyle == 0 ? .white : .gray, for: .normal)
-        styleWalkButton.backgroundColor = runningStyle == 0 ? .mainBlue : .white
+        styleWalkButton.backgroundColor = runningStyle == 0 ? .walking : .white
         
         styleFastWalkButton.setTitleColor(runningStyle == 1 ? .white : .gray, for: .normal)
-        styleFastWalkButton.backgroundColor = runningStyle == 1 ? .mainBlue : .white
+        styleFastWalkButton.backgroundColor = runningStyle == 1 ? .jogging : .white
         
         styleRuuningButton.setTitleColor(runningStyle == 2 ? .white : .gray, for: .normal)
-        styleRuuningButton.backgroundColor = runningStyle == 2 ? .mainBlue : .white
+        styleRuuningButton.backgroundColor = runningStyle == 2 ? .running : .white
         
         styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray, for: .normal)
-        styleSprintButton.backgroundColor = runningStyle == 3 ? .mainBlue : .white
+        styleSprintButton.backgroundColor = runningStyle == 3 ? .interval : .white
     }
     
     func updateAddCourseButtonAppearance() {
@@ -868,11 +869,8 @@ class CourseRegisterVC: UIViewController {
 
         CLGeocoder().reverseGeocodeLocation(addLoc, completionHandler: { place, error in
             if let pm = place?.first {
-                if let administrativeArea = pm.administrativeArea {
-                    address += administrativeArea
-                }
                 if let subLocality = pm.subLocality {
-                    address += " " + subLocality
+                    address += subLocality
                 }
             } else {
                 print("DEBUG: 주소 검색 실패 \(error?.localizedDescription ?? "Unknown error")")

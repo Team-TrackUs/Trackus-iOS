@@ -239,6 +239,7 @@ class CourseDetailVC: UIViewController {
         
         fetchPostDetail()
         MapConfigureUI()
+        runningStyleColor()
     }
     
     // MARK: - Selectors
@@ -552,18 +553,20 @@ class CourseDetailVC: UIViewController {
                 
                 return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
             }
-            self.courseTitleLabel.text = post.title
-            self.courseDestriptionLabel.text = post.content
-            self.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
-            self.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-            self.runningStyleLabel.text = self.runningStyleString(for: post.runningStyle)
-            self.courseLocationLabel.text = post.address
-            self.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
-            self.personInLabel.text = "\(String(describing: post.members.count))명"
-            self.members = post.members
-            self.memberLimit = post.numberOfPeoples
-            self.imageUrl = post.routeImageUrl
-            self.ownerUid = post.ownerUid
+            self.searchAddress { address in
+                self.courseTitleLabel.text = post.title
+                self.courseDestriptionLabel.text = post.content
+                self.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
+                self.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
+                self.runningStyleLabel.text = self.runningStyleString(for: post.runningStyle)
+                self.courseLocationLabel.text = address
+                self.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
+                self.personInLabel.text = "\(String(describing: post.members.count))명"
+                self.members = post.members
+                self.memberLimit = post.numberOfPeoples
+                self.imageUrl = post.routeImageUrl
+                self.ownerUid = post.ownerUid
+            }
         }
     }
     
@@ -613,6 +616,25 @@ class CourseDetailVC: UIViewController {
         }
         
         self.present(alertController, animated: true, completion: nil)
+    }
+    
+    func searchAddress(completion: @escaping (String) -> Void) {
+        let addLoc = CLLocation(latitude: courseCoords[0].latitude, longitude: courseCoords[0].longitude)
+        var address = ""
+
+        CLGeocoder().reverseGeocodeLocation(addLoc, completionHandler: { place, error in
+            if let pm = place?.first {
+                if let administrativeArea = pm.administrativeArea {
+                    address += administrativeArea
+                }
+                if let subLocality = pm.subLocality {
+                    address += " " + subLocality
+                }
+            } else {
+                print("DEBUG: 주소 검색 실패 \(error?.localizedDescription ?? "Unknown error")")
+            }
+            completion(address)
+        })
     }
 }
 
