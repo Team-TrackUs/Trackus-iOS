@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+import ActivityKit
 import UIKit
 import MapKit
 import CoreMotion
@@ -17,6 +17,8 @@ final class RunTrackingVC: UIViewController {
     private let altimeter = CMAltimeter()
     private let locationService = LocationService.shared
     private var gradientLayer = CAGradientLayer()
+    private let animation = CABasicAnimation(keyPath: "shadowPath")
+    private lazy var defaultPath = CGPath(rect: CGRect(x: 0, y: 0, width: 0, height: slideView.frame.height), transform: nil)
     private var runModel = Running() {
         didSet {
             updateUI()
@@ -32,6 +34,7 @@ final class RunTrackingVC: UIViewController {
     private var tempData: [String: Any] = ["distance": 0.0, "steps": 0]
     private var maxAltitude = -99999.0
     private var minAltitude = 99999.0
+    
     
     private lazy var countLabel: UILabel = {
         let label = UILabel()
@@ -77,7 +80,7 @@ final class RunTrackingVC: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = UIColor(white: 0, alpha: 0.6)
         view.layer.cornerRadius = 35
-                
+        
         view.addSubview(slideLabel)
         view.addSubview(actionButton)
         view.clipsToBounds = true
@@ -299,7 +302,7 @@ final class RunTrackingVC: UIViewController {
             blurView.topAnchor.constraint(equalTo: self.view.topAnchor),
             blurView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             
-        
+            
         ])
     }
     
@@ -320,6 +323,9 @@ final class RunTrackingVC: UIViewController {
         startTimer()
         setCameraOnTrackingMode()
         setStartModeUI()
+        if #available(iOS 16.2, *) {
+            displayWidget()
+        }
     }
     
     func updatedOnPause() {
@@ -440,7 +446,7 @@ final class RunTrackingVC: UIViewController {
     
     func setPreviewMode() {
         if let region = runModel.coordinates.makeRegionToFit() {
-                mapView.setRegion(region, animated: false)
+            mapView.setRegion(region, animated: false)
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
@@ -464,8 +470,23 @@ final class RunTrackingVC: UIViewController {
         }
     }
     
-    private let animation = CABasicAnimation(keyPath: "shadowPath")
-    private lazy var defaultPath = CGPath(rect: CGRect(x: 0, y: 0, width: 0, height: slideView.frame.height), transform: nil)
+    @available (iOS 16.2, *)
+    func displayWidget() {
+        if ActivityAuthorizationInfo().areActivitiesEnabled {
+            let attributes = WidgetTestAttributes(name: "test")
+            let initialState = WidgetTestAttributes.ContentState(emoji: "😀")
+            
+            do {
+                try Activity<WidgetTestAttributes>.request(
+                    attributes: attributes,
+                    content: .init(state: initialState, staleDate: nil)
+                )
+                print("성공!")
+            } catch {
+                print("실패..")
+            }
+        }
+    }
     
     // MARK: - objc Methods
     @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
@@ -486,7 +507,7 @@ final class RunTrackingVC: UIViewController {
             gradientLayer.shadowOpacity = 1
             gradientLayer.shadowOffset = CGSize.zero
             gradientLayer.shadowColor = UIColor.mainBlue.cgColor
-      
+            
             animation.fromValue = gradientLayer.shadowPath
             sender.setTranslation(CGPoint.zero, in: actionButton)
         }
@@ -501,9 +522,6 @@ final class RunTrackingVC: UIViewController {
                 self.actionButton.center.x = minX
             }
         }
-        
-        
-        
     }
     
     @objc func buttonTapped() {
@@ -581,7 +599,9 @@ extension RunTrackingVC: UserLocationDelegate {
                 }
             }
         }
+        
     }
+    
     
     func stopTracking() {
         locationService.allowBackgroundUpdates = false
@@ -593,15 +613,15 @@ extension RunTrackingVC: UserLocationDelegate {
     }
     
     func updateUI() {
-            timeLabel.text = runModel.seconds.toMMSSTimeFormat
-            kilometerLabel.text = runModel.distance.asString(style: .km)
-            paceLabel.text = runModel.pace.asString(style: .pace)
-            calorieLabel.text = runModel.calorie.asString(style: .kcal)
-            cadenceLabel.text = String(runModel.cadance)
-            guard Int(runModel.maxAltitude) >= 1 else {
-                return
-            }
-            altitudeLabel.text = "+ \(Int(runModel.maxAltitude))m"
+        timeLabel.text = runModel.seconds.toMMSSTimeFormat
+        kilometerLabel.text = runModel.distance.asString(style: .km)
+        paceLabel.text = runModel.pace.asString(style: .pace)
+        calorieLabel.text = runModel.calorie.asString(style: .kcal)
+        cadenceLabel.text = String(runModel.cadance)
+        guard Int(runModel.maxAltitude) >= 1 else {
+            return
+        }
+        altitudeLabel.text = "+ \(Int(runModel.maxAltitude))m"
     }
 }
 
