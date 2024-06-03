@@ -253,13 +253,8 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func courseExitButtonTapped() {
-        
-        if ownerUid == uid {
-            showAlert(title: "", message: "모집글을 삭제 하시겠습니까?", action: "삭제")
-        } else {
-            PostService().exitPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
-                self.members = updateMembers
-            }
+        PostService().exitPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
+            self.members = updateMembers
         }
     }
     
@@ -300,6 +295,10 @@ class CourseDetailVC: UIViewController {
             self.navigationController?.popToRootViewController(animated: false)
         }
         
+        let deleteAction = UIAlertAction(title: "모집글 삭제", style: .destructive) { action in
+            self.showAlert(title: "", message: "모집글을 삭제하시겠습니까?", action: "삭제")
+        }
+        
         let reportAction = UIAlertAction(title: "모집글 신고", style: .destructive) { action in
             
         }
@@ -311,6 +310,7 @@ class CourseDetailVC: UIViewController {
         if ownerUid == uid {
             // 작성자인 경우
             alert.addAction(editAction)
+            alert.addAction(deleteAction)
         } else {
             alert.addAction(reportAction)
         }
@@ -430,41 +430,7 @@ class CourseDetailVC: UIViewController {
         buttonStack.distribution = .fill // dldl
         
         // 해당 유저가 참여했는지 안했는지
-        if members.contains(uid) {
-            buttonStack.addArrangedSubview(courseExitButton)
-            buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
-            buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
-            
-            buttonStack.addArrangedSubview(goChatRoomButton)
-            goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
-            goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
-            
-            if ownerUid == uid {
-                courseExitButton.backgroundColor = .caution
-                courseExitButton.setTitle("글 삭제하기", for: .normal)
-            } else {
-                courseExitButton.backgroundColor = .caution
-                courseExitButton.setTitle("트랙 나가기", for: .normal)
-            }
-        } else {
-            buttonStack.addArrangedSubview(courseEnterButton)
-            buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
-            buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
-            
-            buttonStack.addArrangedSubview(goChatRoomButton)
-            goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
-            goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
-            
-            if members.count >= memberLimit {
-                courseEnterButton.backgroundColor = .systemGray
-                courseEnterButton.setTitle("모집 마감", for: .normal)
-                courseEnterButton.isEnabled = false
-            } else {
-                courseEnterButton.backgroundColor = .mainBlue
-                courseEnterButton.setTitle("트랙 참여하기", for: .normal)
-                courseEnterButton.isEnabled = true
-            }
-        }
+        updateView()
         
         buttonContainer.addSubview(buttonStack)
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
@@ -516,12 +482,14 @@ class CourseDetailVC: UIViewController {
             goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
             goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
             
+            courseExitButton.setTitle("트랙 나가기", for: .normal)
+            
             if ownerUid == uid {
-                courseExitButton.backgroundColor = .caution
-                courseExitButton.setTitle("글 삭제하기", for: .normal)
+                courseExitButton.backgroundColor = .systemGray
+                courseExitButton.isEnabled = false
             } else {
                 courseExitButton.backgroundColor = .caution
-                courseExitButton.setTitle("트랙 나가기", for: .normal)
+                courseExitButton.isEnabled = true
             }
         } else {
             buttonStack.addArrangedSubview(courseEnterButton)
@@ -683,7 +651,7 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
     
 }
 
-// MARK: - CollectionViewSetting
+// MARK: - MapSetting
 
 extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
     

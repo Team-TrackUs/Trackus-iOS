@@ -227,7 +227,7 @@ class CourseRegisterVC: UIViewController {
         title.frame = CGRect(x: 0, y: 0, width: 398, height: 48)
         title.layer.cornerRadius = 8
         title.layer.borderWidth = 1.0
-        title.layer.borderColor = UIColor.gray.cgColor
+        title.layer.borderColor = UIColor.gray2.cgColor
         
         title.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
         title.leftViewMode = .always
@@ -246,7 +246,7 @@ class CourseRegisterVC: UIViewController {
         description.backgroundColor = .white
         description.layer.cornerRadius = 8
         description.layer.borderWidth = 1.0
-        description.layer.borderColor = UIColor.gray.cgColor
+        description.layer.borderColor = UIColor.gray2.cgColor
         description.textContainerInset = UIEdgeInsets(top: 16, left: 4, bottom: 16, right: 4)
         description.isScrollEnabled = false
         description.inputAccessoryView = toolBarKeyboard
@@ -375,6 +375,7 @@ class CourseRegisterVC: UIViewController {
         
         configureUI()
         MapConfigureUI()
+        setMapResion()
     }
     
     // MARK: - Selectors
@@ -805,21 +806,21 @@ class CourseRegisterVC: UIViewController {
     }
     
     func updateStyleButtonAppearance() {
-        styleWalkButton.setTitleColor(runningStyle == 0 ? .white : .gray, for: .normal)
+        styleWalkButton.setTitleColor(runningStyle == 0 ? .white : .gray2, for: .normal)
         styleWalkButton.backgroundColor = runningStyle == 0 ? .walking : .white
-        styleWalkButton.layer.borderColor = runningStyle == 0 ? UIColor.walking.cgColor : UIColor.gray1.cgColor
+        styleWalkButton.layer.borderColor = runningStyle == 0 ? UIColor.walking.cgColor : UIColor.gray2.cgColor
         
-        styleFastWalkButton.setTitleColor(runningStyle == 1 ? .white : .gray, for: .normal)
+        styleFastWalkButton.setTitleColor(runningStyle == 1 ? .white : .gray2, for: .normal)
         styleFastWalkButton.backgroundColor = runningStyle == 1 ? .jogging : .white
-        styleFastWalkButton.layer.borderColor = runningStyle == 1 ? UIColor.jogging.cgColor : UIColor.gray1.cgColor
+        styleFastWalkButton.layer.borderColor = runningStyle == 1 ? UIColor.jogging.cgColor : UIColor.gray2.cgColor
         
-        styleRuuningButton.setTitleColor(runningStyle == 2 ? .white : .gray, for: .normal)
+        styleRuuningButton.setTitleColor(runningStyle == 2 ? .white : .gray2, for: .normal)
         styleRuuningButton.backgroundColor = runningStyle == 2 ? .running : .white
-        styleRuuningButton.layer.borderColor = runningStyle == 2 ? UIColor.running.cgColor : UIColor.gray1.cgColor
+        styleRuuningButton.layer.borderColor = runningStyle == 2 ? UIColor.running.cgColor : UIColor.gray2.cgColor
         
-        styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray, for: .normal)
+        styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray2, for: .normal)
         styleSprintButton.backgroundColor = runningStyle == 3 ? .interval : .white
-        styleSprintButton.layer.borderColor = runningStyle == 3 ? UIColor.interval.cgColor : UIColor.gray1.cgColor
+        styleSprintButton.layer.borderColor = runningStyle == 3 ? UIColor.interval.cgColor : UIColor.gray2.cgColor
     }
     
     func updateAddCourseButtonAppearance() {
@@ -833,7 +834,6 @@ class CourseRegisterVC: UIViewController {
     }
     
     func setup(with testCoords: [CLLocationCoordinate2D], distance: CLLocationDistance) {
-        
         self.testcoords = testCoords
         self.distance = distance
     }
@@ -988,6 +988,14 @@ class CourseRegisterVC: UIViewController {
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
+    
+    func setMapResion() {
+        guard let region = self.testcoords.makeRegionToFit() else { return }
+        self.drawMapView.setRegion(region, animated: false)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.drawMapView.setVisibleMapRect(self.drawMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: false)
+        }
+    }
 }
 
 // MARK: - MapKit
@@ -1110,5 +1118,21 @@ extension CourseRegisterVC: UITextViewDelegate, UITextFieldDelegate {
                 }
             }
         }
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        courseTitle.layer.borderColor = UIColor.black.cgColor
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        courseTitle.layer.borderColor = UIColor.gray2.cgColor
+    }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        courseDescription.layer.borderColor = UIColor.black.cgColor
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        courseDescription.layer.borderColor = UIColor.gray2.cgColor
     }
 }

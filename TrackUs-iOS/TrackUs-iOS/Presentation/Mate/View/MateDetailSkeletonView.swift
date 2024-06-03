@@ -52,7 +52,7 @@ class MateDetailSkeletonView: UIView {
         mapView.rightAnchor.constraint(equalTo: rightAnchor, constant: -16).isActive = true
         mapView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
         mapView.heightAnchor.constraint(equalToConstant: 310).isActive = true
-        mapView.backgroundColor = .gray2
+        mapView.backgroundColor = .gray3
         mapView.layer.cornerRadius = 12
         
         dateView.translatesAutoresizingMaskIntoConstraints = false
@@ -60,7 +60,7 @@ class MateDetailSkeletonView: UIView {
         dateView.topAnchor.constraint(equalTo: mapView.bottomAnchor, constant: 16).isActive = true
         dateView.heightAnchor.constraint(equalToConstant: 20).isActive = true
         dateView.widthAnchor.constraint(equalToConstant: 100).isActive = true
-        dateView.backgroundColor = .gray2
+        dateView.backgroundColor = .gray3
         dateView.layer.cornerRadius = 5
         
         titleView.translatesAutoresizingMaskIntoConstraints = false
@@ -68,7 +68,7 @@ class MateDetailSkeletonView: UIView {
         titleView.topAnchor.constraint(equalTo: dateView.bottomAnchor, constant: 16).isActive = true
         titleView.heightAnchor.constraint(equalToConstant: 30).isActive = true
         titleView.widthAnchor.constraint(equalToConstant: 120).isActive = true
-        titleView.backgroundColor = .gray2
+        titleView.backgroundColor = .gray3
         titleView.layer.cornerRadius = 5
         
         locationView.translatesAutoresizingMaskIntoConstraints = false
@@ -76,7 +76,7 @@ class MateDetailSkeletonView: UIView {
         locationView.topAnchor.constraint(equalTo: titleView.bottomAnchor, constant: 16).isActive = true
         locationView.heightAnchor.constraint(equalToConstant: 20).isActive = true
         locationView.widthAnchor.constraint(equalToConstant: 110).isActive = true
-        locationView.backgroundColor = .gray2
+        locationView.backgroundColor = .gray3
         locationView.layer.cornerRadius = 5
         
         descriptionView.translatesAutoresizingMaskIntoConstraints = false
@@ -84,7 +84,7 @@ class MateDetailSkeletonView: UIView {
         descriptionView.topAnchor.constraint(equalTo: locationView.bottomAnchor, constant: 16).isActive = true
         descriptionView.heightAnchor.constraint(equalToConstant: 30).isActive = true
         descriptionView.widthAnchor.constraint(equalToConstant: 150).isActive = true
-        descriptionView.backgroundColor = .gray2
+        descriptionView.backgroundColor = .gray3
         descriptionView.layer.cornerRadius = 5
     }
     
