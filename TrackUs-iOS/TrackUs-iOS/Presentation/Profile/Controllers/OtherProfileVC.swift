@@ -38,11 +38,29 @@ class OtherProfileVC: UIViewController {
     
     private let editProfileButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("프로필 편집", for: .normal)
-        button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = .gray3
-        button.layer.cornerRadius = 5
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 4
+        
+        let imageView = UIImageView(image: UIImage(named: "profileChat_icon"))
+        imageView.tintColor = .black
+        stackView.addArrangedSubview(imageView)
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "1:1대화"
+        titleLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        titleLabel.textColor = .gray2
+        stackView.addArrangedSubview(titleLabel)
+        
+        button.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stackView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: button.bottomAnchor)
+        ])
+        
         button.addTarget(self, action: #selector(editProfileButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -220,9 +238,9 @@ class OtherProfileVC: UIViewController {
     private func setupNavBar() {
         self.navigationItem.title = "프로필보기"
         
-        let settingsButton = UIBarButtonItem(image: UIImage(named: "mage_dots_icon"), style: .plain, target: self, action: #selector(settingsButtonTapped))
-        settingsButton.tintColor = .black
-        self.navigationItem.rightBarButtonItem = settingsButton
+        let dotsButton = UIBarButtonItem(image: UIImage(named: "dots_icon"), style: .plain, target: self, action: #selector(dotsButtonButtonTapped))
+        dotsButton.tintColor = .black
+        self.navigationItem.rightBarButtonItem = dotsButton
         
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -334,13 +352,26 @@ class OtherProfileVC: UIViewController {
         ])
     }
     // MARK: - 설정뷰로 이동
-    @objc private func settingsButtonTapped() {
-        let settingVC = SettingVC()
-        self.navigationController?.pushViewController(settingVC, animated: true)
+    @objc private func dotsButtonButtonTapped() {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let blockAction = UIAlertAction(title: "차단하기", style: .destructive) { _ in
+            self.blockUser(userId: self.userId)
+        }
+        let reportAction = UIAlertAction(title: "신고하기", style: .destructive) { _ in
+            // 신고하기 동작 수행
+        }
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        alertController.addAction(blockAction)
+        alertController.addAction(reportAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
-    // MARK: - 프로필편집뷰로 이동
+    // MARK: - 채팅뷰로 이동
     @objc private func editProfileButtonTapped() {
-        let myProfileEditVC = MyProfileEditVC()
+        let myProfileEditVC = MyChatListVC()
         self.navigationController?.pushViewController(myProfileEditVC, animated: true)
     }
     
@@ -378,6 +409,23 @@ class OtherProfileVC: UIViewController {
         labelsAndViews.forEach { label, view in
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        }
+    }
+}
+
+extension OtherProfileVC {
+    private func blockUser(userId: String) {
+        let db = Firestore.firestore()
+        let currentUserUid = UserManager.uid
+        
+        db.collection("user").document(currentUserUid).updateData([
+            "blockingMeList": FieldValue.arrayUnion([userId])
+        ]) { error in
+            if let error = error {
+                print("차단하는 동안 오류 발생: \(error)")
+            } else {
+                print("사용자가 성공적으로 차단됨")
+            }
         }
     }
 }
