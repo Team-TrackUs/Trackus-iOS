@@ -54,6 +54,13 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
         return tableView
     }()
+    
+    private lazy var navigationMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        button.tintColor = .gray1
+        return button
+    }()
 
     // MARK: - Lifecycle
 
@@ -151,22 +158,11 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
 
-        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
-            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
-        }
-        courseDetailVC.courseTitleLabel.text = post.title
-        courseDetailVC.courseDestriptionLabel.text = post.content
-        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
-        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-        courseDetailVC.runningStyleLabel.text = RunningMateVC().runningStyleString(for: post.runningStyle)
-        courseDetailVC.courseLocationLabel.text = post.address
-        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
-        courseDetailVC.personInLabel.text = "\(post.members.count)명"
-        courseDetailVC.members = post.members
         courseDetailVC.postUid = post.uid
-        courseDetailVC.memberLimit = post.numberOfPeoples
-        courseDetailVC.imageUrl = post.routeImageUrl
-        courseDetailVC.ownerUid = post.ownerUid
+        
+        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        courseDetailVC.navigationItem.rightBarButtonItem = barButton
 
         self.searchBar.resignFirstResponder()
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
