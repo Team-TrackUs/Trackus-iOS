@@ -32,7 +32,6 @@
 		827F97322C0DB7C700DAD821 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 827F97312C0DB7C700DAD821 /* WidgetKit.framework */; };
 		827F97342C0DB7C700DAD821 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 827F97332C0DB7C700DAD821 /* SwiftUI.framework */; };
 		827F97372C0DB7C700DAD821 /* WidgetTestBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827F97362C0DB7C700DAD821 /* WidgetTestBundle.swift */; };
-		827F97392C0DB7C700DAD821 /* WidgetTestLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827F97382C0DB7C700DAD821 /* WidgetTestLiveActivity.swift */; };
 		827F973B2C0DB7C700DAD821 /* WidgetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827F973A2C0DB7C700DAD821 /* WidgetTest.swift */; };
 		827F973D2C0DB7C700DAD821 /* AppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827F973C2C0DB7C700DAD821 /* AppIntent.swift */; };
 		827F973F2C0DB7C900DAD821 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 827F973E2C0DB7C900DAD821 /* Assets.xcassets */; };
@@ -57,6 +56,8 @@
 		82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38ACE2BFCA57B004819C1 /* Array+.swift */; };
 		82C38AD12BFCE0C4004819C1 /* CoreLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */; };
 		82C38AD32BFCE445004819C1 /* Double+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C38AD22BFCE445004819C1 /* Double+.swift */; };
+		82D845922C0E0B7900313CA2 /* WidgetTestLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */; };
+		82D845932C0E0BA200313CA2 /* WidgetTestLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */; };
 		82E7638B2C087C220078E5C9 /* MyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E7638A2C087C220078E5C9 /* MyMapView.swift */; };
 		9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9866E6172BFB63ED0031E8B6 /* SplashView.swift */; };
 		9885ACF42BF9E8AA00367991 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 9885ACF32BF9E8AA00367991 /* KakaoSDK */; };
@@ -97,14 +98,14 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		82596AAD2C0356CE00DA6C70 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
 				827F97432C0DB7C900DAD821 /* WidgetTestExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -138,7 +139,6 @@
 		827F97312C0DB7C700DAD821 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		827F97332C0DB7C700DAD821 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		827F97362C0DB7C700DAD821 /* WidgetTestBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTestBundle.swift; sourceTree = "<group>"; };
-		827F97382C0DB7C700DAD821 /* WidgetTestLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTestLiveActivity.swift; sourceTree = "<group>"; };
 		827F973A2C0DB7C700DAD821 /* WidgetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTest.swift; sourceTree = "<group>"; };
 		827F973C2C0DB7C700DAD821 /* AppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntent.swift; sourceTree = "<group>"; };
 		827F973E2C0DB7C900DAD821 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -167,6 +167,7 @@
 		82C38ACE2BFCA57B004819C1 /* Array+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+.swift"; sourceTree = "<group>"; };
 		82C38AD02BFCE0C4004819C1 /* CoreLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreLocation.swift; sourceTree = "<group>"; };
 		82C38AD22BFCE445004819C1 /* Double+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+.swift"; sourceTree = "<group>"; };
+		82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTestLiveActivity.swift; sourceTree = "<group>"; };
 		82E7638A2C087C220078E5C9 /* MyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyMapView.swift; sourceTree = "<group>"; };
 		9866E6172BFB63ED0031E8B6 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		987F6F192C044A43004F6615 /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = info.plist; sourceTree = "<group>"; };
@@ -285,7 +286,7 @@
 			isa = PBXGroup;
 			children = (
 				827F97362C0DB7C700DAD821 /* WidgetTestBundle.swift */,
-				827F97382C0DB7C700DAD821 /* WidgetTestLiveActivity.swift */,
+				82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */,
 				827F973A2C0DB7C700DAD821 /* WidgetTest.swift */,
 				827F973C2C0DB7C700DAD821 /* AppIntent.swift */,
 				827F973E2C0DB7C900DAD821 /* Assets.xcassets */,
@@ -639,11 +640,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				827F97392C0DB7C700DAD821 /* WidgetTestLiveActivity.swift in Sources */,
 				827F973D2C0DB7C700DAD821 /* AppIntent.swift in Sources */,
 				827F973B2C0DB7C700DAD821 /* WidgetTest.swift in Sources */,
 				827F974A2C0DB87400DAD821 /* WidgetAttribute.swift in Sources */,
 				827F97372C0DB7C700DAD821 /* WidgetTestBundle.swift in Sources */,
+				82D845932C0E0BA200313CA2 /* WidgetTestLiveActivity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -667,6 +668,7 @@
 				61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
 				98887F922C00938F006F929E /* UserManager.swift in Sources */,
+				82D845922C0E0B7900313CA2 /* WidgetTestLiveActivity.swift in Sources */,
 				61625E382BFE6EE500E6D1F3 /* Post.swift in Sources */,
 				61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */,
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
@@ -745,8 +747,9 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4N3558QY8F;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
+				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WidgetTest/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = WidgetTest;
@@ -758,14 +761,18 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Trackus.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Trackus.app.TestWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = TrackUs_Uikit_Development2;
+				PROVISIONING_PROFILE_SPECIFIER = TrackUs_Development_w2;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = TrackUs_Development_w2;
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -776,7 +783,9 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4N3558QY8F;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
+				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WidgetTest/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = WidgetTest;
@@ -791,9 +800,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.Trackus.app.WidgetTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -932,8 +945,9 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4N3558QY8F;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
+				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "/Users/seokkikwon/Desktop/Trackus-iOS/TrackUs-iOS/TrackUs-iOS/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
@@ -977,8 +991,9 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4N3558QY8F;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4N3558QY8F;
+				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "/Users/seokkikwon/Desktop/Trackus-iOS/TrackUs-iOS/TrackUs-iOS/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";

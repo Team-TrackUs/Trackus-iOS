@@ -483,7 +483,7 @@ final class RunTrackingVC: UIViewController {
                 )
                 print("성공!")
             } catch {
-                print("실패..")
+                print("실패.. \(error.localizedDescription)")
             }
         }
     }
