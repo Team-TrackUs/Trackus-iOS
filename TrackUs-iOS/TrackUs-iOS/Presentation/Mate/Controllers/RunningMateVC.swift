@@ -98,6 +98,13 @@ class RunningMateVC: UIViewController {
         return button
     }()
     
+    private lazy var navigationMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        button.tintColor = .gray1
+        return button
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -317,6 +324,10 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
         courseDetailVC.hidesBottomBarWhenPushed = true
         
         courseDetailVC.postUid = post.uid
+        
+        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        courseDetailVC.navigationItem.rightBarButtonItem = barButton
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)

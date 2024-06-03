@@ -77,7 +77,7 @@ class PostService {
         }
     }
     
-    // 포스트 패치
+    // 포스트테이블 패치
     func fetchPostTable(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
         
         var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true).limit(to: limit)
@@ -271,20 +271,6 @@ class PostService {
                 // ImageCacheManager.shared.setImage(imageData, forkey: url.absoluteString)
                 
             }
-        }
-    }
-    
-    // 이미지를 스토리지에서 다운로드
-    static func downloadImage(urlString: String, completion: @escaping (UIImage?) -> Void) {
-        let storageReference = Storage.storage().reference(forURL: urlString)
-        let megaByte = Int64(1 * 1024 * 1024)
-        
-        storageReference.getData(maxSize: megaByte) { data, error in
-            guard let imageData = data else {
-                completion(nil)
-                return
-            }
-            completion(UIImage(data: imageData))
         }
     }
     

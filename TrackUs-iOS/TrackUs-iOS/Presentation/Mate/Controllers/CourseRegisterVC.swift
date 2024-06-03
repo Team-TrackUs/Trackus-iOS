@@ -496,6 +496,7 @@ class CourseRegisterVC: UIViewController {
                                         dismissButton.tintColor = .gray1
                                         
                                         courseDetailVC.navigationItem.leftBarButtonItem = dismissButton
+                                        courseDetailVC.navigationItem.rightBarButtonItems = nil
                                     }
                                     self.navigationController?.pushViewController(courseDetailVC, animated: true)
                                     
@@ -569,6 +570,7 @@ class CourseRegisterVC: UIViewController {
                                         dismissButton.tintColor = .gray1
                                         
                                         courseDetailVC.navigationItem.leftBarButtonItem = dismissButton
+                                        courseDetailVC.navigationItem.rightBarButtonItems = nil
                                     }
                                     
                                     courseDetailVC.postUid = post.uid

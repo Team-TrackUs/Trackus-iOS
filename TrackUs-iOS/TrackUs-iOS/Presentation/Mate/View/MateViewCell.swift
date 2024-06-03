@@ -21,7 +21,7 @@ class MateViewCell: UITableViewCell {
     let peopleLimit: Int = 0
     var peopleIn: Int = 0
     
-    private let profileImageView: UIImageView = {
+    private let postImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.clipsToBounds = true
@@ -136,30 +136,30 @@ class MateViewCell: UITableViewCell {
     
     func configureUI() {
         backgroundColor = .white
-        self.contentView.addSubview(profileImageView)
-        profileImageView.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
-        profileImageView.bottomAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.bottomAnchor).isActive = true
-        profileImageView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
-        profileImageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
-        profileImageView.heightAnchor.constraint(equalToConstant: 87).isActive = true
+        self.contentView.addSubview(postImageView)
+        postImageView.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
+        postImageView.bottomAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.bottomAnchor).isActive = true
+        postImageView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
+        postImageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
+        postImageView.heightAnchor.constraint(equalToConstant: 87).isActive = true
         
-        profileImageView.addSubview(closingLabel)
+        postImageView.addSubview(closingLabel)
         closingLabel.translatesAutoresizingMaskIntoConstraints = false
-        closingLabel.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor).isActive = true
-        closingLabel.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor).isActive = true
+        closingLabel.centerXAnchor.constraint(equalTo: postImageView.centerXAnchor).isActive = true
+        closingLabel.centerYAnchor.constraint(equalTo: postImageView.centerYAnchor).isActive = true
         closingLabel.isHidden = true
         
         self.contentView.addSubview(runningStyleLabel)
         runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
         runningStyleLabel.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
-        runningStyleLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        runningStyleLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         runningStyleLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
         runningStyleLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
         
         self.contentView.addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.topAnchor.constraint(equalTo: runningStyleLabel.bottomAnchor, constant: 3).isActive = true
-        titleLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        titleLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         
         let locationStack = UIStackView(arrangedSubviews: [locationIcon, locationLabel])
         locationStack.axis = .horizontal
@@ -180,7 +180,7 @@ class MateViewCell: UITableViewCell {
         self.contentView.addSubview(locationStack)
         locationStack.translatesAutoresizingMaskIntoConstraints = false
         locationStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        locationStack.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        locationStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         
         self.contentView.addSubview(timeStack)
         timeStack.translatesAutoresizingMaskIntoConstraints = false
@@ -195,7 +195,7 @@ class MateViewCell: UITableViewCell {
         self.contentView.addSubview(peopleStack)
         peopleStack.translatesAutoresizingMaskIntoConstraints = false
         peopleStack.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor).isActive = true
-        peopleStack.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        peopleStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         
         self.contentView.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -205,11 +205,7 @@ class MateViewCell: UITableViewCell {
     
     public func configure(image: String, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
         
-        PostService.downloadImage(urlString: image) { image in
-            DispatchQueue.main.async {
-                self.profileImageView.image = image
-            }
-        }
+        postImageView.loadImage(url: image)
         
         self.runningStyleLabel.text = runningStyleLabel
         

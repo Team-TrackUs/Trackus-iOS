@@ -186,15 +186,6 @@ class CourseDetailVC: UIViewController {
         return label
     }()
     
-    private lazy var navigationMenuButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        button.tintColor = .black
-        button.addTarget(self, action: #selector(menuButtonTapped), for: .touchUpInside)
-        
-        return button
-    }()
-    
     var ownerUid: String = ""
     
     let buttonStack = UIStackView()
@@ -287,11 +278,6 @@ class CourseDetailVC: UIViewController {
     @objc func menuButtonTapped() {
         let editAction = UIAlertAction(title: "모집글 수정", style: .default) { action in
             
-            // 네비게이션 Pop
-            self.navigationController?.popToRootViewController(animated: true)
-            // 모달인경우 dismiss
-            self.dismiss(animated: true)
-            
             let courseRegisterVC = CourseRegisterVC()
             
             courseRegisterVC.testcoords = self.courseCoords
@@ -309,6 +295,9 @@ class CourseDetailVC: UIViewController {
             let navController = UINavigationController(rootViewController: courseRegisterVC)
             navController.modalPresentationStyle = .fullScreen
             self.present(navController, animated: true, completion: nil)
+            
+            // DispatchQueue?
+            self.navigationController?.popToRootViewController(animated: false)
         }
         
         let reportAction = UIAlertAction(title: "모집글 신고", style: .destructive) { action in
@@ -494,9 +483,6 @@ class CourseDetailVC: UIViewController {
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
-        let barButton = UIBarButtonItem(customView: navigationMenuButton)
-        self.navigationItem.rightBarButtonItem = barButton
     }
     
     func runningStyleColor() {
@@ -671,6 +657,8 @@ class CourseDetailVC: UIViewController {
     }
 }
 
+// MARK: - CollectionViewSetting
+
 extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
@@ -694,6 +682,8 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
     }
     
 }
+
+// MARK: - CollectionViewSetting
 
 extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
     
