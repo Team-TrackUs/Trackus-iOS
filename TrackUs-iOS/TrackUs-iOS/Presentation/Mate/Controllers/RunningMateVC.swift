@@ -244,9 +244,7 @@ class RunningMateVC: UIViewController {
             }
         }
     }
-    
     private func fetchMorePosts() {
-        
         guard !isPagingComplete && !isLoadingMore else {
             return
         }
@@ -265,7 +263,7 @@ class RunningMateVC: UIViewController {
             }
             
             if let resultPosts = resultPosts {
-                if resultPosts.isEmpty || resultPosts.count < self.pageSize {
+                if resultPosts.isEmpty {
                     self.isPagingComplete = true
                 }
                 

@@ -79,70 +79,31 @@ class PostService {
     
     // 포스트테이블 패치
     func fetchPostTable(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
-        
         var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true).limit(to: limit)
         
         if let startAfter = startAfter {
             query = query.start(afterDocument: startAfter)
         }
         
-        query.getDocuments { snapshot, error in
+        query.getDocuments { (querySnapshot, error) in
             if let error = error {
-                print("DEBUG: Failed to fetch post = \(error.localizedDescription)")
-                completion(nil,nil,error)
+                completion(nil, nil, error)
                 return
             }
             
-            guard let documents = snapshot?.documents else {
+            guard let documents = querySnapshot?.documents else {
                 completion([], nil, nil)
                 return
             }
             
-            var posts = [Post]()
-            
-            for document in documents {
-                let startDate = (document["startDate"] as? Timestamp)?.dateValue() ?? Date()
-                guard let courseRoutesData = document["courseRoutes"] as? [GeoPoint] else {
-                    print("DEBUG: Failed to get courseRoutesData for document \(document.documentID)")
-                    continue
+            let posts = documents.compactMap { queryDocumentSnapshot -> Post? in
+                guard let post = try? queryDocumentSnapshot.data(as: Post.self) else {
+                    return nil
                 }
-                guard let title = document["title"] as? String,
-                      let content = document["content"] as? String,
-                      let distance = document["distance"] as? Double,
-                      let numberOfPeoples = document["numberOfPeoples"] as? Int,
-                      let routeImageUrl = document["routeImageUrl"] as? String,
-                      let address = document["address"] as? String,
-                      let whoReportAt = document["whoReportAt"] as? [String],
-                      let createdAtTimestamp = document["createdAt"] as? Timestamp,
-                      let runningStyle = document["runningStyle"] as? Int,
-                      let members = document["members"] as? [String],
-                      let ownerUid = document["ownerUid"] as? String else {
-                    print("DEBUG: Failed to cast data for document \(document.documentID)")
-                    continue
-                }
-                
-                let post = Post(
-                    uid: document.documentID,
-                    title: title,
-                    content: content,
-                    courseRoutes: courseRoutesData,
-                    distance: distance,
-                    numberOfPeoples: numberOfPeoples,
-                    routeImageUrl: routeImageUrl,
-                    startDate: startDate,
-                    address: address,
-                    whoReportAt: whoReportAt,
-                    createdAt: createdAtTimestamp.dateValue(),
-                    runningStyle: runningStyle,
-                    members: members, 
-                    ownerUid: ownerUid
-                )
-                
-                posts.append(post)
-                
+                return post
             }
             
-            let lastDocumentSnapshot = snapshot?.documents.last
+            let lastDocumentSnapshot = documents.last
             completion(posts, lastDocumentSnapshot, nil)
         }
     }
