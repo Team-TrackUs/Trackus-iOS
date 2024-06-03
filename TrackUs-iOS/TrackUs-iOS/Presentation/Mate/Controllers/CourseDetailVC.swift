@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import FirebaseFirestore
 
 class CourseDetailVC: UIViewController {
     
@@ -224,6 +225,8 @@ class CourseDetailVC: UIViewController {
         PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
             self.members = updateMembers
         }
+        // 채팅방 참여
+        joinChat()
     }
     
     @objc func courseExitButtonTapped() {
@@ -236,6 +239,17 @@ class CourseDetailVC: UIViewController {
     
     @objc func goChatRoomButtonTapped() {
         print("DEBUG: 채팅 버튼 클릭")
+        let ref = Firestore.firestore().collection("chats")
+        if members.contains(uid){
+            // 채팅방 참여된 경우
+            if ChatRoomManager.shared.chatRooms.contains(where: {$0.uid == postUid}) {
+                // 기존 채팅방 열기 View 이동
+            }else {
+                joinChat()
+            }
+        }else {
+            // 참여 안된 경우 - 방장 1:1 대화하기
+        }
         
     }
     
@@ -460,6 +474,26 @@ class CourseDetailVC: UIViewController {
                 courseEnterButton.backgroundColor = .mainBlue
                 courseEnterButton.setTitle("트랙 참여하기", for: .normal)
                 courseEnterButton.isEnabled = true
+            }
+        }
+    }
+    
+    func joinChat() {
+        // 채팅방 참여
+        let ref = Firestore.firestore().collection("chats")
+        ref.document(postUid).updateData([
+            "members.\(uid)": true
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
+            }
+        }
+        
+        ref.document(postUid).updateData([
+            "usersUnreadCountInfo.\(uid)": 0
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
             }
         }
     }

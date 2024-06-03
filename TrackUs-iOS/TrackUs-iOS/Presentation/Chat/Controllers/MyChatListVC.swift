@@ -80,15 +80,14 @@ class MyChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource
     }
         
         func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//            let chatRoom = chatViewModel.chatRooms[indexPath.row]
-//            router.push(ChatViewModel(chatRoom: chatRoom, users: chatViewModel.users))
-//            chatViewModel.currentChatRoom = chatRoom.id
+            let chatRoomVC = ChatRoomVC(chat: chat.chatRooms[indexPath.row])
+            navigationController?.pushViewController(chatRoomVC, animated: true)
         }
         
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "나가기") { (action, view, completionHandler) in
-//            let chatRoom = self.chatViewModel.chatRooms[indexPath.row]
-//            self.chatViewModel.deleteChatRoom(chatRoomID: chatRoom.id)
+            // 나가기 함수 추가
+            
             completionHandler(true)
         }
 //        deleteAction.backgroundColor = .red

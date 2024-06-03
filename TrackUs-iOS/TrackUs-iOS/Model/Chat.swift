@@ -32,16 +32,68 @@ struct LastetMessage {
 
 // 메세지 내용
 struct Message {
-    let uid: String
-    let timeStamp: Data
-    let sendMember: String
-    let imageUrl: String?
-    let text: String?
-    let location: String?
-    let userInOut: Bool
+    //let uid: String
+    public let sendMember: String
+    public let timeStamp: Date
+    public let imageUrl: String?
+    public let text: String?
+    public let location: String?
+    public let userInOut: Bool?
+    
+    public var messageType: MessageType {
+        if text != nil {
+            return .text
+        } else if imageUrl != nil {
+            return .image
+        } else if location != nil {
+            return .location
+        } else if userInOut != nil {
+            return .userInout
+        } else {
+            fatalError("Invalid message type")
+        }
+    }
+    /// firestore 변환용
+    init(firestoreMessage: FirestoreMessage) {
+        self.sendMember = firestoreMessage.sendMember
+        self.timeStamp = firestoreMessage.timeStamp
+        self.imageUrl = firestoreMessage.imageUrl
+        self.text = firestoreMessage.text
+        self.location = firestoreMessage.location
+        self.userInOut = firestoreMessage.userInOut
+    }
+    
+    //타입 지정 입력
+    init(sendMember: String, timeStamp: Date, messageType: MessageType, data: Any) {
+        self.sendMember = sendMember
+        self.timeStamp = timeStamp
+        
+        switch messageType {
+            case .text:
+                self.text = data as? String
+                self.imageUrl = nil
+                self.location = nil
+                self.userInOut = nil
+            case .image:
+                self.imageUrl = data as? String
+                self.text = nil
+                self.location = nil
+                self.userInOut = nil
+            case .location:
+                self.location = data as? String
+                self.imageUrl = nil
+                self.text = nil
+                self.userInOut = nil
+            case .userInout:
+                self.userInOut = data as? Bool
+                self.imageUrl = nil
+                self.text = nil
+                self.location = nil
+        }
+    }
 }
 
-enum messageType {
+enum MessageType: String, Codable {
     case text
     case image
     case location
@@ -64,4 +116,14 @@ public struct FirestoreLastMessage: Codable, Hashable {
     @DocumentID public var id: String?
     @ServerTimestamp public var timestamp: Date?
     public var text: String
+}
+
+// 메세지 내용
+struct FirestoreMessage: Codable {
+    let sendMember: String
+    let timeStamp: Date
+    let imageUrl: String?
+    let text: String?
+    let location: String?
+    let userInOut: Bool?
 }
