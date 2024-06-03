@@ -9,7 +9,16 @@ import UIKit
 import Firebase
 
 class OtherProfileVC: UIViewController {
+    var userId: String
 
+    init(userId: String) {
+        self.userId = userId
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     // MARK: - 사용자 프로필
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
@@ -195,7 +204,6 @@ class OtherProfileVC: UIViewController {
         currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
         updateDateButton()
     }
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -206,13 +214,13 @@ class OtherProfileVC: UIViewController {
         updateDateButton()
         profileImageView.layer.cornerRadius = 35
         setupConstraints()
-        fetchUserProfile()
+        fetchUserProfile(userId: userId)
     }
 
     private func setupNavBar() {
-        self.navigationItem.title = "마이페이지"
+        self.navigationItem.title = "프로필보기"
         
-        let settingsButton = UIBarButtonItem(image: UIImage(named: "setting_icon"), style: .plain, target: self, action: #selector(settingsButtonTapped))
+        let settingsButton = UIBarButtonItem(image: UIImage(named: "mage_dots_icon"), style: .plain, target: self, action: #selector(settingsButtonTapped))
         settingsButton.tintColor = .black
         self.navigationItem.rightBarButtonItem = settingsButton
         
@@ -336,13 +344,9 @@ class OtherProfileVC: UIViewController {
         self.navigationController?.pushViewController(myProfileEditVC, animated: true)
     }
     
-    private func fetchUserProfile() {
-        guard let currentUser = Auth.auth().currentUser else {
-            return
-        }
-        
+    private func fetchUserProfile(userId: String) {
         let db = Firestore.firestore()
-        let userRef = db.collection("user").document(currentUser.uid)
+        let userRef = db.collection("user").document(userId)
         
         userRef.getDocument { [weak self] document, error in
             guard let self = self, let document = document, document.exists else {
