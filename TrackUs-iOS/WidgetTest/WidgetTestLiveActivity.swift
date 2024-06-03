@@ -15,10 +15,43 @@ struct WidgetTestLiveActivity: Widget {
         ActivityConfiguration(for: WidgetTestAttributes.self) { context in
             // Lock screen/banner UI goes here
             VStack {
-                Text("Hello \(context.state.emoji)")
+                HStack {
+                    Spacer()
+                    VStack {
+                        Text(context.state.isActive ? "러닝중 🔥" : "휴식중 😓")
+                    }
+                                      
+                    HStack(spacing: 17) {
+                        VStack(alignment: .leading) {
+                            Text(context.state.kilometer)
+                                .font(.system(size: 32, weight: .bold))
+                            Text("킬로미터")
+                        }
+                       
+                        
+                        VStack(alignment: .center) {
+                            Spacer()
+                            Text(context.state.time)
+                                .font(.system(size: 24, weight: .bold))
+                            Text("시간")
+                        }
+                      
+                        
+                        VStack(alignment: .center) {
+                            Spacer()
+                            Text(context.state.pace)
+                                .font(.system(size: 24, weight: .bold))
+                            Text("페이스")
+                        }
+                       
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 15)
             }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
+            .foregroundStyle(.white)
+            .activityBackgroundTint(Color.black.opacity(0.5))
+            .activitySystemActionForegroundColor(Color.white)
 
         } dynamicIsland: { context in
             DynamicIsland {
@@ -31,15 +64,15 @@ struct WidgetTestLiveActivity: Widget {
                     Text("Trailing")
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
+                    Text("Bottom ")
                     // more content
                 }
             } compactLeading: {
                 Text("L")
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                Text("T")
             } minimal: {
-                Text(context.state.emoji)
+                Text("")
             }
             .widgetURL(URL(string: "http://www.apple.com"))
             .keylineTint(Color.red)
@@ -55,11 +88,11 @@ extension WidgetTestAttributes {
 
 extension WidgetTestAttributes.ContentState {
     fileprivate static var smiley: WidgetTestAttributes.ContentState {
-        WidgetTestAttributes.ContentState(emoji: "😀")
+        WidgetTestAttributes.ContentState(time: "00:00", pace: "", kilometer: "", isActive: false)
      }
      
      fileprivate static var starEyes: WidgetTestAttributes.ContentState {
-         WidgetTestAttributes.ContentState(emoji: "🤩")
+         WidgetTestAttributes.ContentState(time: "00:00", pace: "", kilometer: "", isActive: false)
      }
 }
 

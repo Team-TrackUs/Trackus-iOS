@@ -11,6 +11,12 @@ import UIKit
 import MapKit
 import CoreMotion
 
+@available(iOS 16.1, *)
+final class WidgetManager {
+    static let shared = WidgetManager()
+    private init() {}
+    var activity: Activity<WidgetTestAttributes>!
+}
 final class RunTrackingVC: UIViewController {
     // MARK: - Properties
     private let pedometer = CMPedometer()
@@ -256,6 +262,9 @@ final class RunTrackingVC: UIViewController {
         setConstraint()
         setTimer()
         setRunInfo()
+        if #available(iOS 16.2, *) {
+            displayWidget()
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -323,9 +332,7 @@ final class RunTrackingVC: UIViewController {
         startTimer()
         setCameraOnTrackingMode()
         setStartModeUI()
-        if #available(iOS 16.2, *) {
-            displayWidget()
-        }
+       
     }
     
     func updatedOnPause() {
@@ -333,6 +340,10 @@ final class RunTrackingVC: UIViewController {
         stopTimer()
         setCameraOnPauseMode()
         setPauseModeUI()
+        
+        if #available(iOS 16.2, *) {
+            updateWidget()
+        }
     }
     
     func setStartModeUI() {
@@ -403,7 +414,23 @@ final class RunTrackingVC: UIViewController {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
             runModel.seconds += 1
+            
+            if #available(iOS 16.2, *) {
+                updateWidget()
+            }
         })
+        
+       
+    }
+    
+    @available(iOS 16.2, *)
+    func updateWidget() {
+        guard let activity = WidgetManager.shared.activity else {
+            return
+        }
+        Task {
+            await activity.update(using: WidgetTestAttributes.ContentState(time: runModel.seconds.toMMSSTimeFormat, pace: runModel.pace.asString(style: .pace), kilometer: runModel.distance.asString(style: .km), isActive: isActive))
+        }
     }
     
     func stopTimer() {
@@ -474,17 +501,24 @@ final class RunTrackingVC: UIViewController {
     func displayWidget() {
         if ActivityAuthorizationInfo().areActivitiesEnabled {
             let attributes = WidgetTestAttributes(name: "test")
-            let initialState = WidgetTestAttributes.ContentState(emoji: "😀")
+            let initialState = WidgetTestAttributes.ContentState(time: "00:00", pace: "-'--''", kilometer: "0.00", isActive: false)
             
             do {
-                try Activity<WidgetTestAttributes>.request(
+                WidgetManager.shared.activity = try Activity<WidgetTestAttributes>.request(
                     attributes: attributes,
                     content: .init(state: initialState, staleDate: nil)
                 )
-                print("성공!")
+                
             } catch {
-                print("실패.. \(error.localizedDescription)")
+                print(error.localizedDescription)
             }
+        }
+    }
+    
+    @available (iOS 16.2, *)
+    func removeWidget() {
+        Task {
+            await WidgetManager.shared.activity.end(nil, dismissalPolicy: .immediate)
         }
     }
     
@@ -513,6 +547,9 @@ final class RunTrackingVC: UIViewController {
         }
         else if sender.state == .ended && newX > maxX * 0.9 {
             goToResultVC()
+            if #available(iOS 16.2, *) {
+                removeWidget()
+            }
         }
         else if sender.state == .ended  {
             animation.toValue = defaultPath
