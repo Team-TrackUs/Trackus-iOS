@@ -28,7 +28,6 @@ struct WidgetTestLiveActivity: Widget {
                             Text("킬로미터")
                         }
                        
-                        
                         VStack(alignment: .center) {
                             Spacer()
                             Text(context.state.time)
@@ -42,6 +41,7 @@ struct WidgetTestLiveActivity: Widget {
                             Text(context.state.pace)
                                 .font(.system(size: 24, weight: .bold))
                             Text("페이스")
+                                
                         }
                        
                     }
@@ -49,6 +49,7 @@ struct WidgetTestLiveActivity: Widget {
                 }
                 .padding(.vertical, 15)
             }
+            .contentTransition(.identity)
             .foregroundStyle(.white)
             .activityBackgroundTint(Color.black.opacity(0.5))
             .activitySystemActionForegroundColor(Color.white)
@@ -58,21 +59,21 @@ struct WidgetTestLiveActivity: Widget {
                 // Expanded UI goes here.  Compose the expanded UI through
                 // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    EmptyView()
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    EmptyView()
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom ")
+                    EmptyView()
                     // more content
                 }
             } compactLeading: {
-                Text("L")
+                EmptyView()
             } compactTrailing: {
-                Text("T")
+                EmptyView()
             } minimal: {
-                Text("")
+                EmptyView()
             }
             .widgetURL(URL(string: "http://www.apple.com"))
             .keylineTint(Color.red)

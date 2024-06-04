@@ -332,7 +332,7 @@ final class RunTrackingVC: UIViewController {
         startTimer()
         setCameraOnTrackingMode()
         setStartModeUI()
-       
+        
     }
     
     func updatedOnPause() {
@@ -420,7 +420,7 @@ final class RunTrackingVC: UIViewController {
             }
         })
         
-       
+        
     }
     
     @available(iOS 16.2, *)
@@ -429,7 +429,9 @@ final class RunTrackingVC: UIViewController {
             return
         }
         Task {
-            await activity.update(using: WidgetTestAttributes.ContentState(time: runModel.seconds.toMMSSTimeFormat, pace: runModel.pace.asString(style: .pace), kilometer: runModel.distance.asString(style: .km), isActive: isActive))
+            await activity.update(using: WidgetTestAttributes.ContentState(time: runModel.seconds.toMMSSTimeFormat,
+                                                                           pace: runModel.pace.asString(style: .pace), kilometer: String(format: "%.2f", runModel.distance / 1000.0),
+                                                                           isActive: isActive))
         }
     }
     
