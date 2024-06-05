@@ -16,6 +16,7 @@ final class RunTrackingVC: UIViewController {
     private let pedometer = CMPedometer()
     private let altimeter = CMAltimeter()
     private let locationService = LocationService.shared
+    private var gradientLayer = CAGradientLayer()
     private var runModel = Running() {
         didSet {
             updateUI()
@@ -61,22 +62,27 @@ final class RunTrackingVC: UIViewController {
         return view
     }()
     
-    private lazy var slideBox: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = UIColor(white: 0, alpha: 0.5)
-        view.layer.cornerRadius = 35
-        
+    private let slideLabel: UILabel = {
         let label = UILabel()
+        label.layer.zPosition = 1
         label.text = "밀어서 러닝 종료"
         label.textColor = .lightGray
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(label)
+        return label
+    }()
+    
+    private lazy var slideView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(white: 0, alpha: 0.6)
+        view.layer.cornerRadius = 35
+                
+        view.addSubview(slideLabel)
         view.addSubview(actionButton)
-        label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        view.clipsToBounds = true
+        slideLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        slideLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         view.isHidden = true
         return view
     }()
@@ -86,11 +92,10 @@ final class RunTrackingVC: UIViewController {
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.widthAnchor.constraint(equalToConstant: 50).isActive = true
         btn.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        btn.layer.zPosition = 2
         btn.layer.cornerRadius = 25
         btn.backgroundColor = .white
-        
         let image = UIImage(systemName: "pause.fill")
-        
         btn.setImage(image, for: .normal)
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pangestureHandler))
         btn.addGestureRecognizer(panGesture)
@@ -253,26 +258,29 @@ final class RunTrackingVC: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         addGradientLayer()
+        gradientLayer.frame.size.height = slideView.frame.height
+        slideView.layer.addSublayer(gradientLayer)
+        animation.duration = 0.3
     }
     
     // MARK: - Helpers
     func setConstraint() {
         self.view.addSubview(overlayView)
         self.view.addSubview(blurView)
-        self.view.addSubview(slideBox)
+        self.view.addSubview(slideView)
         self.view.addSubview(topStackView)
         self.view.addSubview(runInfoStackView)
         self.view.addSubview(runInfoStackView2)
         
         NSLayoutConstraint.activate([
-            slideBox.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            slideBox.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            slideBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
-            slideBox.heightAnchor.constraint(equalToConstant: 70),
+            slideView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            slideView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            slideView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
+            slideView.heightAnchor.constraint(equalToConstant: 70),
             
-            actionButton.leadingAnchor.constraint(equalTo: slideBox.leadingAnchor, constant: 10),
-            actionButton.topAnchor.constraint(equalTo: slideBox.topAnchor, constant: 10),
-            actionButton.bottomAnchor.constraint(equalTo: slideBox.bottomAnchor, constant: -10),
+            actionButton.leadingAnchor.constraint(equalTo: slideView.leadingAnchor, constant: 10),
+            actionButton.topAnchor.constraint(equalTo: slideView.topAnchor, constant: 10),
+            actionButton.bottomAnchor.constraint(equalTo: slideView.bottomAnchor, constant: -10),
             
             topStackView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             topStackView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
@@ -291,7 +299,7 @@ final class RunTrackingVC: UIViewController {
             blurView.topAnchor.constraint(equalTo: self.view.topAnchor),
             blurView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             
-            
+        
         ])
     }
     
@@ -323,7 +331,7 @@ final class RunTrackingVC: UIViewController {
     
     func setStartModeUI() {
         overlayView.isHidden = true
-        slideBox.isHidden = false
+        slideView.isHidden = false
         topStackView.isHidden = false
         runInfoStackView.isHidden = false
         blurView.isHidden = true
@@ -439,7 +447,7 @@ final class RunTrackingVC: UIViewController {
             guard let self = self else { return }
             mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY + 20,
                                                                                         left: 0,
-                                                                                        bottom: slideBox.frame.height + 20,
+                                                                                        bottom: slideView.frame.height + 20,
                                                                                         right: 0), animated: false)
         }
     }
@@ -456,23 +464,46 @@ final class RunTrackingVC: UIViewController {
         }
     }
     
+    private let animation = CABasicAnimation(keyPath: "shadowPath")
+    private lazy var defaultPath = CGPath(rect: CGRect(x: 0, y: 0, width: 0, height: slideView.frame.height), transform: nil)
+    
     // MARK: - objc Methods
     @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
-        let minX = actionButton.bounds.width / 2 + 10
         let translation = sender.translation(in: actionButton)
-        
+        let inset = UIEdgeInsets(top: -40, left: -40, bottom: -40, right: 30)
+        let minX = actionButton.bounds.width / 2 + 10
+        let maxX = slideView.bounds.maxX - minX
         let newX = actionButton.center.x + translation.x
-        let maxX = slideBox.bounds.maxX - CGFloat(35)
-        actionButton.center.x = max(minX, min(newX, maxX))
-        sender.setTranslation(CGPoint.zero, in: actionButton)
+        let moveX = max(minX, min(newX, maxX))
         
-        if sender.state == .ended && newX > maxX * 0.9 {
+        if sender.state == .changed {
+            actionButton.center.x = moveX
+            
+            // 블러효과
+            let shadowRadius: CGFloat = 45
+            gradientLayer.shadowRadius = shadowRadius
+            gradientLayer.shadowPath = CGPath(rect: CGRect(x: 0, y: 0, width: moveX, height: slideView.frame.height).inset(by: inset), transform: nil)
+            gradientLayer.shadowOpacity = 1
+            gradientLayer.shadowOffset = CGSize.zero
+            gradientLayer.shadowColor = UIColor.mainBlue.cgColor
+      
+            animation.fromValue = gradientLayer.shadowPath
+            sender.setTranslation(CGPoint.zero, in: actionButton)
+        }
+        else if sender.state == .ended && newX > maxX * 0.9 {
             goToResultVC()
-        } else if sender.state == .ended  {
-            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn) {
+        }
+        else if sender.state == .ended  {
+            animation.toValue = defaultPath
+            gradientLayer.add(animation, forKey: "animation")
+            gradientLayer.shadowPath = defaultPath
+            UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseIn) {
                 self.actionButton.center.x = minX
             }
         }
+        
+        
+        
     }
     
     @objc func buttonTapped() {
@@ -588,3 +619,4 @@ extension RunTrackingVC: MKMapViewDelegate {
         return renderer
     }
 }
+
