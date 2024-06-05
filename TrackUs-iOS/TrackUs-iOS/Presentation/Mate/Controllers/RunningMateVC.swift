@@ -33,6 +33,8 @@ class RunningMateVC: UIViewController {
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .systemBackground
+        tableView.separatorStyle = .singleLine
+        tableView.separatorInset = .init(top: 0, left: 16, bottom: 0, right: 16)
         tableView.allowsSelection = true
         tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
         return tableView
@@ -98,6 +100,13 @@ class RunningMateVC: UIViewController {
         return button
     }()
     
+    private lazy var navigationMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        button.tintColor = .gray1
+        return button
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -120,9 +129,11 @@ class RunningMateVC: UIViewController {
     // MARK: - Selectors
     
     @objc func moveButtonTapped() {
+        HapticManager.shared.hapticImpact(style: .light)
         let courseRegisterVC = CourseRegisterVC()
-        courseRegisterVC.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(courseRegisterVC, animated: true)
+        let navController = UINavigationController(rootViewController: courseRegisterVC)
+        navController.modalPresentationStyle = .fullScreen
+        self.present(navController, animated: true, completion: nil)
     }
     
     @objc func searchButtonTapped() {
@@ -141,15 +152,12 @@ class RunningMateVC: UIViewController {
     @objc func refreshPosts() {
         
         HapticManager.shared.hapticImpact(style: .light)
-        
-        refreshView.startTextRotation()
-        
         fetchPosts()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.refreshView.stopTextRotation()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.refreshControl.endRefreshing()
         }
+        refreshView.updateText()
     }
     
     // MARK: - Helpers
@@ -214,7 +222,7 @@ class RunningMateVC: UIViewController {
     func fetchPosts() {
         let postService = PostService()
         
-        postService.fetchPosts(startAfter: nil, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
+        postService.fetchPostTable(startAfter: nil, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
             guard let self = self else { return }
             
             if let error = error {
@@ -238,35 +246,33 @@ class RunningMateVC: UIViewController {
             }
         }
     }
-    
     private func fetchMorePosts() {
-
         guard !isPagingComplete && !isLoadingMore else {
             return
         }
-
+        
         isLoadingMore = true
-
+        
         let postService = PostService()
-
-        postService.fetchPosts(startAfter: lastDocumentSnapshot, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
+        
+        postService.fetchPostTable(startAfter: lastDocumentSnapshot, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
             guard let self = self else { return }
-
+            
             if let error = error {
                 print("DEBUG: Error fetching posts = \(error.localizedDescription)")
                 self.isLoadingMore = false
                 return
             }
-
+            
             if let resultPosts = resultPosts {
-                if resultPosts.isEmpty || resultPosts.count < self.pageSize {
+                if resultPosts.isEmpty {
                     self.isPagingComplete = true
                 }
-
+                
                 let newPosts = resultPosts.filter { post in
                     !self.posts.contains(where: { $0.uid == post.uid })
                 }
-
+                
                 self.posts.append(contentsOf: newPosts)
                 self.lastDocumentSnapshot = lastDocumentSnapshot
                 self.posts.sort { $0.createdAt > $1.createdAt }
@@ -275,21 +281,6 @@ class RunningMateVC: UIViewController {
                 print("DEBUG: No posts found")
             }
             self.isLoadingMore = false
-        }
-    }
-    
-    func runningStyleString(for runningStyle: Int) -> String {
-        switch runningStyle {
-        case 0:
-            return "걷기"
-        case 1:
-            return "조깅"
-        case 2:
-            return "달리기"
-        case 3:
-            return "인터벌"
-        default:
-            return "걷기"
         }
     }
 }
@@ -305,9 +296,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
         }
         
         let post = posts[indexPath.row]
-        // 이미지 String으로 변경
-        // SearchVC에서도 해야함
-        cell.configure(image: post.routeImageUrl, runningStyleLabel: runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
+        cell.configure(post: post)
         return cell
     }
     
@@ -317,22 +306,11 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
         
-        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
-            
-            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
-        }
-        courseDetailVC.courseTitleLabel.text = post.title
-        courseDetailVC.courseDestriptionLabel.text = post.content
-        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
-        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-        courseDetailVC.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
-        courseDetailVC.courseLocationLabel.text = post.address
-        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
-        courseDetailVC.personInLabel.text = "\(post.members.count)명"
-        courseDetailVC.members = post.members
         courseDetailVC.postUid = post.uid
-        courseDetailVC.memberLimit = post.numberOfPeoples
-        courseDetailVC.imageUrl = post.routeImageUrl
+        
+        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        courseDetailVC.navigationItem.rightBarButtonItem = barButton
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)

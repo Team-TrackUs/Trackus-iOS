@@ -107,7 +107,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         drawMapView.mapType = MKMapType.standard
         drawMapView.isZoomEnabled = true
         drawMapView.isScrollEnabled = true
-        drawMapView.center = view.center
+//        drawMapView.center = view.center
         drawMapView.showsUserLocation = true
         
         for (index, coord) in testcoords.enumerated() {
@@ -138,8 +138,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         if testcoords.count > 0 {
             if !isRegionSet {
                 
-                let center = CLLocationCoordinate2D(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
-                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03))
+                guard let region = testcoords.makeRegionToFit() else { return }
                 drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
                 
                 isRegionSet = true

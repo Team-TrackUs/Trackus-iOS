@@ -10,7 +10,7 @@ import MapKit
 import Firebase
 import FirebaseStorage
 
-class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerDelegate, MKMapViewDelegate {
+class CourseRegisterVC: UIViewController {
     
     // MARK: - Properties
     
@@ -44,11 +44,15 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     var selectedDate: Date = Date() // 날짜
     var selectedTime: Date = Date() // 시간
     var personnel: Int = 2 // 최소인원수
-
+    var members: [String] = [] // 참여인원
+    var postUid: String = "" // 모집글 Uid
+    var isEdit: Bool = false
+    var imageUrl: String = ""
+    
     var isRegionSet = false // mapkit
     var locationManager = CLLocationManager() // mapkit
     var pinAnnotations: [MKPointAnnotation] = [] // mapkit
-
+    
     private lazy var toolBarKeyboard: UIToolbar = {
         let toolbar = UIToolbar()
         let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -64,17 +68,45 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return mapview
     }()
     
-    private lazy var drawMapButton: UIButton = {
-        let button = UIButton()
+    private lazy var drawMapButton: MKMapView = {
+        let mapView = MKMapView()
+        mapView.delegate = self
+        mapView.layer.borderWidth = 1.0
+        mapView.layer.borderColor = UIColor.gray.cgColor
         
-        button.setTitle("코스를 입력해주세요", for: .normal)
-        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        button.titleLabel?.textColor = .white
-        button.backgroundColor = .mainBlue
-        button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
-        button.addTarget(self, action: #selector(drawMapButtonTapped), for: .touchUpInside)
-        return button
+        let overlayView = UIView()
+        overlayView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.6)
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let imageView = UIImageView(image: UIImage(named: "pencil_icon"))
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let label = UILabel()
+        label.text = "코스를 입력해주세요"
+        label.font = UIFont.boldSystemFont(ofSize: 20)
+        label.textColor = .white
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        let stack = UIStackView(arrangedSubviews: [imageView, label])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .horizontal
+        
+        mapView.addSubview(overlayView)
+        overlayView.addSubview(stack)
+        
+        overlayView.topAnchor.constraint(equalTo: mapView.topAnchor).isActive = true
+        overlayView.leadingAnchor.constraint(equalTo: mapView.leadingAnchor).isActive = true
+        overlayView.trailingAnchor.constraint(equalTo: mapView.trailingAnchor).isActive = true
+        overlayView.bottomAnchor.constraint(equalTo: mapView.bottomAnchor).isActive = true
+        
+        stack.centerXAnchor.constraint(equalTo: overlayView.centerXAnchor).isActive = true
+        stack.centerYAnchor.constraint(equalTo: overlayView.centerYAnchor).isActive = true
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(drawMapButtonTapped))
+        mapView.addGestureRecognizer(tapGesture)
+        
+        return mapView
     }()
     
     private lazy var editMapButton: UIButton = {
@@ -88,15 +120,8 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = .white
-        //        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
-    }()
-    
-    let contentView : UIView = {
-        let contentView = UIView()
-        contentView.backgroundColor = .white
-        //        contentView.translatesAutoresizingMaskIntoConstraints = false
-        return contentView
     }()
     
     private let runningStyleLabel: UILabel = {
@@ -156,9 +181,9 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     private lazy var styleWalkButton: UIButton = {
         let button = UIButton()
         button.setTitle("걷기", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(walkButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -166,9 +191,9 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     private lazy var styleFastWalkButton: UIButton = {
         let button = UIButton()
         button.setTitle("조깅", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(FastwalkButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -176,9 +201,9 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     private lazy var styleRuuningButton: UIButton = {
         let button = UIButton()
         button.setTitle("달리기", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(RunningButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -186,14 +211,14 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     private lazy var styleSprintButton: UIButton = {
         let button = UIButton()
         button.setTitle("인터벌", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
         button.layer.cornerRadius = 34 / 2
         button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray.cgColor
         button.addTarget(self, action: #selector(sprintButtonTapped), for: .touchUpInside)
         return button
     }()
     
-    private lazy var courseTitle: UITextField = {
+    lazy var courseTitle: UITextField = {
         let title = UITextField()
         title.textColor = .black
         title.font = UIFont.systemFont(ofSize: 16)
@@ -202,7 +227,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         title.frame = CGRect(x: 0, y: 0, width: 398, height: 48)
         title.layer.cornerRadius = 8
         title.layer.borderWidth = 1.0
-        title.layer.borderColor = UIColor.gray.cgColor
+        title.layer.borderColor = UIColor.gray2.cgColor
         
         title.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 0))
         title.leftViewMode = .always
@@ -214,15 +239,16 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return title
     }()
     
-    private lazy var courseDescription: UITextView = {
+    lazy var courseDescription: UITextView = {
         let description = UITextView()
         description.textColor = .black
         description.font = UIFont.systemFont(ofSize: 16)
         description.backgroundColor = .white
         description.layer.cornerRadius = 8
         description.layer.borderWidth = 1.0
-        description.layer.borderColor = UIColor.gray.cgColor
+        description.layer.borderColor = UIColor.gray2.cgColor
         description.textContainerInset = UIEdgeInsets(top: 16, left: 4, bottom: 16, right: 4)
+        description.isScrollEnabled = false
         description.inputAccessoryView = toolBarKeyboard
         
         return description
@@ -230,7 +256,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     private let courseDescriptionPlaceholder: UILabel = {
         let label = UILabel()
-        label.text = "코스에 대한 자세한 설명을 입력해주세요"
+        label.text = "코스에 대한 자세한 설명을 입력해주세요."
         label.font = UIFont.systemFont(ofSize: 16)
         label.textColor = .gray
         return label
@@ -241,6 +267,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
         picker.locale = Locale(identifier: "ko-KR")
+        picker.minimumDate = Date()
         picker.timeZone = .autoupdatingCurrent
         picker.backgroundColor = .white
         picker.addTarget(self, action: #selector(datePickerValue), for: .valueChanged)
@@ -284,13 +311,10 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     private lazy var addCourseButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("코스 등록하기", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.layer.cornerRadius = 56 / 2
-        
-        button.addTarget(self, action: #selector(addCourseButtonTapped), for: .touchUpInside)
         
         return button
     }()
@@ -325,6 +349,8 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         return label
     }()
     
+    let loadingView = LoadingView()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -333,42 +359,55 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         setupNavBar()
         
         courseDescription.delegate = self
+        courseTitle.delegate = self
         setupPlaceholder()
         
         configureUI()
+        MapConfigureUI()
         
         hideKeyboardWhenTappedAround()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(false)
         
-        if testcoords.count != 0 {
-            configureUI()
-        }
+        configureUI()
+        MapConfigureUI()
+        setMapResion()
     }
     
     // MARK: - Selectors
     
+    @objc func keyboardWillShow(notification: Notification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardFrame.height, right: 0)
+            scrollView.contentInset = contentInset
+            scrollView.scrollIndicatorInsets = contentInset
+        }
+    }
+    
+    @objc func keyboardWillHide(notification: Notification) {
+        scrollView.contentInset = .zero
+        scrollView.scrollIndicatorInsets = .zero
+    }
+    
     @objc func walkButtonTapped() {
         runningStyle = 0
-        print("runningStyle: \(runningStyle)")
     }
     
     @objc func FastwalkButtonTapped() {
         runningStyle = 1
-        print("runningStyle: \(runningStyle)")
-        print("DEBUG: CourseRegisterVC = \(testcoords.count)")
     }
     
     @objc func RunningButtonTapped() {
         runningStyle = 2
-        print("runningStyle: \(runningStyle)")
     }
     
     @objc func sprintButtonTapped() {
         runningStyle = 3
-        print("runningStyle: \(runningStyle)")
     }
     
     @objc func personUp() {
@@ -386,6 +425,11 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }
     
     @objc func addCourseButtonTapped() {
+        // + 주원님 채팅방 생성
+        
+        loadingView.isHidden = false
+        loadingView.startAnimation()
+        
         let userUID = User.currentUid
         let postUID = Firestore.firestore().collection("posts").document().documentID
         
@@ -413,7 +457,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             // Post 인스턴스 생성
             var post = Post(uid: postUID, title: self.courseTitleString, content: self.courseDescriptionString, courseRoutes: self.testcoords.map { location in
                 return GeoPoint(latitude: location.latitude, longitude: location.longitude)
-            }, distance: self.distance, numberOfPeoples: self.personnel, routeImageUrl: "", startDate: selectedDateTime, address: address, whoReportAt: [], createdAt: Date(), runningStyle: self.runningStyle, members: [userUID])
+            }, distance: self.distance, numberOfPeoples: self.personnel, routeImageUrl: "", startDate: selectedDateTime, address: address, whoReportAt: [], createdAt: Date(), runningStyle: self.runningStyle, members: [userUID], ownerUid: userUID)
             
             // 이미지 업로드 후 Post 업데이트
             self.mapSnapshot(with: self.pinAnnotations, polyline: MKPolyline(coordinates: self.testcoords, count: self.testcoords.count)) { [weak self] image in
@@ -438,7 +482,7 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                                     courseDetailVC.courseDestriptionLabel.text = post.content
                                     courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
                                     courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-                                    courseDetailVC.runningStyleLabel.text = RunningMateVC().runningStyleString(for: post.runningStyle)
+                                    courseDetailVC.runningStyleLabel.text = MateViewCell().runningStyleString(for: post.runningStyle)
                                     courseDetailVC.courseLocationLabel.text = post.address
                                     courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
                                     courseDetailVC.personInLabel.text = "\(post.members.count)명"
@@ -446,10 +490,96 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                                     courseDetailVC.postUid = post.uid
                                     courseDetailVC.memberLimit = post.numberOfPeoples
                                     courseDetailVC.imageUrl = post.routeImageUrl
+                                    courseDetailVC.ownerUid = post.ownerUid
                                     
-                                    self.navigationController?.popToRootViewController(animated: true)
-                                    courseDetailVC.hidesBottomBarWhenPushed = true
+                                    if let xmark = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate) {
+                                        let dismissButton = UIBarButtonItem(image: xmark, style: .plain, target: self, action: #selector(self.closeModal))
+                                        
+                                        dismissButton.tintColor = .gray1
+                                        
+                                        courseDetailVC.navigationItem.leftBarButtonItem = dismissButton
+                                        courseDetailVC.navigationItem.rightBarButtonItems = nil
+                                    }
                                     self.navigationController?.pushViewController(courseDetailVC, animated: true)
+                                    
+                                    ImageCacheManager.shared.setImage(image: image, url: post.routeImageUrl)
+                                }
+                            }
+                        }
+                    } else {
+                        print("DEBUG: Image upload failed")
+                    }
+                }
+            }
+        }
+    }
+    
+    @objc func editCourseButtonTapped() {
+        loadingView.isHidden = false
+        loadingView.startAnimation()
+        
+        let userUID = User.currentUid
+        
+        // date와 time을 하나 합쳐서 업로드
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        
+        let dateComponents = calendar.dateComponents([.year, .month, .day], from: selectedDate)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        
+        var combinedComponents = DateComponents()
+        combinedComponents.year = dateComponents.year
+        combinedComponents.month = dateComponents.month
+        combinedComponents.day = dateComponents.day
+        combinedComponents.hour = timeComponents.hour
+        combinedComponents.minute = timeComponents.minute
+        
+        guard let selectedDateTime = calendar.date(from: combinedComponents) else {
+            return
+        }
+        
+        // 주소 입력
+        searchAddress { address in
+            
+            // Post 인스턴스 생성
+            var post = Post(uid: self.postUid, title: self.courseTitleString, content: self.courseDescriptionString, courseRoutes: self.testcoords.map { location in
+                return GeoPoint(latitude: location.latitude, longitude: location.longitude)
+            }, distance: self.distance, numberOfPeoples: self.personnel, routeImageUrl: self.imageUrl, startDate: selectedDateTime, address: address, whoReportAt: [], createdAt: Date(), runningStyle: self.runningStyle, members: self.members, ownerUid: userUID)
+            
+            // 이미지 삭제
+            PostService().deleteImage(imageUrl: self.imageUrl)
+            
+            // 이미지 업로드 후 Post 업데이트
+            self.mapSnapshot(with: self.pinAnnotations, polyline: MKPolyline(coordinates: self.testcoords, count: self.testcoords.count)) { [weak self] image in
+                guard let self = self else { return }
+                PostService.uploadImage(image: image) { url in
+                    if let url = url {
+                        post.updateRouteImageUrl(newUrl: url.absoluteString)
+                        
+                        // Post 업로드
+                        PostService().uploadPost(post: post) { error in
+                            if let error = error {
+                                print("DEBUG: Failed to upload post: \(error.localizedDescription)")
+                            } else {
+                                DispatchQueue.main.async {
+                                    
+                                    let courseDetailVC = CourseDetailVC()
+                                    courseDetailVC.hidesBottomBarWhenPushed = true
+                                    
+                                    if let xmark = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate) {
+                                        let dismissButton = UIBarButtonItem(image: xmark, style: .plain, target: self, action: #selector(self.closeModal))
+                                        
+                                        dismissButton.tintColor = .gray1
+                                        
+                                        courseDetailVC.navigationItem.leftBarButtonItem = dismissButton
+                                        courseDetailVC.navigationItem.rightBarButtonItems = nil
+                                    }
+                                    
+                                    courseDetailVC.postUid = post.uid
+                                    
+                                    self.navigationController?.pushViewController(courseDetailVC, animated: true)
+                                    
+                                    ImageCacheManager.shared.setImage(image: image, url: post.routeImageUrl)
                                 }
                             }
                         }
@@ -489,7 +619,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     
     @objc func editMapButtonTapped() {
         self.testcoords.removeAll()
-        print("DEBUG: \(testcoords.count)")
         
         for annotation in pinAnnotations {
             drawMapView.removeAnnotation(annotation)
@@ -501,81 +630,100 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         }
         
         let courseDrawingMapVC = CourseDrawingMapVC()
+        courseDrawingMapVC.testcoords = testcoords
+        courseDrawingMapVC.distance = distance
         courseDrawingMapVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(courseDrawingMapVC, animated: true)
+    }
+    
+    @objc func closeModal() {
+        dismiss(animated: true, completion: nil)
     }
     
     // MARK: - Helpers
     
     func configureUI() {
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
         view.backgroundColor = .white
-        scrollView.backgroundColor = .white
-        contentView.backgroundColor = .white
+        view.addSubview(addCourseButtonContainer)
+        view.addSubview(scrollView)
+        addCourseButtonContainer.addSubview(divider)
         
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(loadingView)
+        loadingView.translatesAutoresizingMaskIntoConstraints = false
+        loadingView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        loadingView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        loadingView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        loadingView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        loadingView.isHidden = true
         
-        NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-        ])
-
-        NSLayoutConstraint.activate([
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            contentView.heightAnchor.constraint(equalToConstant: 1100)
-        ])
+        addCourseButtonContainer.translatesAutoresizingMaskIntoConstraints = false
+        addCourseButtonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        addCourseButtonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        addCourseButtonContainer.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        addCourseButtonContainer.heightAnchor.constraint(equalToConstant: 66).isActive = true
         
-        MapConfigureUI()
+        addCourseButtonContainer.addSubview(addCourseButton)
+        addCourseButton.translatesAutoresizingMaskIntoConstraints = false
+        addCourseButton.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor, constant: 10).isActive = true
+        addCourseButton.leftAnchor.constraint(equalTo: addCourseButtonContainer.leftAnchor, constant: 16).isActive = true
+        addCourseButton.bottomAnchor.constraint(equalTo: addCourseButtonContainer.bottomAnchor).isActive = true
+        addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor, constant: -16).isActive = true
+        addCourseButton.setTitle(isEdit ? "코스 수정하기" : "코스 등록하기", for: .normal)
+        addCourseButton.addTarget(self, action: isEdit ? #selector(editCourseButtonTapped) : #selector(addCourseButtonTapped), for: .touchUpInside)
+        
+        divider.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor).isActive = true
+        divider.leadingAnchor.constraint(equalTo: addCourseButtonContainer.leadingAnchor).isActive = true
+        divider.trailingAnchor.constraint(equalTo: addCourseButtonContainer.trailingAnchor).isActive = true
+        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        
+        scrollView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor).isActive = true
+        scrollView.bottomAnchor.constraint(equalTo: divider.topAnchor).isActive = true
+        scrollView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor).isActive = true
+        scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        scrollView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         
         if testcoords.count == 0 {
-            contentView.addSubview(drawMapButton)
+            scrollView.addSubview(drawMapButton)
             drawMapButton.translatesAutoresizingMaskIntoConstraints = false
-            drawMapButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 17).isActive = true
-            drawMapButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
-            drawMapButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
-            drawMapButton.widthAnchor.constraint(equalToConstant: 398).isActive = true
+            drawMapButton.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 17).isActive = true
+            drawMapButton.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
+            drawMapButton.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16).isActive = true
             drawMapButton.heightAnchor.constraint(equalToConstant: 310).isActive = true
+            drawMapButton.widthAnchor.constraint(equalTo: addCourseButton.widthAnchor).isActive = true
             drawMapButton.layer.cornerRadius = 10
             
-            contentView.addSubview(runningStyleLabel)
+            scrollView.addSubview(runningStyleLabel)
             runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
             runningStyleLabel.topAnchor.constraint(equalTo: drawMapButton.bottomAnchor, constant: 27).isActive = true
-            runningStyleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
+            runningStyleLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
         } else {
-            contentView.addSubview(drawMapView)
+            scrollView.addSubview(drawMapView)
             drawMapView.translatesAutoresizingMaskIntoConstraints = false
-            drawMapView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 17).isActive = true
-            drawMapView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
-            drawMapView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
-            drawMapView.widthAnchor.constraint(equalToConstant: 398).isActive = true
+            drawMapView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 17).isActive = true
+            drawMapView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
+            drawMapView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16).isActive = true
             drawMapView.heightAnchor.constraint(equalToConstant: 310).isActive = true
+            drawMapView.widthAnchor.constraint(equalTo: addCourseButton.widthAnchor).isActive = true
             drawMapView.layer.cornerRadius = 10
             
             drawMapView.addSubview(editMapButton)
             editMapButton.translatesAutoresizingMaskIntoConstraints = false
-            editMapButton.rightAnchor.constraint(equalTo: drawMapView.rightAnchor, constant: -8).isActive = true
+            editMapButton.trailingAnchor.constraint(equalTo: drawMapView.trailingAnchor, constant: -8).isActive = true
             editMapButton.topAnchor.constraint(equalTo: drawMapView.topAnchor, constant: 8).isActive = true
             
             drawMapView.addSubview(distanceLabel)
             distanceLabel.translatesAutoresizingMaskIntoConstraints = false
-            distanceLabel.leftAnchor.constraint(equalTo: drawMapView.leftAnchor, constant: 16).isActive = true
+            distanceLabel.leadingAnchor.constraint(equalTo: drawMapView.leadingAnchor, constant: 16).isActive = true
             distanceLabel.bottomAnchor.constraint(equalTo: drawMapView.bottomAnchor, constant: -30).isActive = true
             distanceLabel.widthAnchor.constraint(equalToConstant: 80).isActive = true
             distanceLabel.heightAnchor.constraint(equalToConstant: 40).isActive = true
             
-            contentView.addSubview(runningStyleLabel)
+            scrollView.addSubview(runningStyleLabel)
             runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
             runningStyleLabel.topAnchor.constraint(equalTo: drawMapView.bottomAnchor, constant: 27).isActive = true
-            runningStyleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
+            runningStyleLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
         }
+        
         
         styleWalkButton.widthAnchor.constraint(equalToConstant: 76).isActive = true
         styleWalkButton.heightAnchor.constraint(equalToConstant: 34).isActive = true
@@ -591,56 +739,49 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         stack.spacing = 13
         stack.distribution = .fillEqually
         
-        contentView.addSubview(stack)
+        scrollView.addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
-        stack.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16).isActive = true
+        stack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
+        stack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         stack.topAnchor.constraint(equalTo: runningStyleLabel.bottomAnchor, constant: 12).isActive = true
         
-        contentView.addSubview(courseTitleLabel)
-        courseTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        courseTitleLabel.topAnchor.constraint(equalTo: stack.bottomAnchor, constant: 27).isActive = true
-        courseTitleLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
+        let textStack = UIStackView()
+        textStack.axis = .vertical
+        textStack.spacing = 13
         
-        contentView.addSubview(courseTitle)
-        courseTitle.translatesAutoresizingMaskIntoConstraints = false
-        courseTitle.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
-        courseTitle.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16).isActive = true
-        courseTitle.topAnchor.constraint(equalTo: courseTitleLabel.bottomAnchor, constant: 12).isActive = true
+        textStack.addArrangedSubview(courseTitleLabel)
         courseTitle.widthAnchor.constraint(equalToConstant: 398).isActive = true
         courseTitle.heightAnchor.constraint(equalToConstant: 48).isActive = true
-        
-        contentView.addSubview(courseDescriptionLabel)
-        courseDescriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-        courseDescriptionLabel.topAnchor.constraint(equalTo: courseTitle.bottomAnchor, constant: 27).isActive = true
-        courseDescriptionLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
-        
-        contentView.addSubview(courseDescription)
-        courseDescription.translatesAutoresizingMaskIntoConstraints = false
-        courseDescription.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
-        courseDescription.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16).isActive = true
-        courseDescription.topAnchor.constraint(equalTo: courseDescriptionLabel.bottomAnchor, constant: 12).isActive = true
+        textStack.addArrangedSubview(courseTitle)
+        textStack.addArrangedSubview(courseDescriptionLabel)
         courseDescription.widthAnchor.constraint(equalToConstant: 398).isActive = true
         courseDescription.heightAnchor.constraint(equalToConstant: 180).isActive = true
+        textStack.addArrangedSubview(courseDescription)
+        
+        scrollView.addSubview(textStack)
+        textStack.translatesAutoresizingMaskIntoConstraints = false
+        textStack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
+        textStack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
+        textStack.topAnchor.constraint(equalTo: stack.bottomAnchor, constant: 12).isActive = true
         
         let datePickerStack = UIStackView(arrangedSubviews: [datePickerLabel, datePicker])
         datePickerStack.axis = .horizontal
         datePickerStack.spacing = 100
         
-        contentView.addSubview(datePickerStack)
+        scrollView.addSubview(datePickerStack)
         datePickerStack.translatesAutoresizingMaskIntoConstraints = false
-        datePickerStack.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
-        datePickerStack.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16).isActive = true
-        datePickerStack.topAnchor.constraint(equalTo: courseDescription.bottomAnchor, constant: 27).isActive = true
+        datePickerStack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
+        datePickerStack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
+        datePickerStack.topAnchor.constraint(equalTo: textStack.bottomAnchor, constant: 27).isActive = true
         
         let timePickerStack = UIStackView(arrangedSubviews: [timePickerLabel, timePicker])
         timePickerStack.axis = .horizontal
         timePickerStack.spacing = 100
         
-        contentView.addSubview(timePickerStack)
+        scrollView.addSubview(timePickerStack)
         timePickerStack.translatesAutoresizingMaskIntoConstraints = false
-        timePickerStack.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
-        timePickerStack.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16).isActive = true
+        timePickerStack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
+        timePickerStack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         timePickerStack.topAnchor.constraint(equalTo: datePickerStack.bottomAnchor, constant: 27).isActive = true
         
         let personnelButtonStack = UIStackView(arrangedSubviews: [personDownButton, personnelLabel, personUpButton])
@@ -651,84 +792,36 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         personnelStack.axis = .horizontal
         personnelStack.spacing = 100
         
-        contentView.addSubview(personnelStack)
+        scrollView.addSubview(personnelStack)
         personnelStack.translatesAutoresizingMaskIntoConstraints = false
-        personnelStack.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 16).isActive = true
-        personnelStack.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -16).isActive = true
+        personnelStack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
+        personnelStack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         personnelStack.topAnchor.constraint(equalTo: timePickerStack.bottomAnchor, constant: 27).isActive = true
+        personnelStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -32).isActive = true
         personnelStack.widthAnchor.constraint(equalToConstant: 116).isActive = true
         personnelStack.heightAnchor.constraint(equalToConstant: 36).isActive = true
-        
-        contentView.addSubview(addCourseButtonContainer)
-        addCourseButtonContainer.translatesAutoresizingMaskIntoConstraints = false
-        addCourseButtonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        addCourseButtonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        addCourseButtonContainer.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        addCourseButtonContainer.heightAnchor.constraint(equalToConstant: 66).isActive = true
-        
-        addCourseButtonContainer.addSubview(divider)
-        divider.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor).isActive = true
-        divider.leadingAnchor.constraint(equalTo: addCourseButtonContainer.leadingAnchor).isActive = true
-        divider.trailingAnchor.constraint(equalTo: addCourseButtonContainer.trailingAnchor).isActive = true
-        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
-        
-        addCourseButtonContainer.addSubview(addCourseButton)
-        addCourseButton.translatesAutoresizingMaskIntoConstraints = false
-        addCourseButton.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor, constant: 10).isActive = true
-        addCourseButton.leftAnchor.constraint(equalTo: addCourseButtonContainer.leftAnchor, constant: 16).isActive = true
-        addCourseButton.bottomAnchor.constraint(equalTo: addCourseButtonContainer.bottomAnchor).isActive = true
-        addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor, constant: -16).isActive = true
         
         updateStyleButtonAppearance()
         updateAddCourseButtonAppearance()
         
     }
     
-    func setupPlaceholder() {
-        courseDescription.addSubview(courseDescriptionPlaceholder)
-        courseDescriptionPlaceholder.translatesAutoresizingMaskIntoConstraints = false
-        
-        courseDescriptionPlaceholder.topAnchor.constraint(equalTo: courseDescription.topAnchor, constant: 16).isActive = true
-        courseDescriptionPlaceholder.leadingAnchor.constraint(equalTo: courseDescription.leadingAnchor, constant: 8).isActive = true
-        courseDescriptionPlaceholder.trailingAnchor.constraint(equalTo: courseDescription.trailingAnchor, constant: -8).isActive = true
-        
-        courseDescriptionPlaceholder.isHidden = !courseDescription.text.isEmpty
-    }
-
-    func textViewDidChange(_ textView: UITextView) {
-        courseDescriptionPlaceholder.isHidden = !textView.text.isEmpty
-        courseDescriptionString = textView.text
-        
-//        // 텍스트뷰 스크롤 없이 height 길어지게끔..
-//        let size = CGSize(width: contentView.frame.width, height: .infinity)
-//        let estimatedSize = textView.sizeThatFits(size)
-//        
-//        textView.constraints.forEach { (constraint) in
-//            
-//            if estimatedSize.height <= 180 {
-//                
-//            }
-//            else {
-//                if constraint.firstAttribute == .height {
-//                    constraint.constant = estimatedSize.height
-//                }
-//            }
-//        }
-        
-    }
-    
     func updateStyleButtonAppearance() {
-        styleWalkButton.setTitleColor(runningStyle == 0 ? .white : .gray, for: .normal)
-        styleWalkButton.backgroundColor = runningStyle == 0 ? .mainBlue : .white
+        styleWalkButton.setTitleColor(runningStyle == 0 ? .white : .gray2, for: .normal)
+        styleWalkButton.backgroundColor = runningStyle == 0 ? .walking : .white
+        styleWalkButton.layer.borderColor = runningStyle == 0 ? UIColor.walking.cgColor : UIColor.gray2.cgColor
         
-        styleFastWalkButton.setTitleColor(runningStyle == 1 ? .white : .gray, for: .normal)
-        styleFastWalkButton.backgroundColor = runningStyle == 1 ? .mainBlue : .white
+        styleFastWalkButton.setTitleColor(runningStyle == 1 ? .white : .gray2, for: .normal)
+        styleFastWalkButton.backgroundColor = runningStyle == 1 ? .jogging : .white
+        styleFastWalkButton.layer.borderColor = runningStyle == 1 ? UIColor.jogging.cgColor : UIColor.gray2.cgColor
         
-        styleRuuningButton.setTitleColor(runningStyle == 2 ? .white : .gray, for: .normal)
-        styleRuuningButton.backgroundColor = runningStyle == 2 ? .mainBlue : .white
+        styleRuuningButton.setTitleColor(runningStyle == 2 ? .white : .gray2, for: .normal)
+        styleRuuningButton.backgroundColor = runningStyle == 2 ? .running : .white
+        styleRuuningButton.layer.borderColor = runningStyle == 2 ? UIColor.running.cgColor : UIColor.gray2.cgColor
         
-        styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray, for: .normal)
-        styleSprintButton.backgroundColor = runningStyle == 3 ? .mainBlue : .white
+        styleSprintButton.setTitleColor(runningStyle == 3 ? .white : .gray2, for: .normal)
+        styleSprintButton.backgroundColor = runningStyle == 3 ? .interval : .white
+        styleSprintButton.layer.borderColor = runningStyle == 3 ? UIColor.interval.cgColor : UIColor.gray2.cgColor
     }
     
     func updateAddCourseButtonAppearance() {
@@ -742,7 +835,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }
     
     func setup(with testCoords: [CLLocationCoordinate2D], distance: CLLocationDistance) {
-        
         self.testcoords = testCoords
         self.distance = distance
     }
@@ -758,12 +850,14 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
         drawMapView.mapType = MKMapType.standard
         drawMapView.isZoomEnabled = true
         drawMapView.isScrollEnabled = true
-        drawMapView.center = view.center
+        drawMapButton.showsUserLocation = true
+        drawMapButton.isZoomEnabled = false
+        drawMapButton.isScrollEnabled = false
         
         for (index, coord) in testcoords.enumerated() {
             let pin = MKPointAnnotation()
             pin.coordinate = coord
-            let pinTitle = "\(index + 1)" // 핀의 제목을 인덱스로 설정
+            let pinTitle = "\(index + 1)"
             pin.title = pinTitle
             drawMapView.addAnnotation(pin)
             pinAnnotations.append(pin)
@@ -773,12 +867,24 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     }
     
     private func setupNavBar() {
-        self.navigationItem.title = "모집글 등록"
+        if isEdit {
+            self.navigationItem.title = "모집글 수정"
+        } else {
+            self.navigationItem.title = "모집글 등록"
+        }
+        
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        
+        if let xmark = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate) {
+            let closeButton = UIBarButtonItem(image: xmark, style: .plain, target: self, action: #selector(closeModal))
+            closeButton.tintColor = .gray1
+            
+            navigationItem.leftBarButtonItem = closeButton
+        }
     }
     
     func distanceUpdate() {
@@ -788,13 +894,13 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     // 지도 스냅샷
     func mapSnapshot(with annotations: [MKAnnotation], polyline: MKPolyline, completion: @escaping (UIImage) -> Void) {
         let options = MKMapSnapshotter.Options()
-        options.region = MKCoordinateRegion(center: testcoords[testcoords.count / 2], span: MKCoordinateSpan(latitudeDelta: self.distance < 3 ? 0.02 : 0.04, longitudeDelta: self.distance < 3 ? 0.02 : 0.04))
+        options.region = testcoords.makeRegionToFit() ?? MKCoordinateRegion(center: testcoords[testcoords.count / 2], span: MKCoordinateSpan(latitudeDelta: self.distance < 3 ? 0.02 : 0.04, longitudeDelta: self.distance < 3 ? 0.02 : 0.04))
         options.size = CGSize(width: 300, height: 300)
         options.mapType = .mutedStandard
         options.showsBuildings = false
         
         // 이미지를 다크모드로
-//        options.traitCollection = .init(userInterfaceStyle: .dark)
+        //        options.traitCollection = .init(userInterfaceStyle: .dark)
         
         let snapshotter = MKMapSnapshotter(options: options)
         snapshotter.start { snapshot, error in
@@ -856,7 +962,6 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
                 
                 attributedText.draw(in: textRect)
             }
-
             
             let finalImage = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
@@ -868,14 +973,11 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
     func searchAddress(completion: @escaping (String) -> Void) {
         let addLoc = CLLocation(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
         var address = ""
-
+        
         CLGeocoder().reverseGeocodeLocation(addLoc, completionHandler: { place, error in
             if let pm = place?.first {
-                if let administrativeArea = pm.administrativeArea {
-                    address += administrativeArea
-                }
                 if let subLocality = pm.subLocality {
-                    address += " " + subLocality
+                    address += subLocality
                 }
             } else {
                 print("DEBUG: 주소 검색 실패 \(error?.localizedDescription ?? "Unknown error")")
@@ -883,23 +985,41 @@ class CourseRegisterVC: UIViewController, UITextViewDelegate, CLLocationManagerD
             completion(address)
         })
     }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    func setMapResion() {
+        guard let region = self.testcoords.makeRegionToFit() else { return }
+        self.drawMapView.setRegion(region, animated: false)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.drawMapView.setVisibleMapRect(self.drawMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: false)
+        }
+    }
 }
 
 // MARK: - MapKit
-extension CourseRegisterVC {
+extension CourseRegisterVC: CLLocationManagerDelegate, MKMapViewDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         // adding map region
         if testcoords.count > 0 {
             if !isRegionSet {
-                
-                let center = CLLocationCoordinate2D(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
-                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-                drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
-                
+                guard let region = testcoords.makeRegionToFit() else { return }
+                drawMapView.setRegion(region, animated: false)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.drawMapView.setVisibleMapRect(self.drawMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: false)
+                }
                 isRegionSet = true
             }
+        } else {
+            var mapRegion = MKCoordinateRegion()
+            mapRegion.center = drawMapButton.userLocation.coordinate
+            mapRegion.span = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            
+            drawMapButton.setRegion(mapRegion, animated: true)
         }
     }
     
@@ -960,11 +1080,60 @@ extension CourseRegisterVC {
     }
 }
 
-/*
- 
- 1. 텍스트뷰, 텍스트필드 키보드 설정(글을 쓸때 스크롤, 테두리 색, )
- 2. 데이트피커, 타임피커, 인원설정 버튼 모양(현재 인원설정 버튼에 border 추가시 뷰 망가짐)
- 3. testcoords.count가 0일때, 코스를 입력해주세요 버튼 UI 생각
- 4. 코스 등록하기 시 파이어스토어에 코스 정보 올림 + 코스 스크린샷
- 
- */
+// MARK: - Keyboard
+
+extension CourseRegisterVC: UITextViewDelegate, UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        courseDescription.becomeFirstResponder()
+        return true
+    }
+    
+    func setupPlaceholder() {
+        courseDescription.addSubview(courseDescriptionPlaceholder)
+        courseDescriptionPlaceholder.translatesAutoresizingMaskIntoConstraints = false
+        
+        courseDescriptionPlaceholder.topAnchor.constraint(equalTo: courseDescription.topAnchor, constant: 16).isActive = true
+        courseDescriptionPlaceholder.leadingAnchor.constraint(equalTo: courseDescription.leadingAnchor, constant: 8).isActive = true
+        courseDescriptionPlaceholder.trailingAnchor.constraint(equalTo: courseDescription.trailingAnchor, constant: -8).isActive = true
+        
+        courseDescriptionPlaceholder.isHidden = !courseDescription.text.isEmpty
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        courseDescriptionPlaceholder.isHidden = !textView.text.isEmpty
+        courseDescriptionString = textView.text
+        
+        // 텍스트뷰 스크롤 없이 height 길어지게끔..
+        let size = CGSize(width: scrollView.frame.width, height: .infinity)
+        let estimatedSize = textView.sizeThatFits(size)
+        
+        textView.constraints.forEach { (constraint) in
+            
+            if estimatedSize.height <= 180 {
+                
+            }
+            else {
+                if constraint.firstAttribute == .height {
+                    constraint.constant = estimatedSize.height
+                }
+            }
+        }
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        courseTitle.layer.borderColor = UIColor.black.cgColor
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        courseTitle.layer.borderColor = UIColor.gray2.cgColor
+    }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        courseDescription.layer.borderColor = UIColor.black.cgColor
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        courseDescription.layer.borderColor = UIColor.gray2.cgColor
+    }
+}
