@@ -33,6 +33,8 @@ class RunningMateVC: UIViewController {
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .systemBackground
+        tableView.separatorStyle = .singleLine
+        tableView.separatorInset = .init(top: 0, left: 16, bottom: 0, right: 16)
         tableView.allowsSelection = true
         tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
         return tableView
