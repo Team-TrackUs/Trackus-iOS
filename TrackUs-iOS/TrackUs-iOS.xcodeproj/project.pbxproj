@@ -39,6 +39,8 @@
 		8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26E2BF12BD2002CB7DD /* LoginVC.swift */; };
 		8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D2742BF137E2002CB7DD /* RunningResultVC.swift */; };
 		82ABF3742C1004DA002B25CE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 82ABF3732C1004DA002B25CE /* GoogleService-Info.plist */; };
+		82ABF3792C10184A002B25CE /* SelectePhotoVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */; };
+		82ABF39B2C1039D7002B25CE /* PhotoEditVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */; };
 		82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45572BEFA947007AE54A /* AppDelegate.swift */; };
 		82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45592BEFA948007AE54A /* SceneDelegate.swift */; };
 		82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82BE45602BEFA94A007AE54A /* Assets.xcassets */; };
@@ -152,6 +154,8 @@
 		8280D2742BF137E2002CB7DD /* RunningResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningResultVC.swift; sourceTree = "<group>"; };
 		828735A82C0CDC480054A19D /* TrackUs-iOSDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOSDebug.entitlements"; sourceTree = "<group>"; };
 		82ABF3732C1004DA002B25CE /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectePhotoVC.swift; sourceTree = "<group>"; };
+		82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoEditVC.swift; sourceTree = "<group>"; };
 		82BE45542BEFA947007AE54A /* TrackUs-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TrackUs-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		82BE45572BEFA947007AE54A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		82BE45592BEFA948007AE54A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -305,6 +309,15 @@
 			path = WidgetTest;
 			sourceTree = "<group>";
 		};
+		82ABF3752C1014D4002B25CE /* RecordSharing */ = {
+			isa = PBXGroup;
+			children = (
+				82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */,
+				82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */,
+			);
+			path = RecordSharing;
+			sourceTree = "<group>";
+		};
 		82BE454B2BEFA947007AE54A = {
 			isa = PBXGroup;
 			children = (
@@ -349,6 +362,7 @@
 			isa = PBXGroup;
 			children = (
 				82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */,
+				82ABF3752C1014D4002B25CE /* RecordSharing */,
 				82BE45732BEFAFB3007AE54A /* Running */,
 				82BE45722BEFAFB0007AE54A /* Mate */,
 				82BE45712BEFAFAD007AE54A /* Chat */,
@@ -670,6 +684,7 @@
 				822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */,
 				822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */,
 				988618172BF317EE002ACB4E /* UIImage+.swift in Sources */,
+				82ABF39B2C1039D7002B25CE /* PhotoEditVC.swift in Sources */,
 				9898034B2BF5F14200F5DFBD /* AgreementInputView.swift in Sources */,
 				9886183A2BF4FFEB002ACB4E /* MainButton.swift in Sources */,
 				61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */,
@@ -708,6 +723,7 @@
 				96AC57342C059CAA00F1A73C /* WithdrawalVC.swift in Sources */,
 				61625E3A2BFE75A500E6D1F3 /* PostService.swift in Sources */,
 				826248192BFB4D9B0028C221 /* Running.swift in Sources */,
+				82ABF3792C10184A002B25CE /* SelectePhotoVC.swift in Sources */,
 				82C38AD32BFCE445004819C1 /* Double+.swift in Sources */,
 				82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */,
 				826922E52C04664000D506C2 /* RunInfoModel.swift in Sources */,
