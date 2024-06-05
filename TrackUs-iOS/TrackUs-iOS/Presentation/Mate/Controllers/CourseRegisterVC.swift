@@ -481,7 +481,7 @@ class CourseRegisterVC: UIViewController {
                                     courseDetailVC.courseDestriptionLabel.text = post.content
                                     courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
                                     courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-                                    courseDetailVC.runningStyleLabel.text = RunningMateVC().runningStyleString(for: post.runningStyle)
+                                    courseDetailVC.runningStyleLabel.text = MateViewCell().runningStyleString(for: post.runningStyle)
                                     courseDetailVC.courseLocationLabel.text = post.address
                                     courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
                                     courseDetailVC.personInLabel.text = "\(post.members.count)명"

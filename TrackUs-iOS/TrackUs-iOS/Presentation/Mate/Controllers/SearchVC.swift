@@ -148,7 +148,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
 
         let post = searchResultsPosts[indexPath.row]
 
-        cell.configure(image: post.routeImageUrl, runningStyleLabel: RunningMateVC().runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
+        cell.configure(post: post)
         return cell
     }
 

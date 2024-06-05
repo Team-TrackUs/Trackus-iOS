@@ -317,4 +317,54 @@ class PostService {
                 completion(filterPosts)
             }
     }
+    
+    func reportPost(postUid: String, userUid: String, category: String, text: String, completion: @escaping (Bool) -> Void) {
+        let db = Firestore.firestore()
+        let postRef = db.collection("posts").document(postUid)
+        
+        postRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                var postData = document.data()!
+                var whoReportAt = postData["whoReportAt"] as? [String] ?? []
+                
+                if whoReportAt.contains(userUid) {
+                    print("DEBUG: Error = User has already reported this post")
+                    completion(false)
+                    return
+                }
+                
+                whoReportAt.append(userUid)
+                postData["whoReportAt"] = whoReportAt
+                
+                postRef.updateData(["whoReportAt": whoReportAt]) { error in
+                    if let error = error {
+                        print("Error updating document: \(error)")
+                        completion(false)
+                        return
+                    }
+                    
+                    let report = [
+                        "toUser": postData["ownerUid"] as! String,
+                        "fromUser": userUid,
+                        "category": category,
+                        "text": text,
+                        "createdAt": Date()
+                    ] as [String : Any]
+                    
+                    postRef.collection("reasons").addDocument(data: report) { error in
+                        if let error = error {
+                            print("Error adding document: \(error)")
+                            completion(false)
+                        } else {
+                            print("Document added successfully")
+                            completion(true)
+                        }
+                    }
+                }
+            } else {
+                print("Error: Post not found")
+                completion(false)
+            }
+        }
+    }
 }

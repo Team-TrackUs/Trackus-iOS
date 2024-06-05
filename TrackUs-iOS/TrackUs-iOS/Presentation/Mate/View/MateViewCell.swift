@@ -203,25 +203,25 @@ class MateViewCell: UITableViewCell {
         dateLabel.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
     }
     
-    public func configure(image: String, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
+    public func configure(post: Post) {
         
-        postImageView.loadImage(url: image)
+        postImageView.loadImage(url: post.routeImageUrl)
         
-        self.runningStyleLabel.text = runningStyleLabel
+        self.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
         
-        if titleLabel.count > 15 {
-            self.titleLabel.text = "\(titleLabel.prefix(15))..."
+        if post.title.count > 15 {
+            self.titleLabel.text = "\(post.title.prefix(15))..."
         } else {
-            self.titleLabel.text = titleLabel
+            self.titleLabel.text = post.title
         }
         
-        self.locationLabel.text = locationLabel
-        self.timeLabel.text = timeLabel
-        self.distanceLabel.text = distanceLabel
-        self.peopleLabel.text = "\(peopleIn) / \(peopleLimit)"
-        self.dateLabel.text = dateLabel
+        self.locationLabel.text = post.address
+        self.timeLabel.text = post.startDate.toString(format: "h:mm a")
+        self.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
+        self.peopleLabel.text = "\(post.members.count) / \(post.numberOfPeoples)"
+        self.dateLabel.text = post.startDate.toString(format: "yyyy년 MM월 dd일")
         
-        switch runningStyleLabel {
+        switch runningStyleString(for: post.runningStyle) {
         case "걷기":
             self.runningStyleLabel.backgroundColor = .walking
         case "조깅":
@@ -234,10 +234,25 @@ class MateViewCell: UITableViewCell {
             self.runningStyleLabel.backgroundColor = .mainBlue
         }
         
-        if peopleIn >= peopleLimit {
+        if post.members.count >= post.numberOfPeoples {
             closingLabel.isHidden = false
         } else {
             closingLabel.isHidden = true
+        }
+    }
+    
+    func runningStyleString(for runningStyle: Int) -> String {
+        switch runningStyle {
+        case 0:
+            return "걷기"
+        case 1:
+            return "조깅"
+        case 2:
+            return "달리기"
+        case 3:
+            return "인터벌"
+        default:
+            return "걷기"
         }
     }
 

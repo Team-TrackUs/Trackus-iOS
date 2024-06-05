@@ -281,21 +281,6 @@ class RunningMateVC: UIViewController {
             self.isLoadingMore = false
         }
     }
-    
-    func runningStyleString(for runningStyle: Int) -> String {
-        switch runningStyle {
-        case 0:
-            return "걷기"
-        case 1:
-            return "조깅"
-        case 2:
-            return "달리기"
-        case 3:
-            return "인터벌"
-        default:
-            return "걷기"
-        }
-    }
 }
 
 extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate {
@@ -309,9 +294,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
         }
         
         let post = posts[indexPath.row]
-        // 이미지 String으로 변경
-        // SearchVC에서도 해야함
-        cell.configure(image: post.routeImageUrl, runningStyleLabel: runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
+        cell.configure(post: post)
         return cell
     }
     

@@ -300,7 +300,9 @@ class CourseDetailVC: UIViewController {
         }
         
         let reportAction = UIAlertAction(title: "모집글 신고", style: .destructive) { action in
-            
+            let reportPostVC = ReportPostVC()
+            reportPostVC.configure(uid: self.postUid, imageUrl: self.imageUrl, title: self.courseTitleLabel.text ?? "제목 없음", userUid: self.uid)
+            self.navigationController?.pushViewController(reportPostVC, animated: true)
         }
         
         let cancelAction = UIAlertAction(title: "취소", style: .cancel)
