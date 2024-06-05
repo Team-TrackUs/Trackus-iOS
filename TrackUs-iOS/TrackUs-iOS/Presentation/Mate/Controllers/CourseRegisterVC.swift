@@ -267,6 +267,7 @@ class CourseRegisterVC: UIViewController {
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .compact
         picker.locale = Locale(identifier: "ko-KR")
+        picker.minimumDate = Date()
         picker.timeZone = .autoupdatingCurrent
         picker.backgroundColor = .white
         picker.addTarget(self, action: #selector(datePickerValue), for: .valueChanged)
