@@ -179,6 +179,8 @@ extension SelectePhotoVC: AVCapturePhotoCaptureDelegate {
         }
         let image = UIImage(data: data)
         session?.stopRunning()
-        self.navigationController?.pushViewController(PhotoEditVC(), animated: true)
+        let photoEditVC = PhotoEditVC()
+        photoEditVC.image = image
+        self.navigationController?.pushViewController(photoEditVC, animated: true)
     }
 }
