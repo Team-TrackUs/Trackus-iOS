@@ -1,14 +1,14 @@
 //
-//  MyProfileVC.swift
+//  OtherProfileVC.swift
 //  TrackUs-iOS
 //
-//  Created by 석기권 on 5/11/24.
+//  Created by 박소희 on 5/21/24.
 //
 
 import UIKit
 import Firebase
 
-class MyProfileVC: UIViewController {
+class OtherProfileVC: UIViewController {
 
     // MARK: - 사용자 프로필
     private let profileImageView: UIImageView = {
@@ -121,17 +121,6 @@ class MyProfileVC: UIViewController {
         return createLabel(withText: text)
     }()
 
-
-    // MARK: - 러닝기록
-    private lazy var segmentControl: CustomSegmentedControl = {
-        let segment = CustomSegmentedControl()
-        segment.segments = ["기록", "글 목록"]
-        segment.selectedSegmentIndex = 0
-        segment.translatesAutoresizingMaskIntoConstraints = false
-        segment.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
-        return segment
-    }()
-    
     private let recordsView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -285,8 +274,7 @@ class MyProfileVC: UIViewController {
         runningStatsView.addArrangedSubview(horizontalStackView2)
         
         runningStatsContainerView.addSubview(runningStatsView)
-        
-        view.addSubview(segmentControl)
+
         view.addSubview(recordsView)
         view.addSubview(postsView)
         
@@ -317,13 +305,10 @@ class MyProfileVC: UIViewController {
             runningStatsView.bottomAnchor.constraint(equalTo: runningStatsContainerView.bottomAnchor, constant: -22),
             
             
-            segmentControl.topAnchor.constraint(equalTo: runningStatsContainerView.bottomAnchor, constant: 22),
-            segmentControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
             previousDateButton.centerYAnchor.constraint(equalTo: dateButton.centerYAnchor),
             previousDateButton.trailingAnchor.constraint(equalTo: dateButton.leadingAnchor, constant: -10),
             
-            dateButton.topAnchor.constraint(equalTo: segmentControl.bottomAnchor, constant: 27),
+            dateButton.topAnchor.constraint(equalTo: runningStatsContainerView.bottomAnchor, constant: 25),
             dateButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             nextDateButton.centerYAnchor.constraint(equalTo: dateButton.centerYAnchor),
@@ -378,16 +363,6 @@ class MyProfileVC: UIViewController {
     }
 
     
-    @objc private func segmentChanged() {
-        if segmentControl.selectedSegmentIndex == 0 {
-            recordsView.isHidden = false
-            postsView.isHidden = true
-        } else {
-            recordsView.isHidden = true
-            postsView.isHidden = false
-        }
-    }
-    
     private func setupConstraints() {
         let labelsAndViews: [(UILabel, UIView)] = [
             (distanceLabel, distanceView),
@@ -399,18 +374,6 @@ class MyProfileVC: UIViewController {
         labelsAndViews.forEach { label, view in
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        }
-    }
-}
-
-
-class CustomSegmentedControl: UISegmentedControl {
-    var segments: [String] = [] {
-        didSet {
-            removeAllSegments()
-            for (index, segment) in segments.enumerated() {
-                insertSegment(withTitle: segment, at: index, animated: false)
-            }
         }
     }
 }
