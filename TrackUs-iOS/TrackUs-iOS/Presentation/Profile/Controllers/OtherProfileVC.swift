@@ -58,7 +58,7 @@ class OtherProfileVC: UIViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             stackView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
-            stackView.centerYAnchor.constraint(equalTo: button.bottomAnchor)
+            stackView.centerYAnchor.constraint(equalTo: button.centerYAnchor)
         ])
         
         button.addTarget(self, action: #selector(editProfileButtonTapped), for: .touchUpInside)
@@ -359,7 +359,7 @@ class OtherProfileVC: UIViewController {
             self.blockUser(userId: self.userId)
         }
         let reportAction = UIAlertAction(title: "신고하기", style: .destructive) { _ in
-            // 신고하기 동작 수행
+            self.reportUser()
         }
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         
@@ -411,6 +411,11 @@ class OtherProfileVC: UIViewController {
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         }
     }
+    
+    private func reportUser() {
+        let reportUserVC = ReportUserVC(userId: self.userId)
+        navigationController?.pushViewController(reportUserVC, animated: true)
+    }
 }
 
 extension OtherProfileVC {
@@ -429,3 +434,4 @@ extension OtherProfileVC {
         }
     }
 }
+
