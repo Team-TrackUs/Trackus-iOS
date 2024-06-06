@@ -18,10 +18,11 @@ class MatePeopleListCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.widthAnchor.constraint(equalToConstant: 61).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 61).isActive = true
-        imageView.layer.cornerRadius = 61 / 2
-        imageView.backgroundColor = .gray
+        imageView.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        imageView.layer.cornerRadius = 60 / 2
+        imageView.backgroundColor = .gray2
+        imageView.tintColor = .gray3
         return imageView
     }()
     
@@ -68,13 +69,17 @@ class MatePeopleListCell: UICollectionViewCell {
         profileImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
         profileImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
         
-        contentView.addSubview(nameLabel)
-        nameLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 8).isActive = true
-        nameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 1
+        stack.translatesAutoresizingMaskIntoConstraints = false
         
-        contentView.addSubview(OwnerCrownView)
-        OwnerCrownView.leadingAnchor.constraint(equalTo: nameLabel.trailingAnchor, constant: 1).isActive = true
-        OwnerCrownView.centerYAnchor.constraint(equalTo: nameLabel.centerYAnchor).isActive = true
+        stack.addArrangedSubview(nameLabel)
+        stack.addArrangedSubview(OwnerCrownView)
+        
+        contentView.addSubview(stack)
+        stack.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 8).isActive = true
+        stack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
     }
     
     func configure(uid: String, isOwner: Bool) {
@@ -82,7 +87,7 @@ class MatePeopleListCell: UICollectionViewCell {
             
             // 이미지 존재 확인 없으면 기본 프로필
             if url == "" {
-                self.profileImageView.image = UIImage(named: "profile_img")
+                self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")?.withRenderingMode(.alwaysTemplate)
             } else {
                 self.profileImageView.loadImage(url: url ?? "")
             }

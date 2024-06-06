@@ -54,6 +54,13 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
         return tableView
     }()
+    
+    private lazy var navigationMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        button.tintColor = .gray1
+        return button
+    }()
 
     // MARK: - Lifecycle
 
@@ -141,7 +148,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
 
         let post = searchResultsPosts[indexPath.row]
 
-        cell.configure(image: post.routeImageUrl, runningStyleLabel: RunningMateVC().runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
+        cell.configure(post: post)
         return cell
     }
 
@@ -151,21 +158,11 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
 
-        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
-            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
-        }
-        courseDetailVC.courseTitleLabel.text = post.title
-        courseDetailVC.courseDestriptionLabel.text = post.content
-        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
-        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-        courseDetailVC.runningStyleLabel.text = RunningMateVC().runningStyleString(for: post.runningStyle)
-        courseDetailVC.courseLocationLabel.text = post.address
-        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
-        courseDetailVC.personInLabel.text = "\(post.members.count)명"
-        courseDetailVC.members = post.members
         courseDetailVC.postUid = post.uid
-        courseDetailVC.memberLimit = post.numberOfPeoples
-        courseDetailVC.imageUrl = post.routeImageUrl
+        
+        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        courseDetailVC.navigationItem.rightBarButtonItem = barButton
 
         self.searchBar.resignFirstResponder()
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
