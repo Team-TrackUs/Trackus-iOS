@@ -81,7 +81,11 @@ class MyChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         
         func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
             let chatRoomVC = ChatRoomVC(chat: chat.chatRooms[indexPath.row])
-            navigationController?.pushViewController(chatRoomVC, animated: true)
+            
+                let viewController = UINavigationController(rootViewController: chatRoomVC)
+                viewController.modalPresentationStyle = .fullScreen
+                self.present(viewController, animated: false)
+            //navigationController?.pushViewController(chatRoomVC, animated: true)
         }
         
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {

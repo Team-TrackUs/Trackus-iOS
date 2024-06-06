@@ -69,4 +69,21 @@ extension Date {
             return "지금"
         }
     }
+    enum Format {
+        case full // yyyy.mm.dd
+        case time // hh:mm
+    }
+    /// 채팅 날짜, 시간 반환용 >> .full : 날짜, .tiem : 시간
+    func formattedString(style: Date.Format = .full) -> String {
+        let dateFormatter = DateFormatter()
+        switch style {
+        case .full:
+            dateFormatter.dateFormat = "yyyy.MM.dd"
+        case .time:
+            dateFormatter.dateFormat = "yyyy년 MM월 dd일"
+            dateFormatter.amSymbol = "AM"
+            dateFormatter.pmSymbol = "PM"
+        }
+        return dateFormatter.string(from: self)
+    }
 }

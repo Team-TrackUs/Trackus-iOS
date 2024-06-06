@@ -11,9 +11,16 @@ import FirebaseFirestore
 class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     private var chat: Chat
+    private var messageMap: [MessageMap] = [] {
+        didSet {
+        }
+    }
+    private var messages: [Message] = [] // 메시지 배열
+    
+    var lock = NSRecursiveLock()
+    
     private var listener: ListenerRegistration?
-    var messages: [Message] = [] // 메시지 배열
-    var currentUid = User.currentUid
+    let currentUid = User.currentUid
     let db = Firestore.firestore().collection("chats")
     
     init(chat: Chat) {
@@ -27,51 +34,79 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
+        tableView.separatorStyle = .none
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "messageCell")
         return tableView
     }()
     
-    private lazy var messageTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "대화를 입력해주세요."
-        textField.borderStyle = .roundedRect
-        return textField
+    private lazy var plusButton: UIButton = {
+        let button = UIButton()
+        let image = UIImage(systemName: "plus")?.withTintColor(.gray2).resize(width: 18, height: 18)
+        button.setImage(image, for: .normal)
+        return button
+    }()
+    
+    private lazy var messageTextView: UITextView = {
+        let textView = UITextView()
+        textView.font = .systemFont(ofSize: 16)
+        //textField.numberOfLines = 0
+        return textView
     }()
     
     private lazy var sendButton: UIButton = {
         let button = UIButton()
-        button.setTitle("전송", for: .normal)
+        //button.setTitle("전송", for: .normal)
+        let image = UIImage(systemName: "paperplane.circle.fill")?.withTintColor(.mainBlue).resize(width: 36, height: 36)
+        button.setImage(image, for: .normal)
+        button.tintColor = .mainBlue
+        button.layer.cornerRadius = 18
+        button.clipsToBounds = true
+        button.layer.borderColor = UIColor.mainBlue.cgColor
+        button.layer.borderWidth = 3
         button.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
         return button
     }()
     
     private lazy var inputStackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [messageTextField, sendButton])
+        let stackView = UIStackView(arrangedSubviews: [plusButton, messageTextView, sendButton])
         stackView.axis = .horizontal
-        stackView.spacing = 8
+        stackView.backgroundColor = .systemBackground
+        stackView.spacing = 0
+        stackView.layer.cornerRadius = 18
+        stackView.clipsToBounds = true
+        stackView.layer.borderColor = UIColor.gray3.cgColor
+        stackView.layer.borderWidth = 1
         return stackView
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupViews()
         startListening()
+        setupViews()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        // 리스너 종료
         stopListening()
     }
     
     private func setupViews() {
+        view.backgroundColor = .systemBackground
         view.addSubview(tableView)
         view.addSubview(inputStackView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        messageTextField.translatesAutoresizingMaskIntoConstraints = false
+        plusButton.translatesAutoresizingMaskIntoConstraints = false
+        messageTextView.translatesAutoresizingMaskIntoConstraints = false
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         inputStackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        messageTextView.delegate = self
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(ChatMessageCell.self, forCellReuseIdentifier: "ChatMessageCell")
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -83,12 +118,18 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
             inputStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
             inputStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             
-            messageTextField.heightAnchor.constraint(equalToConstant: 40)
+            plusButton.heightAnchor.constraint(equalToConstant: 36),
+            plusButton.widthAnchor.constraint(equalToConstant: 36),
+            
+            sendButton.heightAnchor.constraint(equalToConstant: 36),
+            sendButton.widthAnchor.constraint(equalToConstant: 36),
+            
+            messageTextView.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
     
     @objc private func sendMessage() {
-        guard let text = messageTextField.text, !text.isEmpty else { return }
+        guard let text = messageTextView.text, !text.isEmpty else { return }
         let newMessage = Message(sendMember: currentUid, timeStamp: Date(), messageType: .text, data: text)
         
         if chat.group {
@@ -130,7 +171,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
                 print("Error adding message: \(error)")
             } else {
                 DispatchQueue.main.async {
-                    self.messageTextField.text = nil
+                    self.messageTextView.text = nil
                     self.scrollToBottom()
                 }
             }
@@ -169,10 +210,34 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
                         return Message(firestoreMessage: firestoreMessage)
                     }                
                 self.messages = firestoreMessages
-                self.tableView.reloadData()
-                if !self.messages.isEmpty {
-                    self.scrollToBottom()
+                // 메세지 맵핑
+                self.lock.withLock {
+                    self.messageMap = self.messageMapping(self.messages)
                 }
+                print(messageMap)
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                    if !self.messageMap.isEmpty {
+                        self.scrollToBottom()
+                    }
+                }
+            }
+    }
+    
+    /// 메세지 맵핑용 -> 동일 사용자, 시간별 맵핑
+    func messageMapping(_ messages: [Message]) -> [MessageMap] {
+        //var result: [MessageMap] = []
+        
+        messages
+            .enumerated()
+            .map{
+                //let nextMessageExists = messages[$0.offset + 1] != nil
+                let prevMessageIsSameUser = $0.offset != 0 ? messages[$0.offset - 1].sendMember == $0.element.sendMember : false
+                let sameDate = $0.offset != 0 ? messages[$0.offset - 1].date == $0.element.date : false
+                let nextMessageIsSameUser = $0.offset != messages.count - 1 ? messages[$0.offset + 1].sendMember == $0.element.sendMember : false
+                let sameTime = $0.offset != messages.count - 1 && $0.offset != 0  ? messages[$0.offset + 1].time == $0.element.time : false
+                
+                return MessageMap(message: $0.element, sameUser: prevMessageIsSameUser, sameDate: sameDate, sameTime: nextMessageIsSameUser && sameTime)
             }
     }
     
@@ -188,24 +253,14 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return messages.count
+        return messageMap.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "messageCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatMessageCell", for: indexPath) as! ChatMessageCell
         
-        let message = messages[indexPath.row]
-        let isMyMessage = message.sendMember == currentUid
-        let messageView = ChatMessageView(message: message, isMyMessage: isMyMessage)
-        messageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        cell.contentView.addSubview(messageView)
-        NSLayoutConstraint.activate([
-            messageView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
-            messageView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-            messageView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-            messageView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor)
-        ])
+        let messageMap = messageMap[indexPath.row]
+        cell.configure(messageMap: messageMap)
         
         return cell
     }
@@ -213,5 +268,19 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     // MARK: - UITableViewDelegate
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
+    }
+}
+
+extension ChatRoomVC: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) {
+        // 텍스트 뷰의 크기를 콘텐츠에 맞게 조정
+        let size = CGSize(width: textView.frame.width, height: .infinity)
+        let estimatedSize = textView.sizeThatFits(size)
+        
+        textView.constraints.forEach { (constraint) in
+            if constraint.firstAttribute == .height {
+                constraint.constant = estimatedSize.height
+            }
+        }
     }
 }

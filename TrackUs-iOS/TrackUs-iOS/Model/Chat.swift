@@ -93,11 +93,68 @@ struct Message {
     }
 }
 
+extension Message {
+    // 시간 반환
+    var time: String {
+        DateFormatter.timeFormatter.string(from: timeStamp)
+    }
+    
+    var date: String {
+        DateFormatter.dateFormatter.string(from: timeStamp)
+    }
+}
+
+// 날짜 변환
+extension DateFormatter {
+    static let timeFormatter = {
+        let formatter = DateFormatter()
+
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+
+        return formatter
+    }()
+    static let dateFormatter = {
+        let formatter = DateFormatter()
+
+        formatter.dateFormat = "yyyy.MM.dd"
+
+        return formatter
+    }()
+
+    static func timeString(_ seconds: Int) -> String {
+        let hour = Int(seconds) / 3600
+        let minute = Int(seconds) / 60 % 60
+        let second = Int(seconds) % 60
+
+        if hour > 0 {
+            return String(format: "%02i:%02i:%02i", hour, minute, second)
+        }
+        return String(format: "%02i:%02i", minute, second)
+    }
+}
+
 enum MessageType: String, Codable {
     case text
     case image
     case location
     case userInout
+}
+
+/// 메세지 맵핑용
+struct MessageMap {
+    
+    let message: Message
+    let sameUser: Bool
+    let sameDate: Bool
+    let sameTime: Bool
+    
+    init(message: Message, sameUser: Bool, sameDate: Bool, sameTime: Bool) {
+        self.message = message
+        self.sameUser = sameUser
+        self.sameDate = sameDate
+        self.sameTime = sameTime
+    }
 }
 
 // MARK: - Firebase 반환용

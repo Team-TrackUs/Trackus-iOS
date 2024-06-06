@@ -19,67 +19,6 @@ class ChatRoomManager {
     
     private let ref = Firestore.firestore().collection("chats")
     
-    func dummyData() {
-        let dummyChats: [Chat] = [
-            Chat(
-                uid: "chat1",
-                group: false,
-                title: "",
-                members: [User.currentUid: true, "user2": true],
-                usersUnreadCountInfo: ["user1": 0, User.currentUid: 6],
-                latestMessage: LastetMessage(timestamp: Date(), text: "Hey Alice!")
-            ),
-            Chat(
-                uid: "chat2",
-                group: true,
-                title: "그룹채팅 (3명)",
-                members: [User.currentUid: true,"user1": true, "user3": true, "user4": true],
-                usersUnreadCountInfo: [User.currentUid: 6, "user1": 2, "user3": 0, "user4": 1],
-                latestMessage: LastetMessage(timestamp: Date(), text: "Next meeting at 5 PM.")
-            ),
-            Chat(
-                uid: "chat3",
-                group: false,
-                title: "",
-                members: ["user1": true, User.currentUid: true],
-                usersUnreadCountInfo: [User.currentUid: 1, "user5": 0],
-                latestMessage: LastetMessage(timestamp: Date(), text: "See you tomorrow!")
-            ),
-            Chat(
-                uid: "chat4",
-                group: true,
-                title: "그룹 더미 2(3명, 나간사람 1)",
-                members: [User.currentUid: true, "user1": true, "user2": true, "user3": false],
-                usersUnreadCountInfo: [User.currentUid: 0, "user1": 0, "user2": 3]
-            )
-        ]
-        self.chatRooms = dummyChats
-        var user1 = User()
-        user1.uid = "user1"
-        user1.name = "유저1"
-        user1.profileImageUrl = "https://firebasestorage.googleapis.com:443/v0/b/newtrackus.appspot.com/o/usersImage%2FJJMVcgVXYNUMDIs9N8hXoiaiXAm1?alt=media&token=b1a4c6c0-4cfe-4fa7-9f98-89580c1137ce"
-        var user2 = User()
-        user2.uid = "user2"
-        user2.name = "유저2"
-        var user3 = User()
-        user3.uid = "user3"
-        user3.name = "유저3"
-        var user4 = User()
-        user4.uid = "user4"
-        user4.name = "유저4"
-        var user5 = User()
-        user5.uid = "user5"
-        user5.name = "유저5"
-        
-        let dummyUsers: [String: User] = [
-            "user1": user1,
-            "user2": user2,
-            "user3": user3,
-            "user4": user4,
-            "user5": user5,
-        ]
-        self.userInfo = dummyUsers
-    }
     // MARK: - 채팅방 리스너 관련
     // 채팅방 listener 추가
     func subscribeToUpdates(completionHandler: @escaping () -> Void) {
