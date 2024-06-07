@@ -1,35 +1,46 @@
 //
-//  RunActivityVC.swift
+//  RunTrackingVC.swift
 //  TrackUs-iOS
 //
-//  Created by 석기권 on 5/13/24.
+//  Created by 석기권 on 5/27/24.
 //
-// TODO: - 스와이프 구현
-// tanslation x값을 측정
-// 버튼의 center.x값을 이동한 값만큼 추가
-// TODO: - 라이브트래킹
-// 타이머 설정
-// TODO: - 디자인변경 적용
-// 러닝중지시 고도, 케이던스 정보추가
-// blurView의 bottomInset을 runInfoStackView + 50으로 설정
-// TODO: - 이동경로가 전부 보이도록 zoom level 설정
 
-
+import Foundation
+import ActivityKit
 import UIKit
 import MapKit
+import CoreMotion
 
-
-final class RunActivityVC: UIViewController {
+@available(iOS 16.1, *)
+final class WidgetManager {
+    static let shared = WidgetManager()
+    private init() {}
+    var activity: Activity<WidgetTestAttributes>!
+}
+final class RunTrackingVC: UIViewController {
     // MARK: - Properties
- 
+    private let pedometer = CMPedometer()
+    private let altimeter = CMAltimeter()
     private let locationService = LocationService.shared
-    private let runTrackingManager = RunTrackingManager()
+    private var gradientLayer = CAGradientLayer()
+    private let animation = CABasicAnimation(keyPath: "shadowPath")
+    private lazy var defaultPath = CGPath(rect: CGRect(x: 0, y: 0, width: 0, height: slideView.frame.height), transform: nil)
+    private var runModel = Running() {
+        didSet {
+            updateUI()
+        }
+    }
     private var mapView: MKMapView!
     private var isActive = true
     private var timer: Timer?
     private var count = 3
     private var polyline: MKPolyline?
     private var annotation: MKPointAnnotation?
+    private var annotation2: MKPointAnnotation?
+    private var tempData: [String: Any] = ["distance": 0.0, "steps": 0]
+    private var maxAltitude = -99999.0
+    private var minAltitude = 99999.0
+    
     
     private lazy var countLabel: UILabel = {
         let label = UILabel()
@@ -60,22 +71,27 @@ final class RunActivityVC: UIViewController {
         return view
     }()
     
-    private lazy var slideBox: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = UIColor(white: 0, alpha: 0.5)
-        view.layer.cornerRadius = 35
-        
+    private let slideLabel: UILabel = {
         let label = UILabel()
+        label.layer.zPosition = 1
         label.text = "밀어서 러닝 종료"
         label.textColor = .lightGray
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var slideView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(white: 0, alpha: 0.6)
+        view.layer.cornerRadius = 35
         
-        view.addSubview(label)
+        view.addSubview(slideLabel)
         view.addSubview(actionButton)
-        label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        view.clipsToBounds = true
+        slideLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        slideLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         view.isHidden = true
         return view
     }()
@@ -85,11 +101,10 @@ final class RunActivityVC: UIViewController {
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.widthAnchor.constraint(equalToConstant: 50).isActive = true
         btn.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        btn.layer.zPosition = 2
         btn.layer.cornerRadius = 25
         btn.backgroundColor = .white
-        
         let image = UIImage(systemName: "pause.fill")
-        
         btn.setImage(image, for: .normal)
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pangestureHandler))
         btn.addGestureRecognizer(panGesture)
@@ -234,43 +249,50 @@ final class RunActivityVC: UIViewController {
     private let blurView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         view.isHidden = true
         return view
     }()
     
-    // MARK: - Life Cycle
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupMapView()
         setMapRegion()
         setConstraint()
         setTimer()
+        setRunInfo()
+        if #available(iOS 16.2, *) {
+            displayWidget()
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         addGradientLayer()
+        gradientLayer.frame.size.height = slideView.frame.height
+        slideView.layer.addSublayer(gradientLayer)
+        animation.duration = 0.3
     }
     
-    // MARK: - UI Methods
+    // MARK: - Helpers
     func setConstraint() {
         self.view.addSubview(overlayView)
         self.view.addSubview(blurView)
-        self.view.addSubview(slideBox)
+        self.view.addSubview(slideView)
         self.view.addSubview(topStackView)
         self.view.addSubview(runInfoStackView)
         self.view.addSubview(runInfoStackView2)
         
         NSLayoutConstraint.activate([
-            slideBox.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            slideBox.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            slideBox.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            slideBox.heightAnchor.constraint(equalToConstant: 70),
+            slideView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            slideView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            slideView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
+            slideView.heightAnchor.constraint(equalToConstant: 70),
             
-            actionButton.leadingAnchor.constraint(equalTo: slideBox.leadingAnchor, constant: 10),
-            actionButton.topAnchor.constraint(equalTo: slideBox.topAnchor, constant: 10),
-            actionButton.bottomAnchor.constraint(equalTo: slideBox.bottomAnchor, constant: -10),
+            actionButton.leadingAnchor.constraint(equalTo: slideView.leadingAnchor, constant: 10),
+            actionButton.topAnchor.constraint(equalTo: slideView.topAnchor, constant: 10),
+            actionButton.bottomAnchor.constraint(equalTo: slideView.bottomAnchor, constant: -10),
             
             topStackView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             topStackView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
@@ -289,7 +311,7 @@ final class RunActivityVC: UIViewController {
             blurView.topAnchor.constraint(equalTo: self.view.topAnchor),
             blurView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             
-         
+            
         ])
     }
     
@@ -305,19 +327,12 @@ final class RunActivityVC: UIViewController {
         mapView.setUserTrackingMode(.follow, animated: true)
     }
     
-    // latitudinalMeters 남북범위
-    // longitudinalMeters 동서범위
-    func setMapRange(center: CLLocationCoordinate2D, animated: Bool = true) {
-        let range = runTrackingManager.coordinates.totalDistance + 1000
-        let region = MKCoordinateRegion(center: center, latitudinalMeters: CLLocationDistance(floatLiteral: range), longitudinalMeters: range)
-        mapView.setRegion(region, animated: animated)
-    }
-    
     func updatedOnStart() {
         startTracking()
         startTimer()
         setCameraOnTrackingMode()
         setStartModeUI()
+        
     }
     
     func updatedOnPause() {
@@ -325,11 +340,15 @@ final class RunActivityVC: UIViewController {
         stopTimer()
         setCameraOnPauseMode()
         setPauseModeUI()
+        
+        if #available(iOS 16.2, *) {
+            updateWidget()
+        }
     }
     
     func setStartModeUI() {
         overlayView.isHidden = true
-        slideBox.isHidden = false
+        slideView.isHidden = false
         topStackView.isHidden = false
         runInfoStackView.isHidden = false
         blurView.isHidden = true
@@ -368,13 +387,13 @@ final class RunActivityVC: UIViewController {
     }
     
     func goToResultVC() {
+        runModel.setEndTime()
         HapticManager.shared.hapticImpact(style: .medium)
         let resultVC = RunningResultVC()
-        resultVC.modalPresentationStyle = .fullScreen
-        present(resultVC, animated: true)
+        resultVC.runModel = runModel
+        navigationController?.pushViewController(resultVC, animated: false)
     }
     
-    // MARK: - Helpers
     func setTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
@@ -394,9 +413,26 @@ final class RunActivityVC: UIViewController {
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
-            runTrackingManager.seconds += 1
-            timeLabel.text = runTrackingManager.seconds.toMMSSTimeFormat
+            runModel.seconds += 1
+            
+            if #available(iOS 16.2, *) {
+                updateWidget()
+            }
         })
+        
+        
+    }
+    
+    @available(iOS 16.2, *)
+    func updateWidget() {
+        guard let activity = WidgetManager.shared.activity else {
+            return
+        }
+        Task {
+            await activity.update(using: WidgetTestAttributes.ContentState(time: runModel.seconds.toMMSSTimeFormat,
+                                                                           pace: runModel.pace.asString(style: .pace), kilometer: String(format: "%.2f", runModel.distance / 1000.0),
+                                                                           isActive: isActive))
+        }
     }
     
     func stopTimer() {
@@ -404,7 +440,7 @@ final class RunActivityVC: UIViewController {
     }
     
     func setCameraOnPauseMode() {
-        setMapPreview()
+        setPreviewMode()
         drawPath()
     }
     
@@ -414,50 +450,114 @@ final class RunActivityVC: UIViewController {
     }
     
     func drawPath() {
-        let coordinates = self.runTrackingManager.coordinates
+        mapView.showsUserLocation = false
+        let coordinates = runModel.coordinates
         annotation = MKPointAnnotation()
+        annotation2 = MKPointAnnotation()
         polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         
         guard coordinates.count >= 1, let annotation = annotation else { return }
         annotation.coordinate = coordinates.first!
+        annotation2?.coordinate = coordinates.last!
         mapView.addAnnotation(annotation)
         
-        guard coordinates.count >= 2, let polyline = polyline else { return }
+        guard coordinates.count >= 2, let polyline = polyline, let annotation2 = annotation2 else { return }
         mapView.addOverlay(polyline)
+        mapView.addAnnotations([annotation, annotation2])
     }
     
     func removePath() {
-        guard let polyline = polyline, let annotation = annotation else { return }
+        mapView.showsUserLocation = true
+        guard let polyline = polyline, let annotation = annotation, let annotation2 = annotation2 else { return }
         mapView.removeOverlay(polyline)
-        mapView.removeAnnotation(annotation)
+        mapView.removeAnnotations([annotation, annotation2])
     }
     
-    func setMapPreview() {
-        if let center = runTrackingManager.coordinates.centerPosition, runTrackingManager.coordinates.count >= 2 {
-            setMapRange(center: center, animated: false)
-        } else {
-            setMapRegion(animated: false)
+    func setPreviewMode() {
+        if let region = runModel.coordinates.makeRegionToFit() {
+            mapView.setRegion(region, animated: false)
         }
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             guard let self = self else { return }
-            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY, left: 20, bottom: 20, right: 20), animated: false)
+            mapView.setVisibleMapRect(mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: runInfoStackView2.frame.maxY + 20,
+                                                                                        left: 0,
+                                                                                        bottom: slideView.frame.height + 20,
+                                                                                        right: 0), animated: false)
+        }
+    }
+    
+    func setRunInfo() {
+        runModel.setStartTime()
+        
+        guard let location = locationService.currentLocation?.asCLLocation else {
+            return
+        }
+        runModel.coordinates.append(location.coordinate)
+        locationService.reverseGeoCoding(location: location) { address in
+            self.runModel.address = address
+        }
+    }
+    
+    @available (iOS 16.2, *)
+    func displayWidget() {
+        if ActivityAuthorizationInfo().areActivitiesEnabled {
+            let attributes = WidgetTestAttributes(name: "test")
+            let initialState = WidgetTestAttributes.ContentState(time: "00:00", pace: "-'--''", kilometer: "0.00", isActive: false)
+            
+            do {
+                WidgetManager.shared.activity = try Activity<WidgetTestAttributes>.request(
+                    attributes: attributes,
+                    content: .init(state: initialState, staleDate: nil)
+                )
+                
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    @available (iOS 16.2, *)
+    func removeWidget() {
+        Task {
+            await WidgetManager.shared.activity.end(nil, dismissalPolicy: .immediate)
         }
     }
     
     // MARK: - objc Methods
     @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
-        let minX = actionButton.bounds.width / 2 + 10
         let translation = sender.translation(in: actionButton)
-        
+        let inset = UIEdgeInsets(top: -40, left: -40, bottom: -40, right: 30)
+        let minX = actionButton.bounds.width / 2 + 10
+        let maxX = slideView.bounds.maxX - minX
         let newX = actionButton.center.x + translation.x
-        let maxX = slideBox.bounds.maxX - CGFloat(35)
-        actionButton.center.x = max(minX, min(newX, maxX))
-        sender.setTranslation(CGPoint.zero, in: actionButton)
+        let moveX = max(minX, min(newX, maxX))
         
-        if sender.state == .ended && newX > maxX * 0.9 {
+        if sender.state == .changed {
+            actionButton.center.x = moveX
+            
+            // 블러효과
+            let shadowRadius: CGFloat = 45
+            gradientLayer.shadowRadius = shadowRadius
+            gradientLayer.shadowPath = CGPath(rect: CGRect(x: 0, y: 0, width: moveX, height: slideView.frame.height).inset(by: inset), transform: nil)
+            gradientLayer.shadowOpacity = 1
+            gradientLayer.shadowOffset = CGSize.zero
+            gradientLayer.shadowColor = UIColor.mainBlue.cgColor
+            
+            animation.fromValue = gradientLayer.shadowPath
+            sender.setTranslation(CGPoint.zero, in: actionButton)
+        }
+        else if sender.state == .ended && newX > maxX * 0.9 {
             goToResultVC()
-        } else if sender.state == .ended  {
-            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn) {
+            if #available(iOS 16.2, *) {
+                removeWidget()
+            }
+        }
+        else if sender.state == .ended  {
+            animation.toValue = defaultPath
+            gradientLayer.add(animation, forKey: "animation")
+            gradientLayer.shadowPath = defaultPath
+            UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseIn) {
                 self.actionButton.center.x = minX
             }
         }
@@ -475,12 +575,12 @@ final class RunActivityVC: UIViewController {
 }
 
 // MARK: - Extentions
-extension RunActivityVC {
+extension RunTrackingVC {
     func makeCircleStView() -> UIStackView {
         let circleDiameter: CGFloat = 88.0
         let view = UIStackView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         view.layer.cornerRadius = circleDiameter / 2.0
         view.clipsToBounds = true
         view.distribution = .equalSpacing
@@ -494,39 +594,77 @@ extension RunActivityVC {
     }
 }
 
-extension RunActivityVC: UserLocationDelegate {
+extension RunTrackingVC: UserLocationDelegate {
     func userLocationUpated(location: CLLocation) {
-        runTrackingManager.coordinates.append(location.coordinate)
+        runModel.coordinates.append(location.coordinate)
         mapView.setUserTrackingMode(.follow, animated: true)
     }
     
     func startTracking() {
+        locationService.allowBackgroundUpdates = true
         locationService.userLocationDelegate = self
-        // 움직임이 감지될때마다 호출되는 핸들러
-        runTrackingManager.updateRunInfo { [weak self] runningModel in
+        pedometer.startUpdates(from: Date()) { [weak self] pedometerData, error in
             guard let self = self else { return }
+            guard let pedometerData = pedometerData, error == nil else {
+                return
+            }
+            let currentDistance = pedometerData.distance?.doubleValue ?? 0.0
+            let currentSteps = pedometerData.numberOfSteps.intValue
+            guard let beforeData = tempData["steps"] as? Int else { return }
             
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                kilometerLabel.text = runningModel.distance.asString(style: .km)
-                paceLabel.text = runningModel.pace.asString(style: .pace)
-                calorieLabel.text = runningModel.calorie.asString(style: .kcal)
-                cadenceLabel.text = String(runningModel.cadance)
-                guard Int(runningModel.maxAltitude) >= 1 else {
-                    return
-                }
-                altitudeLabel.text = "+ \(Int(runningModel.maxAltitude))m"
+                runModel.steps = currentSteps + beforeData
+                runModel.distance = currentDistance + (tempData["distance"] as? Double ?? 0.0)
+                runModel.cadance = Int((Double(currentSteps + beforeData)) / (runModel.seconds / 60))
+                runModel.calorie = Double(runModel.steps) * 0.04
+                runModel.pace = (runModel.seconds / 60) / (runModel.distance / 1000.0)
             }
         }
+        
+        altimeter.startRelativeAltitudeUpdates(to: .main) { [weak self]  altitudeData, error in
+            guard let self = self else { return }
+            guard let altitudeData = altitudeData, error == nil else {
+                return
+            }
+            let currentAltitue = altitudeData.relativeAltitude.doubleValue
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                if currentAltitue > 0 {
+                    runModel.maxAltitude = max(maxAltitude, currentAltitue)
+                }
+                if currentAltitue < 0 {
+                    runModel.minAltitude = min(minAltitude, currentAltitue)
+                }
+            }
+        }
+        
     }
     
+    
     func stopTracking() {
-        self.locationService.userLocationDelegate = nil
-        runTrackingManager.stopRecord()
+        locationService.allowBackgroundUpdates = false
+        locationService.userLocationDelegate = nil
+        pedometer.stopUpdates()
+        altimeter.stopRelativeAltitudeUpdates()
+        tempData["steps"] = runModel.steps
+        tempData["distance"] = runModel.distance
+    }
+    
+    func updateUI() {
+        timeLabel.text = runModel.seconds.toMMSSTimeFormat
+        kilometerLabel.text = runModel.distance.asString(style: .km)
+        paceLabel.text = runModel.pace.asString(style: .pace)
+        calorieLabel.text = runModel.calorie.asString(style: .kcal)
+        cadenceLabel.text = String(runModel.cadance)
+        guard Int(runModel.maxAltitude) >= 1 else {
+            return
+        }
+        altitudeLabel.text = "+ \(Int(runModel.maxAltitude))m"
     }
 }
 
-extension RunActivityVC: MKMapViewDelegate {
+extension RunTrackingVC: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         guard let polyLine = overlay as? MKPolyline
         else {
@@ -540,3 +678,4 @@ extension RunActivityVC: MKMapViewDelegate {
         return renderer
     }
 }
+

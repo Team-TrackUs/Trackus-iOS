@@ -20,7 +20,7 @@ final class CustomTabBarVC: UITabBarController {
         btn.layer.shadowColor = UIColor.black.cgColor
         btn.layer.shadowOffset = CGSize(width: 3, height: 3)
         btn.layer.shadowOpacity = 0.4
-        btn.addTarget(self, action: #selector(goToRunActivityVC), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(goToRunTrackingVC), for: .touchUpInside)
         return btn
     }()
     
@@ -67,11 +67,11 @@ final class CustomTabBarVC: UITabBarController {
         items[3].image = UIImage(resource: .profileTabbarIcon)
     }
     
-    @objc func goToRunActivityVC() {
+    @objc func goToRunTrackingVC() {
         CoreMotionService.shared.checkAuthrization { [weak self] status in
             guard let self = self else { return }
             if status == .authorized {
-                let viewController = UINavigationController(rootViewController: RunActivityVC())
+                let viewController = UINavigationController(rootViewController: RunTrackingVC())
                 viewController.modalPresentationStyle = .fullScreen
                 self.present(viewController, animated: false)
             } else if status == .denied {

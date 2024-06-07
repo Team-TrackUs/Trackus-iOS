@@ -56,17 +56,23 @@ class ChatMessageCell: UITableViewCell {
         return messageBackgroundView
     }()
     
-    private lazy var leftSpacerView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private lazy var messageStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.alignment = .bottom
+        stackView.distribution = .fill
+        stackView.spacing = 8
+        
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
     }()
     
-    private lazy var rightSpacerView: UIView = {
+    private lazy var spacerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -81,36 +87,16 @@ class ChatMessageCell: UITableViewCell {
     
     // 기본 제약 조건
     private func setupViews() {
-        contentView.addSubview(messageBackgroundView)
-        contentView.addSubview(timeLabel)
+        contentView.addSubview(dateLabel)
         contentView.addSubview(profileImageView)
-        contentView.addSubview(leftSpacerView)
-        contentView.addSubview(rightSpacerView)
+        contentView.addSubview(userNameLabel)
+        contentView.addSubview(messageStackView)
+        contentView.addSubview(timeLabel)
         messageBackgroundView.addSubview(messageLabel)
         
-        // 기본 공통 오토 레이아웃
-        NSLayoutConstraint.activate([
-            messageBackgroundView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
-            
-            profileImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            profileImageView.widthAnchor.constraint(equalToConstant: 40),
-            profileImageView.heightAnchor.constraint(equalToConstant: 40),
-            
-            messageLabel.topAnchor.constraint(equalTo: messageBackgroundView.topAnchor, constant: 8),
-            messageLabel.leadingAnchor.constraint(equalTo: messageBackgroundView.leadingAnchor, constant: 8),
-            messageLabel.trailingAnchor.constraint(equalTo: messageBackgroundView.trailingAnchor, constant: -8),
-            messageLabel.bottomAnchor.constraint(equalTo: messageBackgroundView.bottomAnchor, constant: -8),
-            
-            timeLabel.bottomAnchor.constraint(equalTo: messageBackgroundView.bottomAnchor),
-            
-            leftSpacerView.bottomAnchor.constraint(equalTo: messageBackgroundView.bottomAnchor),
-            rightSpacerView.bottomAnchor.constraint(equalTo: messageBackgroundView.bottomAnchor)
-        ])
-    }
-    
-    // 날짜 출력
-    func dateLabelSetup() {
-        
+        // 레이블의 content hugging priority를 설정
+        messageBackgroundView.setContentHuggingPriority(UILayoutPriority(rawValue: 251), for: .horizontal)
+        spacerView.setContentHuggingPriority(UILayoutPriority(rawValue: 249), for: .horizontal)
     }
     
     @objc private func profileImageTap() {
@@ -123,93 +109,106 @@ class ChatMessageCell: UITableViewCell {
         let isMyMessage = (messageMap.message.sendMember == User.currentUid)
         let message = messageMap.message
         
-        var topAnchorPoint = contentView.topAnchor
+        // 제약조건 리스트
+        NSLayoutConstraint.deactivate(contentView.constraints)
+        var constraints = [NSLayoutConstraint]()
         // 사용자 정보 가져오기
         guard let sendMember = ChatRoomManager.shared.userInfo[message.sendMember] else { return }
         
         messageLabel.text = message.text
         
-        // 시간 출력 여부
-        timeLabel.isHidden = messageMap.sameTime
-        timeLabel.text = message.time
+        // 공통 제약조건
+        constraints.append(messageLabel.topAnchor.constraint(equalTo: messageBackgroundView.topAnchor, constant: 8))
+        constraints.append(messageLabel.bottomAnchor.constraint(equalTo: messageBackgroundView.bottomAnchor, constant: -8))
+        constraints.append(messageLabel.leadingAnchor.constraint(equalTo: messageBackgroundView.leadingAnchor, constant: 8))
+        constraints.append(messageLabel.trailingAnchor.constraint(equalTo: messageBackgroundView.trailingAnchor, constant: -8))
         
+        constraints.append(messageStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant:-4))
+        constraints.append(messageStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant:64))
+        
+        constraints.append(timeLabel.bottomAnchor.constraint(equalTo: messageStackView.bottomAnchor))
         
         // 날짜 출력 여부
-        if !messageMap.sameDate {
-            contentView.addSubview(dateLabel)
-            NSLayoutConstraint.activate([
-                dateLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-                dateLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
-            ])
+        if messageMap.sameDate {
+            dateLabel.isHidden = true
+            //topAnchorPoint = dateLabel.bottomAnchor
+        } else {
+            dateLabel.isHidden = false
+            constraints.append(dateLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8))
+            constraints.append(dateLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+            constraints.append(dateLabel.heightAnchor.constraint(equalToConstant: 16))
             dateLabel.text = message.date
-            topAnchorPoint = dateLabel.bottomAnchor
         }
-        
-        profileImageView.topAnchor.constraint(equalTo: topAnchorPoint, constant: 8).isActive = true
         
         // 프로필 이미지파일 출력 여부
         if isMyMessage {
+            constraints.append(messageStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant:-16))
+            constraints.append(timeLabel.trailingAnchor.constraint(equalTo: messageBackgroundView.leadingAnchor, constant: -4))
+            messageStackView.addArrangedSubview(spacerView)
+            messageStackView.addArrangedSubview(messageBackgroundView)
+            
+            
             profileImageView.isHidden = true
-            NSLayoutConstraint.activate([
-                messageBackgroundView.topAnchor.constraint(equalTo: topAnchorPoint, constant: 4),
-                messageBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-                timeLabel.trailingAnchor.constraint(equalTo: messageBackgroundView.leadingAnchor, constant: -8),
-                timeLabel.leadingAnchor.constraint(equalTo: leftSpacerView.trailingAnchor, constant: 8),
-                leftSpacerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-                //emptyView.leadingAnchor.constraint(equalTo: timeLabel.leadingAnchor, constant: -8)
-            ])
+            userNameLabel.isHidden = true
+            timeLabel.textAlignment = .right
+            constraints.append(messageStackView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 4))
             messageLabel.textColor = .white
             messageBackgroundView.backgroundColor = .mainBlue
         } else {
             
-            rightSpacerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8).isActive = true
+            messageStackView.addArrangedSubview(messageBackgroundView)
+            messageStackView.addArrangedSubview(spacerView)
+            timeLabel.textAlignment = .left
+            constraints.append(messageStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant:-64))
+            constraints.append(timeLabel.leadingAnchor.constraint(equalTo: messageBackgroundView.trailingAnchor, constant: 4))
             // 프로필, 닉네임 출력 여부
             if !messageMap.sameUser || !messageMap.sameDate {
                 profileImageView.isHidden = false
-                if !contentView.subviews.contains(userNameLabel) {
-                    contentView.addSubview(userNameLabel)
+                userNameLabel.isHidden = false
+                constraints.append(profileImageView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 4))
+                constraints.append(profileImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16))
+                constraints.append(profileImageView.trailingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 56))
+                constraints.append(profileImageView.widthAnchor.constraint(equalToConstant: 40))
+                constraints.append(profileImageView.heightAnchor.constraint(equalToConstant: 40))
+                
+                constraints.append(userNameLabel.topAnchor.constraint(equalTo: profileImageView.topAnchor))
+                constraints.append(userNameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 8))
+                constraints.append(userNameLabel.heightAnchor.constraint(equalToConstant: 12))
+                constraints.append(messageStackView.topAnchor.constraint(equalTo: profileImageView.topAnchor, constant: 16))
+                //constraints.append(messageBackgroundView.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 8))
+                
+                // 사용자 이미지 있을 경우 이미지 표시 - 없을경우 기본
+                if let url = sendMember.profileImageUrl {
+                    profileImageView.loadImage(url: url)
                 }
                 userNameLabel.text = sendMember.name.isEmpty ? "탈퇴 회원" : sendMember.name
                 
-                NSLayoutConstraint.activate([
-                    profileImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-                    
-                    userNameLabel.topAnchor.constraint(equalTo: profileImageView.topAnchor, constant: 4),
-                    userNameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 8),
-                    
-                    messageBackgroundView.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 4),
-                    messageBackgroundView.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant:8)
-                ])
-                if let url = ChatRoomManager.shared.userInfo[message.sendMember]?.profileImageUrl {
-                    // Load image from URL (you may need an image loading library like SDWebImage)
-                    ImageCacheManager.shared.loadImage(imageUrl: url, completionHandler: { image in
-                        self.profileImageView.image = image
-                    })
-                }
                 // 탭 제스처 추가
-                //tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(profileImageTap))
-                //profileImageView.addGestureRecognizer(tapGestureRecognizer)
+                tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(profileImageTap))
+                profileImageView.addGestureRecognizer(tapGestureRecognizer)
+                
             } else {
                 profileImageView.isHidden = true
                 userNameLabel.isHidden = true
-//                if contentView.subviews.contains(profileImageView) {
-//                    profileImageView.removeFromSuperview()
-//                }
-//                if contentView.subviews.contains(userNameLabel) {
-//                    userNameLabel.removeFromSuperview()
-//                }
-                NSLayoutConstraint.activate([
-                    messageBackgroundView.topAnchor.constraint(equalTo: topAnchorPoint, constant: 4),
-                    messageBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant:64)
-                ])
+                
+                constraints.append(messageStackView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 4))
+                constraints.append(messageBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant:64))
+                
             }
-            
-            timeLabel.leadingAnchor.constraint(equalTo: messageBackgroundView.trailingAnchor, constant: 8).isActive = true
-            timeLabel.trailingAnchor.constraint(equalTo: rightSpacerView.leadingAnchor, constant: -8).isActive = true
             messageLabel.textColor = .label
             messageBackgroundView.backgroundColor = .gray3
         }
         
+        // 시간 출력 여부
+        if messageMap.sameTime {
+            timeLabel.isHidden = true
+        }else {
+            timeLabel.isHidden = false
+            timeLabel.text = message.time
+        }
+        
+        // 제약조건 추가
+        NSLayoutConstraint.activate(constraints)
         //contentView.layoutIfNeeded()
     }
 }

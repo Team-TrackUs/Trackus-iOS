@@ -25,15 +25,22 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         textField.attributedPlaceholder = NSAttributedString(string: "검색어를 입력해주세요", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray])
         textField.backgroundColor = .white
         textField.frame = CGRect(x: 0, y: 0, width: 300, height: 48)
+        
+        // 검색창 설정
+        textField.returnKeyType = .search
         textField.inputAccessoryView = toolBarKeyboard
-        textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        textField.clearButtonMode = .whileEditing
+        textField.autocorrectionType = .no
+        textField.spellCheckingType = .no
+        textField.autocapitalizationType = .none
+        
         return textField
     }()
 
     private lazy var toolBarKeyboard: UIToolbar = {
         let toolbar = UIToolbar()
         let flexBarButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(btnDoneBarTapped))
+        let doneButton = UIBarButtonItem(title: "검색", style: .done, target: self, action: #selector(btnDoneBarTapped))
         toolbar.sizeToFit()
         toolbar.items = [flexBarButton, doneButton]
         toolbar.tintColor = .mainBlue
@@ -47,6 +54,13 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
         return tableView
     }()
+    
+    private lazy var navigationMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        button.tintColor = .gray1
+        return button
+    }()
 
     // MARK: - Lifecycle
 
@@ -58,21 +72,25 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         tableView.delegate = self
         tableView.dataSource = self
         searchBar.becomeFirstResponder()
-        Task {
-            await fetchPosts()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let searchText = searchBar.text, !searchText.isEmpty {
+            searchPosts(for: searchText)
         }
+        tableView.reloadData()
     }
 
     // MARK: - Selectors
 
     @objc func btnDoneBarTapped(sender: Any) {
         searchBar.resignFirstResponder()
-        view.endEditing(true)
-    }
-
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        guard let searchText = textField.text else { return }
-        filterPosts(for: searchText)
+        guard let searchText = searchBar.text, !searchText.isEmpty else {
+            print("DEBUG: Search text is nil or empty")
+            return
+        }
+        searchPosts(for: searchText)
     }
 
     // MARK: - Helpers
@@ -98,27 +116,24 @@ class SearchVC: UIViewController, UITextFieldDelegate {
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
 
-    private func fetchPosts() async {
-
+    private func searchPosts(for searchText: String) {
         let postService = PostService()
-
-        do {
-            try await postService.fetchPost()
-            self.posts = postService.posts
-            tableView.reloadData()
-        } catch {
-            let nsError = error as NSError
-            print("DEBUG: Firestore error - Domain: \(nsError.domain), Code: \(nsError.code), Description: \(nsError.localizedDescription)")
+        postService.searchFilter(searchText: searchText) { [weak self] filteredPosts in
+            self?.searchResultsPosts = filteredPosts
+            self?.tableView.reloadData()
         }
     }
-
-    private func filterPosts(for searchText: String) {
-        searchResultsPosts = posts.filter { post in
-            return post.title.lowercased().contains(searchText.lowercased())
+    
+    // 키보드 리턴키
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        searchBar.resignFirstResponder()
+        guard let searchText = searchBar.text, !searchText.isEmpty else {
+            print("DEBUG: Search text is nil or empty")
+            return true
         }
-        tableView.reloadData()
+        searchPosts(for: searchText)
+        return true
     }
-
 }
 
 extension SearchVC: UITableViewDelegate, UITableViewDataSource {
@@ -133,7 +148,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
 
         let post = searchResultsPosts[indexPath.row]
 
-        cell.configure(image: post.routeImageUrl, runningStyleLabel: RunningMateVC().runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
+        cell.configure(post: post)
         return cell
     }
 
@@ -143,34 +158,15 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
 
-        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
-            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
-        }
-        courseDetailVC.courseTitleLabel.text = post.title
-        courseDetailVC.courseDestriptionLabel.text = post.content
-        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
-        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-        courseDetailVC.runningStyleLabel.text = RunningMateVC().runningStyleString(for: post.runningStyle)
-        courseDetailVC.courseLocationLabel.text = post.address
-        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
-        courseDetailVC.personInLabel.text = "\(post.members.count)명"
-        courseDetailVC.members = post.members
         courseDetailVC.postUid = post.uid
-        courseDetailVC.memberLimit = post.numberOfPeoples
-        courseDetailVC.imageUrl = post.routeImageUrl
-
-        // 이미지 추가
-        // CourseRegisterVC에서도 해야함
-        PostService.downloadImage(urlString: post.routeImageUrl) { image in
-            DispatchQueue.main.async {
-                courseDetailVC.mapImageButton.setImage(image, for: .normal)
-            }
-        }
+        
+        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        courseDetailVC.navigationItem.rightBarButtonItem = barButton
 
         self.searchBar.resignFirstResponder()
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
 
         tableView.deselectRow(at: indexPath, animated: false)
     }
-
 }

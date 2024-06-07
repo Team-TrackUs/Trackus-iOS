@@ -23,8 +23,9 @@ struct Post: Codable {
     var createdAt: Date
     var runningStyle: Int
     var members: [String]
+    var ownerUid: String
     
-    init(uid: String, title: String, content: String, courseRoutes: [GeoPoint], distance: Double, numberOfPeoples: Int, routeImageUrl: String, startDate: Date, address: String, whoReportAt: [String], createdAt: Date, runningStyle: Int, members: [String]) {
+    init(uid: String, title: String, content: String, courseRoutes: [GeoPoint], distance: Double, numberOfPeoples: Int, routeImageUrl: String, startDate: Date, address: String, whoReportAt: [String], createdAt: Date, runningStyle: Int, members: [String], ownerUid: String) {
         self.uid = uid
         self.title = title
         self.content = content
@@ -38,6 +39,7 @@ struct Post: Codable {
         self.createdAt = createdAt
         self.runningStyle = runningStyle
         self.members = members
+        self.ownerUid = ownerUid
     }
     
     mutating func updateRouteImageUrl(newUrl: String) {

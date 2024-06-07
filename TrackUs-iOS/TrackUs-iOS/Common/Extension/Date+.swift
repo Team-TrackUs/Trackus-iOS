@@ -1,14 +1,30 @@
 //
 //  Date+.swift
 //  TrackUs-iOS
-//
-//  Created by 최주원 on 5/30/24.
-//
 
 import Foundation
 import UIKit
 
 extension Date {
+    var fullYear: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy.MM.dd"
+        let str = dateFormatter.string(from: self)
+        return str
+    }
+    
+    var currentTime: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        let str = dateFormatter.string(from: self)
+        return str
+    }
+    
+    var timeOfDay: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        return hour < 12 ? "오전" : "오후"
+    }
+    
     func timeAgoFormat(numericDates: Bool = false) -> String {
         let calendar = Calendar.current
         let date = self
@@ -69,21 +85,25 @@ extension Date {
             return "지금"
         }
     }
+    
     enum Format {
         case full // yyyy.mm.dd
         case time // hh:mm
     }
+    
     /// 채팅 날짜, 시간 반환용 >> .full : 날짜, .tiem : 시간
     func formattedString(style: Date.Format = .full) -> String {
         let dateFormatter = DateFormatter()
         switch style {
-        case .full:
-            dateFormatter.dateFormat = "yyyy.MM.dd"
-        case .time:
-            dateFormatter.dateFormat = "yyyy년 MM월 dd일"
-            dateFormatter.amSymbol = "AM"
-            dateFormatter.pmSymbol = "PM"
+            case .full:
+                dateFormatter.dateFormat = "yyyy.MM.dd"
+            case .time:
+                dateFormatter.dateFormat = "yyyy년 MM월 dd일"
+                dateFormatter.amSymbol = "AM"
+                dateFormatter.pmSymbol = "PM"
         }
         return dateFormatter.string(from: self)
     }
+    
+    
 }

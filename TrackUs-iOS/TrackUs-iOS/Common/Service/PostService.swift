@@ -30,7 +30,8 @@ class PostService {
             "whoReportAt" : post.whoReportAt,
             "createdAt" : post.createdAt,
             "runningStyle" : post.runningStyle,
-            "members" : post.members
+            "members" : post.members,
+            "ownerUid" : post.ownerUid
         ] as [String : Any]
         
         Firestore.firestore().collection("posts").document(post.uid).setData(postData) { error in
@@ -39,13 +40,28 @@ class PostService {
     }
     
     // 포스트 참여
-    func enterPost(postUid: String, userUid: String, members: [String], completion: @escaping ([String]) -> Void) {
+    func enterPost(postUid: String, userUid: String, members: [String], completion: @escaping ([String]?, Error?) -> Void) {
         Firestore.firestore().collection("posts").document(postUid).getDocument { snapshot, error in
-            guard let document = try? snapshot?.data(as: Post.self) else { return }
-            Firestore.firestore().collection("posts").document(postUid).updateData(["members": document.members + [userUid]]) { _ in
-                var updatedMembers = members
-                updatedMembers.append(userUid)
-                completion(updatedMembers)
+            guard let document = try? snapshot?.data(as: Post.self), error == nil else {
+                completion(nil, error)
+                return
+            }
+            
+            if document.members.count >= document.numberOfPeoples {
+                let capacityError = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Post is already full"])
+                completion(nil, capacityError)
+                return
+            }
+            
+            var updatedMembers = document.members
+            updatedMembers.append(userUid)
+            
+            Firestore.firestore().collection("posts").document(postUid).updateData(["members": updatedMembers]) { updateError in
+                if let updateError = updateError {
+                    completion(nil, updateError)
+                } else {
+                    completion(updatedMembers, nil)
+                }
             }
         }
     }
@@ -61,65 +77,111 @@ class PostService {
         }
     }
     
-    // 포스트 패치
-    func fetchPost() async throws {
-        let snapshot = try await Firestore.firestore().collection("posts").getDocuments()
+    // 포스트테이블 패치
+    func fetchPostTable(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
+        var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true).limit(to: limit)
         
-        for document in snapshot.documents {
-            print("읽어오기 시작!")
-            print("\(document.documentID) => \(document.data())")
-            print("DEBUG: Document data = \(document.data()) ;;")
-            print("읽어오기 끝!")
-            
-            do {
-                
-                let startDate = (document["startDate"] as? Timestamp)?.dateValue() ?? Date()
-                
-                guard let courseRoutesData = document["courseRoutes"] as? [GeoPoint] else {
-                    print("DEBUG: Failed to get courseRoutesData for document \(document.documentID)")
-                    continue
-                }
-                
-                guard let title = document["title"] as? String,
-                      let content = document["content"] as? String,
-                      let distance = document["distance"] as? Double,
-                      let numberOfPeoples = document["numberOfPeoples"] as? Int,
-                      let routeImageUrl = document["routeImageUrl"] as? String,
-                      let address = document["address"] as? String,
-                      let whoReportAt = document["whoReportAt"] as? [String],
-                      let createdAtTimestamp = document["createdAt"] as? Timestamp,
-                      let runningStyle = document["runningStyle"] as? Int,
-                      let members = document["members"] as? [String] else {
-                    print("DEBUG: Failed to cast data for document \(document.documentID)")
-                    continue
-                }
-                
-                let post = Post(
-                    uid: document.documentID,
-                    title: title,
-                    content: content,
-                    courseRoutes: courseRoutesData,
-                    distance: distance,
-                    numberOfPeoples: numberOfPeoples,
-                    routeImageUrl: routeImageUrl,
-                    startDate: startDate,
-                    address: address,
-                    whoReportAt: whoReportAt,
-                    createdAt: createdAtTimestamp.dateValue(),
-                    runningStyle: runningStyle,
-                    members: members
-                )
-                
-                self.posts.append(post)
-            } catch {
-                print("DEBUG: Error processing document \(document.documentID) - \(error.localizedDescription)")
+        if let startAfter = startAfter {
+            query = query.start(afterDocument: startAfter)
+        }
+        
+        query.getDocuments { (querySnapshot, error) in
+            if let error = error {
+                completion(nil, nil, error)
+                return
             }
+            
+            guard let documents = querySnapshot?.documents else {
+                completion([], nil, nil)
+                return
+            }
+            
+            let posts = documents.compactMap { queryDocumentSnapshot -> Post? in
+                guard let post = try? queryDocumentSnapshot.data(as: Post.self) else {
+                    return nil
+                }
+                return post
+            }
+            
+            let lastDocumentSnapshot = documents.last
+            completion(posts, lastDocumentSnapshot, nil)
+        }
+    }
+    
+    // 해당 게시물 정보 불러오기
+    func fetchPost(uid: String, completion: @escaping (Post?, Error?) -> Void) {
+        Firestore.firestore().collection("posts").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                print("DEBUG: Failed to fetch post = \(error.localizedDescription)")
+                completion(nil, error)
+                return
+            }
+            
+            guard let document = snapshot?.data() else {
+                completion(nil, nil)
+                return
+            }
+            
+            guard let title = document["title"] as? String,
+                  let content = document["content"] as? String,
+                  let courseRoutes = document["courseRoutes"] as? [GeoPoint],
+                  let distance = document["distance"] as? Double,
+                  let numberOfPeoples = document["numberOfPeoples"] as? Int,
+                  let routeImageUrl = document["routeImageUrl"] as? String,
+                  let startDate = (document["startDate"] as? Timestamp)?.dateValue(),
+                  let address = document["address"] as? String,
+                  let whoReportAt = document["whoReportAt"] as? [String],
+                  let createdAt = (document["createdAt"] as? Timestamp)?.dateValue(),
+                  let runningStyle = document["runningStyle"] as? Int,
+                  let members = document["members"] as? [String],
+                  let ownerUid = document["ownerUid"] as? String else {
+                print("DEBUG: Failed to cast data for document \(uid)")
+                completion(nil, nil)
+                return
+            }
+            
+            let post = Post(
+                uid: uid,
+                title: title,
+                content: content,
+                courseRoutes: courseRoutes,
+                distance: distance,
+                numberOfPeoples: numberOfPeoples,
+                routeImageUrl: routeImageUrl,
+                startDate: startDate,
+                address: address,
+                whoReportAt: whoReportAt,
+                createdAt: createdAt,
+                runningStyle: runningStyle,
+                members: members,
+                ownerUid: ownerUid
+            )
+            
+            completion(post, nil)
         }
     }
     
     // 포스트 수정
-    func editPost() {
+    func editPost(post: Post, completion: @escaping (Error?) -> Void) {
+        let postData = [
+            "title" : post.title,
+            "content" : post.content,
+            "courseRoutes" : post.courseRoutes,
+            "distance" : post.distance,
+            "numberOfPeoples" : post.numberOfPeoples,
+            "routeImageUrl" : post.routeImageUrl,
+            "startDate" : post.startDate,
+            "address" : post.address,
+            "whoReportAt" : post.whoReportAt,
+            "createdAt" : post.createdAt,
+            "runningStyle" : post.runningStyle,
+            "members" : post.members,
+            "ownerUid" : post.ownerUid
+        ] as [String : Any]
         
+        Firestore.firestore().collection("posts").document(post.uid).updateData(postData) { error in
+            completion(error)
+        }
     }
     
     // 포스트 삭제
@@ -128,16 +190,18 @@ class PostService {
             completion()
         }
         
-        let storageReference = Storage.storage().reference(forURL: imageUrl)
-        storageReference.delete { error in
-            completion()
-        }
+        deleteImage(imageUrl: imageUrl)
+        
+//        let storageReference = Storage.storage().reference(forURL: imageUrl)
+//        storageReference.delete { error in
+//            completion()
+//        }
     }
     
     // 이미지를 스토리지에 업로드
     static func uploadImage(image: UIImage, completion: @escaping (URL?) -> Void) {
         guard let resizedImage = image.resizeWithWidth(width: 100) else { return }
-        guard let imageData = resizedImage.jpegData(compressionQuality: 0.5) else {
+        guard let imageData = resizedImage.jpegData(compressionQuality: 1.0) else {
             print("DEBUG: Failed to convert image to data")
             completion(nil)
             return
@@ -147,7 +211,7 @@ class PostService {
         metaData.contentType = "image/jpeg"
         
         let imageName = UUID().uuidString + String(Date().timeIntervalSince1970)
-
+        
         let firebaseReference = Storage.storage().reference().child("posts_image").child(imageName)
         firebaseReference.putData(imageData, metadata: metaData) { metaData, error in
             if let error = error {
@@ -165,23 +229,142 @@ class PostService {
                 completion(url)
                 
                 // 이미지 setImage
-//                ImageCacheManager.shared.setImage(imageData, forkey: url.absoluteString)
+                // ImageCacheManager.shared.setImage(imageData, forkey: url.absoluteString)
                 
             }
         }
     }
     
-    // 이미지를 스토리지에서 다운로드
-    static func downloadImage(urlString: String, completion: @escaping (UIImage?) -> Void) {
-        let storageReference = Storage.storage().reference(forURL: urlString)
-        let megaByte = Int64(1 * 1024 * 1024)
+    // 이미지를 스토리지에서 삭제
+    func deleteImage(imageUrl: String) {
+        let storageReference = Storage.storage().reference(forURL: imageUrl)
+        storageReference.delete { error in
+            print("DEBUG: Image Delete Failed = \(String(describing: error?.localizedDescription))")
+        }
+    }
+    
+    // 모집글 참여인원의 프로필이미지와 이름 가져오기
+    func fetchMembers(uid: String, completion: @escaping (String?, String?) -> Void) {
+        Firestore.firestore().collection("user").document(uid).getDocument { snapshot, error in
+            guard let data = snapshot?.data() else { return }
+            let name = data["name"] as? String ?? ""
+            let imageUrl = data["profileImageUrl"] as? String ?? ""
+            
+            completion(name, imageUrl)
+            return
+        }
+    }
+    
+    // 검색어 필터링
+    func searchFilter(searchText: String, completion: @escaping ([Post]) -> Void) {
+        let searchToken = searchText.lowercased()
         
-        storageReference.getData(maxSize: megaByte) { data, error in
-            guard let imageData = data else {
-                completion(nil)
-                return
+        Firestore.firestore().collection("posts")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("DEBUG: Search Error \(error.localizedDescription)")
+                    completion([])
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    print("DEBUG: No documents found for searchText: \(searchText)")
+                    completion([])
+                    return
+                }
+                
+                var filterPosts = [Post]()
+                documents.forEach { document in
+                    let data = document.data()
+                    
+                    guard let title = data["title"] as? String,
+                          let content = data["content"] as? String,
+                          let courseRoutes = data["courseRoutes"] as? [GeoPoint],
+                          let distance = data["distance"] as? Double,
+                          let numberOfPeoples = data["numberOfPeoples"] as? Int,
+                          let routeImageUrl = data["routeImageUrl"] as? String,
+                          let startDateTimestamp = data["startDate"] as? Timestamp,
+                          let address = data["address"] as? String,
+                          let whoReportAt = data["whoReportAt"] as? [String],
+                          let createdAtTimestamp = data["createdAt"] as? Timestamp,
+                          let runningStyle = data["runningStyle"] as? Int,
+                          let members = data["members"] as? [String],
+                          let ownerUid = data["ownerUid"] as? String else {
+                        print("DEBUG: Invalid document data for documentID: \(document.documentID)")
+                        return
+                    }
+                    
+                    // 검색어가 제목에 포함되어 있는지 확인
+                    if title.lowercased().contains(searchToken) {
+                        let post = Post(uid: document.documentID,
+                                        title: title,
+                                        content: content,
+                                        courseRoutes: courseRoutes,
+                                        distance: distance,
+                                        numberOfPeoples: numberOfPeoples,
+                                        routeImageUrl: routeImageUrl,
+                                        startDate: startDateTimestamp.dateValue(),
+                                        address: address,
+                                        whoReportAt: whoReportAt,
+                                        createdAt: createdAtTimestamp.dateValue(),
+                                        runningStyle: runningStyle,
+                                        members: members, 
+                                        ownerUid: ownerUid)
+                        
+                        filterPosts.append(post)
+                    }
+                }
+                completion(filterPosts)
             }
-            completion(UIImage(data: imageData))
+    }
+    
+    func reportPost(postUid: String, userUid: String, category: String, text: String, completion: @escaping (Bool) -> Void) {
+        let db = Firestore.firestore()
+        let postRef = db.collection("posts").document(postUid)
+        
+        postRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                var postData = document.data()!
+                var whoReportAt = postData["whoReportAt"] as? [String] ?? []
+                
+                if whoReportAt.contains(userUid) {
+                    print("DEBUG: Error = User has already reported this post")
+                    completion(false)
+                    return
+                }
+                
+                whoReportAt.append(userUid)
+                postData["whoReportAt"] = whoReportAt
+                
+                postRef.updateData(["whoReportAt": whoReportAt]) { error in
+                    if let error = error {
+                        print("Error updating document: \(error)")
+                        completion(false)
+                        return
+                    }
+                    
+                    let report = [
+                        "toUser": postData["ownerUid"] as! String,
+                        "fromUser": userUid,
+                        "category": category,
+                        "text": text,
+                        "createdAt": Date()
+                    ] as [String : Any]
+                    
+                    postRef.collection("reasons").addDocument(data: report) { error in
+                        if let error = error {
+                            print("Error adding document: \(error)")
+                            completion(false)
+                        } else {
+                            print("Document added successfully")
+                            completion(true)
+                        }
+                    }
+                }
+            } else {
+                print("Error: Post not found")
+                completion(false)
+            }
         }
     }
 }

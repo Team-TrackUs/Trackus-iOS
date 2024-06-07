@@ -13,7 +13,6 @@ class MateViewCell: UITableViewCell {
     
     static let identifier = "MateViewCell"
     
-    
     let titleText: String = ""
     let locationText: String = ""
     let timeText: String = ""
@@ -22,7 +21,7 @@ class MateViewCell: UITableViewCell {
     let peopleLimit: Int = 0
     var peopleIn: Int = 0
     
-    private let profileImageView: UIImageView = {
+    private let postImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.clipsToBounds = true
@@ -137,30 +136,30 @@ class MateViewCell: UITableViewCell {
     
     func configureUI() {
         backgroundColor = .white
-        self.contentView.addSubview(profileImageView)
-        profileImageView.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
-        profileImageView.bottomAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.bottomAnchor).isActive = true
-        profileImageView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
-        profileImageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
-        profileImageView.heightAnchor.constraint(equalToConstant: 87).isActive = true
+        self.contentView.addSubview(postImageView)
+        postImageView.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
+        postImageView.bottomAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.bottomAnchor).isActive = true
+        postImageView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
+        postImageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
+        postImageView.heightAnchor.constraint(equalToConstant: 87).isActive = true
         
-        profileImageView.addSubview(closingLabel)
+        postImageView.addSubview(closingLabel)
         closingLabel.translatesAutoresizingMaskIntoConstraints = false
-        closingLabel.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor).isActive = true
-        closingLabel.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor).isActive = true
+        closingLabel.centerXAnchor.constraint(equalTo: postImageView.centerXAnchor).isActive = true
+        closingLabel.centerYAnchor.constraint(equalTo: postImageView.centerYAnchor).isActive = true
         closingLabel.isHidden = true
         
         self.contentView.addSubview(runningStyleLabel)
         runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
         runningStyleLabel.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
-        runningStyleLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        runningStyleLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         runningStyleLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
         runningStyleLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
         
         self.contentView.addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.topAnchor.constraint(equalTo: runningStyleLabel.bottomAnchor, constant: 3).isActive = true
-        titleLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        titleLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         
         let locationStack = UIStackView(arrangedSubviews: [locationIcon, locationLabel])
         locationStack.axis = .horizontal
@@ -181,7 +180,7 @@ class MateViewCell: UITableViewCell {
         self.contentView.addSubview(locationStack)
         locationStack.translatesAutoresizingMaskIntoConstraints = false
         locationStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        locationStack.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        locationStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         
         self.contentView.addSubview(timeStack)
         timeStack.translatesAutoresizingMaskIntoConstraints = false
@@ -196,7 +195,7 @@ class MateViewCell: UITableViewCell {
         self.contentView.addSubview(peopleStack)
         peopleStack.translatesAutoresizingMaskIntoConstraints = false
         peopleStack.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor).isActive = true
-        peopleStack.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9).isActive = true
+        peopleStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         
         self.contentView.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -204,32 +203,25 @@ class MateViewCell: UITableViewCell {
         dateLabel.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
     }
     
-    public func configure(image: String, runningStyleLabel: String, titleLabel: String, locationLabel: String, timeLabel: String, distanceLabel: String, peopleLimit: Int, peopleIn: Int, dateLabel: String) {
+    public func configure(post: Post) {
         
-//        self.profileImageView.image = image
-        // 이미지 추가
-        PostService.downloadImage(urlString: image) { image in
-//            guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.profileImageView.image = image
-            }
-        }
+        postImageView.loadImage(url: post.routeImageUrl)
         
-        self.runningStyleLabel.text = runningStyleLabel
+        self.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
         
-        if titleLabel.count > 20 {
-            self.titleLabel.text = "\(titleLabel.prefix(20))..."
+        if post.title.count > 15 {
+            self.titleLabel.text = "\(post.title.prefix(15))..."
         } else {
-            self.titleLabel.text = titleLabel
+            self.titleLabel.text = post.title
         }
         
-        self.locationLabel.text = locationLabel
-        self.timeLabel.text = timeLabel
-        self.distanceLabel.text = distanceLabel
-        self.peopleLabel.text = "\(peopleIn) / \(peopleLimit)"
-        self.dateLabel.text = dateLabel
+        self.locationLabel.text = post.address
+        self.timeLabel.text = post.startDate.toString(format: "h:mm a")
+        self.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
+        self.peopleLabel.text = "\(post.members.count) / \(post.numberOfPeoples)"
+        self.dateLabel.text = post.startDate.toString(format: "yyyy년 MM월 dd일")
         
-        switch runningStyleLabel {
+        switch runningStyleString(for: post.runningStyle) {
         case "걷기":
             self.runningStyleLabel.backgroundColor = .walking
         case "조깅":
@@ -242,10 +234,25 @@ class MateViewCell: UITableViewCell {
             self.runningStyleLabel.backgroundColor = .mainBlue
         }
         
-        if peopleIn >= peopleLimit {
+        if post.members.count >= post.numberOfPeoples {
             closingLabel.isHidden = false
         } else {
             closingLabel.isHidden = true
+        }
+    }
+    
+    func runningStyleString(for runningStyle: Int) -> String {
+        switch runningStyle {
+        case 0:
+            return "걷기"
+        case 1:
+            return "조깅"
+        case 2:
+            return "달리기"
+        case 3:
+            return "인터벌"
+        default:
+            return "걷기"
         }
     }
 

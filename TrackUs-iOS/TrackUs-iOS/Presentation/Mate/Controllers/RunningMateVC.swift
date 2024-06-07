@@ -7,16 +7,34 @@
 
 import UIKit
 import CoreLocation
+import FirebaseFirestore
 
 class RunningMateVC: UIViewController {
     
     // MARK: - Properties
-    
+    private let pageSize: Int = 10
+    private var lastDocumentSnapshot: DocumentSnapshot?
     private var posts = [Post]()
+    private var isLoadingMore = false
+    private var isPagingComplete = false
+    let refreshView = RefreshView()
+    
+    private var deletedPostUIDs = [String]()
+    
+    private lazy var refreshControl : UIRefreshControl = {
+        let control = UIRefreshControl()
+        control.addTarget(self, action: #selector(refreshPosts), for: .valueChanged)
+        control.tintColor = UIColor.clear
+        control.attributedTitle = NSAttributedString(string: "모집글 새로고침", attributes: [.foregroundColor: UIColor.clear])
+        
+        return control
+    }()
     
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .systemBackground
+        tableView.separatorStyle = .singleLine
+        tableView.separatorInset = .init(top: 0, left: 16, bottom: 0, right: 16)
         tableView.allowsSelection = true
         tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
         return tableView
@@ -52,6 +70,43 @@ class RunningMateVC: UIViewController {
         return label
     }()
     
+    let footer: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        view.layer.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: 150)
+        return view
+    }()
+    
+    let footerLabel: UILabel = {
+        let label = UILabel()
+        label.text = "마지막 모집글을 확인했어요"
+        label.font = UIFont.boldSystemFont(ofSize: 16)
+        label.textColor = UIColor.gray1
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    lazy var footerButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("새로고침", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+        button.setTitleColor(UIColor.white, for: .normal)
+        button.layer.cornerRadius = 5
+        button.clipsToBounds = true
+        button.backgroundColor = .mainBlue
+        button.addTarget(self, action: #selector(footerButtonTapped), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var navigationMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        button.tintColor = .gray1
+        return button
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -62,33 +117,47 @@ class RunningMateVC: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         
-        Task {
-            await fetchPosts()
-        }
+        fetchPosts()
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(false)
+        super.viewDidAppear(animated)
         
-        Task {
-            await fetchPosts()
-        }
+        fetchPosts()
     }
     
     // MARK: - Selectors
     
     @objc func moveButtonTapped() {
+        HapticManager.shared.hapticImpact(style: .light)
         let courseRegisterVC = CourseRegisterVC()
-        courseRegisterVC.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(courseRegisterVC, animated: true)
-        
+        let navController = UINavigationController(rootViewController: courseRegisterVC)
+        navController.modalPresentationStyle = .fullScreen
+        self.present(navController, animated: true, completion: nil)
     }
     
     @objc func searchButtonTapped() {
-        print("DEBUG: 검색 버튼 클릭")
         let searchVC = SearchVC()
         searchVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(searchVC, animated: true)
+    }
+    
+    @objc func footerButtonTapped() {
+        fetchPosts()
+        
+        // 스크롤 맨 위로 이동하도록
+        tableView.setContentOffset(CGPoint(x: 0, y: -tableView.contentInset.top), animated: true)
+    }
+    
+    @objc func refreshPosts() {
+        
+        HapticManager.shared.hapticImpact(style: .light)
+        fetchPosts()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.refreshControl.endRefreshing()
+        }
+        refreshView.updateText()
     }
     
     // MARK: - Helpers
@@ -119,12 +188,26 @@ class RunningMateVC: UIViewController {
         tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
+        tableView.backgroundView = refreshView
+        
+        tableView.tableFooterView = footer
+        tableView.refreshControl = refreshControl
+        
         self.view.addSubview(moveButton)
-        moveButton.bottomAnchor.constraint(equalTo: tableView.bottomAnchor,constant: -17).isActive = true
+        moveButton.bottomAnchor.constraint(equalTo: tableView.bottomAnchor, constant: -17).isActive = true
         moveButton.rightAnchor.constraint(equalTo: tableView.rightAnchor, constant: -16).isActive = true
         moveButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
         moveButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
         
+        footer.addSubview(footerLabel)
+        footerLabel.centerXAnchor.constraint(equalTo: footer.centerXAnchor).isActive = true
+        footerLabel.topAnchor.constraint(equalTo: footer.topAnchor, constant: 32).isActive = true
+        
+        footer.addSubview(footerButton)
+        footerButton.centerXAnchor.constraint(equalTo: footer.centerXAnchor).isActive = true
+        footerButton.topAnchor.constraint(equalTo: footerLabel.bottomAnchor, constant: 16).isActive = true
+        footerButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        footerButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
     }
     
     private func setupNavBar() {
@@ -135,51 +218,74 @@ class RunningMateVC: UIViewController {
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
-
-    private func fetchPosts() async {
-        print("DEBUG: Fetching posts...")
+    
+    func fetchPosts() {
+        let postService = PostService()
+        
+        postService.fetchPostTable(startAfter: nil, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("DEBUG: Error fetching posts = \(error.localizedDescription)")
+                self.refreshControl.endRefreshing()
+                return
+            }
+            
+            if let resultPosts = resultPosts {
+                self.posts = resultPosts.filter { post in
+                    !self.deletedPostUIDs.contains(post.uid)
+                }
+                
+                self.lastDocumentSnapshot = lastDocumentSnapshot
+                self.posts.sort { $0.createdAt > $1.createdAt }
+                self.tableView.reloadData()
+                self.isPagingComplete = false
+            } else {
+                print("DEBUG: No posts found")
+                self.refreshControl.endRefreshing()
+            }
+        }
+    }
+    private func fetchMorePosts() {
+        guard !isPagingComplete && !isLoadingMore else {
+            return
+        }
+        
+        isLoadingMore = true
         
         let postService = PostService()
         
-        do {
-            print("DEBUG: Trying to fetch posts from Firestore...")
+        postService.fetchPostTable(startAfter: lastDocumentSnapshot, limit: pageSize) { [weak self] resultPosts, lastDocumentSnapshot, error in
+            guard let self = self else { return }
             
-            // fetchPost 함수 호출 및 완료까지 대기
-            try await postService.fetchPost()
+            if let error = error {
+                print("DEBUG: Error fetching posts = \(error.localizedDescription)")
+                self.isLoadingMore = false
+                return
+            }
             
-            print("DEBUG: Posts fetched successfully.")
-            
-            // fetchPost 함수가 완료된 후에 posts 배열 업데이트
-            self.posts = postService.posts
-            print("DEBUG: 포스트 = \(posts)")
-            
-            // 데이터를 가져온 후 호출
-            tableView.reloadData()
-        } catch {
-            print("DEBUG: Error fetching posts - \(error.localizedDescription)")
-            
-            let nsError = error as NSError
-            print("DEBUG: Firestore error - Domain: \(nsError.domain), Code: \(nsError.code), Description: \(nsError.localizedDescription)")
-        }
-    }
-    
-    func runningStyleString(for runningStyle: Int) -> String {
-        switch runningStyle {
-        case 0:
-            return "걷기"
-        case 1:
-            return "조깅"
-        case 2:
-            return "달리기"
-        case 3:
-            return "인터벌"
-        default:
-            return "걷기"
+            if let resultPosts = resultPosts {
+                if resultPosts.isEmpty {
+                    self.isPagingComplete = true
+                }
+                
+                let newPosts = resultPosts.filter { post in
+                    !self.posts.contains(where: { $0.uid == post.uid })
+                }
+                
+                self.posts.append(contentsOf: newPosts)
+                self.lastDocumentSnapshot = lastDocumentSnapshot
+                self.posts.sort { $0.createdAt > $1.createdAt }
+                self.tableView.reloadData()
+            } else {
+                print("DEBUG: No posts found")
+            }
+            self.isLoadingMore = false
         }
     }
 }
 
-extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
+extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return posts.count
     }
@@ -190,9 +296,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         }
         
         let post = posts[indexPath.row]
-        // 이미지 String으로 변경
-        // SearchVC에서도 해야함
-        cell.configure(image: post.routeImageUrl, runningStyleLabel: runningStyleString(for: post.runningStyle), titleLabel: post.title, locationLabel: post.address, timeLabel: post.startDate.toString(format: "h:mm a"), distanceLabel: "\(String(format: "%.2f", post.distance))km", peopleLimit: post.numberOfPeoples, peopleIn: post.members.count, dateLabel: post.startDate.toString(format: "yyyy년 MM월 dd일"))
+        cell.configure(post: post)
         return cell
     }
     
@@ -202,34 +306,24 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource {
         let courseDetailVC = CourseDetailVC()
         courseDetailVC.hidesBottomBarWhenPushed = true
         
-        courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
-            
-            return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
-        }
-        courseDetailVC.courseTitleLabel.text = post.title
-        courseDetailVC.courseDestriptionLabel.text = post.content
-        courseDetailVC.distanceLabel.text = "\(String(format: "%.2f", post.distance)) km"
-        courseDetailVC.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
-        courseDetailVC.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
-        courseDetailVC.courseLocationLabel.text = post.address
-        courseDetailVC.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
-        courseDetailVC.personInLabel.text = "\(post.members.count)명"
-        courseDetailVC.members = post.members
         courseDetailVC.postUid = post.uid
-        courseDetailVC.memberLimit = post.numberOfPeoples
-        courseDetailVC.imageUrl = post.routeImageUrl
         
-        // 이미지 추가
-        // CourseRegisterVC에서도 해야함
-        PostService.downloadImage(urlString: post.routeImageUrl) { image in
-            DispatchQueue.main.async {
-                courseDetailVC.mapImageButton.setImage(image, for: .normal)
-            }
-        }
-        
+        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        courseDetailVC.navigationItem.rightBarButtonItem = barButton
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)
+    }
+    
+    // 인피니티 스크롤 (무한 스크롤)
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height - scrollView.frame.size.height
+        
+        if offsetY > contentHeight - 100 && !isLoadingMore && !isPagingComplete {
+            fetchMorePosts()
+        }
     }
 }
 
