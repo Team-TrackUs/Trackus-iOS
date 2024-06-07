@@ -26,6 +26,7 @@ final class PhotoEditVC: UIViewController {
         imgView.image = image
         imgView.contentMode = .scaleAspectFill
         imgView.clipsToBounds = true
+        imgView.isUserInteractionEnabled = true
         return imgView
     }()
     
@@ -70,8 +71,12 @@ final class PhotoEditVC: UIViewController {
         setDelegates()
     }
     
-    // MARK: - Helpers
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        photoPreview.addLogo()
+    }
     
+    // MARK: - Helpers
     func setPages() {
         pageViewController.setViewControllers([colVC1], direction: .forward, animated: true, completion: nil)
     }
@@ -80,6 +85,7 @@ final class PhotoEditVC: UIViewController {
         pageViewController.delegate = self
         pageViewController.dataSource = self
         colVC1.delegate = self
+        colVC2.delegate = self
     }
     
     private func setConstrains() {
@@ -92,7 +98,7 @@ final class PhotoEditVC: UIViewController {
             photoPreview.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             photoPreview.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             photoPreview.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            photoPreview.heightAnchor.constraint(equalToConstant: view.frame.height * 0.4),
+            photoPreview.heightAnchor.constraint(equalToConstant: view.frame.height * 0.5),
             
             segmentedControl.topAnchor.constraint(equalTo: photoPreview.bottomAnchor),
             segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -183,40 +189,71 @@ extension UIPageViewController {
 extension PhotoEditVC: DataCollectionDelegate {
     // 어떤 데이터를 넘겨줄것인가?
     // 어떤위치에 추가할것인가?
-    func dataCellTapped(_ behavior: ImageDrawBehavior) {
+    func dataCellTapped(_ style: TemplateStyle) {
         guard let runModel = runModel else {
             return
         }
-        let distnce = runModel.distance.asString(style: .km)
-        let time = runModel.seconds.toMMSSTimeFormat
-        
-        switch behavior.dataType {
-        case .onlyDistance:
-            photoPreview.addTextLayer(string: distnce, position: behavior.position)
-            break
-        case .onlyTime:
-            photoPreview.addTextLayer(string: time, position: behavior.position)
-            break
+        switch style {
+        case .distanceOnly:
+            photoPreview.addTextLayerBottom(string: runModel.distance.asString(style: .km).uppercased())
+        case .timeOnly:
+            photoPreview.addTextLayerBottom(string: runModel.seconds.toMMSSTimeFormat)
         }
+    }
+    
+    func stickerCellTapped(_ image: UIImage) {
+        let imageView = UIImageView(image: image)
+        imageView.isUserInteractionEnabled = true
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pangestureHandler))
+        imageView.addGestureRecognizer(panGesture)
+        photoPreview.addImageView(imageView)
+    }
+    
+    @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
+        guard let view = sender.view else {
+            return
+        }
+        let translation = sender.translation(in: view)
+        let moveX = view.center.x + translation.x
+        let moveY = view.center.y + translation.y
+        view.center = .init(x: moveX, y: moveY)
+        
+        sender.setTranslation(CGPoint.zero, in: view)
     }
 }
 
 extension UIImageView {
     /// ImageView위에 텍스트레이어를 추가한다.
-    func addTextLayer(string: String, position: ImageDrawBehavior.Postion) {
-        layer.sublayers = []
-        var textPosition: CGRect!
-        switch position {
-        case .bottom:
-            textPosition = CGRect(x: frame.width / 2 - 100, y: frame.height - 60, width: 200, height: 50)
+    func addTextLayerBottom(string: String) {
+        if let _ = layer.sublayers {
+            layer.sublayers = layer.sublayers!.filter {
+                $0 as? CATextLayer == nil
+            }
         }
+        
         let textLayer = CATextLayer()
         textLayer.string = string
         textLayer.foregroundColor = UIColor.white.cgColor
-        textLayer.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        textLayer.font = UIFont.boldSystemFont(ofSize: 24)
+        textLayer.fontSize = 24
         textLayer.alignmentMode = .center
-        textLayer.frame = textPosition
         textLayer.contentsScale = UIScreen.main.scale
+        textLayer.frame = CGRect(x: 0, y: frame.height - 40, width: frame.width, height: 50)
         layer.addSublayer(textLayer)
     }
+    
+    func addImageView(_ imageView: UIImageView) {
+        imageView.layer.position = .init(x: center.x, y: center.y)
+        addSubview(imageView)
+    }
+    
+    func addLogo() {
+        let size: CGFloat = 30
+        let imageView = UIImageView(frame: .init(x: frame.width - 40, y: 10, width: size, height: size))
+        imageView.image = UIImage(resource: .subtract).withRenderingMode(.alwaysOriginal).withTintColor(.white)
+        imageView.contentMode = .scaleAspectFit
+        addSubview(imageView)
+    }
 }
+
+

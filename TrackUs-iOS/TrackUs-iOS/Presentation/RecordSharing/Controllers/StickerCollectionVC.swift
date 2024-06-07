@@ -7,10 +7,15 @@
 
 import UIKit
 
-private let reuseIdentifier = "Cell"
+
 
 class StickerCollectionVC: UICollectionViewController {
-
+    private let resources: [ImageResource] = [
+        .test1,
+        .test2
+    ]
+    weak var delegate: DataCollectionDelegate?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionView()
@@ -18,17 +23,19 @@ class StickerCollectionVC: UICollectionViewController {
 
     func setupCollectionView() {
         self.collectionView.backgroundColor = .black
-        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        self.collectionView!.register(StickerCollectionCell.self, forCellWithReuseIdentifier: StickerCollectionCell.reuseIdentifier)
     }
 
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 77
+        return resources.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
-        cell.backgroundColor = .systemRed
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: StickerCollectionCell.reuseIdentifier, for: indexPath) as? StickerCollectionCell else {
+            return UICollectionViewCell()
+        }
+        cell.image = UIImage(resource: resources[indexPath.row])
         return cell
     }
 }
@@ -45,5 +52,9 @@ extension StickerCollectionVC: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 1
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        delegate?.stickerCellTapped(UIImage(resource: resources[indexPath.row]))
     }
 }

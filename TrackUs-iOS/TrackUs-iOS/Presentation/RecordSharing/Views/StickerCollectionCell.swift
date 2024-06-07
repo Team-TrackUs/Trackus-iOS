@@ -7,18 +7,8 @@
 
 import UIKit
 
-protocol DataCollectionDelegate: AnyObject {
-    func dataCellTapped(_ :TemplateStyle)
-    func stickerCellTapped(_ : UIImage)
-}
-
-extension DataCollectionDelegate {
-    func dataCellTapped(_ style: TemplateStyle) {}
-    func stickerCellTapped(_ : UIImage) {}
-}
-
-class DataCollectionCell: UICollectionViewCell {
-    static let reuseIdentifier = "DataCell"
+class StickerCollectionCell: UICollectionViewCell {
+    static let reuseIdentifier = "StickerCell"
    
     var image: UIImage? {
         didSet {
@@ -50,10 +40,10 @@ class DataCollectionCell: UICollectionViewCell {
         addSubview(imageView)
         
         NSLayoutConstraint.activate([
-            imageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            imageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
-            imageView.topAnchor.constraint(equalTo: topAnchor, constant: 10),
-            imageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10),
+            imageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30),
+            imageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30),
+            imageView.topAnchor.constraint(equalTo: topAnchor, constant: 30),
+            imageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30),
         ])
     }
     

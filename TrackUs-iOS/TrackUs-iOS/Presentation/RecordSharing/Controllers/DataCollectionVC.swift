@@ -9,29 +9,20 @@ import UIKit
 
 
 
-struct ImageDrawBehavior {
-    enum Postion {
-        case bottom
-    }
-
-    enum DataType {
-        case onlyDistance
-        case onlyTime
-    }
-    
-    let dataType: DataType
-    let position: Postion
+enum TemplateStyle {
+    case distanceOnly
+    case timeOnly
 }
 
-struct ImageDrawType {
+struct TemplateData {
     let resource: ImageResource
-    let drawBehavior: ImageDrawBehavior
+    let style: TemplateStyle
 }
 
 class DataCollectionVC: UICollectionViewController {
-    let imageTemplates: [ImageDrawType] = [
-        ImageDrawType(resource: .photoCell, drawBehavior: .init(dataType: .onlyDistance, position: .bottom)),
-        ImageDrawType(resource: .photoCell2, drawBehavior: .init(dataType: .onlyTime, position: .bottom))
+    let imageTemplates: [TemplateData] = [
+        TemplateData(resource: .photoCell, style: .distanceOnly),
+        TemplateData(resource: .photoCell2, style: .timeOnly)
     ]
     
     weak var delegate: DataCollectionDelegate?
@@ -74,6 +65,6 @@ extension DataCollectionVC: UICollectionViewDelegateFlowLayout {
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        delegate?.dataCellTapped(imageTemplates[indexPath.row].drawBehavior)
+        delegate?.dataCellTapped(imageTemplates[indexPath.row].style)
     }
 }

@@ -28,6 +28,7 @@
 		820069162C10BD86009FDA6C /* DataCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820069152C10BD86009FDA6C /* DataCollectionCell.swift */; };
 		822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B52BF1EC2500636CCC /* LocationService.swift */; };
 		822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */; };
+		823E7A4A2C13452000EFA983 /* StickerCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823E7A492C13451F00EFA983 /* StickerCollectionCell.swift */; };
 		82596A8A2C034CAC00DA6C70 /* CoreMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82596A892C034CAC00DA6C70 /* CoreMotion.swift */; };
 		826248192BFB4D9B0028C221 /* Running.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826248182BFB4D9B0028C221 /* Running.swift */; };
 		826922E32C045B8B00D506C2 /* RunInfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826922E22C045B8B00D506C2 /* RunInfoCell.swift */; };
@@ -147,6 +148,7 @@
 		820069152C10BD86009FDA6C /* DataCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCollectionCell.swift; sourceTree = "<group>"; };
 		822E06B52BF1EC2500636CCC /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDelegate.swift; sourceTree = "<group>"; };
+		823E7A492C13451F00EFA983 /* StickerCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCollectionCell.swift; sourceTree = "<group>"; };
 		825569952C117F6700C75E80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82596A892C034CAC00DA6C70 /* CoreMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMotion.swift; sourceTree = "<group>"; };
 		826248182BFB4D9B0028C221 /* Running.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Running.swift; sourceTree = "<group>"; };
@@ -348,6 +350,7 @@
 			isa = PBXGroup;
 			children = (
 				820069152C10BD86009FDA6C /* DataCollectionCell.swift */,
+				823E7A492C13451F00EFA983 /* StickerCollectionCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -782,6 +785,7 @@
 				82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */,
 				827F97482C0DB85200DAD821 /* WidgetAttribute.swift in Sources */,
 				82C38AD12BFCE0C4004819C1 /* CoreLocation.swift in Sources */,
+				823E7A4A2C13452000EFA983 /* StickerCollectionCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
