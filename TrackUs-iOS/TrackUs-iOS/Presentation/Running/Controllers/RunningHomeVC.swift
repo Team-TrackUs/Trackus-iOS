@@ -19,6 +19,8 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
     private let locationService = LocationService.shared
     private var pinAnnotations = [MKPointAnnotation]()
     
+    private var isSelected = false
+    
     private lazy var infoButton: UIButton = {
         let button = UIButton()
         button.setTitleColor(.black, for: .normal)
@@ -403,6 +405,17 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         
         return annotationView
     }
+    
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        if let polyline = overlay as? MKPolyline {
+            let testlineRenderer = MKPolylineRenderer(polyline: polyline)
+            testlineRenderer.strokeColor = .mainBlue
+            testlineRenderer.lineWidth = 8.0
+            return testlineRenderer
+        }
+        
+        return MKOverlayRenderer(overlay: overlay)
+    }
 
     
     // Annotaion이 선택되었을 떄
@@ -410,27 +423,73 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         guard let annotation = view.annotation as? MKPointAnnotation else {
             return
         }
-        
+
         if let selectedPost = posts.first(where: { $0.uid == annotation.title }) {
             view.tintColor = .red
             view.layer.borderColor = UIColor.caution.cgColor
             HapticManager.shared.hapticImpact(style: .light)
             setupButton(post: selectedPost)
             self.selectedPost = selectedPost
+            
+            mapView.annotations.forEach { pin in
+                if pin !== annotation {
+                    mapView.view(for: pin)?.isHidden = true
+                }
+            }
+            
+            let courseCoords = selectedPost.courseRoutes.map { geoPoint in
+                return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
+            }
+            
+            if let lastCoord = courseCoords.last {
+                let endAnnotation = MKPointAnnotation()
+                endAnnotation.coordinate = lastCoord
+                endAnnotation.title = "끝"
+                mapView.addAnnotation(endAnnotation)
+            }
+            
+            let polyline = MKPolyline(coordinates: courseCoords, count: courseCoords.count)
+            mapView.addOverlay(polyline)
+            
             UIView.animate(withDuration: 0.1) {
                 self.infoButton.frame.origin.y = self.mapView.frame.height - 128 - 120
             }
+            
+            guard let region = courseCoords.makeRegionToFit() else { return }
+            mapView.setRegion(region, animated: false)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100), animated: false)
+            }
+            
+            isSelected = true
         }
     }
+
 
     // Annotaion이 선택 해제 되었을떄
     func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
         view.tintColor = .mainBlue
         view.layer.borderColor = UIColor.mainBlue.cgColor
         
+        mapView.annotations.forEach { pin in
+            mapView.view(for: pin)?.isHidden = false
+        }
+        
+        mapView.annotations.forEach { pin in
+            if pin.title == "끝" {
+                mapView.removeAnnotation(pin)
+            }
+        }
+        
+        if let overlays = mapView.overlays as? [MKPolyline] {
+            mapView.removeOverlays(overlays)
+        }
+        
         UIView.animate(withDuration: 0.1) {
             self.infoButton.frame.origin.y = self.view.frame.height
         }
+        
+        isSelected = false
     }
-
 }
