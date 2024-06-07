@@ -7,30 +7,55 @@
 
 import UIKit
 
-private let reuseIdentifier = "Cell"
 
-class DataCollectionVC: UICollectionViewController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.collectionView.backgroundColor = .darkGray
-        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        
+struct ImageDrawBehavior {
+    enum Postion {
+        case bottom
     }
 
-//    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-//        return 0
-//    }
+    enum DataType {
+        case onlyDistance
+        case onlyTime
+    }
+    
+    let dataType: DataType
+    let position: Postion
+}
 
+struct ImageDrawType {
+    let resource: ImageResource
+    let drawBehavior: ImageDrawBehavior
+}
+
+class DataCollectionVC: UICollectionViewController {
+    let imageTemplates: [ImageDrawType] = [
+        ImageDrawType(resource: .photoCell, drawBehavior: .init(dataType: .onlyDistance, position: .bottom)),
+        ImageDrawType(resource: .photoCell2, drawBehavior: .init(dataType: .onlyTime, position: .bottom))
+    ]
+    
+    weak var delegate: DataCollectionDelegate?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupCollectionView()
+    }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 77
+        return imageTemplates.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
-        cell.backgroundColor = .systemGreen        
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DataCollectionCell.reuseIdentifier, for: indexPath) as? DataCollectionCell else {
+            return UICollectionViewCell()
+        }
+        cell.image = UIImage(resource: imageTemplates[indexPath.row].resource)
         return cell
+    }
+    
+    func setupCollectionView() {
+        self.collectionView.backgroundColor = .black
+        self.collectionView!.register(DataCollectionCell.self, forCellWithReuseIdentifier: DataCollectionCell.reuseIdentifier)
     }
 }
 
@@ -46,5 +71,9 @@ extension DataCollectionVC: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 1
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        delegate?.dataCellTapped(imageTemplates[indexPath.row].drawBehavior)
     }
 }

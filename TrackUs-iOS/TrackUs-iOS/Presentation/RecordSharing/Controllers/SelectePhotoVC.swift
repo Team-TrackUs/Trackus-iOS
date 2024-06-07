@@ -17,7 +17,7 @@ final class SelectePhotoVC: UIViewController {
     // Video Preview
     let previewLayer = AVCaptureVideoPreviewLayer()
     // Shtter Button
-    
+    var onCompleted: (((UIImage?) -> Void))?
     
     private let cameraPreview: UIView = {
         let view = UIView()
@@ -179,8 +179,7 @@ extension SelectePhotoVC: AVCapturePhotoCaptureDelegate {
         }
         let image = UIImage(data: data)
         session?.stopRunning()
-        let photoEditVC = PhotoEditVC()
-        photoEditVC.image = image
-        self.navigationController?.pushViewController(photoEditVC, animated: true)
+        onCompleted?(image)
+//        self.navigationController?.pushViewController(photoEditVC, animated: true)
     }
 }

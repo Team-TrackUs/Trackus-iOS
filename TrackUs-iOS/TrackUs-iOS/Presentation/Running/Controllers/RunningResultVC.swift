@@ -232,9 +232,18 @@ class RunningResultVC: ExtensionVC {
     }
     
     func showSeletePhotoVC() {
-        let photoVC = UINavigationController(rootViewController: SelectePhotoVC())
-        photoVC.modalPresentationStyle = .fullScreen
-        present(photoVC, animated: true)
+        let selectPhotoVC = SelectePhotoVC()
+        let photoNav = UINavigationController(rootViewController: selectPhotoVC)
+        photoNav.modalPresentationStyle = .fullScreen
+        present(photoNav, animated: true)
+        
+        selectPhotoVC.onCompleted = { [weak self] image in
+            guard let self = self else { return }
+            let photoEditVC = PhotoEditVC()
+            photoEditVC.image = image
+            photoEditVC.runModel = self.runModel
+            photoNav.pushViewController(photoEditVC, animated: true)
+        }
     }
     
     // MARK: - objc

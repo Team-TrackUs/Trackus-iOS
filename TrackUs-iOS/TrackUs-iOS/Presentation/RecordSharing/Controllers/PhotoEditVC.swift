@@ -14,6 +14,11 @@ final class PhotoEditVC: UIViewController {
             updateImage()
         }
     }
+    var runModel: Running? {
+        didSet {
+            // 이곳에서 컬렉션뷰 리로드
+        }
+    }
     
     private lazy var photoPreview: UIImageView = {
         let imgView = UIImageView()
@@ -43,6 +48,7 @@ final class PhotoEditVC: UIViewController {
     private lazy var pageViewController: UIPageViewController = {
         let vc = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
         vc.view.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.backgroundColor = .black
         return vc
     }()
     
@@ -72,7 +78,8 @@ final class PhotoEditVC: UIViewController {
     
     func setDelegates() {
         pageViewController.delegate = self
-        pageViewController.dataSource = self        
+        pageViewController.dataSource = self
+        colVC1.delegate = self
     }
     
     private func setConstrains() {
@@ -131,7 +138,7 @@ final class PhotoEditVC: UIViewController {
     @objc private func didChangeValue(segment: UISegmentedControl) {
         pageIndex = segment.selectedSegmentIndex
     }
-   
+    
     @objc private func completeButtonTapped() {
         let alert = UIAlertController(title: "열심히 만들었으니 공유하자!", message: nil, preferredStyle: .actionSheet)
         
@@ -173,4 +180,43 @@ extension UIPageViewController {
     }
 }
 
+extension PhotoEditVC: DataCollectionDelegate {
+    // 어떤 데이터를 넘겨줄것인가?
+    // 어떤위치에 추가할것인가?
+    func dataCellTapped(_ behavior: ImageDrawBehavior) {
+        guard let runModel = runModel else {
+            return
+        }
+        let distnce = runModel.distance.asString(style: .km)
+        let time = runModel.seconds.toMMSSTimeFormat
+        
+        switch behavior.dataType {
+        case .onlyDistance:
+            photoPreview.addTextLayer(string: distnce, position: behavior.position)
+            break
+        case .onlyTime:
+            photoPreview.addTextLayer(string: time, position: behavior.position)
+            break
+        }
+    }
+}
 
+extension UIImageView {
+    /// ImageView위에 텍스트레이어를 추가한다.
+    func addTextLayer(string: String, position: ImageDrawBehavior.Postion) {
+        layer.sublayers = []
+        var textPosition: CGRect!
+        switch position {
+        case .bottom:
+            textPosition = CGRect(x: frame.width / 2 - 100, y: frame.height - 60, width: 200, height: 50)
+        }
+        let textLayer = CATextLayer()
+        textLayer.string = string
+        textLayer.foregroundColor = UIColor.white.cgColor
+        textLayer.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        textLayer.alignmentMode = .center
+        textLayer.frame = textPosition
+        textLayer.contentsScale = UIScreen.main.scale
+        layer.addSublayer(textLayer)
+    }
+}

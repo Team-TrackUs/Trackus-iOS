@@ -13,14 +13,13 @@ class StickerCollectionVC: UICollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.collectionView.backgroundColor = .darkGray
-        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        
+        setupCollectionView()
     }
 
-//    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-//        return 0
-//    }
+    func setupCollectionView() {
+        self.collectionView.backgroundColor = .black
+        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+    }
 
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
