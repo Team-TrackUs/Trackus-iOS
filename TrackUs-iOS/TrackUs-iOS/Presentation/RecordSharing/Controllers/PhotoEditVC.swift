@@ -134,7 +134,10 @@ final class PhotoEditVC: UIViewController {
     }
     
     private func shareButtonTapped(action: UIAlertAction) {
-        dismiss(animated: true)
+        if let image = UIImage.imageFromView(view: photoPreview) {
+            let activityViewController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+            present(activityViewController, animated: true)
+        }
     }
     
     private func photoButtonTapped(action: UIAlertAction) {
