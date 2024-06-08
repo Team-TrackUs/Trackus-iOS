@@ -133,6 +133,9 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         label.textAlignment = .center
         return label
     }()
+    
+    let loadingView = LoadingView()
+    private var timer: Timer?
 
     // MARK: - Lifecycle
     
@@ -142,7 +145,7 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         setupMapView()
         setMapRegion()
         configureUI()
-        fetchPosts()
+        mapView(mapView, regionDidChangeAnimated: true)
         
         self.mapView.delegate = self
     }
@@ -180,11 +183,48 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
     }
     
+    @objc func fetchRegion() {
+        self.loadingView.isHidden = false
+        self.loadingView.startAnimation()
+        
+        for annotation in pinAnnotations {
+            mapView.removeAnnotation(annotation)
+        }
+        
+        let regionCenter = mapView.region.center
+        PostService().fetchMap(regionCenter: regionCenter) { posts, lastDocument, error in
+            if let error = error {
+                print("Error fetching posts: \(error)")
+                return
+            }
+            guard let posts = posts else {
+                print("No posts found")
+                return
+            }
+            
+            print("Fetched \(posts.count) posts within 10km of the region center")
+            self.posts = posts
+            
+            self.addPinsForPosts()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.loadingView.isHidden = true
+            }
+        }
+    }
     
     // MARK: - Helpers
     
     func configureUI() {
         self.view.addSubview(mapView)
+        self.view.addSubview(loadingView)
+        
+        loadingView.translatesAutoresizingMaskIntoConstraints = false
+        loadingView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+        loadingView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+        loadingView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+        loadingView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        loadingView.isHidden = true
         
         mapView.addSubview(infoButton)
         infoButton.translatesAutoresizingMaskIntoConstraints = false
@@ -258,31 +298,6 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.bottomAnchor.constraint(equalTo: infoButton.layoutMarginsGuide.bottomAnchor).isActive = true
         dateLabel.trailingAnchor.constraint(equalTo: self.infoButton.layoutMarginsGuide.trailingAnchor).isActive = true
-    }
-    
-    func fetchPosts() {
-        let postService = PostService()
-        
-        postService.fetchPostTable(startAfter: nil, limit: 100) { [weak self] resultPosts, lastDocumentSnapshot, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print("DEBUG: Error fetching posts = \(error.localizedDescription)")
-                return
-            }
-            
-            if let resultPosts = resultPosts {
-                self.posts = resultPosts.filter { post in
-                    !self.deletedPostUIDs.contains(post.uid)
-                }
-                
-                self.posts.sort { $0.createdAt > $1.createdAt }
-                
-                self.addPinsForPosts()
-            } else {
-                print("DEBUG: No posts found")
-            }
-        }
     }
     
     func setupButton(post: Post) {
@@ -462,6 +477,9 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
                 self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100), animated: false)
             }
             
+            mapView.isZoomEnabled = false
+            mapView.isScrollEnabled = false
+            mapView.isRotateEnabled = false
             isSelected = true
         }
     }
@@ -490,6 +508,18 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             self.infoButton.frame.origin.y = self.view.frame.height
         }
         
+        mapView.isZoomEnabled = true
+        mapView.isScrollEnabled = true
+        mapView.isRotateEnabled = true
         isSelected = false
+    }
+    
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        if isSelected == false {
+            timer?.invalidate()
+            timer = Timer.scheduledTimer(timeInterval: 1.5, target: self, selector: #selector(fetchRegion), userInfo: nil, repeats: false)
+        } else {
+            timer?.invalidate()
+        }
     }
 }
