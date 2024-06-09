@@ -21,122 +21,30 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
     
     private var isSelected = false
     
-    private lazy var infoButton: UIButton = {
-        let button = UIButton()
-        button.setTitleColor(.black, for: .normal)
-        button.titleLabel?.textAlignment = .center
-        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        button.backgroundColor = .white
-        button.layer.cornerRadius = 12
-        button.layer.shadowColor = UIColor.gray.cgColor
-        button.layer.shadowOffset = CGSize(width: 0, height: 5)
-        button.layer.shadowOpacity = 0.8
-        button.addTarget(self, action: #selector(infoButtonTapped), for: .touchUpInside)
+    lazy var collectionView: UICollectionView = {
+        let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.scrollDirection = .horizontal
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
+        collectionView.backgroundColor = .clear
+        collectionView.decelerationRate = UIScrollView.DecelerationRate.fast
+        collectionView.register(RunningMapCell.self, forCellWithReuseIdentifier: RunningMapCell.identifier)
+        collectionView.isPagingEnabled = true
+        collectionView.showsHorizontalScrollIndicator = false
+        return collectionView
+    }()
+    
+    private lazy var navigationMenuButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        button.tintColor = .gray1
         return button
-    }()
-    
-    private let postImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.clipsToBounds = true
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.layer.cornerRadius = 12
-        imageView.layer.borderWidth = 1
-        imageView.layer.borderColor = UIColor.gray3.cgColor
-        imageView.backgroundColor = .gray
-        return imageView
-    }()
-    
-    private let runningStyleLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 12)
-        label.clipsToBounds = true
-        label.layer.cornerRadius = 5
-        label.textColor = .white
-        label.textAlignment = .center
-        return label
-    }()
-    
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 16)
-        return label
-    }()
-    
-    private let locationLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
-        return label
-    }()
-    
-    private let timeLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
-        return label
-    }()
-    
-    private let distanceLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
-        return label
-    }()
-    
-    private let peopleLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 16)
-        return label
-    }()
-    
-    private let dateLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 12)
-        return label
-    }()
-    
-    let locationIcon: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "locationPin_icon"))
-        imageView.layer.transform = CATransform3DMakeScale(1.2, 0.9, 0.9)
-        return imageView
-    }()
-    
-    let timeIcon: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "time_icon"))
-        imageView.layer.transform = CATransform3DMakeScale(1.0, 1.0, 1.0)
-        return imageView
-    }()
-    
-    let distanceIcon: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "arrowBoth_icon"))
-        imageView.layer.transform = CATransform3DMakeScale(1.0, 1.0, 1.0)
-        return imageView
-    }()
-    
-    let peopleIcon: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "people_icon"))
-        return imageView
-    }()
-    
-    let closingLabel: UILabel = {
-        let label = UILabel()
-        label.text = "마감"
-        label.font = .boldSystemFont(ofSize: 24)
-        label.textColor = .gray1
-        label.textAlignment = .center
-        return label
-    }()
-    
-    let endLabel: UILabel = {
-        let label = UILabel()
-        label.text = "종료"
-        label.font = .boldSystemFont(ofSize: 24)
-        label.textColor = .gray1
-        label.textAlignment = .center
-        return label
     }()
     
     let loadingView = LoadingView()
     private var timer: Timer?
-
+    
+    private var selectedAnnotation: MKAnnotation?
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -148,6 +56,8 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         mapView(mapView, regionDidChangeAnimated: true)
         
         self.mapView.delegate = self
+        self.collectionView.delegate = self
+        self.collectionView.dataSource = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -163,25 +73,6 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
     }
     
     // MARK: - Selectors
-    
-    @objc func infoButtonTapped() {
-        guard let selectedPost = selectedPost else { return }
-        
-        let courseDetailVC = CourseDetailVC()
-        courseDetailVC.hidesBottomBarWhenPushed = true
-        
-        courseDetailVC.postUid = selectedPost.uid
-        
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        button.tintColor = .gray1
-        
-        button.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
-        let barButton = UIBarButtonItem(customView: button)
-        courseDetailVC.navigationItem.rightBarButtonItem = barButton
-        
-        self.navigationController?.pushViewController(courseDetailVC, animated: true)
-    }
     
     @objc func fetchRegion() {
         self.loadingView.isHidden = false
@@ -202,12 +93,12 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
                 return
             }
             
-            print("Fetched \(posts.count) posts within 10km of the region center")
             self.posts = posts
             
             self.addPinsForPosts()
+            self.collectionView.reloadData()
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.loadingView.isHidden = true
             }
         }
@@ -226,115 +117,13 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         loadingView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
         loadingView.isHidden = true
         
-        mapView.addSubview(infoButton)
-        infoButton.translatesAutoresizingMaskIntoConstraints = false
-        infoButton.leftAnchor.constraint(equalTo: mapView.leftAnchor, constant: 16).isActive = true
-        infoButton.rightAnchor.constraint(equalTo: mapView.rightAnchor, constant: -16).isActive = true
-        infoButton.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant:
-        +120).isActive = true
-        infoButton.heightAnchor.constraint(equalToConstant: 120).isActive = true
-        
-        self.infoButton.addSubview(postImageView)
-        postImageView.topAnchor.constraint(equalTo: self.infoButton.layoutMarginsGuide.topAnchor).isActive = true
-        postImageView.bottomAnchor.constraint(equalTo: self.infoButton.layoutMarginsGuide.bottomAnchor).isActive = true
-        postImageView.leadingAnchor.constraint(equalTo: self.infoButton.layoutMarginsGuide.leadingAnchor).isActive = true
-        postImageView.widthAnchor.constraint(equalTo: postImageView.heightAnchor).isActive = true
-        
-        postImageView.addSubview(closingLabel)
-        closingLabel.translatesAutoresizingMaskIntoConstraints = false
-        closingLabel.centerXAnchor.constraint(equalTo: postImageView.centerXAnchor).isActive = true
-        closingLabel.centerYAnchor.constraint(equalTo: postImageView.centerYAnchor).isActive = true
-        closingLabel.isHidden = true
-        
-        self.infoButton.addSubview(runningStyleLabel)
-        runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
-        runningStyleLabel.topAnchor.constraint(equalTo: self.infoButton.layoutMarginsGuide.topAnchor).isActive = true
-        runningStyleLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
-        runningStyleLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
-        runningStyleLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
-        
-        self.infoButton.addSubview(titleLabel)
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.topAnchor.constraint(equalTo: runningStyleLabel.bottomAnchor, constant: 3).isActive = true
-        titleLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
-        
-        let locationStack = UIStackView(arrangedSubviews: [locationIcon, locationLabel])
-        locationStack.axis = .horizontal
-        locationStack.spacing = 5
-        
-        let timeStack = UIStackView(arrangedSubviews: [timeIcon, timeLabel])
-        timeStack.axis = .horizontal
-        timeStack.spacing = 5
-        
-        let distanceStack = UIStackView(arrangedSubviews: [distanceIcon, distanceLabel])
-        distanceStack.axis = .horizontal
-        distanceStack.spacing = 5
-        
-        let peopleStack = UIStackView(arrangedSubviews: [peopleIcon, peopleLabel])
-        peopleStack.axis = .horizontal
-        peopleStack.spacing = 5
-        
-        self.infoButton.addSubview(locationStack)
-        locationStack.translatesAutoresizingMaskIntoConstraints = false
-        locationStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        locationStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
-        
-        self.infoButton.addSubview(timeStack)
-        timeStack.translatesAutoresizingMaskIntoConstraints = false
-        timeStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        timeStack.leadingAnchor.constraint(equalTo: locationStack.trailingAnchor, constant: 8).isActive = true
-        
-        self.infoButton.addSubview(distanceStack)
-        distanceStack.translatesAutoresizingMaskIntoConstraints = false
-        distanceStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        distanceStack.leadingAnchor.constraint(equalTo: timeStack.trailingAnchor, constant: 8).isActive = true
-        
-        self.infoButton.addSubview(peopleStack)
-        peopleStack.translatesAutoresizingMaskIntoConstraints = false
-        peopleStack.bottomAnchor.constraint(equalTo: infoButton.layoutMarginsGuide.bottomAnchor).isActive = true
-        peopleStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
-        
-        self.infoButton.addSubview(dateLabel)
-        dateLabel.translatesAutoresizingMaskIntoConstraints = false
-        dateLabel.bottomAnchor.constraint(equalTo: infoButton.layoutMarginsGuide.bottomAnchor).isActive = true
-        dateLabel.trailingAnchor.constraint(equalTo: self.infoButton.layoutMarginsGuide.trailingAnchor).isActive = true
-    }
-    
-    func setupButton(post: Post) {
-        postImageView.loadImage(url: post.routeImageUrl)
-        
-        self.runningStyleLabel.text = MateViewCell().runningStyleString(for: post.runningStyle)
-        
-        if post.title.count > 15 {
-            self.titleLabel.text = "\(post.title.prefix(15))..."
-        } else {
-            self.titleLabel.text = post.title
-        }
-        
-        self.locationLabel.text = post.address
-        self.timeLabel.text = post.startDate.toString(format: "h:mm a")
-        self.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
-        self.peopleLabel.text = "\(post.members.count) / \(post.numberOfPeoples)"
-        self.dateLabel.text = post.startDate.toString(format: "yyyy년 MM월 dd일")
-        
-        switch MateViewCell().runningStyleString(for: post.runningStyle) {
-        case "걷기":
-            self.runningStyleLabel.backgroundColor = .walking
-        case "조깅":
-            self.runningStyleLabel.backgroundColor = .jogging
-        case "달리기":
-            self.runningStyleLabel.backgroundColor = .running
-        case "인터벌":
-            self.runningStyleLabel.backgroundColor = .interval
-        default:
-            self.runningStyleLabel.backgroundColor = .mainBlue
-        }
-        
-        if post.members.count >= post.numberOfPeoples {
-            closingLabel.isHidden = false
-        } else {
-            closingLabel.isHidden = true
-        }
+        mapView.addSubview(collectionView)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.leftAnchor.constraint(equalTo: mapView.leftAnchor).isActive = true
+        collectionView.rightAnchor.constraint(equalTo: mapView.rightAnchor).isActive = true
+        collectionView.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant:
+                                                +120).isActive = true
+        collectionView.heightAnchor.constraint(equalToConstant: 120).isActive = true
     }
     
     // 맵설정
@@ -378,6 +167,8 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         }
     }
     
+    // MARK: - MapView
+    
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         guard !(annotation is MKUserLocation) else {
             return nil
@@ -394,28 +185,53 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         }
         
         if annotation is MKPointAnnotation {
-            let imageView = UIImageView()
-            imageView.image = UIImage(named: "trackus_icon")?.withRenderingMode(.alwaysTemplate)
-            imageView.contentMode = .scaleAspectFit
-            imageView.clipsToBounds = true
-            imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-            imageView.layer.cornerRadius = 50 / 2
-            imageView.backgroundColor = .white
-            imageView.layer.borderColor = UIColor.mainBlue.cgColor
-            imageView.layer.borderWidth = 2
-            
-            annotationView?.subviews.forEach { $0.removeFromSuperview() }
-            
-            annotationView?.frame.size = CGSize(width: 50, height: 50)
-            annotationView?.addSubview(imageView)
-            
-            imageView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                imageView.centerXAnchor.constraint(equalTo: annotationView!.centerXAnchor),
-                imageView.centerYAnchor.constraint(equalTo: annotationView!.centerYAnchor),
-                imageView.widthAnchor.constraint(equalToConstant: 50),
-                imageView.heightAnchor.constraint(equalToConstant: 50)
-            ])
+            if annotation.title == "끝" {
+                let imageView = UIImageView()
+                imageView.image = UIImage(systemName: "flag.circle.fill")
+                imageView.contentMode = .scaleAspectFit
+                imageView.clipsToBounds = true
+                imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+                imageView.layer.cornerRadius = 50 / 2
+                imageView.backgroundColor = .white
+                imageView.layer.borderColor = UIColor.mainBlue.cgColor
+                imageView.layer.borderWidth = 2
+                
+                annotationView?.subviews.forEach { $0.removeFromSuperview() }
+                
+                annotationView?.frame.size = CGSize(width: 50, height: 50)
+                annotationView?.addSubview(imageView)
+                
+                imageView.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    imageView.centerXAnchor.constraint(equalTo: annotationView!.centerXAnchor),
+                    imageView.centerYAnchor.constraint(equalTo: annotationView!.centerYAnchor),
+                    imageView.widthAnchor.constraint(equalToConstant: 50),
+                    imageView.heightAnchor.constraint(equalToConstant: 50)
+                ])
+            } else {
+                let imageView = UIImageView()
+                imageView.image = UIImage(named: "trackus_icon")?.withRenderingMode(.alwaysTemplate)
+                imageView.contentMode = .scaleAspectFit
+                imageView.clipsToBounds = true
+                imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+                imageView.layer.cornerRadius = 50 / 2
+                imageView.backgroundColor = .white
+                imageView.layer.borderColor = UIColor.mainBlue.cgColor
+                imageView.layer.borderWidth = 2
+                
+                annotationView?.subviews.forEach { $0.removeFromSuperview() }
+                
+                annotationView?.frame.size = CGSize(width: 50, height: 50)
+                annotationView?.addSubview(imageView)
+                
+                imageView.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    imageView.centerXAnchor.constraint(equalTo: annotationView!.centerXAnchor),
+                    imageView.centerYAnchor.constraint(equalTo: annotationView!.centerYAnchor),
+                    imageView.widthAnchor.constraint(equalToConstant: 50),
+                    imageView.heightAnchor.constraint(equalToConstant: 50)
+                ])
+            }
         }
         
         return annotationView
@@ -431,23 +247,19 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         
         return MKOverlayRenderer(overlay: overlay)
     }
-
     
     // Annotaion이 선택되었을 떄
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         guard let annotation = view.annotation as? MKPointAnnotation else {
             return
         }
-
+        
         if let selectedPost = posts.first(where: { $0.uid == annotation.title }) {
-            view.tintColor = .red
-            view.layer.borderColor = UIColor.caution.cgColor
             HapticManager.shared.hapticImpact(style: .light)
-            setupButton(post: selectedPost)
             self.selectedPost = selectedPost
             
             mapView.annotations.forEach { pin in
-                if pin !== annotation {
+                if pin !== annotation && pin.title != "끝" {
                     mapView.view(for: pin)?.isHidden = true
                 }
             }
@@ -467,7 +279,7 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             mapView.addOverlay(polyline)
             
             UIView.animate(withDuration: 0.1) {
-                self.infoButton.frame.origin.y = self.mapView.frame.height - 128 - 120
+                self.collectionView.frame.origin.y = self.mapView.frame.height - 128 - 120
             }
             
             guard let region = courseCoords.makeRegionToFit() else { return }
@@ -477,19 +289,20 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
                 self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100), animated: false)
             }
             
+            if let index = posts.firstIndex(where: { $0.uid == annotation.title }) {
+                collectionView.scrollToItem(at: IndexPath(item: index, section: 0), at: .centeredHorizontally, animated: false)
+            }
+            
             mapView.isZoomEnabled = false
             mapView.isScrollEnabled = false
             mapView.isRotateEnabled = false
             isSelected = true
         }
     }
-
-
+    
+    
     // Annotaion이 선택 해제 되었을떄
     func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
-        view.tintColor = .mainBlue
-        view.layer.borderColor = UIColor.mainBlue.cgColor
-        
         mapView.annotations.forEach { pin in
             mapView.view(for: pin)?.isHidden = false
         }
@@ -505,13 +318,14 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         }
         
         UIView.animate(withDuration: 0.1) {
-            self.infoButton.frame.origin.y = self.view.frame.height
+            self.collectionView.frame.origin.y = self.view.frame.height
         }
         
         mapView.isZoomEnabled = true
         mapView.isScrollEnabled = true
         mapView.isRotateEnabled = true
         isSelected = false
+        selectedAnnotation = nil
     }
     
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
@@ -520,6 +334,81 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             timer = Timer.scheduledTimer(timeInterval: 1.5, target: self, selector: #selector(fetchRegion), userInfo: nil, repeats: false)
         } else {
             timer?.invalidate()
+        }
+    }
+}
+
+// MARK: - CollectionViewDelegate
+
+extension RunningHomeVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return posts.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RunningMapCell.identifier, for: indexPath) as? RunningMapCell else {
+            fatalError("Unable to dequeue RunningMapCell")
+        }
+        
+        let post = posts[indexPath.row]
+        cell.configure(post: post)
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let post = posts[indexPath.row]
+        
+        let courseDetailVC = CourseDetailVC()
+        courseDetailVC.hidesBottomBarWhenPushed = true
+        courseDetailVC.postUid = post.uid
+        
+        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        courseDetailVC.navigationItem.rightBarButtonItem = barButton
+        
+        self.navigationController?.pushViewController(courseDetailVC, animated: true)
+        collectionView.deselectItem(at: indexPath, animated: false)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 16
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let frameSize = collectionView.frame.size
+        return CGSize(width: frameSize.width - 16, height: frameSize.height)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+    }
+    
+    // 컬렉션뷰 페이징
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let rect = CGRect(origin: collectionView.contentOffset, size: collectionView.bounds.size)
+        let point = CGPoint(x: rect.midX, y: rect.midY)
+        
+        if let indexPath = collectionView.indexPathForItem(at: point) {
+            let post = posts[indexPath.row]
+            
+            if indexPath.row != 0 && indexPath.row != posts.count - 1 {
+                if let currentAnnotation = selectedAnnotation {
+                    mapView.deselectAnnotation(currentAnnotation, animated: true)
+                    mapView.view(for: currentAnnotation)?.isHidden = true
+                }
+            }
+            
+            if let newAnnotation = mapView.annotations.first(where: { ($0 as? MKPointAnnotation)?.title == post.uid }) {
+                mapView.selectAnnotation(newAnnotation, animated: true)
+                selectedAnnotation = newAnnotation
+                isSelected = true
+                mapView.annotations.forEach { pin in
+                    if pin !== newAnnotation && pin.title != "끝" {
+                        mapView.view(for: pin)?.isHidden = true
+                    }
+                }
+            }
         }
     }
 }
