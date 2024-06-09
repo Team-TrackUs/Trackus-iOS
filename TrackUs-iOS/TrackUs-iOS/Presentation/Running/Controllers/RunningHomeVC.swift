@@ -122,8 +122,8 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         collectionView.leftAnchor.constraint(equalTo: mapView.leftAnchor).isActive = true
         collectionView.rightAnchor.constraint(equalTo: mapView.rightAnchor).isActive = true
         collectionView.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant:
-                                                +120).isActive = true
-        collectionView.heightAnchor.constraint(equalToConstant: 120).isActive = true
+                                                +110).isActive = true
+        collectionView.heightAnchor.constraint(equalToConstant: 110).isActive = true
     }
     
     // 맵설정
@@ -279,7 +279,7 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             mapView.addOverlay(polyline)
             
             UIView.animate(withDuration: 0.1) {
-                self.collectionView.frame.origin.y = self.mapView.frame.height - 128 - 120
+                self.collectionView.frame.origin.y = self.mapView.frame.height - 128 - 110
             }
             
             guard let region = courseCoords.makeRegionToFit() else { return }
@@ -395,7 +395,7 @@ extension RunningHomeVC: UICollectionViewDelegate, UICollectionViewDataSource, U
             if indexPath.row != 0 && indexPath.row != posts.count - 1 {
                 if let currentAnnotation = selectedAnnotation {
                     mapView.deselectAnnotation(currentAnnotation, animated: true)
-                    mapView.view(for: currentAnnotation)?.isHidden = true
+//                    mapView.view(for: currentAnnotation)?.isHidden = true
                 }
             }
             
