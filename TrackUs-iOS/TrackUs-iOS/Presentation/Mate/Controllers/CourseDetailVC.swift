@@ -58,6 +58,7 @@ class CourseDetailVC: UIViewController {
     
     var preMapView: MKMapView = { // 지도 미리보기
         let mapview = MKMapView()
+        mapview.layer.cornerRadius = 10
         return mapview
     }()
     
@@ -151,8 +152,6 @@ class CourseDetailVC: UIViewController {
     
     private lazy var courseExitButton: UIButton = { // 트랙 나가기 버튼
         let button = UIButton(type: .system)
-        button.backgroundColor = .mainBlue
-        button.setTitle("트랙 나가기", for: .normal)
         button.titleLabel?.textAlignment = .center
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.setTitleColor(.white, for: .normal)
@@ -187,30 +186,47 @@ class CourseDetailVC: UIViewController {
         return label
     }()
     
-    private lazy var navigationMenuButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        button.tintColor = .black
-        button.addTarget(self, action: #selector(menuButtonTapped), for: .touchUpInside)
-        
-        return button
-    }()
+    var ownerUid: String = ""
     
     let buttonStack = UIStackView()
     
     lazy var preMapViewTapGesture = UITapGestureRecognizer(target: self, action: #selector(goCourseDetail(_:)))
+    
+    let skeletonView = MateDetailSkeletonView()
+    
+    var fetchComplete = false
+    var mapUIComplete = false
+    var viewUIComplete = false
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        skeletonView.isHidden = false
+        
         setupNavBar()
         
         collectionView.delegate = self
         collectionView.dataSource = self
-        configureUI()
+        
+        fetchPostDetail()
         runningStyleColor()
+        
+        configureUI()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        configureUI()
+        fetchPostDetail()
+        runningStyleColor()
+        MapConfigureUI()
+        
+        if fetchComplete && mapUIComplete && viewUIComplete {
+            self.hideSkeletonViewWithFadeIn()
+        }
     }
     
     // MARK: - Selectors
@@ -225,8 +241,14 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func courseEnterButtonTapped() {
-        PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updateMembers in
-            self.members = updateMembers
+        PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updatedMembers, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                
+                self.showAlert(title: "", message: "해당 모집글에 인원이 다 찼습니다.", action: "참여")
+            } else if let updatedMembers = updatedMembers {
+                self.members = updatedMembers
+            }
         }
     }
     
@@ -238,30 +260,57 @@ class CourseDetailVC: UIViewController {
     
     @objc func goChatRoomButtonTapped() {
         
+        if members.contains(uid) {
+            // 채팅방에 참여 했을 시 -> 해당 모집글 톡방
+            
+        } else {
+            // 채팅방에 참여 하지 않았을 경우 -> 방장 개인톡
+            
+        }
+        
     }
     
     @objc func menuButtonTapped() {
         let editAction = UIAlertAction(title: "모집글 수정", style: .default) { action in
             
+            let courseRegisterVC = CourseRegisterVC()
+            
+            courseRegisterVC.testcoords = self.courseCoords
+            courseRegisterVC.courseTitle.text = self.courseTitleLabel.text!
+            courseRegisterVC.courseTitleString = self.courseTitleLabel.text!
+            courseRegisterVC.courseDescription.text = self.courseDestriptionLabel.text!
+            courseRegisterVC.courseDescriptionString = self.courseDestriptionLabel.text!
+            courseRegisterVC.members = self.members
+            courseRegisterVC.personnel = self.memberLimit
+            courseRegisterVC.distance = self.distance
+            courseRegisterVC.postUid = self.postUid
+            courseRegisterVC.isEdit = true
+            courseRegisterVC.imageUrl = self.imageUrl
+            
+            let navController = UINavigationController(rootViewController: courseRegisterVC)
+            navController.modalPresentationStyle = .fullScreen
+            self.present(navController, animated: true, completion: nil)
+            
+            // DispatchQueue?
+            self.navigationController?.popToRootViewController(animated: false)
         }
         
         let deleteAction = UIAlertAction(title: "모집글 삭제", style: .destructive) { action in
-            
-            PostService().deletePost(postUid: self.postUid, imageUrl: self.imageUrl) {
-                self.navigationController?.popToRootViewController(animated: true)
-            }
+            self.showAlert(title: "", message: "모집글을 삭제하시겠습니까?", action: "삭제")
         }
         
         let reportAction = UIAlertAction(title: "모집글 신고", style: .destructive) { action in
-            
+            let reportPostVC = ReportPostVC()
+            reportPostVC.configure(uid: self.postUid, imageUrl: self.imageUrl, title: self.courseTitleLabel.text ?? "제목 없음", userUid: self.uid)
+            self.navigationController?.pushViewController(reportPostVC, animated: true)
         }
         
         let cancelAction = UIAlertAction(title: "취소", style: .cancel)
         
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        if members[0] == uid {
-            // 참여인원의 0번째(작성자)라면
+        if ownerUid == uid {
+            // 작성자인 경우
             alert.addAction(editAction)
             alert.addAction(deleteAction)
         } else {
@@ -280,6 +329,13 @@ class CourseDetailVC: UIViewController {
         view.addSubview(buttonContainer)
         view.addSubview(scrollView)
         buttonContainer.addSubview(divider)
+        
+        view.addSubview(skeletonView)
+        skeletonView.translatesAutoresizingMaskIntoConstraints = false
+        skeletonView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        skeletonView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        skeletonView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        skeletonView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
         buttonContainer.translatesAutoresizingMaskIntoConstraints = false
         buttonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
@@ -306,8 +362,6 @@ class CourseDetailVC: UIViewController {
         preMapView.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         preMapView.heightAnchor.constraint(equalToConstant: 310).isActive = true
         preMapView.addGestureRecognizer(preMapViewTapGesture)
-        
-        MapConfigureUI()
         
         preMapView.addSubview(distanceLabel)
         distanceLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -378,30 +432,7 @@ class CourseDetailVC: UIViewController {
         buttonStack.distribution = .fill // dldl
         
         // 해당 유저가 참여했는지 안했는지
-        
-        if members.contains(uid) {
-            buttonStack.addArrangedSubview(courseExitButton)
-            buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
-            buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
-            
-            buttonStack.addArrangedSubview(goChatRoomButton)
-            goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
-            goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
-        } else {
-            buttonStack.addArrangedSubview(courseEnterButton)
-            buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
-            buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
-            
-            if members.count >= memberLimit {
-                courseEnterButton.backgroundColor = .systemGray
-                courseEnterButton.setTitle("모집 마감", for: .normal)
-                courseEnterButton.isEnabled = false
-            } else {
-                courseEnterButton.backgroundColor = .mainBlue
-                courseEnterButton.setTitle("트랙 참여하기", for: .normal)
-                courseEnterButton.isEnabled = true
-            }
-        }
+        updateView()
         
         buttonContainer.addSubview(buttonStack)
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
@@ -409,6 +440,8 @@ class CourseDetailVC: UIViewController {
         buttonStack.leftAnchor.constraint(equalTo: buttonContainer.leftAnchor, constant: 16).isActive = true
         buttonStack.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor).isActive = true
         buttonStack.rightAnchor.constraint(equalTo: buttonContainer.rightAnchor, constant: -16).isActive = true
+        
+        viewUIComplete = true
     }
     
     private func setupNavBar() {
@@ -418,9 +451,6 @@ class CourseDetailVC: UIViewController {
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
-        let barButton = UIBarButtonItem(customView: navigationMenuButton)
-        self.navigationItem.rightBarButtonItem = barButton
     }
     
     func runningStyleColor() {
@@ -453,10 +483,24 @@ class CourseDetailVC: UIViewController {
             buttonStack.addArrangedSubview(goChatRoomButton)
             goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
             goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
+            
+            courseExitButton.setTitle("트랙 나가기", for: .normal)
+            
+            if ownerUid == uid {
+                courseExitButton.backgroundColor = .systemGray
+                courseExitButton.isEnabled = false
+            } else {
+                courseExitButton.backgroundColor = .caution
+                courseExitButton.isEnabled = true
+            }
         } else {
             buttonStack.addArrangedSubview(courseEnterButton)
             buttonStack.widthAnchor.constraint(equalToConstant: 335).isActive = true
             buttonStack.heightAnchor.constraint(equalToConstant: 56).isActive = true
+            
+            buttonStack.addArrangedSubview(goChatRoomButton)
+            goChatRoomButton.widthAnchor.constraint(equalToConstant: 56).isActive = true
+            goChatRoomButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
             
             if members.count >= memberLimit {
                 courseEnterButton.backgroundColor = .systemGray
@@ -469,7 +513,121 @@ class CourseDetailVC: UIViewController {
             }
         }
     }
+    
+    func fetchPostDetail() {
+        PostService().fetchPost(uid: postUid) { post, error in
+            
+            if let error = error {
+                print("DEBUG: Error FetchPostDetail")
+                self.showAlert(title: "오류", message: "모집글을 불러오지 못했습니다.", action: "상태")
+                return
+            }
+            
+            guard let post = post else {
+                self.showAlert(title: "", message: "삭제된 모집글입니다.", action: "상태")
+                return
+            }
+            
+            self.courseCoords = post.courseRoutes.map { geoPoint in
+                
+                return CLLocationCoordinate2D(latitude: geoPoint.latitude, longitude: geoPoint.longitude)
+            }
+            self.searchAddress { address in
+                self.courseTitleLabel.text = post.title
+                self.courseDestriptionLabel.text = post.content
+                self.distance = post.distance
+                self.distanceLabel.text = "\(String(format: "%.2f", self.distance)) km"
+                self.dateLabel.text = post.startDate.toString(format: "yyyy.MM.dd")
+                self.runningStyleLabel.text = self.runningStyleString(for: post.runningStyle)
+                self.courseLocationLabel.text = address
+                self.courseTimeLabel.text = post.startDate.toString(format: "h:mm a")
+                self.personInLabel.text = "\(String(describing: post.members.count))명"
+                self.members = post.members
+                self.memberLimit = post.numberOfPeoples
+                self.imageUrl = post.routeImageUrl
+                self.ownerUid = post.ownerUid
+            }
+        }
+        fetchComplete = true
+    }
+    
+    func runningStyleString(for runningStyle: Int) -> String {
+        switch runningStyle {
+        case 0:
+            return "걷기"
+        case 1:
+            return "조깅"
+        case 2:
+            return "달리기"
+        case 3:
+            return "인터벌"
+        default:
+            return "걷기"
+        }
+    }
+    
+    func showAlert(title: String, message: String, action: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        switch action {
+        case "상태":
+            let okAction = UIAlertAction(title: "확인", style: .default) { _ in
+                self.navigationController?.popViewController(animated: true)
+            }
+            alertController.addAction(okAction)
+            
+        case "참여":
+            let okAction = UIAlertAction(title: "확인", style: .default) { _ in
+                self.fetchPostDetail()
+            }
+            alertController.addAction(okAction)
+            
+        case "삭제":
+            let okAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
+                PostService().deletePost(postUid: self.postUid, imageUrl: self.imageUrl) {
+                    self.navigationController?.popToRootViewController(animated: true)
+                }
+            }
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+            alertController.addAction(okAction)
+            alertController.addAction(cancelAction)
+            
+        default:
+            break
+        }
+        
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
+    func searchAddress(completion: @escaping (String) -> Void) {
+        let addLoc = CLLocation(latitude: courseCoords[0].latitude, longitude: courseCoords[0].longitude)
+        var address = ""
+
+        CLGeocoder().reverseGeocodeLocation(addLoc, completionHandler: { place, error in
+            if let pm = place?.first {
+                if let administrativeArea = pm.administrativeArea {
+                    address += administrativeArea
+                }
+                if let subLocality = pm.subLocality {
+                    address += " " + subLocality
+                }
+            } else {
+                print("DEBUG: 주소 검색 실패 \(error?.localizedDescription ?? "Unknown error")")
+            }
+            completion(address)
+        })
+    }
+    
+    private func hideSkeletonViewWithFadeIn() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.skeletonView.alpha = 0.0
+        }) { _ in
+            self.skeletonView.isHidden = true
+        }
+    }
 }
+
+// MARK: - CollectionViewSetting
 
 extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -483,7 +641,7 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
         }
         
         let memberUid = members[indexPath.item]
-        let isOwner = indexPath.item == 0
+        let isOwner = ownerUid == memberUid
         cell.configure(uid: memberUid, isOwner: isOwner)
         return cell
     }
@@ -494,6 +652,8 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
     }
     
 }
+
+// MARK: - MapSetting
 
 extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
     
@@ -508,7 +668,6 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         preMapView.mapType = MKMapType.mutedStandard
         preMapView.isZoomEnabled = false
         preMapView.isScrollEnabled = false
-        preMapView.center = view.center
         preMapView.showsUserLocation = false
         
         for (index, coord) in courseCoords.enumerated() {
@@ -521,6 +680,8 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         }
         
         addPolylineToMap()
+        
+        mapUIComplete = true
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -529,10 +690,12 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         if courseCoords.count > 0 {
             if !isRegionSet {
                 
-                let center = CLLocationCoordinate2D(latitude: courseCoords[0].latitude, longitude: courseCoords[0].longitude)
-                let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03))
-                preMapView.setRegion(region, animated: true) // 위치를 코스의 시작위치로
+                guard let region = courseCoords.makeRegionToFit() else { return }
+                preMapView.setRegion(region, animated: false) // 위치를 코스의 시작위치로
                 
+                DispatchQueue.main.asyncAfter(deadline: .now()) {
+                    self.preMapView.setVisibleMapRect(self.preMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: false)
+                }
                 isRegionSet = true
             }
         }
@@ -588,11 +751,3 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
         preMapView.addOverlay(polyline)
     }
 }
-
-
-/*
- 
- "4명의 TrackUs 회원이 이 러닝 모임에 참여중입니다!"
- 참여한 사람의 이미지와 이름 Cell을 만들기
- 
- */
