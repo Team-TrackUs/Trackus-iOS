@@ -251,7 +251,7 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
     
     private func deleteUserAccount() {
         let db = Firestore.firestore()
-        let userRef = db.collection("user").document(User.currentUid)
+        let userRef = db.collection("users").document(User.currentUid)
         userRef.delete { error in
             if let error = error {
                 print("Error deleting user document: \(error)")

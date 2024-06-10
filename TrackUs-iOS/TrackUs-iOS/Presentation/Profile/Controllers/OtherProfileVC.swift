@@ -386,7 +386,7 @@ class OtherProfileVC: UIViewController {
     
     private func fetchUserProfile(userId: String) {
         let db = Firestore.firestore()
-        let userRef = db.collection("user").document(userId)
+        let userRef = db.collection("users").document(userId)
         
         userRef.getDocument { [weak self] document, error in
             guard let self = self, let document = document, document.exists else {
@@ -412,7 +412,7 @@ class OtherProfileVC: UIViewController {
         let db = Firestore.firestore()
         let currentUserUid = UserManager.uid
         
-        db.collection("user").document(currentUserUid).getDocument { [weak self] document, error in
+        db.collection("users").document(currentUserUid).getDocument { [weak self] document, error in
             guard let self = self, let document = document, document.exists else {
                 return
             }
@@ -451,7 +451,7 @@ class OtherProfileVC: UIViewController {
         let db = Firestore.firestore()
         let currentUserUid = UserManager.uid
         
-        db.collection("user").document(currentUserUid).updateData([
+        db.collection("users").document(currentUserUid).updateData([
             "blockingMeList": FieldValue.arrayRemove([userId])
         ]) { [weak self] error in
             if let error = error {
@@ -489,7 +489,7 @@ extension OtherProfileVC {
         let db = Firestore.firestore()
         let currentUserUid = UserManager.uid
         
-        db.collection("user").document(currentUserUid).updateData([
+        db.collection("users").document(currentUserUid).updateData([
             "blockingMeList": FieldValue.arrayUnion([userId])
         ]) { error in
             if let error = error {

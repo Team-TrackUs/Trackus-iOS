@@ -357,7 +357,7 @@ class MyProfileVC: UIViewController {
         }
         
         let db = Firestore.firestore()
-        let userRef = db.collection("user").document(currentUser.uid)
+        let userRef = db.collection("users").document(currentUser.uid)
         
         userRef.getDocument { [weak self] document, error in
             guard let self = self, let document = document, document.exists else {

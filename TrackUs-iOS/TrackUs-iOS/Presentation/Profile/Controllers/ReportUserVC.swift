@@ -269,7 +269,7 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
     
     private func fetchUserProfile(userId: String) {
         let db = Firestore.firestore()
-        let userRef = db.collection("user").document(userId)
+        let userRef = db.collection("users").document(userId)
         
         userRef.getDocument { [weak self] document, error in
             guard let self = self, let document = document, document.exists else {
