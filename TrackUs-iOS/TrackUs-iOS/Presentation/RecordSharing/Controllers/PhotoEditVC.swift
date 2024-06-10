@@ -38,8 +38,7 @@ final class PhotoEditVC: UIViewController {
         control.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.black], for: .selected)
         control.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.lightGray], for: .normal)
         control.addTarget(self, action: #selector(didChangeValue(segment:)), for: .valueChanged)
-        control.setBackgroundImage(UIImage(), for: .normal, barMetrics: .default)
-        
+        control.setBackgroundImage(UIImage(), for: .normal, barMetrics: .default)        
         return control
     }()
     
