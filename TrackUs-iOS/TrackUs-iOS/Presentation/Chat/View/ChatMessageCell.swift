@@ -134,9 +134,9 @@ class ChatMessageCell: UITableViewCell {
             //topAnchorPoint = dateLabel.bottomAnchor
         } else {
             dateLabel.isHidden = false
-            constraints.append(dateLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8))
+            constraints.append(dateLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4))
             constraints.append(dateLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
-            constraints.append(dateLabel.heightAnchor.constraint(equalToConstant: 16))
+            constraints.append(dateLabel.heightAnchor.constraint(equalToConstant: 36))
             dateLabel.text = message.date
         }
         
@@ -151,7 +151,7 @@ class ChatMessageCell: UITableViewCell {
             profileImageView.isHidden = true
             userNameLabel.isHidden = true
             timeLabel.textAlignment = .right
-            constraints.append(messageStackView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 4))
+            constraints.append(messageStackView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 2))
             messageLabel.textColor = .white
             messageBackgroundView.backgroundColor = .mainBlue
         } else {
@@ -165,7 +165,7 @@ class ChatMessageCell: UITableViewCell {
             if !messageMap.sameUser || !messageMap.sameDate {
                 profileImageView.isHidden = false
                 userNameLabel.isHidden = false
-                constraints.append(profileImageView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 4))
+                constraints.append(profileImageView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 2))
                 constraints.append(profileImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16))
                 constraints.append(profileImageView.trailingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 56))
                 constraints.append(profileImageView.widthAnchor.constraint(equalToConstant: 40))

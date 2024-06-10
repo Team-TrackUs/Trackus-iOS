@@ -63,13 +63,16 @@ class ChatProfileImageView: UIView {
         imageView.clipsToBounds = true
         imageView.contentMode = .scaleAspectFill
         imageView.tintColor = .gray3
-        if let url = url {
-            imageView.loadImage(url: url)
-        } else {
-            imageView.image = UIImage(systemName: "person.crop.circle.fill")
-            imageView.layer.borderColor = UIColor.gray3.cgColor
-            imageView.layer.borderWidth = 4
-        }
+        imageView.loadProfileImage(url: url)
+//        if let url = url {
+//            imageView.loadImage(url: url)
+//            imageView.layer.borderColor = UIColor.gray3.cgColor
+//            imageView.layer.borderWidth = 0.5
+//        } else {
+//            imageView.image = UIImage(systemName: "person.crop.circle.fill")
+//            imageView.layer.borderColor = UIColor.gray3.cgColor
+//            imageView.layer.borderWidth = 4
+//        }
         imageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(imageView)
         imageView.widthAnchor.constraint(equalToConstant: size).isActive = true

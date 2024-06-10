@@ -8,14 +8,16 @@
 import UIKit
 import FirebaseFirestore
 
-class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate {
     
     private var chat: Chat
-    private var messageMap: [MessageMap] = [] {
-        didSet {
-        }
-    }
+    private var messageMap: [MessageMap] = []
     private var messages: [Message] = [] // 메시지 배열
+    
+    private var userInfo = ChatRoomManager.shared.userInfo
+    
+    // 메인 버튼 하단 위치 제약조건
+    private var inputStackViewBottomConstraint: NSLayoutConstraint!
     
     var lock = NSRecursiveLock()
     
@@ -51,6 +53,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     private lazy var messageTextView: UITextView = {
         let textView = UITextView()
         textView.font = .systemFont(ofSize: 16)
+        textView.isScrollEnabled = false
+        textView.delegate = self
         //textField.numberOfLines = 0
         return textView
     }()
@@ -85,12 +89,40 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         super.viewDidLoad()
         startListening()
         setupViews()
+        setupNavigationBar()
+        
+        // 탭 제스처 인식기를 생성합니다.
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
+            // 제스처 인식기가 뷰의 다른 터치 이벤트를 방해하지 않도록 설정합니다.
+            tapGesture.cancelsTouchesInView = false
+            // 뷰에 제스처 인식기를 추가합니다.
+            view.addGestureRecognizer(tapGesture)
+        
+        // 스와이프로 이전 화면 갈 수 있도록 추가
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+        
+        
+        // 키보드 메소드 등록
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // 리스너 종료
         stopListening()
+    }
+
+    private func setupNavigationBar() {
+        let sideMenuButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal"), style: .plain, target: self, action: #selector(showSideMenu))
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backAction))
+        
+        sideMenuButton.tintColor = .gray1
+        backButton.tintColor = .gray1
+        
+        navigationItem.rightBarButtonItem = sideMenuButton
+        navigationItem.leftBarButtonItem = backButton
+        navigationItem.title = chat.group ? chat.title : userInfo[chat.nonSelfMembers[0]]?.name
     }
     
     private func setupViews() {
@@ -108,6 +140,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         tableView.dataSource = self
         tableView.register(ChatMessageCell.self, forCellReuseIdentifier: "ChatMessageCell")
         
+        inputStackViewBottomConstraint = inputStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
+        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -116,7 +150,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
             
             inputStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
             inputStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
-            inputStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            inputStackViewBottomConstraint,
             
             plusButton.heightAnchor.constraint(equalToConstant: 36),
             plusButton.widthAnchor.constraint(equalToConstant: 36),
@@ -128,6 +162,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         ])
     }
     
+    // 전송 버튼 이벤트 함수
     @objc private func sendMessage() {
         guard let text = messageTextView.text, !text.isEmpty else { return }
         let newMessage = Message(sendMember: currentUid, timeStamp: Date(), messageType: .text, data: text)
@@ -157,6 +192,48 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
     }
     
+    // 사이드 메뉴 보이기
+    @objc private func showSideMenu() {
+        let sideMenuVC = SideMenuVC(chat: chat)
+        sideMenuVC.delegate = self
+        
+        sideMenuVC.modalPresentationStyle = .overFullScreen
+        present(sideMenuVC, animated: false) {
+            sideMenuVC.showMenu()
+        }
+    }
+    
+    // 키보드 나타날 때
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            // 키보드 높이만큼 bottom constraint 조정
+            inputStackViewBottomConstraint.constant = 25 - keyboardSize.height
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    
+    // 키보드 사라질 때
+    @objc private func keyboardWillHide(notification: NSNotification) {
+        // 키보드가 사라질 때 원래대로 복귀
+        inputStackViewBottomConstraint.constant = -10
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    /// 키보드 숨기기
+    @objc func hideKeyboard() {
+        // 모든 입력 필드의 편집을 종료하고 키보드를 숨깁니다.
+        view.endEditing(true)
+    }
+    
+    @objc private func backAction() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    // MARK: - Firebase 관련 함수
     // 메세지 전송
     private func sendMessageFireStore(db: CollectionReference, message: Message) {
         db.addDocument(data: [
@@ -176,21 +253,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
                 }
             }
         }
-//        db.addDocument(data: [
-//            "sendMember": message.sendMember,
-//            "timeStamp": message.timeStamp,
-//            "messageType": message.messageType,
-//            "text": message.text!
-//        ]) { error in
-//            if let error = error {
-//                print("Error adding message: \(error)")
-//            } else {
-//                DispatchQueue.main.async {
-//                    self.messageTextField.text = nil
-//                    self.scrollToBottom()
-//                }
-//            }
-//        }
     }
     
     /// 채팅방 리스너 추가
@@ -246,6 +308,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         listener?.remove()
     }
     
+    /// 스크롤뷰 하단으로 내리기
     private func scrollToBottom() {
         let indexPath = IndexPath(row: messages.count - 1, section: 0)
         tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
@@ -261,7 +324,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
         
         let messageMap = messageMap[indexPath.row]
         cell.configure(messageMap: messageMap)
-        
+        cell.selectionStyle = .none
         return cell
     }
     
@@ -284,3 +347,12 @@ extension ChatRoomVC: UITextViewDelegate {
         }
     }
 }
+
+// 사이드바
+extension ChatRoomVC: SideMenuDelegate {
+    // 나가기 버튼 함수
+    func didSelectLeaveChatRoom(chatRoomID: String) {
+        
+    }
+}
+    
