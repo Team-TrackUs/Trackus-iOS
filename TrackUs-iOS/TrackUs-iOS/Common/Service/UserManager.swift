@@ -17,7 +17,6 @@ class UserManager {
     private init() {
         self.user = User()
     }
-    
     // 사용자 정보 유무 여부 확인
     func checkUserData(uid: String?, completionHandler: @escaping (Bool) -> Void) {
         guard let uid = uid else {
@@ -29,7 +28,7 @@ class UserManager {
             if error != nil {
                 completionHandler(false)
             } else {
-                guard let document = documentSnapshot else {
+                guard documentSnapshot != nil else {
                     // 사용자 정보 없을 경우
                     completionHandler(false)
                     return

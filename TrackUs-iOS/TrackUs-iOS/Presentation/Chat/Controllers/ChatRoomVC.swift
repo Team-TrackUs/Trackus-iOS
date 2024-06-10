@@ -187,7 +187,12 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
         
         // 안읽은 메세지수 갱신
+//        guard let chatroom = ChatRoomManager.shared.chatRooms.filter({ chatroom in
+//            chatroom.uid == chat.uid
+//        }).first else { return }
+//        
         var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
+        //var usersUnreadCountInfo = chatroom.usersUnreadCountInfo
         usersUnreadCountInfo[currentUid] = 0
         db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
     }
@@ -367,6 +372,21 @@ extension ChatRoomVC: SideMenuDelegate {
         ]) { error in
             if let error = error {
                 print("Error updating document: \(error)")
+            }
+        }
+        
+        // firebase 본인 채팅 저장소 삭제 -> 코어데이터 적용시 수정
+        db.document(chatRoomID).collection(currentUid).getDocuments { snapshot, error in
+            guard let snapshot = snapshot else {
+                return
+            }
+            
+            let batch = Firestore.firestore().batch()
+            snapshot.documents.forEach { document in
+                batch.deleteDocument(document.reference)
+            }
+            
+            batch.commit { batchError in
             }
         }
         
