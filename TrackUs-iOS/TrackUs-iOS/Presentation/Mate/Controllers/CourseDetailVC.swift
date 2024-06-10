@@ -267,9 +267,7 @@ class CourseDetailVC: UIViewController {
             // 채팅방 참여된 경우
             if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
                 // 기존 채팅방 띄우기
-                let chatRoomVC = ChatRoomVC(chat: chat)
-                chatRoomVC.hidesBottomBarWhenPushed = true
-                navigationController?.pushViewController(chatRoomVC, animated: true)
+                presentChatView(chat: chat)
             }else {
                 // 채팅방 참여하기
                 DispatchQueue.main.async {
@@ -278,13 +276,18 @@ class CourseDetailVC: UIViewController {
                 
                 let chat = Chat(uid: postUid, group: true, title: "", members: [:], usersUnreadCountInfo: [:])
                 // 기존 채팅방 띄우기
-                let chatRoomVC = ChatRoomVC(chat: chat)
-                chatRoomVC.hidesBottomBarWhenPushed = true
-                navigationController?.pushViewController(chatRoomVC, animated: true)
-                
+                presentChatView(chat: chat)
             }
         }else {
             // 참여 안된 경우 - 방장 1:1 대화하기
+            if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in 
+                // 개인 채팅방 - 방장 uid통해 채팅 유무 여부 확인
+                !chatRoom.group && chatRoom.nonSelfMembers.contains(ownerUid)  }){
+                // 채팅방 표시
+                presentChatView(chat: chat)
+            } else {
+                
+            }
         }
         
     }
@@ -662,6 +665,13 @@ class CourseDetailVC: UIViewController {
         }) { _ in
             self.skeletonView.isHidden = true
         }
+    }
+    
+    /// 채팅방 띄우기
+    private func presentChatView(chat: Chat){
+        let chatRoomVC = ChatRoomVC(chat: chat)
+        chatRoomVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(chatRoomVC, animated: true)
     }
 }
 

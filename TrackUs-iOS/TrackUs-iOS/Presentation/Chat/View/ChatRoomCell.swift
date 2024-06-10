@@ -119,7 +119,7 @@ class ChatRoomCell: UITableViewCell {
     }
     
     func configure(with chat: Chat, users: [String: User]) {
-        chatProfileImageView.configure(with: chat.nonSelfMembers, users: users)
+        chatProfileImageView.configure(with: chat.nonSelfMembers)
         
         if chat.group {
             titleLabel.text = chat.title

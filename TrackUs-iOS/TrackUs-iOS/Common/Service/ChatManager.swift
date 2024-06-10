@@ -82,9 +82,9 @@ class ChatRoomManager {
             guard let document = documentSnapshot else {
                 // 탈퇴 사용자인 경우 리스트에서 삭제
                 self.chatRooms = self.chatRooms.map{
-                    var chatRomm = $0
-                    chatRomm.members = $0.members.filter{ $0.key != uid }
-                    return chatRomm
+                    var chatRoom = $0
+                    chatRoom.members = $0.members.filter{ $0.key != uid }
+                    return chatRoom
                 }
                 return
             }

@@ -75,9 +75,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             guard let self = self else { return }
             if let user = user {
                 // Firestore에서 사용자 정보 확인
-                self.checkUserInFirestore(uid: user.uid)
+                checkUserInFirestore(uid: user.uid)
                 // 로그인이 확인되었으므로 리스너 해제
-                Auth.auth().removeStateDidChangeListener(authListener!)
+                //Auth.auth().removeStateDidChangeListener(authListener!)
             } else {
                 // 로그인하지 않은 경우 로그인 화면으로 전환
                 self.showLoginView()
@@ -87,15 +87,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     // 사용자 정보 유무 조건 확인
     func checkUserInFirestore(uid: String) {
-        UserManager.shared.getUserData(uid: uid) { userNotFound in
+        // 로그인 사용자 기본 정보 유무 확인
+        UserManager.shared.checkUserData(uid: uid) { userFound in
             DispatchQueue.main.async {
-                if userNotFound {
-                    // 회원가입 화면으로 전환
-                    self.showSignUpView()
-                } else {
+                if userFound {
                     // 메인 화면으로 전환
                     self.showMainView()
-                    
+                } else {
+                    // 회원가입 화면으로 전환
+                    self.showSignUpView()
                 }
             }
         }

@@ -9,7 +9,9 @@ import UIKit
 
 class ChatProfileImageView: UIView {
     
-    func configure(with members: [String], users: [String: User]) {
+    var users: [String: User] = ChatRoomManager.shared.userInfo
+    
+    func configure(with members: [String]) {
         // Remove all subviews
         subviews.forEach { $0.removeFromSuperview() }
         
