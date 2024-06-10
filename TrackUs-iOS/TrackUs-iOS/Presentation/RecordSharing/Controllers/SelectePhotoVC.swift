@@ -19,6 +19,7 @@ final class SelectePhotoVC: UIViewController {
     // Shtter Button
     public var onCompleted: (UIImage?) -> Void = { (image) in }
     
+    
     private let cameraPreview: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -71,6 +72,7 @@ final class SelectePhotoVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        buttonEnabled()
         checkCameraPermissions()
     }
     
@@ -192,8 +194,17 @@ final class SelectePhotoVC: UIViewController {
     }
     
     @objc private func didTapTakePhoto() {
-          output.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+        buttonDisabled()
+        output.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
       }
+    
+    func buttonEnabled() {
+        buttonStack.isUserInteractionEnabled = true
+    }
+    
+    func buttonDisabled() {
+        buttonStack.isUserInteractionEnabled = false
+    }
 }
 
 extension SelectePhotoVC: AVCapturePhotoCaptureDelegate {
