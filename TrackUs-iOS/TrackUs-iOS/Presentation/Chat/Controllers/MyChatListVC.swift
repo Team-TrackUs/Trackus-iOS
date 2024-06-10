@@ -58,20 +58,6 @@ class MyChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource
     }
     
     // MARK: - view 관련 함수
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        if chatViewModel.chatRooms.count == 0 {
-//            let label = UILabel(frame: tableView.bounds)
-//            label.text = "참여한 채팅방이 없습니다"
-//            label.textAlignment = .center
-//            label.textColor = .gray
-//            tableView.backgroundView = label
-//            return 0
-//        } else {
-//            tableView.backgroundView = nil
-//            return chatViewModel.chatRooms.count
-//        }
-//    }
-
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatRoomCell", for: indexPath) as! ChatRoomCell
         let chatRoom = chat.chatRooms[indexPath.row]
@@ -79,15 +65,11 @@ class MyChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         return cell
     }
         
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            let chatRoomVC = ChatRoomVC(chat: chat.chatRooms[indexPath.row])
-            chatRoomVC.hidesBottomBarWhenPushed = true
-            
-//                let viewController = UINavigationController(rootViewController: chatRoomVC)
-//                viewController.modalPresentationStyle = .fullScreen
-//                self.present(viewController, animated: false)
-            navigationController?.pushViewController(chatRoomVC, animated: true)
-        }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let chatRoomVC = ChatRoomVC(chat: chat.chatRooms[indexPath.row])
+        chatRoomVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(chatRoomVC, animated: true)
+    }
         
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "나가기") { (action, view, completionHandler) in

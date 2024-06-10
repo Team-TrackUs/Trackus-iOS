@@ -265,10 +265,23 @@ class CourseDetailVC: UIViewController {
         let ref = Firestore.firestore().collection("chats")
         if members.contains(uid){
             // 채팅방 참여된 경우
-            if ChatRoomManager.shared.chatRooms.contains(where: {$0.uid == postUid}) {
-                // 기존 채팅방 열기 View 이동
+            if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+                // 기존 채팅방 띄우기
+                let chatRoomVC = ChatRoomVC(chat: chat)
+                chatRoomVC.hidesBottomBarWhenPushed = true
+                navigationController?.pushViewController(chatRoomVC, animated: true)
             }else {
-                joinChat()
+                // 채팅방 참여하기
+                DispatchQueue.main.async {
+                    self.joinChat()
+                }
+                
+                let chat = Chat(uid: postUid, group: true, title: "", members: [:], usersUnreadCountInfo: [:])
+                // 기존 채팅방 띄우기
+                let chatRoomVC = ChatRoomVC(chat: chat)
+                chatRoomVC.hidesBottomBarWhenPushed = true
+                navigationController?.pushViewController(chatRoomVC, animated: true)
+                
             }
         }else {
             // 참여 안된 경우 - 방장 1:1 대화하기

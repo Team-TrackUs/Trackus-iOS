@@ -352,7 +352,42 @@ extension ChatRoomVC: UITextViewDelegate {
 extension ChatRoomVC: SideMenuDelegate {
     // 나가기 버튼 함수
     func didSelectLeaveChatRoom(chatRoomID: String) {
+        // 채팅방 나가기
+        db.document(chatRoomID).updateData([
+            "members.\(currentUid)": false
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
+            }
+        }
         
+        // 안읽은 메세지수 카운터 제거
+        db.document(chatRoomID).updateData([
+            "usersUnreadCountInfo.\(currentUid)": FieldValue.delete()
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
+            }
+        }
+        
+        // 나가기 안내 메세지
+        let newMessage = Message(sendMember: currentUid, timeStamp: Date(), messageType: .userInout, data: false)
+        
+        // 그룹 채팅방만 해당
+        if chat.group {
+            // 그룹 메세지 - 각 사용자별 메세지 저장소에 저장
+            _ = chat.members.map{
+                // 참여중인 사용자 확인
+                if $0.value == true {
+                    // 해당 사용자 메세지 정보에 저장
+                    let db = db.document(chat.uid).collection($0.key)
+                    sendMessageFireStore(db: db, message: newMessage)
+                }
+            }
+        }
+        
+        // 채팅방 view 나가기
+        self.navigationController?.popViewController(animated: true)
     }
 }
     

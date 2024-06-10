@@ -48,14 +48,7 @@ class ChatRoomManager {
                     }
                     return date1 > date2
                 }
-            ?? [Chat(
-                uid: "chat1",
-                group: false,
-                title: "",
-                members: [User.currentUid: true, "user1": true],
-                usersUnreadCountInfo: ["user1": 0, User.currentUid: 6],
-                latestMessage: LastetMessage(timestamp: Date(), text: "Hey Alice!")
-            )]
+            ?? []
         }
     }
     

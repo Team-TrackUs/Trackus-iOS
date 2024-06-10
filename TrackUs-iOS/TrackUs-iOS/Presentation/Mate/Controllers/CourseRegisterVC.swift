@@ -512,6 +512,8 @@ class CourseRegisterVC: UIViewController {
                 }
             }
         }
+        // 채팅방 등록
+        createGroupChatRoom(trackId: postUID, title: self.courseTitleString, uid: userUID)
     }
     
     @objc func editCourseButtonTapped() {

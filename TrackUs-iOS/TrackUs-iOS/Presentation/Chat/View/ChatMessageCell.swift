@@ -34,7 +34,16 @@ class ChatMessageCell: UITableViewCell {
         userNameLabel.textColor = .gray1
         return userNameLabel
     }()
+    // MARK: - 사용자 InOut
+    private lazy var inoutLabel = {
+        let inoutLabel = UILabel()
+        inoutLabel.translatesAutoresizingMaskIntoConstraints = false
+        inoutLabel.font = UIFont.systemFont(ofSize: 12)
+        inoutLabel.textColor = .gray1
+        return inoutLabel
+    }()
     
+    // MARK: - 메세지 관련
     private lazy var messageLabel = {
         let messageLabel = UILabel()
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -92,6 +101,7 @@ class ChatMessageCell: UITableViewCell {
         contentView.addSubview(userNameLabel)
         contentView.addSubview(messageStackView)
         contentView.addSubview(timeLabel)
+        contentView.addSubview(inoutLabel)
         messageBackgroundView.addSubview(messageLabel)
         
         // 레이블의 content hugging priority를 설정
@@ -106,14 +116,55 @@ class ChatMessageCell: UITableViewCell {
     
     /// ui출력별 종류
     func configure(messageMap: MessageMap) {
-        let isMyMessage = (messageMap.message.sendMember == User.currentUid)
         let message = messageMap.message
         
-        // 제약조건 리스트
+        // 제약조건 초기화
         NSLayoutConstraint.deactivate(contentView.constraints)
+        
         var constraints = [NSLayoutConstraint]()
         // 사용자 정보 가져오기
         guard let sendMember = ChatRoomManager.shared.userInfo[message.sendMember] else { return }
+        
+        // 날짜 출력 여부 (공통)
+        if messageMap.sameDate {
+            dateLabel.isHidden = true
+            //topAnchorPoint = dateLabel.bottomAnchor
+        } else {
+            dateLabel.isHidden = false
+            constraints.append(dateLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4))
+            constraints.append(dateLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+            constraints.append(dateLabel.heightAnchor.constraint(equalToConstant: 28))
+            dateLabel.text = message.date
+        }
+        
+        
+        switch message.messageType {
+            case .text:
+                textMessgeSetup(messageMap: messageMap, sendMember: sendMember)
+            case .image:
+                return
+            case .location:
+                return
+            case .userInout:
+                InOutSetup(messageMap: messageMap, sendMember: sendMember)
+        }
+        
+        // 제약조건 추가
+        NSLayoutConstraint.activate(constraints)
+    }
+    
+    /// 사용자 메세지 view 세팅
+    func textMessgeSetup(messageMap: MessageMap, sendMember: User) {
+        let isMyMessage = (messageMap.message.sendMember == User.currentUid)
+        let message = messageMap.message
+        
+        var constraints = [NSLayoutConstraint]()
+        
+        // 관련없는 view 숨기기
+        inoutLabel.isHidden = true
+        
+        // 공통 view
+        messageStackView.isHidden = false
         
         messageLabel.text = message.text
         
@@ -127,18 +178,6 @@ class ChatMessageCell: UITableViewCell {
         constraints.append(messageStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant:64))
         
         constraints.append(timeLabel.bottomAnchor.constraint(equalTo: messageStackView.bottomAnchor))
-        
-        // 날짜 출력 여부
-        if messageMap.sameDate {
-            dateLabel.isHidden = true
-            //topAnchorPoint = dateLabel.bottomAnchor
-        } else {
-            dateLabel.isHidden = false
-            constraints.append(dateLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4))
-            constraints.append(dateLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
-            constraints.append(dateLabel.heightAnchor.constraint(equalToConstant: 36))
-            dateLabel.text = message.date
-        }
         
         // 프로필 이미지파일 출력 여부
         if isMyMessage {
@@ -209,6 +248,32 @@ class ChatMessageCell: UITableViewCell {
         
         // 제약조건 추가
         NSLayoutConstraint.activate(constraints)
-        //contentView.layoutIfNeeded()
+    }
+    
+    /// 사용자 출입 정보 view 셋업
+    func InOutSetup(messageMap: MessageMap, sendMember: User) {
+        let message = messageMap.message
+        
+        // 연관 없는 뷰 숨기기
+        profileImageView.isHidden = true
+        userNameLabel.isHidden = true
+        messageStackView.isHidden = true
+        timeLabel.isHidden = true
+        
+        inoutLabel.isHidden = false
+        
+        guard let userInOut = message.userInOut else { return }
+        
+        var constraints = [NSLayoutConstraint]()
+        
+        constraints.append(inoutLabel.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: dateLabel.isHidden ? 8 : 2))
+        constraints.append(inoutLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+        constraints.append(inoutLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8))
+        
+        // 사용자 나가기, 들어오기 여부 확인, true: 들어오기, false: 나가기
+        inoutLabel.text = userInOut ? sendMember.name + "님이 들어왔습니다." : sendMember.name + "님이 나갔습니다."
+        
+        // 제약조건 추가
+        NSLayoutConstraint.activate(constraints)
     }
 }
