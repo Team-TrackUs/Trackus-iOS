@@ -132,11 +132,25 @@ class RunningResultVC: ExtensionVC {
         closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
         closeButton.tintColor = .black
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
+        
+        let shareButton = UIButton(type: .system)
+        shareButton.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
+        shareButton.tintColor = .black
+        shareButton.addTarget(self, action: #selector(shareButtonTapped), for: .touchUpInside)
+        
         let menuBarItem = UIBarButtonItem(customView: closeButton)
         menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
         menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 16).isActive = true
         menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        
+        let menuBarItem2 = UIBarButtonItem(customView: shareButton)
+        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
+        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        
+        
         navigationItem.leftBarButtonItem = menuBarItem
+        navigationItem.rightBarButtonItem = menuBarItem2
         navigationItem.hidesBackButton = true
         navigationItem.rightBarButtonItem?.tintColor = .black
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
@@ -217,6 +231,21 @@ class RunningResultVC: ExtensionVC {
         view.window!.rootViewController?.dismiss(animated: true)
     }
     
+    func showSeletePhotoVC() {
+        let selectPhotoVC = SelectePhotoVC()
+        let photoNav = UINavigationController(rootViewController: selectPhotoVC)
+        photoNav.modalPresentationStyle = .fullScreen
+        present(photoNav, animated: true)
+        let photoEditVC = PhotoEditVC()
+        
+        selectPhotoVC.onCompleted = { [weak self, weak photoNav] image in
+            guard let self = self else { return }
+            photoEditVC.image = image
+            photoEditVC.runModel = self.runModel
+            photoNav?.pushViewController(photoEditVC, animated: true)
+        }
+    }
+    
     // MARK: - objc
     @objc func goToDetailVC() {
         let detailVC = RunInfoDetailVC()
@@ -246,6 +275,10 @@ class RunningResultVC: ExtensionVC {
     
     @objc func closeButtonTapped() {
         self.goToRootView()
+    }
+    
+    @objc func shareButtonTapped() {
+        self.showSeletePhotoVC()
     }
 }
 
