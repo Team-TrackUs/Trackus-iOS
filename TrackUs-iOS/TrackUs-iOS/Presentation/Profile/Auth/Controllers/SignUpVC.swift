@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SignUpVC: UIViewController, MainButtonEnabledDelegate {
+final class SignUpVC: UIViewController, MainButtonEnabledDelegate {
     
     var user = UserManager.shared.user
     
@@ -92,7 +92,7 @@ class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 24, weight: .bold)
-        label.textColor = UIColor.black
+        label.textColor = UIColor.label
         label.text = SignUpSteps[currentStep].title
         return label
     }()

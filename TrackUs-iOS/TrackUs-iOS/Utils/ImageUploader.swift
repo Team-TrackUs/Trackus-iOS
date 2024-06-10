@@ -17,12 +17,12 @@ enum UploadType {
     var filePath: StorageReference {
         let filename = NSUUID().uuidString
         switch self {
-        case .profile:
-            return Storage.storage().reference(withPath: "/profileImages/\(filename)")
-        case .post:
-            return Storage.storage().reference(withPath: "/posts_image/\(filename)")
-        case .record:
-            return Storage.storage().reference(withPath: "record_images/\(filename)")
+            case .profile:
+                return Storage.storage().reference(withPath: "/profileImages/\(User.currentUid)")
+            case .post:
+                return Storage.storage().reference(withPath: "/posts_image/\(filename)")
+            case .record:
+                return Storage.storage().reference(withPath: "record_images/\(filename)")
         }
     }
 }

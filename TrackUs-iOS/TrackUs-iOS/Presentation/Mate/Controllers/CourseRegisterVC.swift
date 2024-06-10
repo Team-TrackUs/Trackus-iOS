@@ -520,6 +520,8 @@ class CourseRegisterVC: UIViewController {
                 }
             }
         }
+        // 채팅방 등록
+        createGroupChatRoom(trackId: postUID, title: self.courseTitleString, uid: userUID)
     }
     
     @objc func editCourseButtonTapped() {
@@ -597,6 +599,7 @@ class CourseRegisterVC: UIViewController {
                 }
             }
         }
+        createGroupChatRoom(trackId: postUid, title: self.courseTitleString, uid: userUID)
     }
     
     @objc func btnDoneBarTapped(sender: Any) {
@@ -1086,6 +1089,18 @@ extension CourseRegisterVC: CLLocationManagerDelegate, MKMapViewDelegate {
         let tap = UITapGestureRecognizer(target: self, action: #selector(CourseRegisterVC.dismissKeyboard))
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
+    }
+    
+    // 그룹 채팅방 생성하기
+    func createGroupChatRoom(trackId: String, title: String, uid: String) {
+        let newChatRoom: [String: Any] = [
+            "title": title,
+            "group": true,
+            "members": [uid: true],
+            "usersUnreadCountInfo": [uid: 0]
+            //"latestMessage": nil
+        ]  as [String : Any]
+        Firestore.firestore().collection("chats").document(trackId).setData(newChatRoom)
     }
 }
 

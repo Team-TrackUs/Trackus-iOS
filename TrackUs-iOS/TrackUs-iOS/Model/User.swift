@@ -9,6 +9,7 @@ import Foundation
 import Firebase
 
 struct User: Codable{
+    var uid: String = ""
     var name: String = ""
     var profileImageUrl: String?
     var isProfilePublic: Bool = true

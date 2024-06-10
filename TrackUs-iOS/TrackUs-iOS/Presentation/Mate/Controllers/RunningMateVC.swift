@@ -51,7 +51,7 @@ class RunningMateVC: UIViewController {
     
     private lazy var searchButton: UIButton = {
         let btn = UIButton()
-        btn.backgroundColor = .white
+        btn.backgroundColor = .systemBackground
         btn.layer.cornerRadius = 40 / 2
         btn.layer.borderWidth = 1.0
         btn.layer.borderColor = UIColor.gray2.cgColor
@@ -163,7 +163,7 @@ class RunningMateVC: UIViewController {
     // MARK: - Helpers
     
     func configureUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         
         self.view.addSubview(searchButton)
         searchButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
@@ -214,7 +214,7 @@ class RunningMateVC: UIViewController {
         self.navigationItem.title = "메이트 모집"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.white
+        appearance.backgroundColor = UIColor.systemBackground
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }

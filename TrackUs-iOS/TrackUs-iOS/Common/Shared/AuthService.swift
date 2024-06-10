@@ -41,7 +41,7 @@ final class AuthService: NSObject {
     /// 닉네임 중복 확인
     func checkUser(name: String, completionHandler: @escaping (Bool) -> Void) async {
         do {
-            let querySnapshot = try await Firestore.firestore().collection("user")
+            let querySnapshot = try await Firestore.firestore().collection("users")
                 .whereField("name", isEqualTo: name).getDocuments()
             if querySnapshot.isEmpty {
                 completionHandler(true)
@@ -58,7 +58,7 @@ final class AuthService: NSObject {
         // 이미지 저장 -> url 포함 User 저장
         guard let image = image else { return self.storeUserInformation(user: user) }
         let uid = User.currentUid
-        let ref = Storage.storage().reference().child("usersImage/\(uid)")
+        let ref = Storage.storage().reference().child("profileImages/\(uid)")
         
         // 이미지 비율 줄이기 (용량 감소 목적)
         guard let resizedImage = image.resizeWithWidth(width: 300) else { return }
@@ -85,6 +85,7 @@ final class AuthService: NSObject {
                 // 이미지 url 저장
                 guard let url = url else { return }
                 var user = user
+                user.uid = uid
                 user.profileImageUrl = url.absoluteString
                 ImageCacheManager.shared.setImage(image: image, url: url.absoluteString)
                 self.storeUserInformation(user: user)
@@ -97,13 +98,14 @@ final class AuthService: NSObject {
     private func storeUserInformation(user: User) {
         let uid = User.currentUid
         // 해당부분 자료형 지정 필요
-        let userData = ["name": user.name,
+        let userData = ["uid": User.currentUid,
+                        "name": user.name,
                         "isProfilePublic": user.isProfilePublic,
                         "profileImageUrl": user.profileImageUrl as Any,
                         "isBlock": user.isBlock as Any,
                         "token": user.token] as [String : Any]
         
-        Firestore.firestore().collection("user").document(uid).setData(userData){ error in
+        Firestore.firestore().collection("users").document(uid).setData(userData){ error in
             if error != nil {
                 return
             }
