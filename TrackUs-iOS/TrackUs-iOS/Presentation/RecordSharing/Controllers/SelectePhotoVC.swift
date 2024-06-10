@@ -53,8 +53,8 @@ final class SelectePhotoVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setConstraint()
-        setupNavBar()
-//        checkCameraPermissions()
+        setupNavBar()        
+        checkCameraPermissions()
     }
     
     
@@ -114,24 +114,48 @@ final class SelectePhotoVC: UIViewController {
     
     private func checkCameraPermissions() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
-            
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 guard granted else {
+                    self.dissmossView()
                     return
                 }
                 DispatchQueue.main.async {
                     self.setUpCamera()
                 }
-            }
-        case .restricted:
-            break
-        case .denied:
+            }            
             break
         case .authorized:
-            setUpCamera()
-        @unknown default:
+            DispatchQueue.main.async {
+                self.setUpCamera()
+            }
+        default:
+            showSettingAlert()
             break
+        }
+    }
+    
+    private func showSettingAlert() {
+        let alert = UIAlertController(title: "카메라 권한", message: "설정에서 카메라 권한을 허용 해주세요.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "취소", style: .destructive, handler: { _ in
+            self.dissmossView()
+        }))
+        alert.addAction(UIAlertAction(title: "설정하러 가기", style: .default, handler: goToAppSettings))
+        
+        self.present(alert, animated: true)
+    }
+    
+    private func goToAppSettings(_ sender: UIAlertAction) {
+        guard let settingURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        
+        if UIApplication.shared.canOpenURL(settingURL) {
+            UIApplication.shared.open(settingURL)
+        }
+    }
+    
+    private func dissmossView() {
+        DispatchQueue.main.async {
+            self.dismiss(animated: true)
         }
     }
     

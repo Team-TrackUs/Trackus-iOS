@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Photos
 
 final class PhotoEditVC: UIViewController {
     // MARK: - Properties
@@ -136,12 +137,42 @@ final class PhotoEditVC: UIViewController {
     private func shareButtonTapped(action: UIAlertAction) {
         if let image = UIImage.imageFromView(view: photoPreview) {
             let activityViewController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+            activityViewController.completionWithItemsHandler = {(activity, success, items, error) in
+                if success {
+                    self.dismiss(animated: true)
+                }
+            }
             present(activityViewController, animated: true)
         }
     }
     
     private func photoButtonTapped(action: UIAlertAction) {
-        dismiss(animated: true)
+       
+    }
+    
+    private func checkAddPhotoPermission(action: UIAlertAction) {
+        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+            if status == .authorized {
+                DispatchQueue.main.async {
+                    self.savePhoto()
+                }
+            }            
+        }
+    }
+    
+    private func savePhoto() {
+        if let image = UIImage.imageFromView(view: photoPreview) {
+            UIImageWriteToSavedPhotosAlbum(image, self, #selector(imageSaved(image:didFinishSavingWithError:contextInfo:)), nil)
+        }
+    }
+
+    
+    @objc func imageSaved(image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+        } else {
+            dismiss(animated: true)
+        }
+        
     }
     
     @objc private func didChangeValue(segment: UISegmentedControl) {
@@ -152,7 +183,7 @@ final class PhotoEditVC: UIViewController {
         let alert = UIAlertController(title: "열심히 만들었으니 공유하자!", message: nil, preferredStyle: .actionSheet)
         
         let share = UIAlertAction(title: "공유하기", style: .default, handler: shareButtonTapped)
-        let photo = UIAlertAction(title: "갤러리 저장", style: .default, handler: photoButtonTapped)
+        let photo = UIAlertAction(title: "갤러리 저장", style: .default, handler: checkAddPhotoPermission)
         
         [share, photo].forEach { alert.addAction($0) }
         
@@ -283,7 +314,7 @@ extension UIImageView {
         imageView.contentMode = .scaleAspectFit
         addSubview(imageView)
     }
-
+    
 }
 
 
