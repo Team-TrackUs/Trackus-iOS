@@ -207,21 +207,41 @@ extension PhotoEditVC: DataCollectionDelegate {
     func stickerCellTapped(_ image: UIImage) {
         let imageView = UIImageView(image: image)
         imageView.isUserInteractionEnabled = true
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(pangestureHandler))
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
+        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(pinchGestureHandler))
+        let rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(rotaionGestureHandler))
+        
         imageView.addGestureRecognizer(panGesture)
+        imageView.addGestureRecognizer(pinchGesture)
+        imageView.addGestureRecognizer(rotationGesture)
+        
         photoPreview.addImageView(imageView)
     }
     
-    @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
+    @objc func panGestureHandler(sender: UIPanGestureRecognizer) {
         guard let view = sender.view else {
             return
         }
         let translation = sender.translation(in: view)
-        let moveX = view.center.x + translation.x
-        let moveY = view.center.y + translation.y
-        view.center = .init(x: moveX, y: moveY)
+        view.transform = view.transform.translatedBy(x: translation.x, y: translation.y)
         
         sender.setTranslation(CGPoint.zero, in: view)
+    }
+    
+    @objc func pinchGestureHandler(sender: UIPinchGestureRecognizer) {
+        guard let view = sender.view else {
+            return
+        }
+        view.transform = view.transform.scaledBy(x: sender.scale, y: sender.scale)
+        sender.scale = 1.0
+    }
+    
+    @objc func rotaionGestureHandler(sender: UIRotationGestureRecognizer) {
+        guard let view = sender.view else {
+            return
+        }
+        view.transform = view.transform.rotated(by: sender.rotation)
+        sender.rotation = 0.0
     }
 }
 
