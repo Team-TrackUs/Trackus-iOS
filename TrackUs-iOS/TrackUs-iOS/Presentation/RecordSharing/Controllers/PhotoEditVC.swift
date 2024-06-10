@@ -206,16 +206,22 @@ extension PhotoEditVC: DataCollectionDelegate {
     
     func stickerCellTapped(_ image: UIImage) {
         let imageView = UIImageView(image: image)
-        imageView.isUserInteractionEnabled = true
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(pinchGestureHandler))
         let rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(rotaionGestureHandler))
         
-        imageView.addGestureRecognizer(panGesture)
-        imageView.addGestureRecognizer(pinchGesture)
-        imageView.addGestureRecognizer(rotationGesture)
+        let touchAreaView = UIImageView(frame: imageView.frame)
+        touchAreaView.frame.size.width += 20
+        touchAreaView.frame.size.height += 20
+        imageView.layer.position = touchAreaView.layer.position
+        touchAreaView.addSubview(imageView)
         
-        photoPreview.addImageView(imageView)
+        touchAreaView.addGestureRecognizer(panGesture)
+        touchAreaView.addGestureRecognizer(pinchGesture)
+        touchAreaView.addGestureRecognizer(rotationGesture)
+        touchAreaView.isUserInteractionEnabled = true
+        
+        photoPreview.addImageView(touchAreaView)
     }
     
     @objc func panGestureHandler(sender: UIPanGestureRecognizer) {
@@ -277,6 +283,7 @@ extension UIImageView {
         imageView.contentMode = .scaleAspectFit
         addSubview(imageView)
     }
+
 }
 
 
