@@ -338,13 +338,17 @@ class CourseRegisterVC: UIViewController {
         label.text = "\(String(format: "%.2f", distance)) km"
         label.textColor = .white
         label.textAlignment = .center
-        label.frame = CGRect(x: 0, y: 0, width: 80, height: 40)
         label.layer.cornerRadius = 40 / 2
         label.layer.shadowColor = UIColor.gray.cgColor
         label.layer.shadowOpacity = 1.0
         label.layer.shadowOffset = CGSize.zero
         label.layer.shadowRadius = 6
         label.clipsToBounds = true
+        if let descriptor = UIFont.systemFont(ofSize: 16, weight: .bold).fontDescriptor.withSymbolicTraits([.traitBold, .traitItalic]) {
+            label.font = UIFont(descriptor: descriptor, size: 0)
+        } else {
+            label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        }
         
         return label
     }()
@@ -425,7 +429,6 @@ class CourseRegisterVC: UIViewController {
     }
     
     @objc func addCourseButtonTapped() {
-        // + 주원님 채팅방 생성
         
         loadingView.isHidden = false
         loadingView.startAnimation()
@@ -500,6 +503,11 @@ class CourseRegisterVC: UIViewController {
                                         courseDetailVC.navigationItem.leftBarButtonItem = dismissButton
                                         courseDetailVC.navigationItem.rightBarButtonItems = nil
                                     }
+                                    
+                                    // + 주원님 채팅방 생성
+                                    
+                                    // + 소희님 users 컬렉션에 참여 모집글 배열에 해당 포스트 uid append
+                                    
                                     self.navigationController?.pushViewController(courseDetailVC, animated: true)
                                     
                                     ImageCacheManager.shared.setImage(image: image, url: post.routeImageUrl)
@@ -619,6 +627,7 @@ class CourseRegisterVC: UIViewController {
     
     @objc func editMapButtonTapped() {
         self.testcoords.removeAll()
+        self.distance = 0.0
         
         for annotation in pinAnnotations {
             drawMapView.removeAnnotation(annotation)
@@ -660,13 +669,13 @@ class CourseRegisterVC: UIViewController {
         addCourseButtonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         addCourseButtonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         addCourseButtonContainer.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        addCourseButtonContainer.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        addCourseButtonContainer.heightAnchor.constraint(equalToConstant: 68).isActive = true
         
         addCourseButtonContainer.addSubview(addCourseButton)
         addCourseButton.translatesAutoresizingMaskIntoConstraints = false
         addCourseButton.topAnchor.constraint(equalTo: addCourseButtonContainer.topAnchor, constant: 10).isActive = true
         addCourseButton.leftAnchor.constraint(equalTo: addCourseButtonContainer.leftAnchor, constant: 16).isActive = true
-        addCourseButton.bottomAnchor.constraint(equalTo: addCourseButtonContainer.bottomAnchor).isActive = true
+        addCourseButton.bottomAnchor.constraint(equalTo: addCourseButtonContainer.bottomAnchor, constant: -2).isActive = true
         addCourseButton.rightAnchor.constraint(equalTo: addCourseButtonContainer.rightAnchor, constant: -16).isActive = true
         addCourseButton.setTitle(isEdit ? "코스 수정하기" : "코스 등록하기", for: .normal)
         addCourseButton.addTarget(self, action: isEdit ? #selector(editCourseButtonTapped) : #selector(addCourseButtonTapped), for: .touchUpInside)
