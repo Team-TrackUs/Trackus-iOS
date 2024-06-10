@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6140CCFA2C15686500094202 /* RunningMapCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6140CCF92C15686500094202 /* RunningMapCell.swift */; };
 		615ADADC2C04D45D005CAC75 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 82BE455D2BEFA948007AE54A /* Main.storyboard */; };
 		615ADAE22C07802B005CAC75 /* RefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615ADAE12C07802B005CAC75 /* RefreshView.swift */; };
 		615ADAE42C086F18005CAC75 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615ADAE32C086F18005CAC75 /* LoadingView.swift */; };
@@ -21,8 +22,12 @@
 		61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DED12BFA668F009E360B /* SearchVC.swift */; };
 		61B5A00B2C1076B4004FF238 /* ReportPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B5A00A2C1076B4004FF238 /* ReportPostVC.swift */; };
 		61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */; };
+		820069122C10838B009FDA6C /* StickerCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820069112C10838B009FDA6C /* StickerCollectionVC.swift */; };
+		820069142C10BA3F009FDA6C /* DataCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820069132C10BA3F009FDA6C /* DataCollectionVC.swift */; };
+		820069162C10BD86009FDA6C /* DataCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820069152C10BD86009FDA6C /* DataCollectionCell.swift */; };
 		822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B52BF1EC2500636CCC /* LocationService.swift */; };
 		822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */; };
+		823E7A4A2C13452000EFA983 /* StickerCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823E7A492C13451F00EFA983 /* StickerCollectionCell.swift */; };
 		82596A8A2C034CAC00DA6C70 /* CoreMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82596A892C034CAC00DA6C70 /* CoreMotion.swift */; };
 		826248192BFB4D9B0028C221 /* Running.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826248182BFB4D9B0028C221 /* Running.swift */; };
 		826922E32C045B8B00D506C2 /* RunInfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826922E22C045B8B00D506C2 /* RunInfoCell.swift */; };
@@ -41,6 +46,8 @@
 		827F974A2C0DB87400DAD821 /* WidgetAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827F97472C0DB85200DAD821 /* WidgetAttribute.swift */; };
 		8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26E2BF12BD2002CB7DD /* LoginVC.swift */; };
 		8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D2742BF137E2002CB7DD /* RunningResultVC.swift */; };
+		82ABF3792C10184A002B25CE /* SelectePhotoVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */; };
+		82ABF39B2C1039D7002B25CE /* PhotoEditVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */; };
 		82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45572BEFA947007AE54A /* AppDelegate.swift */; };
 		82BE455A2BEFA948007AE54A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45592BEFA948007AE54A /* SceneDelegate.swift */; };
 		82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82BE45602BEFA94A007AE54A /* Assets.xcassets */; };
@@ -120,6 +127,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6140CCF92C15686500094202 /* RunningMapCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningMapCell.swift; sourceTree = "<group>"; };
 		615ADADD2C059D5D005CAC75 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Config.xcconfig; path = ../../../Config.xcconfig; sourceTree = "<group>"; };
 		615ADAE12C07802B005CAC75 /* RefreshView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshView.swift; sourceTree = "<group>"; };
 		615ADAE32C086F18005CAC75 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
@@ -137,8 +145,13 @@
 		61B5A0062C10682C004FF238 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		61B5A00A2C1076B4004FF238 /* ReportPostVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportPostVC.swift; sourceTree = "<group>"; };
 		61B8F98D2BF1D502005F0728 /* CourseDrawingMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDrawingMapVC.swift; sourceTree = "<group>"; };
+		820069112C10838B009FDA6C /* StickerCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCollectionVC.swift; sourceTree = "<group>"; };
+		820069132C10BA3F009FDA6C /* DataCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCollectionVC.swift; sourceTree = "<group>"; };
+		820069152C10BD86009FDA6C /* DataCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCollectionCell.swift; sourceTree = "<group>"; };
 		822E06B52BF1EC2500636CCC /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDelegate.swift; sourceTree = "<group>"; };
+		823E7A492C13451F00EFA983 /* StickerCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCollectionCell.swift; sourceTree = "<group>"; };
+		825569952C117F6700C75E80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82596A892C034CAC00DA6C70 /* CoreMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMotion.swift; sourceTree = "<group>"; };
 		826248182BFB4D9B0028C221 /* Running.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Running.swift; sourceTree = "<group>"; };
 		826922E22C045B8B00D506C2 /* RunInfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunInfoCell.swift; sourceTree = "<group>"; };
@@ -157,6 +170,11 @@
 		827F974B2C0DBCF400DAD821 /* WidgetTestExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetTestExtensionDebug.entitlements; sourceTree = "<group>"; };
 		8280D26E2BF12BD2002CB7DD /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		8280D2742BF137E2002CB7DD /* RunningResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningResultVC.swift; sourceTree = "<group>"; };
+
+		828735A82C0CDC480054A19D /* TrackUs-iOSDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOSDebug.entitlements"; sourceTree = "<group>"; };
+		82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectePhotoVC.swift; sourceTree = "<group>"; };
+		82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoEditVC.swift; sourceTree = "<group>"; };
+
 		82BE45542BEFA947007AE54A /* TrackUs-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TrackUs-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		82BE45572BEFA947007AE54A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		82BE45592BEFA948007AE54A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -295,6 +313,7 @@
 			children = (
 				826922E22C045B8B00D506C2 /* RunInfoCell.swift */,
 				82E7638A2C087C220078E5C9 /* MyMapView.swift */,
+				6140CCF92C15686500094202 /* RunningMapCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -319,6 +338,35 @@
 				96D43FA42C117E3D0059C377 /* Info.plist */,
 			);
 			path = WidgetTest;
+			sourceTree = "<group>";
+		};
+		82ABF3752C1014D4002B25CE /* RecordSharing */ = {
+			isa = PBXGroup;
+			children = (
+				82ABF39E2C1047FD002B25CE /* Views */,
+				82ABF39D2C1047D7002B25CE /* Controllers */,
+			);
+			path = RecordSharing;
+			sourceTree = "<group>";
+		};
+		82ABF39D2C1047D7002B25CE /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */,
+				82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */,
+				820069132C10BA3F009FDA6C /* DataCollectionVC.swift */,
+				820069112C10838B009FDA6C /* StickerCollectionVC.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		82ABF39E2C1047FD002B25CE /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				820069152C10BD86009FDA6C /* DataCollectionCell.swift */,
+				823E7A492C13451F00EFA983 /* StickerCollectionCell.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		82BE454B2BEFA947007AE54A = {
@@ -349,6 +397,7 @@
 				96D43FAF2C118A4C0059C377 /* Info.plist */,
 				96D43FAD2C1183310059C377 /* GoogleService-Info.plist */,
 				96D43FA82C117ED60059C377 /* Config.xcconfig */,
+
 				988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */,
 				82277FFE2C08C3C700AA59E3 /* Utils */,
 				988618312BF34A6C002ACB4E /* Model */,
@@ -365,6 +414,7 @@
 			isa = PBXGroup;
 			children = (
 				82BE45842BEFB77C007AE54A /* CustomTabBarVC.swift */,
+				82ABF3752C1014D4002B25CE /* RecordSharing */,
 				82BE45732BEFAFB3007AE54A /* Running */,
 				82BE45722BEFAFB0007AE54A /* Mate */,
 				82BE45712BEFAFAD007AE54A /* Chat */,
@@ -690,6 +740,7 @@
 				61A51B0A2C0BB1EF00FEE7E3 /* MateDetailSkeletonView.swift in Sources */,
 				822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */,
 				988618172BF317EE002ACB4E /* UIImage+.swift in Sources */,
+				82ABF39B2C1039D7002B25CE /* PhotoEditVC.swift in Sources */,
 				9898034B2BF5F14200F5DFBD /* AgreementInputView.swift in Sources */,
 				9886183A2BF4FFEB002ACB4E /* MainButton.swift in Sources */,
 				61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */,
@@ -712,6 +763,7 @@
 				96AC57382C059CDC00F1A73C /* MyProfileEditVC.swift in Sources */,
 				98AB544B2BF71B790047310A /* ProfilePublicView.swift in Sources */,
 				82BE457C2BEFB0A0007AE54A /* RunningHomeVC.swift in Sources */,
+				820069122C10838B009FDA6C /* StickerCollectionVC.swift in Sources */,
 				82C38ACB2BFCA18E004819C1 /* Int+.swift in Sources */,
 				82C214622C06312200D15993 /* Date+.swift in Sources */,
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
@@ -721,6 +773,7 @@
 				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
 				96AC573E2C059D1700F1A73C /* OtherProfileVC.swift in Sources */,
 				98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */,
+				820069162C10BD86009FDA6C /* DataCollectionCell.swift in Sources */,
 				615ADAE42C086F18005CAC75 /* LoadingView.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
 				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
@@ -730,6 +783,7 @@
 				96AC57342C059CAA00F1A73C /* WithdrawalVC.swift in Sources */,
 				61625E3A2BFE75A500E6D1F3 /* PostService.swift in Sources */,
 				826248192BFB4D9B0028C221 /* Running.swift in Sources */,
+				82ABF3792C10184A002B25CE /* SelectePhotoVC.swift in Sources */,
 				82C38AD32BFCE445004819C1 /* Double+.swift in Sources */,
 				82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */,
 				826922E52C04664000D506C2 /* RunInfoModel.swift in Sources */,
@@ -743,11 +797,14 @@
 				61B5A00B2C1076B4004FF238 /* ReportPostVC.swift in Sources */,
 				988618382BF37E81002ACB4E /* SignUpVC.swift in Sources */,
 				615ADAE22C07802B005CAC75 /* RefreshView.swift in Sources */,
+				820069142C10BA3F009FDA6C /* DataCollectionVC.swift in Sources */,
 				98AB54472BF71B390047310A /* NicknameInputView.swift in Sources */,
+				6140CCFA2C15686500094202 /* RunningMapCell.swift in Sources */,
 				61B0DECE2BF92174009E360B /* MateViewCell.swift in Sources */,
 				82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */,
 				827F97482C0DB85200DAD821 /* WidgetAttribute.swift in Sources */,
 				82C38AD12BFCE0C4004819C1 /* CoreLocation.swift in Sources */,
+				823E7A4A2C13452000EFA983 /* StickerCollectionCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

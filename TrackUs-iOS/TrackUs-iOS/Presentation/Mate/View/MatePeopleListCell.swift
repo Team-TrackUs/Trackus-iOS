@@ -92,6 +92,12 @@ class MatePeopleListCell: UICollectionViewCell {
                 self.profileImageView.loadImage(url: url ?? "")
             }
             
+            if name == "" {
+                self.nameLabel.text = "탈퇴유저"
+            } else {
+                self.nameLabel.text = name
+            }
+            
             // 이름의 길이 확인 7글자 이상이면 .. 표시
             if name?.count ?? 1 > 7 {
                 self.nameLabel.text = "\(String(describing: name?.prefix(6))).."
