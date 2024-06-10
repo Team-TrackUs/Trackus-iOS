@@ -170,9 +170,11 @@
 		827F974B2C0DBCF400DAD821 /* WidgetTestExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetTestExtensionDebug.entitlements; sourceTree = "<group>"; };
 		8280D26E2BF12BD2002CB7DD /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		8280D2742BF137E2002CB7DD /* RunningResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningResultVC.swift; sourceTree = "<group>"; };
+
 		828735A82C0CDC480054A19D /* TrackUs-iOSDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOSDebug.entitlements"; sourceTree = "<group>"; };
 		82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectePhotoVC.swift; sourceTree = "<group>"; };
 		82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoEditVC.swift; sourceTree = "<group>"; };
+
 		82BE45542BEFA947007AE54A /* TrackUs-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TrackUs-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		82BE45572BEFA947007AE54A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		82BE45592BEFA948007AE54A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -395,6 +397,7 @@
 				96D43FAF2C118A4C0059C377 /* Info.plist */,
 				96D43FAD2C1183310059C377 /* GoogleService-Info.plist */,
 				96D43FA82C117ED60059C377 /* Config.xcconfig */,
+
 				988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */,
 				82277FFE2C08C3C700AA59E3 /* Utils */,
 				988618312BF34A6C002ACB4E /* Model */,
