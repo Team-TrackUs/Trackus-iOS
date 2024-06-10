@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Firebase
 
 class WithdrawalVC: UIViewController, UITextViewDelegate {
 
@@ -240,14 +241,45 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
 
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         let confirmAction = UIAlertAction(title: "탈퇴", style: .destructive) { _ in
-            // 우선 임시로 이거로 함 ㅇㅅㅇ
-            print("회원탈퇴 처리")
+            self.deleteUserAccount()
         }
         alert.addAction(cancelAction)
         alert.addAction(confirmAction)
         
         present(alert, animated: true, completion: nil)
     }
+    
+    private func deleteUserAccount() {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(User.currentUid)
+        userRef.delete { error in
+            if let error = error {
+                print("Error deleting user document: \(error)")
+                return
+            }
+            
+            Auth.auth().currentUser?.delete { error in
+                if let error = error {
+                    print("Error deleting user account: \(error)")
+                    return
+                }
+                
+                do {
+                    try Auth.auth().signOut()
+                    
+                    // 로그인 화면으로 이동
+                    let loginVC = LoginVC()
+                    UIApplication.shared.windows.first?.rootViewController = loginVC
+                    UIApplication.shared.windows.first?.makeKeyAndVisible()
+                    
+                    
+                } catch let signOutError as NSError {
+                    print("Error signing out: %@", signOutError)
+                }
+            }
+        }
+    }
+
 
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.textColor == UIColor.lightGray {

@@ -172,7 +172,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         }
         
         let db = Firestore.firestore()
-        let userRef = db.collection("user").document(currentUser.uid)
+        let userRef = db.collection("users").document(currentUser.uid)
         
         guard let newNickname = nicknameTextField.text else {
             return
@@ -198,7 +198,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         
         if let profileImage = profileImageView.imageView.image,
            let imageData = profileImage.jpegData(compressionQuality: 0.5) {
-            let storageRef = Storage.storage().reference().child("profileImages/\(currentUser.uid)_\(UUID().uuidString).jpg")
+            let storageRef = Storage.storage().reference().child("profileImages/\(currentUser.uid)")
             
             let metadata = StorageMetadata()
             metadata.contentType = "image/jpeg"
@@ -232,7 +232,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         }
         
         let db = Firestore.firestore()
-        let userRef = db.collection("user").document(currentUser.uid)
+        let userRef = db.collection("users").document(currentUser.uid)
         
         userRef.getDocument { [weak self] document, error in
             guard let self = self, let document = document, document.exists else {

@@ -1,17 +1,17 @@
 //
-//  MateViewCell.swift
+//  RunningMapCell.swift
 //  TrackUs-iOS
 //
-//  Created by 박선구 on 5/19/24.
+//  Created by 박선구 on 6/9/24.
 //
 
 import UIKit
 
-class MateViewCell: UITableViewCell {
+class RunningMapCell: UICollectionViewCell {
     
     // MARK: - Properties
     
-    static let identifier = "MateViewCell"
+    static let identifier = "RunningMapCell"
     
     let titleText: String = ""
     let locationText: String = ""
@@ -26,9 +26,9 @@ class MateViewCell: UITableViewCell {
         imageView.contentMode = .scaleAspectFit
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 87).isActive = true
         imageView.layer.cornerRadius = 12
+        imageView.layer.borderWidth = 1
+        imageView.layer.borderColor = UIColor.gray3.cgColor
         imageView.backgroundColor = .gray
         return imageView
     }()
@@ -120,9 +120,10 @@ class MateViewCell: UITableViewCell {
     
     // MARK: - Lifecycle
 
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier reuseIndentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIndentifier)
-        self.configureUI()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        configureUI()
     }
     
     required init?(coder: NSCoder) {
@@ -133,12 +134,15 @@ class MateViewCell: UITableViewCell {
     
     func configureUI() {
         backgroundColor = .white
+        layer.borderWidth = 1
+        layer.borderColor = UIColor.gray3.cgColor
+        layer.cornerRadius = 12
+        
         self.contentView.addSubview(postImageView)
         postImageView.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
         postImageView.bottomAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.bottomAnchor).isActive = true
         postImageView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
-        postImageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
-        postImageView.heightAnchor.constraint(equalToConstant: 87).isActive = true
+        postImageView.widthAnchor.constraint(equalTo: postImageView.heightAnchor).isActive = true
         
         postImageView.addSubview(overlayView)
         overlayView.topAnchor.constraint(equalTo: postImageView.topAnchor).isActive = true
@@ -231,6 +235,10 @@ class MateViewCell: UITableViewCell {
             closingLabel.text = "마감"
         }
         
+//        if post.members.count >= post.numberOfPeoples {
+//            closingLabel.text = "마감"
+//        }
+        
         if post.members.count >= post.numberOfPeoples || post.startDate < Date() {
             closingLabel.isHidden = false
             overlayView.isHidden = false
@@ -269,3 +277,4 @@ class MateViewCell: UITableViewCell {
     }
 
 }
+

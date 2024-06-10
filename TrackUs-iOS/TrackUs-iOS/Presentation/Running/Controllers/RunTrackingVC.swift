@@ -11,7 +11,7 @@ import UIKit
 import MapKit
 import CoreMotion
 
-@available(iOS 16.1, *)
+@available(iOS 16.2, *)
 final class WidgetManager {
     static let shared = WidgetManager()
     private init() {}

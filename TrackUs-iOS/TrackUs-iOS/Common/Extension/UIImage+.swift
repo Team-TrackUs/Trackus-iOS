@@ -44,4 +44,6 @@ extension UIImage {
                let image = UIGraphicsGetImageFromCurrentImageContext()
                return image
            }
+    
+  
 }
