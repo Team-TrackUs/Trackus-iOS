@@ -236,13 +236,13 @@ class RunningResultVC: ExtensionVC {
         let photoNav = UINavigationController(rootViewController: selectPhotoVC)
         photoNav.modalPresentationStyle = .fullScreen
         present(photoNav, animated: true)
+        let photoEditVC = PhotoEditVC()
         
-        selectPhotoVC.onCompleted = { [weak self] image in
+        selectPhotoVC.onCompleted = { [weak self, weak photoNav] image in
             guard let self = self else { return }
-            let photoEditVC = PhotoEditVC()
             photoEditVC.image = image
             photoEditVC.runModel = self.runModel
-            photoNav.pushViewController(photoEditVC, animated: true)
+            photoNav?.pushViewController(photoEditVC, animated: true)
         }
     }
     

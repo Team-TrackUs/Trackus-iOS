@@ -11,13 +11,13 @@ import AVFoundation
 final class SelectePhotoVC: UIViewController {
     // MARK: - Properties
     // Cpatrue Session
-    var session: AVCaptureSession?
+    private var session: AVCaptureSession?
     // Photo Output
-    var output: AVCapturePhotoOutput!
+    private var output: AVCapturePhotoOutput!
     // Video Preview
-    let previewLayer = AVCaptureVideoPreviewLayer()
+    private let previewLayer = AVCaptureVideoPreviewLayer()
     // Shtter Button
-    var onCompleted: (((UIImage?) -> Void))?
+    public var onCompleted: (UIImage?) -> Void = { (image) in }
     
     private let cameraPreview: UIView = {
         let view = UIView()
@@ -135,7 +135,7 @@ final class SelectePhotoVC: UIViewController {
         }
     }
     
-    func setUpCamera() {
+    private func setUpCamera() {
         let session = AVCaptureSession() // 캡처세션 생성
         output = AVCapturePhotoOutput() // 데이터를 보내는 출려대상을 촬영떄마다 초기화
      
@@ -163,11 +163,11 @@ final class SelectePhotoVC: UIViewController {
         }
     }
     
-    @objc func closeButtonTapped() {
+    @objc private func closeButtonTapped() {
         dismiss(animated: true)
     }
     
-    @objc func didTapTakePhoto() {
+    @objc private func didTapTakePhoto() {
           output.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
       }
 }
@@ -179,7 +179,6 @@ extension SelectePhotoVC: AVCapturePhotoCaptureDelegate {
         }
         let image = UIImage(data: data)
         session?.stopRunning()
-        onCompleted?(image)
-//        self.navigationController?.pushViewController(photoEditVC, animated: true)
+        onCompleted(image)
     }
 }
