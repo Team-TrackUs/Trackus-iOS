@@ -58,7 +58,7 @@ final class AuthService: NSObject {
         // 이미지 저장 -> url 포함 User 저장
         guard let image = image else { return self.storeUserInformation(user: user) }
         let uid = User.currentUid
-        let ref = Storage.storage().reference().child("usersImage/\(uid)")
+        let ref = Storage.storage().reference().child("profileImages/\(uid)")
         
         // 이미지 비율 줄이기 (용량 감소 목적)
         guard let resizedImage = image.resizeWithWidth(width: 300) else { return }

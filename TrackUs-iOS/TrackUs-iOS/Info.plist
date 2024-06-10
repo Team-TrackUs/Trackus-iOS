@@ -13,7 +13,7 @@
 	<key>UIStatusBarStyle</key>
 	<string></string>
 	<key>KAKAO_NATIVE_APP_KEY</key>
-	<string>362c228c85a06fb031049d482fb5c7b5</string>
+	<string>${KAKAO_NATIVE_APP_KEY}</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>UIMainStoryboardFile</key>
