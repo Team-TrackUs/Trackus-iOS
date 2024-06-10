@@ -151,6 +151,7 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
     func setupMapView() {
         mapView = MKMapView(frame: self.view.bounds)
         mapView.showsUserLocation = true
+        mapView.isRotateEnabled = false // 회전막기
     }
     
     // 초기위치 설정
