@@ -419,7 +419,6 @@ extension RunningHomeVC: UICollectionViewDelegate, UICollectionViewDataSource, U
             if indexPath.row != 0 && indexPath.row != posts.count - 1 {
                 if let currentAnnotation = selectedAnnotation {
                     mapView.deselectAnnotation(currentAnnotation, animated: true)
-//                    mapView.view(for: currentAnnotation)?.isHidden = true
                 }
             }
             

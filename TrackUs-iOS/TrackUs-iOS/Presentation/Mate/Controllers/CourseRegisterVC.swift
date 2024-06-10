@@ -429,7 +429,6 @@ class CourseRegisterVC: UIViewController {
     }
     
     @objc func addCourseButtonTapped() {
-        // + 주원님 채팅방 생성
         
         loadingView.isHidden = false
         loadingView.startAnimation()
@@ -504,6 +503,11 @@ class CourseRegisterVC: UIViewController {
                                         courseDetailVC.navigationItem.leftBarButtonItem = dismissButton
                                         courseDetailVC.navigationItem.rightBarButtonItems = nil
                                     }
+                                    
+                                    // + 주원님 채팅방 생성
+                                    
+                                    // + 소희님 users 컬렉션에 참여 모집글 배열에 해당 포스트 uid append
+                                    
                                     self.navigationController?.pushViewController(courseDetailVC, animated: true)
                                     
                                     ImageCacheManager.shared.setImage(image: image, url: post.routeImageUrl)

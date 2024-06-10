@@ -282,7 +282,7 @@ class PostService {
     
     // 모집글 참여인원의 프로필이미지와 이름 가져오기
     func fetchMembers(uid: String, completion: @escaping (String?, String?) -> Void) {
-        Firestore.firestore().collection("user").document(uid).getDocument { snapshot, error in
+        Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
             guard let data = snapshot?.data() else { return }
             let name = data["name"] as? String ?? ""
             let imageUrl = data["profileImageUrl"] as? String ?? ""
