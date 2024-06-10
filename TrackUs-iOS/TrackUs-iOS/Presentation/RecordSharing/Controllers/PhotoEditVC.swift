@@ -77,6 +77,11 @@ final class PhotoEditVC: UIViewController {
         photoPreview.addLogo()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        resetPhotoView()
+    }
+    
     // MARK: - Helpers
     func setPages() {
         pageViewController.setViewControllers([colVC1], direction: .forward, animated: true, completion: nil)
@@ -146,8 +151,12 @@ final class PhotoEditVC: UIViewController {
         }
     }
     
-    private func photoButtonTapped(action: UIAlertAction) {
-       
+    private func resetPhotoView() {
+        photoPreview.subviews.forEach { $0.removeFromSuperview() }
+        if let _ = photoPreview.layer.sublayers {
+            photoPreview.layer.sublayers = []
+        }
+        photoPreview.addLogo()
     }
     
     private func checkAddPhotoPermission(action: UIAlertAction) {
@@ -190,7 +199,7 @@ final class PhotoEditVC: UIViewController {
 
     
     @objc func imageSaved(image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        if let error = error {
+        if error != nil {
         } else {
             dismiss(animated: true)
         }
@@ -276,6 +285,8 @@ extension PhotoEditVC: DataCollectionDelegate {
         
         photoPreview.addImageView(touchAreaView)
     }
+    
+
     
     @objc func panGestureHandler(sender: UIPanGestureRecognizer) {
         guard let view = sender.view else {

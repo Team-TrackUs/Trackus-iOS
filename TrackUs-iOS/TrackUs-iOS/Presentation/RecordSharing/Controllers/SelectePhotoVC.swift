@@ -55,7 +55,7 @@ final class SelectePhotoVC: UIViewController {
         super.viewDidLoad()
         setConstraint()
         setupNavBar()        
-        checkCameraPermissions()
+//        checkCameraPermissions()
     }
     
     
