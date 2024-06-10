@@ -39,7 +39,7 @@ class UserListVC: UIViewController {
 
     private func fetchUsers() {
         let db = Firestore.firestore()
-        db.collection("user").getDocuments { [weak self] (snapshot, error) in
+        db.collection("users").getDocuments { [weak self] (snapshot, error) in
             guard let self = self else { return }
             if let error = error {
                 print("Error getting users: \(error)")

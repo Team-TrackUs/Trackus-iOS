@@ -24,7 +24,7 @@ class UserManager {
             return
         }
         
-        Firestore.firestore().collection("user").document(uid).getDocument { [self] documentSnapshot, error in
+        Firestore.firestore().collection("users").document(uid).getDocument { [self] documentSnapshot, error in
             if error != nil {
                 completionHandler(false)
             } else {
