@@ -20,7 +20,7 @@ final public class RecordService {
             let url = try await ImageUploader.uploadImageAsyncChaching(image: image, type: .record)
             record.setUrl(url)
             record.setTime()
-            try Firestore.firestore().collection("user").document(uid).collection("records").addDocument(from: record)
+            try Firestore.firestore().collection("users").document(uid).collection("records").addDocument(from: record)
             
         } catch {
             print(#function + "upload failed")
