@@ -152,11 +152,33 @@ final class PhotoEditVC: UIViewController {
     
     private func checkAddPhotoPermission(action: UIAlertAction) {
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
-            if status == .authorized {
+            switch status {
+            case .authorized:
                 DispatchQueue.main.async {
                     self.savePhoto()
                 }
-            }            
+            default:
+                DispatchQueue.main.async {
+                    self.showAuthorizationAlert()
+                }
+            }
+        }
+    }
+    
+    func showAuthorizationAlert() {
+        let alert = UIAlertController(title: "앨범 권한", message: "설정에서 사진 권한을 설정 해주세요.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "취소", style: .destructive, handler: nil))
+        alert.addAction(UIAlertAction(title: "설정하러 가기", style: .default, handler: goToAppSettings))
+        
+        self.present(alert, animated: true)
+    }
+    
+    
+    private func goToAppSettings(_ sender: UIAlertAction) {
+        guard let settingURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        
+        if UIApplication.shared.canOpenURL(settingURL) {
+            UIApplication.shared.open(settingURL)
         }
     }
     
