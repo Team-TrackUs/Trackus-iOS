@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6140CCFA2C15686500094202 /* RunningMapCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6140CCF92C15686500094202 /* RunningMapCell.swift */; };
 		615ADADC2C04D45D005CAC75 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 82BE455D2BEFA948007AE54A /* Main.storyboard */; };
 		615ADAE22C07802B005CAC75 /* RefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615ADAE12C07802B005CAC75 /* RefreshView.swift */; };
 		615ADAE42C086F18005CAC75 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615ADAE32C086F18005CAC75 /* LoadingView.swift */; };
@@ -126,6 +127,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6140CCF92C15686500094202 /* RunningMapCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningMapCell.swift; sourceTree = "<group>"; };
 		615ADADD2C059D5D005CAC75 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Config.xcconfig; path = ../../../Config.xcconfig; sourceTree = "<group>"; };
 		615ADAE12C07802B005CAC75 /* RefreshView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshView.swift; sourceTree = "<group>"; };
 		615ADAE32C086F18005CAC75 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
@@ -309,6 +311,7 @@
 			children = (
 				826922E22C045B8B00D506C2 /* RunInfoCell.swift */,
 				82E7638A2C087C220078E5C9 /* MyMapView.swift */,
+				6140CCF92C15686500094202 /* RunningMapCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -793,6 +796,7 @@
 				615ADAE22C07802B005CAC75 /* RefreshView.swift in Sources */,
 				820069142C10BA3F009FDA6C /* DataCollectionVC.swift in Sources */,
 				98AB54472BF71B390047310A /* NicknameInputView.swift in Sources */,
+				6140CCFA2C15686500094202 /* RunningMapCell.swift in Sources */,
 				61B0DECE2BF92174009E360B /* MateViewCell.swift in Sources */,
 				82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */,
 				827F97482C0DB85200DAD821 /* WidgetAttribute.swift in Sources */,

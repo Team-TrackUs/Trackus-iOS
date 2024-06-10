@@ -65,7 +65,11 @@ class CourseDetailVC: UIViewController {
     let distanceLabel: UILabel = { // 코스 거리
         let label = UILabel()
         label.textColor = .white
-        label.font = .boldSystemFont(ofSize: 16)
+        if let descriptor = UIFont.systemFont(ofSize: 16, weight: .bold).fontDescriptor.withSymbolicTraits([.traitBold, .traitItalic]) {
+            label.font = UIFont(descriptor: descriptor, size: 0)
+        } else {
+            label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        }
         label.backgroundColor = .mainBlue
         label.layer.masksToBounds = true
         label.layer.cornerRadius = 20
@@ -341,7 +345,7 @@ class CourseDetailVC: UIViewController {
         buttonContainer.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         buttonContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         buttonContainer.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        buttonContainer.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        buttonContainer.heightAnchor.constraint(equalToConstant: 68).isActive = true
         
         divider.topAnchor.constraint(equalTo: buttonContainer.topAnchor).isActive = true
         divider.leadingAnchor.constraint(equalTo: buttonContainer.leadingAnchor).isActive = true
@@ -438,7 +442,7 @@ class CourseDetailVC: UIViewController {
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         buttonStack.topAnchor.constraint(equalTo: buttonContainer.topAnchor, constant: 10).isActive = true
         buttonStack.leftAnchor.constraint(equalTo: buttonContainer.leftAnchor, constant: 16).isActive = true
-        buttonStack.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor).isActive = true
+        buttonStack.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor, constant: -2).isActive = true
         buttonStack.rightAnchor.constraint(equalTo: buttonContainer.rightAnchor, constant: -16).isActive = true
         
         viewUIComplete = true

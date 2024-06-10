@@ -9,12 +9,13 @@ import Foundation
 import Firebase
 import FirebaseStorage
 import FirebaseFirestore
+import CoreLocation
 
 class PostService {
     
     var posts = [Post]()
     
-    // 포스트 업로드
+    // 모집글 업로드
     func uploadPost(post: Post, completion: @escaping (Error?) -> Void) {
         
         let postData = [
@@ -39,7 +40,7 @@ class PostService {
         }
     }
     
-    // 포스트 참여
+    // 모집글 참여
     func enterPost(postUid: String, userUid: String, members: [String], completion: @escaping ([String]?, Error?) -> Void) {
         Firestore.firestore().collection("posts").document(postUid).getDocument { snapshot, error in
             guard let document = try? snapshot?.data(as: Post.self), error == nil else {
@@ -66,7 +67,7 @@ class PostService {
         }
     }
     
-    // 포스트 나가기
+    // 모집글 나가기
     func exitPost(postUid: String, userUid: String, members: [String], completion: @escaping ([String]) -> Void) {
         Firestore.firestore().collection("posts").document(postUid).getDocument { snapshot, error in
             guard let document = try? snapshot?.data(as: Post.self) else { return }
@@ -77,7 +78,7 @@ class PostService {
         }
     }
     
-    // 포스트테이블 패치
+    // 모집글 테이블 패치
     func fetchPostTable(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
         var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true).limit(to: limit)
         
@@ -108,7 +109,48 @@ class PostService {
         }
     }
     
-    // 해당 게시물 정보 불러오기
+    // 맵뷰의 중앙과 코스 시작점과의 거리 계산
+    func distanceBetweenCourse(_ point1: CLLocationCoordinate2D, _ point2: CLLocationCoordinate2D) -> Double {
+        let region = CLLocation(latitude: point1.latitude, longitude: point1.longitude)
+        let course = CLLocation(latitude: point2.latitude, longitude: point2.longitude)
+        return region.distance(from: course)
+    }
+    
+    // 러닝맵 모집글 불러오기
+    func fetchMap(regionCenter: CLLocationCoordinate2D, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
+        var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true)
+        
+        query.getDocuments { (querySnapshot, error) in
+            if let error = error {
+                completion(nil, nil, error)
+                return
+            }
+            
+            guard let documents = querySnapshot?.documents else {
+                completion([], nil, nil)
+                return
+            }
+            
+            let posts = documents.compactMap { queryDocumentSnapshot -> Post? in
+                guard let post = try? queryDocumentSnapshot.data(as: Post.self) else {
+                    return nil
+                }
+
+                guard let courseRoute = post.courseRoutes.first else {
+                    return nil
+                }
+                
+                let courseRouteStart = CLLocationCoordinate2D(latitude: courseRoute.latitude, longitude: courseRoute.longitude)
+                let distance = self.distanceBetweenCourse(regionCenter, courseRouteStart)
+                return distance <= 5000 ? post : nil // 5km 이내
+            }
+            
+            let lastDocumentSnapshot = documents.last
+            completion(posts, lastDocumentSnapshot, nil)
+        }
+    }
+    
+    // 해당 모집글 정보 불러오기
     func fetchPost(uid: String, completion: @escaping (Post?, Error?) -> Void) {
         Firestore.firestore().collection("posts").document(uid).getDocument { snapshot, error in
             if let error = error {
@@ -161,7 +203,7 @@ class PostService {
         }
     }
     
-    // 포스트 수정
+    // 모집글 수정
     func editPost(post: Post, completion: @escaping (Error?) -> Void) {
         let postData = [
             "title" : post.title,
@@ -184,18 +226,13 @@ class PostService {
         }
     }
     
-    // 포스트 삭제
+    // 모집글 삭제
     func deletePost(postUid: String, imageUrl: String, completion: @escaping () -> ()) {
         Firestore.firestore().collection("posts").document(postUid).delete { error in
             completion()
         }
         
         deleteImage(imageUrl: imageUrl)
-        
-//        let storageReference = Storage.storage().reference(forURL: imageUrl)
-//        storageReference.delete { error in
-//            completion()
-//        }
     }
     
     // 이미지를 스토리지에 업로드
@@ -245,7 +282,7 @@ class PostService {
     
     // 모집글 참여인원의 프로필이미지와 이름 가져오기
     func fetchMembers(uid: String, completion: @escaping (String?, String?) -> Void) {
-        Firestore.firestore().collection("user").document(uid).getDocument { snapshot, error in
+        Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
             guard let data = snapshot?.data() else { return }
             let name = data["name"] as? String ?? ""
             let imageUrl = data["profileImageUrl"] as? String ?? ""

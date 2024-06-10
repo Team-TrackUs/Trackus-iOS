@@ -29,7 +29,11 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         label.backgroundColor = .mainBlue
         label.textColor = .white
         label.textAlignment = .center
-        label.font = .boldSystemFont(ofSize: 16)
+         if let descriptor = UIFont.systemFont(ofSize: 16, weight: .bold).fontDescriptor.withSymbolicTraits([.traitBold, .traitItalic]) {
+             label.font = UIFont(descriptor: descriptor, size: 0)
+         } else {
+             label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+         }
         label.frame = CGRect(x: 0, y: 0, width: 80, height: 46)
         label.layer.cornerRadius = 40 / 2
         label.layer.shadowColor = UIColor.gray.cgColor
