@@ -33,6 +33,13 @@ class RunningMapCell: UICollectionViewCell {
         return imageView
     }()
     
+    let overlayView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private let runningStyleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 12)
@@ -104,18 +111,8 @@ class RunningMapCell: UICollectionViewCell {
     
     let closingLabel: UILabel = {
         let label = UILabel()
-        label.text = "마감"
         label.font = .boldSystemFont(ofSize: 24)
-        label.textColor = .gray1
-        label.textAlignment = .center
-        return label
-    }()
-    
-    let endLabel: UILabel = {
-        let label = UILabel()
-        label.text = "종료"
-        label.font = .boldSystemFont(ofSize: 24)
-        label.textColor = .gray1
+        label.textColor = .white
         label.textAlignment = .center
         return label
     }()
@@ -147,10 +144,17 @@ class RunningMapCell: UICollectionViewCell {
         postImageView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor).isActive = true
         postImageView.widthAnchor.constraint(equalTo: postImageView.heightAnchor).isActive = true
         
-        postImageView.addSubview(closingLabel)
+        postImageView.addSubview(overlayView)
+        overlayView.topAnchor.constraint(equalTo: postImageView.topAnchor).isActive = true
+        overlayView.leadingAnchor.constraint(equalTo: postImageView.leadingAnchor).isActive = true
+        overlayView.trailingAnchor.constraint(equalTo: postImageView.trailingAnchor).isActive = true
+        overlayView.bottomAnchor.constraint(equalTo: postImageView.bottomAnchor).isActive = true
+        overlayView.isHidden = true
+        
+        overlayView.addSubview(closingLabel)
         closingLabel.translatesAutoresizingMaskIntoConstraints = false
-        closingLabel.centerXAnchor.constraint(equalTo: postImageView.centerXAnchor).isActive = true
-        closingLabel.centerYAnchor.constraint(equalTo: postImageView.centerYAnchor).isActive = true
+        closingLabel.centerXAnchor.constraint(equalTo: overlayView.centerXAnchor).isActive = true
+        closingLabel.centerYAnchor.constraint(equalTo: overlayView.centerYAnchor).isActive = true
         closingLabel.isHidden = true
         
         self.contentView.addSubview(runningStyleLabel)
@@ -225,6 +229,24 @@ class RunningMapCell: UICollectionViewCell {
         self.peopleLabel.text = "\(post.members.count) / \(post.numberOfPeoples)"
         self.dateLabel.text = post.startDate.toString(format: "yyyy년 MM월 dd일")
         
+        if post.startDate < Date() {
+            closingLabel.text = "종료"
+        } else if post.members.count >= post.numberOfPeoples {
+            closingLabel.text = "마감"
+        }
+        
+//        if post.members.count >= post.numberOfPeoples {
+//            closingLabel.text = "마감"
+//        }
+        
+        if post.members.count >= post.numberOfPeoples || post.startDate < Date() {
+            closingLabel.isHidden = false
+            overlayView.isHidden = false
+        } else {
+            closingLabel.isHidden = true
+            overlayView.isHidden = true
+        }
+        
         switch runningStyleString(for: post.runningStyle) {
         case "걷기":
             self.runningStyleLabel.backgroundColor = .walking
@@ -236,12 +258,6 @@ class RunningMapCell: UICollectionViewCell {
             self.runningStyleLabel.backgroundColor = .interval
         default:
             self.runningStyleLabel.backgroundColor = .mainBlue
-        }
-        
-        if post.members.count >= post.numberOfPeoples {
-            closingLabel.isHidden = false
-        } else {
-            closingLabel.isHidden = true
         }
     }
     

@@ -40,6 +40,14 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         return button
     }()
     
+    private lazy var myLocationButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: "location_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(myLocationButtonTapped), for: .touchUpInside)
+        
+        return button
+    }()
+    
     let loadingView = LoadingView()
     private var timer: Timer?
     
@@ -104,6 +112,14 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         }
     }
     
+    @objc func myLocationButtonTapped() {
+        var mapRegion = MKCoordinateRegion()
+        mapRegion.center = mapView.userLocation.coordinate
+        mapRegion.span = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        
+        mapView.setRegion(mapRegion, animated: true)
+    }
+    
     // MARK: - Helpers
     
     func configureUI() {
@@ -124,6 +140,11 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         collectionView.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant:
                                                 +110).isActive = true
         collectionView.heightAnchor.constraint(equalToConstant: 110).isActive = true
+        
+        mapView.addSubview(myLocationButton)
+        myLocationButton.translatesAutoresizingMaskIntoConstraints = false
+        myLocationButton.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant: -110).isActive = true
+        myLocationButton.rightAnchor.constraint(equalTo: mapView.rightAnchor, constant: -16).isActive = true
     }
     
     // 맵설정
@@ -279,14 +300,14 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             mapView.addOverlay(polyline)
             
             UIView.animate(withDuration: 0.1) {
-                self.collectionView.frame.origin.y = self.mapView.frame.height - 128 - 110
+                self.collectionView.frame.origin.y = self.mapView.frame.height - 120 - 110
             }
             
             guard let region = courseCoords.makeRegionToFit() else { return }
             mapView.setRegion(region, animated: false)
             
             DispatchQueue.main.asyncAfter(deadline: .now()) {
-                self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100), animated: false)
+                self.mapView.setVisibleMapRect(self.mapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 100, left: 100, bottom: 200, right: 100), animated: false)
             }
             
             if let index = posts.firstIndex(where: { $0.uid == annotation.title }) {
@@ -296,6 +317,7 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             mapView.isZoomEnabled = false
             mapView.isScrollEnabled = false
             mapView.isRotateEnabled = false
+            self.myLocationButton.isHidden = true
             isSelected = true
         }
     }
@@ -324,6 +346,7 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         mapView.isZoomEnabled = true
         mapView.isScrollEnabled = true
         mapView.isRotateEnabled = true
+        self.myLocationButton.isHidden = false
         isSelected = false
         selectedAnnotation = nil
     }

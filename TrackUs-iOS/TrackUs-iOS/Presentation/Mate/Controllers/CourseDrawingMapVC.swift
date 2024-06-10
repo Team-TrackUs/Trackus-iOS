@@ -28,11 +28,15 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         label.backgroundColor = .mainBlue
         label.textColor = .white
         label.textAlignment = .center
-        label.frame = CGRect(x: 0, y: 0, width: 80, height: 46)
         label.layer.shadowColor = UIColor.gray.cgColor
         label.layer.shadowOpacity = 1.0
         label.layer.shadowOffset = CGSize.zero
         label.layer.shadowRadius = 6
+        if let descriptor = UIFont.systemFont(ofSize: 16, weight: .bold).fontDescriptor.withSymbolicTraits([.traitBold, .traitItalic]) {
+            label.font = UIFont(descriptor: descriptor, size: 0)
+        } else {
+            label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        }
         
         return label
     }()
@@ -201,7 +205,7 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         finishDrawCourseButton.widthAnchor.constraint(equalToConstant: 398).isActive = true
         finishDrawCourseButton.heightAnchor.constraint(equalToConstant: 56).isActive = true
         finishDrawCourseButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16).isActive = true
-        finishDrawCourseButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        finishDrawCourseButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -2).isActive = true
         finishDrawCourseButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16).isActive = true
         
         let stack = UIStackView(arrangedSubviews: [oneStepBackButton, courseClearButton])
@@ -222,8 +226,6 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         distanceLabel.clipsToBounds = true
         distanceLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 15).isActive = true
         distanceLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-//        distanceLabel.text = "0.00 km"
-        configureDistanceLabel()
         
     }
     
@@ -278,15 +280,6 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         self.distance = totalDistance / 1000
         
         updateDistanceLabel()
-    }
-    
-    func configureDistanceLabel() {
-        // bold + italic
-        let font = UIFont.boldSystemFont(ofSize: 16)
-        let italicFontDescriptor = font.fontDescriptor.withSymbolicTraits(.traitItalic)
-        let boldItalicFont = UIFont(descriptor: italicFontDescriptor!, size: 16)
-        
-        distanceLabel.font = boldItalicFont
     }
     
     private func setupNavBar() {
