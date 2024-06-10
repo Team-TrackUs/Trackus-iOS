@@ -9,7 +9,17 @@ import UIKit
 import Firebase
 
 class OtherProfileVC: UIViewController {
+    var userId: String
+    private var blockingMeList = [String]()
 
+    init(userId: String) {
+        self.userId = userId
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     // MARK: - 사용자 프로필
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
@@ -29,12 +39,31 @@ class OtherProfileVC: UIViewController {
     
     private let editProfileButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("프로필 편집", for: .normal)
-        button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = .gray3
-        button.layer.cornerRadius = 5
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        button.addTarget(self, action: #selector(editProfileButtonTapped), for: .touchUpInside)
+        
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 4
+        
+        let imageView = UIImageView(image: UIImage(named: "profileChat_icon"))
+        imageView.tintColor = .black
+        stackView.addArrangedSubview(imageView)
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "1:1대화"
+        titleLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        titleLabel.textColor = .gray2
+        stackView.addArrangedSubview(titleLabel)
+        
+        button.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stackView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: button.centerYAnchor)
+        ])
+        
+        button.isUserInteractionEnabled = true
+        stackView.isUserInteractionEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -195,7 +224,6 @@ class OtherProfileVC: UIViewController {
         currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
         updateDateButton()
     }
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -206,15 +234,16 @@ class OtherProfileVC: UIViewController {
         updateDateButton()
         profileImageView.layer.cornerRadius = 35
         setupConstraints()
-        fetchUserProfile()
+        fetchUserProfile(userId: userId)
+        checkIfUserIsBlocked()
     }
 
     private func setupNavBar() {
-        self.navigationItem.title = "마이페이지"
+        self.navigationItem.title = "프로필보기"
         
-        let settingsButton = UIBarButtonItem(image: UIImage(named: "setting_icon"), style: .plain, target: self, action: #selector(settingsButtonTapped))
-        settingsButton.tintColor = .black
-        self.navigationItem.rightBarButtonItem = settingsButton
+        let dotsButton = UIBarButtonItem(image: UIImage(named: "dots_icon"), style: .plain, target: self, action: #selector(dotsButtonButtonTapped))
+        dotsButton.tintColor = .black
+        self.navigationItem.rightBarButtonItem = dotsButton
         
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -326,23 +355,38 @@ class OtherProfileVC: UIViewController {
         ])
     }
     // MARK: - 설정뷰로 이동
-    @objc private func settingsButtonTapped() {
-        let settingVC = SettingVC()
-        self.navigationController?.pushViewController(settingVC, animated: true)
+    @objc private func dotsButtonButtonTapped() {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let blockActionTitle = blockingMeList.contains(userId) ? "차단 해제" : "차단하기"
+        let blockAction = UIAlertAction(title: blockActionTitle, style: .destructive) { _ in
+            if self.blockingMeList.contains(self.userId) {
+                self.unblockUserTapped()
+            } else {
+                self.blockUser(userId: self.userId)
+            }
+        }
+        let reportAction = UIAlertAction(title: "신고하기", style: .destructive) { _ in
+            self.reportUser()
+        }
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        alertController.addAction(blockAction)
+        alertController.addAction(reportAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
-    // MARK: - 프로필편집뷰로 이동
+    
+    // MARK: - 채팅뷰로 이동
     @objc private func editProfileButtonTapped() {
-        let myProfileEditVC = MyProfileEditVC()
+        let myProfileEditVC = MyChatListVC()
         self.navigationController?.pushViewController(myProfileEditVC, animated: true)
     }
     
-    private func fetchUserProfile() {
-        guard let currentUser = Auth.auth().currentUser else {
-            return
-        }
-        
+    private func fetchUserProfile(userId: String) {
         let db = Firestore.firestore()
-        let userRef = db.collection("user").document(currentUser.uid)
+        let userRef = db.collection("users").document(userId)
         
         userRef.getDocument { [weak self] document, error in
             guard let self = self, let document = document, document.exists else {
@@ -361,6 +405,63 @@ class OtherProfileVC: UIViewController {
             }
         }
     }
+    
+    
+    // MARK: - 차단된 사용자 확인
+    private func checkIfUserIsBlocked() {
+        let db = Firestore.firestore()
+        let currentUserUid = UserManager.uid
+        
+        db.collection("users").document(currentUserUid).getDocument { [weak self] document, error in
+            guard let self = self, let document = document, document.exists else {
+                return
+            }
+            
+            let data = document.data()
+            if let blockingList = data?["blockingMeList"] as? [String], blockingList.contains(self.userId) {
+                self.blockingMeList = blockingList
+                self.updateBlockButton(toBlocked: true)
+            } else {
+                self.updateBlockButton(toBlocked: false)
+            }
+        }
+    }
+    
+    // MARK: - 차단 버튼 업데이트
+    private func updateBlockButton(toBlocked: Bool) {
+        let stackView = editProfileButton.subviews.first as? UIStackView
+        let imageView = stackView?.arrangedSubviews.first as? UIImageView
+        let titleLabel = stackView?.arrangedSubviews.last as? UILabel
+        
+        if toBlocked {
+            imageView?.image = UIImage(named: "profileblock_icon")
+            titleLabel?.text = "차단 해제"
+            editProfileButton.removeTarget(self, action: #selector(editProfileButtonTapped), for: .touchUpInside)
+            editProfileButton.addTarget(self, action: #selector(unblockUserTapped), for: .touchUpInside)
+        } else {
+            imageView?.image = UIImage(named: "profileChat_icon")
+            titleLabel?.text = "1:1대화"
+            editProfileButton.removeTarget(self, action: #selector(unblockUserTapped), for: .touchUpInside)
+            editProfileButton.addTarget(self, action: #selector(editProfileButtonTapped), for: .touchUpInside)
+        }
+    }
+        
+   // MARK: - 차단 해제
+    @objc private func unblockUserTapped() {
+        let db = Firestore.firestore()
+        let currentUserUid = UserManager.uid
+        
+        db.collection("users").document(currentUserUid).updateData([
+            "blockingMeList": FieldValue.arrayRemove([userId])
+        ]) { [weak self] error in
+            if let error = error {
+                print("차단 해제하는 동안 오류 발생: \(error)")
+            } else {
+                print("사용자가 성공적으로 차단 해제됨")
+                self?.updateBlockButton(toBlocked: false)
+            }
+        }
+    }
 
     
     private func setupConstraints() {
@@ -376,4 +477,28 @@ class OtherProfileVC: UIViewController {
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         }
     }
+    
+    private func reportUser() {
+        let reportUserVC = ReportUserVC(userId: self.userId)
+        navigationController?.pushViewController(reportUserVC, animated: true)
+    }
 }
+
+extension OtherProfileVC {
+    private func blockUser(userId: String) {
+        let db = Firestore.firestore()
+        let currentUserUid = UserManager.uid
+        
+        db.collection("users").document(currentUserUid).updateData([
+            "blockingMeList": FieldValue.arrayUnion([userId])
+        ]) { error in
+            if let error = error {
+                print("차단하는 동안 오류 발생: \(error)")
+            } else {
+                print("사용자가 성공적으로 차단됨")
+                self.updateBlockButton(toBlocked: true)
+            }
+        }
+    }
+}
+
