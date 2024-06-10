@@ -22,7 +22,7 @@ class UserManager {
         self.user = User()
     }
     
-    
+
     // 사용자 정보 불러오기 (리스너 추가) => 신규 사용자 true 반환
     func getUserData(uid: String?, completionHandler: @escaping (Bool) -> Void) {
         guard let uid = uid else { return }
