@@ -703,6 +703,15 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
         return UIEdgeInsets(top: 0, left: 10, bottom: 20, right: 10)
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let memberUid = members[indexPath.item]
+        let otherProfileVC = OtherProfileVC(userId: memberUid)
+        
+        otherProfileVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(otherProfileVC, animated: true)
+        
+    }
+    
 }
 
 // MARK: - MapSetting

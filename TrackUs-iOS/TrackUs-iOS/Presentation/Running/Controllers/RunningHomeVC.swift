@@ -8,7 +8,7 @@
 import UIKit
 import MapKit
 
-final class RunningHomeVC: UIViewController, MKMapViewDelegate {
+final class RunningHomeVC: UIViewController {
     
     // MARK: - Properties
     
@@ -146,8 +146,11 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         myLocationButton.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant: -110).isActive = true
         myLocationButton.rightAnchor.constraint(equalTo: mapView.rightAnchor, constant: -16).isActive = true
     }
+}
+    // MARK: - MapView
+ 
+extension RunningHomeVC: MKMapViewDelegate {
     
-    // 맵설정
     func setupMapView() {
         mapView = MKMapView(frame: self.view.bounds)
         mapView.showsUserLocation = true
@@ -188,8 +191,6 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             pinAnnotations.append(pin)
         }
     }
-    
-    // MARK: - MapView
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         guard !(annotation is MKUserLocation) else {
@@ -317,7 +318,6 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             
             mapView.isZoomEnabled = false
             mapView.isScrollEnabled = false
-            mapView.isRotateEnabled = false
             self.myLocationButton.isHidden = true
             isSelected = true
         }
@@ -346,7 +346,6 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         
         mapView.isZoomEnabled = true
         mapView.isScrollEnabled = true
-        mapView.isRotateEnabled = true
         self.myLocationButton.isHidden = false
         isSelected = false
         selectedAnnotation = nil
