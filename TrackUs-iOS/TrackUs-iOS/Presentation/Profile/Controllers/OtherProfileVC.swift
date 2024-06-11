@@ -410,7 +410,7 @@ class OtherProfileVC: UIViewController {
     // MARK: - 차단된 사용자 확인
     private func checkIfUserIsBlocked() {
         let db = Firestore.firestore()
-        let currentUserUid = UserManager.uid
+        let currentUserUid = UserManager.shared.user.uid
         
         db.collection("users").document(currentUserUid).getDocument { [weak self] document, error in
             guard let self = self, let document = document, document.exists else {
@@ -449,7 +449,7 @@ class OtherProfileVC: UIViewController {
    // MARK: - 차단 해제
     @objc private func unblockUserTapped() {
         let db = Firestore.firestore()
-        let currentUserUid = UserManager.uid
+        let currentUserUid = UserManager.shared.user.uid
         
         db.collection("users").document(currentUserUid).updateData([
             "blockingMeList": FieldValue.arrayRemove([userId])
@@ -487,7 +487,7 @@ class OtherProfileVC: UIViewController {
 extension OtherProfileVC {
     private func blockUser(userId: String) {
         let db = Firestore.firestore()
-        let currentUserUid = UserManager.uid
+        let currentUserUid = UserManager.shared.user.uid
         
         db.collection("users").document(currentUserUid).updateData([
             "blockingMeList": FieldValue.arrayUnion([userId])
