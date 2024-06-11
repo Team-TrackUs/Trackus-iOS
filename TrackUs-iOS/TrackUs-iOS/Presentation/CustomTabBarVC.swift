@@ -54,7 +54,7 @@ final class CustomTabBarVC: UITabBarController {
         
         self.setViewControllers([homeVC, mateVC, chatVC, profileVC], animated: false)
         self.modalPresentationStyle = .fullScreen
-        self.tabBar.backgroundColor = .white
+        self.tabBar.backgroundColor = .systemBackground
         
         guard let items = self.tabBar.items else { return }
         items[0].image = UIImage(systemName: "mappin.and.ellipse")

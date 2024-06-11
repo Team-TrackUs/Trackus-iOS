@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import FirebaseFirestore
 
 class CourseDetailVC: UIViewController {
     
@@ -254,6 +255,8 @@ class CourseDetailVC: UIViewController {
                 self.members = updatedMembers
             }
         }
+        // 채팅방 참여
+        joinChat()
     }
     
     @objc func courseExitButtonTapped() {
@@ -263,13 +266,32 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func goChatRoomButtonTapped() {
-        
-        if members.contains(uid) {
-            // 채팅방에 참여 했을 시 -> 해당 모집글 톡방
-            
-        } else {
-            // 채팅방에 참여 하지 않았을 경우 -> 방장 개인톡
-            
+        let ref = Firestore.firestore().collection("chats")
+        if members.contains(uid){
+            // 채팅방 참여된 경우
+            if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+                // 기존 채팅방 띄우기
+                presentChatView(chat: chat)
+            }else {
+                // 채팅방 참여하기
+                DispatchQueue.main.async {
+                    self.joinChat()
+                }
+                
+                let chat = Chat(uid: postUid, group: true, title: "", members: [:], usersUnreadCountInfo: [:])
+                // 기존 채팅방 띄우기
+                presentChatView(chat: chat)
+            }
+        }else {
+            // 참여 안된 경우 - 방장 1:1 대화하기
+            if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in 
+                // 개인 채팅방 - 방장 uid통해 채팅 유무 여부 확인
+                !chatRoom.group && chatRoom.nonSelfMembers.contains(ownerUid)  }){
+                // 채팅방 표시
+                presentChatView(chat: chat)
+            } else {
+                
+            }
         }
         
     }
@@ -517,6 +539,25 @@ class CourseDetailVC: UIViewController {
             }
         }
     }
+    func joinChat() {
+        // 채팅방 참여
+        let ref = Firestore.firestore().collection("chats")
+        ref.document(postUid).updateData([
+            "members.\(uid)": true
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
+            }
+        }
+        
+        ref.document(postUid).updateData([
+            "usersUnreadCountInfo.\(uid)": 0
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
+            }
+        }
+    }
     
     func fetchPostDetail() {
         PostService().fetchPost(uid: postUid) { post, error in
@@ -628,6 +669,13 @@ class CourseDetailVC: UIViewController {
         }) { _ in
             self.skeletonView.isHidden = true
         }
+    }
+    
+    /// 채팅방 띄우기
+    private func presentChatView(chat: Chat){
+        let chatRoomVC = ChatRoomVC(chat: chat)
+        chatRoomVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(chatRoomVC, animated: true)
     }
 }
 

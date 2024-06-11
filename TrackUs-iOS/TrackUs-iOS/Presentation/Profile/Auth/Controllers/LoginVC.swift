@@ -8,7 +8,7 @@
 import UIKit
 import Firebase
 
-class LoginVC: UIViewController {
+final class LoginVC: UIViewController {
     
     private lazy var icon: UIImageView = {
         let image = UIImage(named: "trackus_icon")?.resize(width: 90, height: 73)
@@ -56,17 +56,18 @@ class LoginVC: UIViewController {
     private lazy var appleLoginButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = .black
+        button.backgroundColor = .label
         // apple 로고 추가
         let LogoImage = UIImage(systemName: "applelogo")
         button.setImage(LogoImage, for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
-        button.imageView?.tintColor = .white
+        button.imageView?.tintColor = .systemBackground
+        button.imageView?.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10) // 로고와 문구 사이의 간격 조절
         
         button.setTitle("Apple로 시작하기", for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.systemBackground, for: .normal)
         
         button.layer.cornerRadius = 8
         button.layer.masksToBounds = true
@@ -85,7 +86,7 @@ class LoginVC: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = #colorLiteral(red: 1, green: 0.8935882449, blue: 0, alpha: 1)
         // apple 로고 추가
-        if let LogoImage = UIImage(named: "kakao_icon")?.resize(width: 20, height: 20){
+        if let LogoImage = UIImage(named: "kakao_icon")?.resize(width: 16, height: 16){
             button.setImage(LogoImage, for: .normal)
             button.imageView?.contentMode = .scaleAspectFit
             button.imageView?.tintColor = .white
@@ -188,11 +189,6 @@ class LoginVC: UIViewController {
     }
 }
 
-extension LoginVC {
-    
-    
-}
-
 /// 배경 그라데이션
 class GradientBackgroundView: UIView {
     
@@ -204,7 +200,7 @@ class GradientBackgroundView: UIView {
         super.layoutSubviews()
         
         let gradientLayer = self.layer as! CAGradientLayer
-        gradientLayer.colors = [UIColor.mainBlue.withAlphaComponent(0.5).cgColor, UIColor.white.cgColor]
+        gradientLayer.colors = [UIColor.mainBlue.withAlphaComponent(0.5).cgColor, UIColor.systemBackground.cgColor]
         gradientLayer.startPoint = CGPoint(x: 0, y: 1.5)
         gradientLayer.endPoint = CGPoint(x: 0, y: 0.6)
         gradientLayer.frame = bounds

@@ -20,9 +20,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         
-        LoginCheck()
-        
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        window = UIWindow(windowScene: windowScene)
+        // 스플래시 화면 표시
+        window?.rootViewController = SplashView()
+        window?.makeKeyAndVisible()
+        // 로그인 여부 확인
+        loginCheck()
     }
     
     // Kakao 로그인 관련
@@ -62,45 +66,58 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
-    // MARK: - 이전 로그인 여부 확인
-    func LoginCheck() {
-//        self.window?.rootViewController = SplashView()
-//        self.window?.makeKeyAndVisible()
-        
-        authListener = Auth.auth().addStateDidChangeListener({ auth, user in
-            if user == nil {
-                self.login()
+    // MARK: - 로그인 여부 확인 관련 함수 목록
+    
+    // 로그인 여부 확인
+    func loginCheck() {
+        // Firebase 인증 상태 리스너 등록
+        authListener = Auth.auth().addStateDidChangeListener { [weak self] auth, user in
+            guard let self = self else { return }
+            if let user = user {
+                // Firestore에서 사용자 정보 확인
+                checkUserInFirestore(uid: user.uid)
+                // 로그인이 확인되었으므로 리스너 해제
+                //Auth.auth().removeStateDidChangeListener(authListener!)
             } else {
-                DispatchQueue.main.async {
-                    UserManager.shared.getUserData(uid: user?.uid) { newUser in
-                        print("사용자 정보 불러오기 시작")
-                        if newUser {
-                            self.signUp()
-                        } else {
-                            self.startApp()
-                            // 리스너 등록 해제
-                            Auth.auth().removeStateDidChangeListener(self.authListener!)
-                        }
-                    }
+                // 로그인하지 않은 경우 로그인 화면으로 전환
+                self.showLoginView()
+            }
+        }
+    }
+    
+    // 사용자 정보 유무 조건 확인
+    func checkUserInFirestore(uid: String) {
+        // 로그인 사용자 기본 정보 유무 확인
+        UserManager.shared.checkUserData(uid: uid) { userFound in
+            DispatchQueue.main.async {
+                if userFound {
+                    // 메인 화면으로 전환
+                    self.showMainView()
+                } else {
+                    // 회원가입 화면으로 전환
+                    self.showSignUpView()
                 }
             }
-        })
+        }
     }
     
     /// 메인 화면
-    private func startApp() {
-        self.window?.rootViewController = CustomTabBarVC()
-        self.window?.makeKeyAndVisible()
+    func showLoginView() {
+        DispatchQueue.main.async {
+            self.window?.rootViewController = LoginVC()
+        }
     }
-    
-    private func login() {
-        self.window?.rootViewController = LoginVC()
-        self.window?.makeKeyAndVisible()
+    // 회원가입 화면
+    func showSignUpView() {
+        DispatchQueue.main.async {
+            self.window?.rootViewController = SignUpVC()
+        }
     }
-    /// 회원가입 화면
-    private func signUp() {
-        self.window?.rootViewController = SignUpVC()
-        self.window?.makeKeyAndVisible()
+    // 메인 화면
+    func showMainView() {
+        DispatchQueue.main.async {
+            self.window?.rootViewController = CustomTabBarVC()
+        }
     }
 }
 
