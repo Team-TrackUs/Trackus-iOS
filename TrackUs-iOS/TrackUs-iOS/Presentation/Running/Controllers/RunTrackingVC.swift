@@ -5,18 +5,11 @@
 //  Created by 석기권 on 5/27/24.
 //
 
-import Foundation
-import ActivityKit
 import UIKit
 import MapKit
+import ActivityKit
 import CoreMotion
 
-@available(iOS 16.2, *)
-final class WidgetManager {
-    static let shared = WidgetManager()
-    private init() {}
-    var activity: Activity<WidgetTestAttributes>!
-}
 final class RunTrackingVC: UIViewController {
     // MARK: - Properties
     private let pedometer = CMPedometer()
@@ -652,6 +645,7 @@ extension RunTrackingVC: UserLocationDelegate {
     }
     
     func updateUI() {
+        print("UpdateUI!!")
         timeLabel.text = runModel.seconds.toMMSSTimeFormat
         kilometerLabel.text = runModel.distance.asString(style: .km)
         paceLabel.text = runModel.pace.asString(style: .pace)
