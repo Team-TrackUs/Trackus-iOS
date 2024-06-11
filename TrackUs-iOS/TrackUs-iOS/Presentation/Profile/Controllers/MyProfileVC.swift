@@ -356,27 +356,24 @@ class MyProfileVC: UIViewController {
             return
         }
         
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(currentUser.uid)
-        
-        userRef.getDocument { [weak self] document, error in
-            guard let self = self, let document = document, document.exists else {
-                return
-            }
-            
-            let data = document.data()
-            if let profileImageUrl = data?["profileImageUrl"] as? String {
-                self.profileImageView.loadImage(url: profileImageUrl)
+        UserManager.shared.checkUserData(uid: currentUser.uid) { [weak self] exists in
+            guard let self = self else { return }
+            if exists {
+                let user = UserManager.shared.user
+                if let profileImageUrl = user.profileImageUrl {
+                    self.profileImageView.loadImage(url: profileImageUrl)
+                } else {
+                    self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
+                }
+                
+                self.nameLabel.text = user.name
             } else {
+                // Handle case where user data doesn't exist
                 self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
-            }
-            
-            if let userName = data?["name"] as? String {
-                self.nameLabel.text = userName
+                self.nameLabel.text = "No Name"
             }
         }
     }
-
     
     @objc private func segmentChanged() {
         if segmentControl.selectedSegmentIndex == 0 {
@@ -400,6 +397,11 @@ class MyProfileVC: UIViewController {
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         }
+    }
+    // MARK: - 최신 정보 유지
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchUserProfile()
     }
 }
 

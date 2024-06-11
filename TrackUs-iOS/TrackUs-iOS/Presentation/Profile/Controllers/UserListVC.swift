@@ -42,7 +42,7 @@ class UserListVC: UIViewController {
         db.collection("users").getDocuments { [weak self] (snapshot, error) in
             guard let self = self else { return }
             if let error = error {
-                print("Error getting users: \(error)")
+                //print("Error getting users: \(error)")
                 return
             }
             guard let documents = snapshot?.documents else { return }

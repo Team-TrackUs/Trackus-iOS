@@ -15,7 +15,7 @@ class SettingVC: UIViewController {
     
     private func performLogout() {
         authService.logOut()
-        print("로그아웃 완료")
+        //print("로그아웃 완료")
         
         let loginVC = LoginVC()
         navigationController?.setViewControllers([loginVC], animated: true)
