@@ -28,7 +28,7 @@ class UserManager {
             if error != nil {
                 completionHandler(false)
             } else {
-                guard documentSnapshot != nil else {
+                guard let document = documentSnapshot, document.exists else {
                     // 사용자 정보 없을 경우
                     completionHandler(false)
                     return
