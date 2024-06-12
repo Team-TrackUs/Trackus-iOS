@@ -7,10 +7,10 @@
 
 import UIKit
 import Firebase
-import FirebaseStorage
 
 class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
-    
+    private let defaultProfileImage = UIImage(systemName: "person.crop.circle.fill")
+        
     private lazy var profileImageView: ProfilePictureInputView = {
         let view = ProfilePictureInputView()
         view.delegate = self
@@ -160,72 +160,77 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
     }
     
     func didChooseImage(_ image: UIImage?) {
-            guard let selectedImage = image else {
-                return
-            }
+        if let selectedImage = image {
             profileImageView.imageView.image = selectedImage
+        } else {
+            profileImageView.imageView.image = defaultProfileImage
+        }
+    }
+    
+    @objc private func saveButtonTapped() {
+        guard let currentUser = Auth.auth().currentUser else {
+            return
         }
         
-        @objc private func saveButtonTapped() {
-            guard let currentUser = Auth.auth().currentUser else {
-                return
-            }
-            
-            let newNickname = nicknameTextField.text ?? ""
-            UserManager.shared.user.name = newNickname
-            
-            let isProfilePublic = toggleSwitch.isOn
-            UserManager.shared.user.isProfilePublic = isProfilePublic
-            
-            if let profileImage = profileImageView.imageView.image {
-                let imageUrl = "profileImages/\(currentUser.uid)"
-                ImageCacheManager.shared.setImage(image: profileImage, url: imageUrl)
-                UserManager.shared.user.profileImageUrl = imageUrl
-                updateUserData(currentUser.uid)
+        let newNickname = nicknameTextField.text ?? ""
+        UserManager.shared.user.name = newNickname
+        
+        let isProfilePublic = toggleSwitch.isOn
+        UserManager.shared.user.isProfilePublic = isProfilePublic
+        
+        if let profileImage = profileImageView.imageView.image {
+            let imageUrl = "profileImages/\(currentUser.uid)"
+            ImageCacheManager.shared.setImage(image: profileImage, url: imageUrl)
+            UserManager.shared.user.profileImageUrl = imageUrl
+            updateUserData(currentUser.uid)
+        } else {
+            updateUserData(currentUser.uid)
+        }
+    }
+    private func isDefaultImage(_ image: UIImage) -> Bool {
+        return image == defaultProfileImage
+    }
+    
+    private func updateUserData(_ uid: String) {
+        UserManager.shared.updateUserData(uid: uid) { success in
+            if success {
+                //print("User data updated successfully")
+                self.navigationController?.popViewController(animated: true)
             } else {
-                updateUserData(currentUser.uid)
-            }
-        }
-        
-        private func updateUserData(_ uid: String) {
-            UserManager.shared.updateUserData(uid: uid) { success in
-                if success {
-                    //print("User data updated successfully")
-                    self.navigationController?.popViewController(animated: true)
-                } else {
-                    //print("Failed to update user data")
-                }
-            }
-        }
-        
-        private func fetchUserProfile() {
-            guard let currentUser = Auth.auth().currentUser else {
-                return
-            }
-            
-            let db = Firestore.firestore()
-            let userRef = db.collection("users").document(currentUser.uid)
-            
-            userRef.getDocument { document, error in
-                guard let document = document, document.exists else {
-                    return
-                }
-                
-                let data = document.data()
-                if let profileImageUrl = data?["profileImageUrl"] as? String {
-                    self.profileImageView.imageView.loadImage(url: profileImageUrl)
-                } else {
-                    self.profileImageView.imageView.image = UIImage(systemName: "person.crop.circle.fill")
-                    self.profileImageView.imageView.tintColor = .gray3
-                }
-                
-                if let userName = data?["name"] as? String {
-                    self.nicknameTextField.text = userName
-                }
-                
-                if let isProfilePublic = data?["isProfilePublic"] as? Bool {
-                    self.toggleSwitch.isOn = isProfilePublic
-                }
+                //print("Failed to update user data")
             }
         }
     }
+    
+    private func fetchUserProfile() {
+        guard let currentUser = Auth.auth().currentUser else {
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(currentUser.uid)
+        
+        userRef.getDocument { document, error in
+            guard let document = document, document.exists else {
+                return
+            }
+            
+            let data = document.data()
+            if let profileImageUrl = data?["profileImageUrl"] as? String {
+                self.profileImageView.imageView.loadImage(url: profileImageUrl)
+            } else {
+                self.profileImageView.imageView.image = UIImage(systemName: "person.crop.circle.fill")
+                self.profileImageView.imageView.tintColor = .gray3
+            }
+            
+            if let userName = data?["name"] as? String {
+                self.nicknameTextField.text = userName
+            }
+            
+            if let isProfilePublic = data?["isProfilePublic"] as? Bool {
+                self.toggleSwitch.isOn = isProfilePublic
+            }
+        }
+    }
+}
+

@@ -10,7 +10,8 @@ import Firebase
 
 class OtherProfileVC: UIViewController {
     var userId: String
-    private var blockingMeList = [String]()
+    private var blockingUserList = [String]() // 내가 상대방
+    private var blockingMeList = [String]() // 상대방이 나
 
     init(userId: String) {
         self.userId = userId
@@ -358,9 +359,9 @@ class OtherProfileVC: UIViewController {
     @objc private func dotsButtonButtonTapped() {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        let blockActionTitle = blockingMeList.contains(userId) ? "차단 해제" : "차단하기"
+        let blockActionTitle = blockingUserList.contains(userId) ? "차단 해제" : "차단하기"
         let blockAction = UIAlertAction(title: blockActionTitle, style: .destructive) { _ in
-            if self.blockingMeList.contains(self.userId) {
+            if self.blockingUserList.contains(self.userId) {
                 self.unblockUserTapped()
             } else {
                 self.blockUser(userId: self.userId)
@@ -406,7 +407,6 @@ class OtherProfileVC: UIViewController {
         }
     }
     
-    
     // MARK: - 차단된 사용자 확인
     private func checkIfUserIsBlocked() {
         let db = Firestore.firestore()
@@ -418,8 +418,8 @@ class OtherProfileVC: UIViewController {
             }
             
             let data = document.data()
-            if let blockingList = data?["blockingMeList"] as? [String], blockingList.contains(self.userId) {
-                self.blockingMeList = blockingList
+            if let blockingList = data?["blockingUserList"] as? [String], blockingList.contains(self.userId) {
+                self.blockingUserList = blockingList
                 self.updateBlockButton(toBlocked: true)
             } else {
                 self.updateBlockButton(toBlocked: false)
@@ -452,7 +452,7 @@ class OtherProfileVC: UIViewController {
         let currentUserUid = UserManager.shared.user.uid
         
         db.collection("users").document(currentUserUid).updateData([
-            "blockingMeList": FieldValue.arrayRemove([userId])
+            "blockingUserList": FieldValue.arrayRemove([userId])
         ]) { [weak self] error in
             if let error = error {
                 print("차단 해제하는 동안 오류 발생: \(error)")
@@ -490,7 +490,7 @@ extension OtherProfileVC {
         let currentUserUid = UserManager.shared.user.uid
         
         db.collection("users").document(currentUserUid).updateData([
-            "blockingMeList": FieldValue.arrayUnion([userId])
+            "blockingUserList": FieldValue.arrayUnion([userId])
         ]) { error in
             if let error = error {
                 print("차단하는 동안 오류 발생: \(error)")

@@ -122,7 +122,7 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         button.backgroundColor = .red
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 25.0
-        //button.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -286,6 +286,41 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
             if let userName = data?["name"] as? String {
                 self.nameLabel.text = userName
             }
+        }
+    }
+    
+    @objc private func reportButtonTapped() {
+        guard let currentUser = Auth.auth().currentUser else { return }
+        
+        let db = Firestore.firestore()
+        let reportId = UUID().uuidString
+        let reportRef = db.collection("report_user").document(reportId)
+        
+        let report = report_user(
+            uid: reportId,
+            toUser: nameLabel.text ?? "Unknown User",
+            toUserUid: userId,
+            category: reasonTextField.text ?? "",
+            text: reportTextView.text ?? "",
+            fromUser: currentUser.uid,
+            createdAt: Timestamp()
+        )
+        
+        do {
+            try reportRef.setData(from: report) { error in
+                if let error = error {
+                    print("Error saving report: \(error.localizedDescription)")
+                } else {
+                    print("Report successfully saved.")
+                    let alert = UIAlertController(title: "신고 완료", message: "신고가 성공적으로 접수되었습니다.", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "확인", style: .default, handler: { _ in
+                        self.navigationController?.popViewController(animated: true)
+                    }))
+                    self.present(alert, animated: true, completion: nil)
+                }
+            }
+        } catch let error {
+            print("Error encoding report: \(error.localizedDescription)")
         }
     }
 }
