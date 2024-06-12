@@ -203,11 +203,10 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
             radioButton.heightAnchor.constraint(equalToConstant: 25),
             radioButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
-            withdrawalButton.topAnchor.constraint(equalTo: radioButton.bottomAnchor, constant: 16),
+            withdrawalButton.topAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 16),
             withdrawalButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             withdrawalButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             withdrawalButton.heightAnchor.constraint(equalToConstant: 58),
-            withdrawalButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
         ])
     }
 

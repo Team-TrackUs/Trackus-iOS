@@ -82,7 +82,7 @@ class UserManager {
         userRef.updateData([
             "name": user.name,
             "isProfilePublic": user.isProfilePublic,
-            "profileImageUrl": user.profileImageUrl ?? ""
+            "profileImageUrl": user.profileImageUrl as Any
         ]) { error in
             if let error = error {
                 //print("Error updating user data: \(error)")
