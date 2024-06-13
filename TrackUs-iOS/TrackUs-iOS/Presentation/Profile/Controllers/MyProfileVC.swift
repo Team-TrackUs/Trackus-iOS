@@ -286,21 +286,44 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     
     func fetchPosts() {
         let db = Firestore.firestore()
-        db.collection("posts").getDocuments { [weak self] (querySnapshot, error) in
-            guard let self = self else { return }
-            if let error = error {
-                print("Error getting documents: \(error)")
-            } else {
-                self.posts = querySnapshot?.documents.compactMap { document in
-                    do {
-                        return try document.data(as: Post.self)
-                    } catch {
-                        print("Error decoding post: \(error)")
-                        return nil
-                    }
-                } ?? []
-                self.tableView.reloadData()
+        
+        let startOfDay = Calendar.current.startOfDay(for: currentDate)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        db.collection("posts")
+            .whereField("startDate", isGreaterThanOrEqualTo: Timestamp(date: startOfDay))
+            .whereField("startDate", isLessThan: Timestamp(date: endOfDay))
+            .getDocuments { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                if let error = error {
+                    print("Error getting documents: \(error)")
+                } else {
+                    self.posts = querySnapshot?.documents.compactMap { document in
+                        do {
+                            let post = try document.data(as: Post.self)
+                            return post
+                        } catch {
+                            print("Error decoding post: \(error)")
+                            return nil
+                        }
+                    } ?? []
+                    
+                    self.posts = self.posts.filter { self.shouldIncludePost($0) }
+
+                    self.tableView.reloadData()
+                }
             }
+    }
+
+    private func shouldIncludePost(_ post: Post) -> Bool {
+        guard let currentUserUID = Auth.auth().currentUser?.uid else {
+            return false
+        }
+
+        if post.members.contains(currentUserUID) || post.ownerUid == currentUserUID {
+            return true
+        } else {
+            return false
         }
     }
 
