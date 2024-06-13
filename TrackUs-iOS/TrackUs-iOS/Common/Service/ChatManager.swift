@@ -24,19 +24,19 @@ class ChatRoomManager {
     func subscribeToUpdates(completionHandler: @escaping () -> Void) {
         let currentUid = User.currentUid
         ref.whereField("members.\(currentUid)", isEqualTo: true).addSnapshotListener() { [weak self] (snapshot, _) in
-            self?.storeChatRooms(snapshot, currentUid)
-            completionHandler()
+            self?.storeChatRooms(snapshot, currentUid, completionHandler: completionHandler)
         }
     }
     
     // 채팅방 Firebase 정보 가져오기
-    private func storeChatRooms(_ snapshot: QuerySnapshot?, _ currentUId: String) {
+    private func storeChatRooms(_ snapshot: QuerySnapshot?, _ currentUId: String, completionHandler: @escaping () -> Void) {
+        let dispatchGroup = DispatchGroup()
         DispatchQueue.main.async { [weak self] in
             self?.chatRooms = snapshot?.documents
                 .compactMap { [weak self] document in
                     do {
                         let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
-                        return self?.makeChatRooms(firestoreChatRoom, currentUId)
+                        return self?.makeChatRooms(firestoreChatRoom, currentUId, dispatchGroup: dispatchGroup)
                     } catch {
                         print(error)
                     }
@@ -49,11 +49,15 @@ class ChatRoomManager {
                     return date1 > date2
                 }
             ?? []
+            
+            dispatchGroup.notify(queue: .main) {
+                completionHandler()
+            }
         }
     }
     
     // ChatRoom타입에 맞게 변환
-    private func makeChatRooms(_ firestoreChatRoom: FirestoreChatRoom, _ currentUId: String) -> Chat {
+    private func makeChatRooms(_ firestoreChatRoom: FirestoreChatRoom, _ currentUId: String, dispatchGroup: DispatchGroup) -> Chat {
         var message: LastetMessage? = nil
         if let flm = firestoreChatRoom.latestMessage {
             message = LastetMessage(
@@ -62,8 +66,11 @@ class ChatRoomManager {
                 text: flm.text.isEmpty ? "사진을 보냈습니다." : flm.text
             )
         }
-        _ = firestoreChatRoom.members.map { memberId in
-            memberUserInfo(uid: memberId.key)
+        firestoreChatRoom.members.forEach { memberId in
+            dispatchGroup.enter()
+            memberUserInfo(uid: memberId.key) {
+                dispatchGroup.leave()
+            }
         }
         let chatRoom = Chat(
             uid: firestoreChatRoom.id ?? "",
@@ -77,7 +84,7 @@ class ChatRoomManager {
     }
     
     // 채팅방 멤버 닉네임, 프로필사진url 불러오기
-    private func memberUserInfo(uid: String) {
+    private func memberUserInfo(uid: String, completionHandler: @escaping () -> ()) {
         Firestore.firestore().collection("users").document(uid).addSnapshotListener { documentSnapshot, error in
             guard let document = documentSnapshot else {
                 // 탈퇴 사용자인 경우 리스트에서 삭제
@@ -86,13 +93,16 @@ class ChatRoomManager {
                     chatRoom.members = $0.members.filter{ $0.key != uid }
                     return chatRoom
                 }
+                completionHandler()
                 return
             }
             do {
                 let userInfo = try document.data(as: User.self)
                 self.userInfo[uid] = userInfo
+                completionHandler()
             } catch {
                 print("Error decoding document: \(error)")
+                completionHandler()
             }
         }
     }
@@ -106,48 +116,46 @@ class ChatRoomManager {
             !chat.group && chat.nonSelfMembers.contains(opponentUid)
         }) {
             completionHandler(chat, false)
-        }
-        // 채팅방 없는 경우 firestore 확인
-        ref.whereField("group", isEqualTo: false)
-            .whereField("members.\(currentUid)", in: [false])
-            .whereField("members.\(opponentUid)", in: [true, false])
-            .getDocuments { [weak self] (querySnapshot, error) in
-                if let error = error {
-                    print("Error getting documents: \(error)")
-                    return
-                }
-                // 기존 채팅방 정보 있을 경우
-                if let document = querySnapshot?.documents.first, document.exists {
-                    do {
-                        let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
-                        if let chat = self?.makeChatRooms(firestoreChatRoom, currentUid){
-                            self?.memberUserInfo(uid: opponentUid)
-                            completionHandler(chat, false)
-                        }
+        }else {
+            // 채팅방 없는 경우 firestore 확인
+            ref.whereField("group", isEqualTo: false)
+                .whereField("members.\(currentUid)", in: [false])
+                .whereField("members.\(opponentUid)", in: [true, false])
+                .getDocuments { [weak self] (querySnapshot, error) in
+                    if let error = error {
+                        print("Error getting documents: \(error)")
                         return
-                    } catch {
-                        print("Error decoding document: \(error)")
+                    }
+                    // 기존 채팅방 정보 있을 경우
+                    if let document = querySnapshot?.documents.first, document.exists {
+                        do {
+                            let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
+                            if let chat = self?.makeChatRooms(firestoreChatRoom, currentUid, dispatchGroup: DispatchGroup()) {
+                                self?.memberUserInfo(uid: opponentUid){
+                                    completionHandler(chat, false)
+                                }
+                            }
+                            return
+                        } catch {
+                            print("Error decoding document: \(error)")
+                        }
+                    }
+                    
+                    // 3. 1:1 채팅방이 없으면 새로운 채팅방 생성
+                    let newChatRoom = Chat(
+                        uid: UUID().uuidString,
+                        group: false,
+                        title: "", // 상대방 이름으로 설정하거나 다른 로직 추가 가능
+                        members: [currentUid: true, opponentUid: true],
+                        usersUnreadCountInfo: [currentUid: 0, opponentUid: 0],
+                        latestMessage: nil
+                    )
+                    // 사용자 정보 불러와 userInfo에 추가
+                    self?.memberUserInfo(uid: opponentUid) {
+                        // 없을경우 신규 채팅
+                        completionHandler(newChatRoom, true)
                     }
                 }
-                
-                // 3. 1:1 채팅방이 없으면 새로운 채팅방 생성
-                let newChatRoom = Chat(
-                    uid: UUID().uuidString,
-                    group: false,
-                    title: "", // 상대방 이름으로 설정하거나 다른 로직 추가 가능
-                    members: [currentUid: true, opponentUid: true],
-                    usersUnreadCountInfo: [currentUid: 0, opponentUid: 0],
-                    latestMessage: nil
-                )
-                // 사용자 정보 불러와 userInfo에 추가
-                self?.memberUserInfo(uid: opponentUid)
-                // 없을경우 신규 채팅
-                completionHandler(newChatRoom, true)
-            }
+        }
     }
-    
-    func creatChat() {
-        
-    }
-    
 }

@@ -299,15 +299,9 @@ class CourseDetailVC: UIViewController {
             }
         }else {
             // 참여 안된 경우 - 방장 1:1 대화하기
-            if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in 
-                // 개인 채팅방 - 방장 uid통해 채팅 유무 여부 확인
-                !chatRoom.group && chatRoom.nonSelfMembers.contains(ownerUid)  }){
-                // 채팅방 표시
-                presentChatView(chat: chat)
-            } else {
-//                ChatRoomManager.shared.joinChatRoom(opponentUser: <#T##User#>) { chat, <#Bool#> in
-//                    presentChatView(chat: chat)
-//                }
+            ChatRoomManager.shared.joinChatRoom(opponentUid: ownerUid) { chat, newChat in
+                let chatRoomVC = ChatRoomVC(chat: chat, newChat: newChat)
+                self.navigationController?.pushViewController(chatRoomVC, animated: true)
             }
         }
         
