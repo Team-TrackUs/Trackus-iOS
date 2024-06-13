@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
@@ -72,12 +73,12 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     }
         
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let deleteAction = UIContextualAction(style: .destructive, title: "나가기") { (action, view, completionHandler) in
+        let deleteAction = UIContextualAction(style: .destructive, title: "나가기") { [self] (action, view, completionHandler) in
             // 나가기 함수 추가
-            
+            let chat = ChatRoomManager.shared.chatRooms[indexPath.row]
+            didSelectLeaveChatRoom(chat: chat)
             completionHandler(true)
         }
-//        deleteAction.backgroundColor = .red
         return UISwipeActionsConfiguration(actions: [deleteAction])
     }
     
@@ -94,5 +95,84 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             return ChatRoomManager.shared.chatRooms.count
         }
         //return chat.chatRooms.count
+    }
+    
+    func didSelectLeaveChatRoom(chat: Chat) {
+        let db = Firestore.firestore().collection("chats")
+        let currentUserUid = User.currentUid
+        // 채팅방 나가기
+        db.document(chat.uid).updateData([
+            "members.\(currentUserUid)": false
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
+            }
+        }
+        
+        // 안읽은 메세지수 카운터 제거
+        if chat.group {
+            db.document(chat.uid).updateData([
+                "usersUnreadCountInfo.\(currentUserUid)": FieldValue.delete()
+            ]) { error in
+                if let error = error {
+                    print("Error updating document: \(error)")
+                }
+            }
+        } else { // 개인채팅
+            db.document(chat.uid).updateData([
+                "usersUnreadCountInfo.\(currentUserUid)": 0
+            ]) { error in
+                if let error = error {
+                    print("Error updating document: \(error)")
+                }
+            }
+        }
+        
+        // firebase 본인 채팅 저장소 삭제 -> 코어데이터 적용시 수정
+        db.document(chat.uid).collection(currentUserUid).getDocuments { snapshot, error in
+            guard let snapshot = snapshot else {
+                return
+            }
+            
+            let batch = Firestore.firestore().batch()
+            snapshot.documents.forEach { document in
+                batch.deleteDocument(document.reference)
+            }
+            
+            batch.commit { batchError in
+            }
+        }
+        
+        // 나가기 안내 메세지
+        let newMessage = Message(sendMember: currentUserUid, timeStamp: Date(), messageType: .userInout, data: false)
+        
+        // 그룹 채팅방만 해당
+        if chat.group {
+            // 그룹 메세지 - 각 사용자별 메세지 저장소에 저장
+            _ = chat.members.map{
+                // 참여중인 사용자 확인
+                if $0.value == true {
+                    // 해당 사용자 메세지 정보에 저장
+                    let db = db.document(chat.uid).collection($0.key)
+                    sendMessageFireStore(db: db, message: newMessage)
+                }
+            }
+        }
+    }
+    
+    // 메세지 전송
+    private func sendMessageFireStore(db: CollectionReference, message: Message) {
+        db.addDocument(data: [
+            "sendMember": message.sendMember,
+            "timeStamp": message.timeStamp,
+            "text": message.text as Any,
+            "imageUrl": message.imageUrl as Any,
+            "location": message.location as Any,
+            "userInOut": message.userInOut as Any
+        ]) { error in
+            if let error = error {
+                print("Error adding message: \(error)")
+            }
+        }
     }
 }
