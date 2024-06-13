@@ -504,8 +504,8 @@ class CourseRegisterVC: UIViewController {
                                         courseDetailVC.navigationItem.rightBarButtonItems = nil
                                     }
                                     
-                                    // + 주원님 채팅방 생성
-                                    
+                                    // 채팅방 등록
+                                    self.createGroupChatRoom(trackId: postUID, title: self.courseTitleString, uid: userUID)
                                     // + 소희님 users 컬렉션에 참여 모집글 배열에 해당 포스트 uid append
                                     
                                     self.navigationController?.pushViewController(courseDetailVC, animated: true)
@@ -520,8 +520,6 @@ class CourseRegisterVC: UIViewController {
                 }
             }
         }
-        // 채팅방 등록
-        createGroupChatRoom(trackId: postUID, title: self.courseTitleString, uid: userUID)
     }
     
     @objc func editCourseButtonTapped() {

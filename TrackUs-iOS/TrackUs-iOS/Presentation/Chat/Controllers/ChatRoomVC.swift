@@ -49,6 +49,17 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         super.init(nibName: nil, bundle: nil)
     }
     
+    /// 개인채팅용
+    init(chat: Chat, newChat: Bool = false) {
+        self.chat = chat
+        self.chatUId = chat.uid
+        self.newChat = newChat
+        if newChat {
+            
+        }
+        super.init(nibName: nil, bundle: nil)
+    }
+    
     // 채팅방 정보 불러오기 용도
     private func subscribeChat(chatUid: String, completionHandler: @escaping (Chat) -> Void) {
         let ref = Firestore.firestore().collection("chats")
@@ -269,7 +280,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             messageTextView.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
-    
+    // MARK: - 액션 관련 함수
     // 전송 버튼 이벤트 함수
     @objc private func sendMessage() {
         guard let text = messageTextView.text, !text.isEmpty else { return }
@@ -289,16 +300,41 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             }
         }else { // 개인 채팅
             // 차단 여부 추가
-            _ = chat.members.map{
-                // 해당 사용자 메세지 정보에 저장
-                let db = db.document(chat.uid).collection($0.key)
-                sendMessageFireStore(db: db, message: newMessage)
+            if newChat {
+                createChatRoom { [self] in
+                    _ = chat.members.map{
+                        // 해당 사용자 메세지 정보에 저장
+                        let db = db.document(chat.uid).collection($0.key)
+                        sendMessageFireStore(db: db, message: newMessage)
+                    }
+                }
+                startListening()
+            }else {
+                
+                // 나간 여부로 되어있을 경우 true 처리
+                if chat.members.values.contains(false) {
+                    for key in chat.members.keys {
+                        chat.members[key] = true
+                    }
+                    db.document(chatUId).updateData([
+                        "members": chat.members
+                    ]) { error in
+                        if let error = error {
+                            print("Error updating document: \(error)")
+                        } else {
+                            print("Document successfully updated")
+                        }
+                    }
+                }
+                
+                _ = chat.members.map{
+                    // 해당 사용자 메세지 정보에 저장
+                    let db = db.document(chat.uid).collection($0.key)
+                    sendMessageFireStore(db: db, message: newMessage)
+                }
             }
         }
         
-        if newChat {
-            startListening()
-        }
         
         if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
             // 기존 채팅방 띄우기
@@ -306,6 +342,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             usersUnreadCountInfo[currentUserUid] = 0
             db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
         } else {
+            // 초반 리스너 파일 불러와지기 전 업데이트 용도
             var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
             usersUnreadCountInfo[currentUserUid] = 0
             db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
@@ -433,6 +470,18 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 return MessageMap(message: $0.element, sameUser: prevMessageIsSameUser, sameDate: sameDate, sameTime: nextMessageIsSameUser && sameTime)
             }
     }
+    // 개인 신규 채팅방 생성하기
+    private func createChatRoom(completionHandler: @escaping () -> Void) {
+        let newChatRoom: [String: Any] = [
+            "title": chat.title,
+            "group": false,
+            "members": chat.members,
+            "usersUnreadCountInfo": chat.usersUnreadCountInfo
+            //"latestMessage": nil
+        ]  as [String : Any]
+        Firestore.firestore().collection("chats").document(chat.uid).setData(newChatRoom)
+        completionHandler()
+    }
     
     /// 채팅방 리스너 제거
     private func stopListening() {
@@ -495,11 +544,21 @@ extension ChatRoomVC: SideMenuDelegate {
         }
         
         // 안읽은 메세지수 카운터 제거
-        db.document(chatRoomID).updateData([
-            "usersUnreadCountInfo.\(currentUserUid)": FieldValue.delete()
-        ]) { error in
-            if let error = error {
-                print("Error updating document: \(error)")
+        if chat.group {
+            db.document(chatRoomID).updateData([
+                "usersUnreadCountInfo.\(currentUserUid)": FieldValue.delete()
+            ]) { error in
+                if let error = error {
+                    print("Error updating document: \(error)")
+                }
+            }
+        } else { // 개인채팅
+            db.document(chatRoomID).updateData([
+                "usersUnreadCountInfo.\(currentUserUid)": 0
+            ]) { error in
+                if let error = error {
+                    print("Error updating document: \(error)")
+                }
             }
         }
         

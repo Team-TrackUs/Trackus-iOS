@@ -97,7 +97,7 @@ class ChatRoomManager {
         }
     }
     
-    // 1대1 채팅방 있는지 확인
+    /// 1대1 채팅방 있는지 확인
     func joinChatRoom(opponentUid: String, completionHandler: @escaping (Chat, Bool) -> Void) {
         // 채팅방 정보, 신규 채팅방 여부 반환
         let currentUid = User.currentUid
@@ -107,21 +107,21 @@ class ChatRoomManager {
         }) {
             completionHandler(chat, false)
         }
-        
+        // 채팅방 없는 경우 firestore 확인
         ref.whereField("group", isEqualTo: false)
             .whereField("members.\(currentUid)", in: [false])
             .whereField("members.\(opponentUid)", in: [true, false])
             .getDocuments { [weak self] (querySnapshot, error) in
                 if let error = error {
                     print("Error getting documents: \(error)")
-                    //completionHandler(nil)
                     return
                 }
                 // 기존 채팅방 정보 있을 경우
-                if let document = querySnapshot?.documents.first {
+                if let document = querySnapshot?.documents.first, document.exists {
                     do {
                         let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
                         if let chat = self?.makeChatRooms(firestoreChatRoom, currentUid){
+                            self?.memberUserInfo(uid: opponentUid)
                             completionHandler(chat, false)
                         }
                         return
@@ -139,8 +139,9 @@ class ChatRoomManager {
                     usersUnreadCountInfo: [currentUid: 0, opponentUid: 0],
                     latestMessage: nil
                 )
+                // 사용자 정보 불러와 userInfo에 추가
+                self?.memberUserInfo(uid: opponentUid)
                 // 없을경우 신규 채팅
-                self?.chatRooms.append(newChatRoom)
                 completionHandler(newChatRoom, true)
             }
     }

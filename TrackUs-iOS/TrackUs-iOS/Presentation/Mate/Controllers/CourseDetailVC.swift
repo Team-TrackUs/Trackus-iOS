@@ -256,7 +256,7 @@ class CourseDetailVC: UIViewController {
             }
         }
         // 채팅방 참여
-        guard let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }) else {
+        if ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }) == nil {
             // 채팅방이 없을 때만 실행
             joinChat(){ [self] in
                 if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
