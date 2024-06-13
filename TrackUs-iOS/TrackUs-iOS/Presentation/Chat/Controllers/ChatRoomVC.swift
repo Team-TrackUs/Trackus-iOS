@@ -335,6 +335,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             }
         }
         
+        updateLatesMessage(message: newMessage)
         
         if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
             // 기존 채팅방 띄우기
@@ -421,6 +422,28 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             usersUnreadCountInfo[currentUserUid] = 0
             db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
         }
+    }
+    
+    // 최근 메세지 업데이트
+    private func updateLatesMessage (message: Message) {
+        if message.messageType == .userInout { return }
+        var text: String
+        switch message.messageType {
+            case .text:
+                text = message.text!
+            case .image:
+                text = "사진을 보냈습니다."
+            case .location:
+                text = "위치 장소를 보냈습니다."
+            case .userInout:
+                return
+        }
+        let latestMessageData : [String: Any] = [
+            "text": text,
+            // 이미지 작업 추가하면 해당 수정
+            "timestamp": Date() // 현재 시간을 타임스탬프로 변환
+        ]
+        db.document(chat.uid).updateData(["latestMessage" : latestMessageData])
     }
     
     /// 채팅방 리스너 추가
