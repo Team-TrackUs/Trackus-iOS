@@ -44,7 +44,7 @@ final class CustomTabBarVC: UITabBarController {
     func addTabItems() {
         let homeVC = UINavigationController(rootViewController: RunningHomeVC())
         let mateVC = UINavigationController(rootViewController: RunningMateVC())
-        let chatVC = UINavigationController(rootViewController: MyChatListVC())
+        let chatVC = UINavigationController(rootViewController: ChatListVC())
         let profileVC = UINavigationController(rootViewController: MyProfileVC())
         
         homeVC.title = "러닝맵"

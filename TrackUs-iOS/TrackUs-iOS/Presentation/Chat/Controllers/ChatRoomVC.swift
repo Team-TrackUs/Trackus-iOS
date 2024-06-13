@@ -9,8 +9,15 @@ import UIKit
 import FirebaseFirestore
 
 class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate {
-    
+    private var chatUId: String
     private var chat: Chat
+    private var newChat: Bool{
+        didSet{
+            subscribeChat(chatUid: chatUId) { chat in
+                self.chat = chat
+            }
+        }
+    }
     private var messageMap: [MessageMap] = []
     private var messages: [Message] = [] // 메시지 배열
     
@@ -22,12 +29,108 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     var lock = NSRecursiveLock()
     
     private var listener: ListenerRegistration?
-    let currentUid = User.currentUid
+    let currentUserUid = User.currentUid
     let db = Firestore.firestore().collection("chats")
     
-    init(chat: Chat) {
-        self.chat = chat
+    /// 그룹채팅용
+    init(chatUId: String, newChat: Bool = false) {
+        self.chat = {
+            if let chat = ChatRoomManager.shared.chatRooms.first(where: { $0.uid == chatUId }){
+                return chat
+            }
+            // 없을 경우 새로 불러오기
+            return Chat(uid: chatUId, group: true, title: "", members: [:], usersUnreadCountInfo: [:])
+        }()
+        self.chatUId = chatUId
+        self.newChat = newChat
+        if newChat {
+            
+        }
         super.init(nibName: nil, bundle: nil)
+    }
+    
+    // 채팅방 정보 불러오기 용도
+    private func subscribeChat(chatUid: String, completionHandler: @escaping (Chat) -> Void) {
+        let ref = Firestore.firestore().collection("chats")
+        ref.document(chatUid).addSnapshotListener(){ [weak self] (snapshot, _) in
+            guard let document = snapshot, document.exists else {
+                return
+            }
+            do {
+            let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
+                guard let chat = self?.makeChatRooms(firestoreChatRoom) else { return }
+                completionHandler(chat)
+            } catch {
+                print(error)
+            }
+        }
+    }
+//    // 채팅방 Firebase 정보 가져오기
+//    private func storeChatRooms(_ snapshot: QuerySnapshot?, _ currentUId: String) {
+//        DispatchQueue.main.async { [weak self] in
+//            self?.chatRooms = snapshot?.documents
+//                .compactMap { [weak self] document in
+//                    do {
+//                        let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
+//                        return self?.makeChatRooms(firestoreChatRoom, currentUId)
+//                    } catch {
+//                        print(error)
+//                    }
+//                    
+//                    return nil
+//                }.sorted {
+//                    guard let date1 = $0.latestMessage?.timestamp, let date2 = $1.latestMessage?.timestamp else {
+//                        return $0.title < $1.title
+//                    }
+//                    return date1 > date2
+//                }
+//            ?? []
+//        }
+//    }
+//    
+    // ChatRoom타입에 맞게 변환
+    private func makeChatRooms(_ firestoreChatRoom: FirestoreChatRoom) -> Chat {
+        var message: LastetMessage? = nil
+        if let flm = firestoreChatRoom.latestMessage {
+            message = LastetMessage(
+                //senderName: user.name,
+                timestamp: flm.timestamp,
+                text: flm.text.isEmpty ? "사진을 보냈습니다." : flm.text
+            )
+        }
+        _ = firestoreChatRoom.members.map { memberId in
+            memberUserInfo(uid: memberId.key)
+        }
+        let chatRoom = Chat(
+            uid: firestoreChatRoom.id ?? "",
+            group: firestoreChatRoom.group,
+            title: firestoreChatRoom.title,
+            members: firestoreChatRoom.members,
+            usersUnreadCountInfo: firestoreChatRoom.usersUnreadCountInfo,
+            latestMessage: message
+        )
+        return chatRoom
+    }
+//    
+    // 채팅방 멤버 닉네임, 프로필사진url 불러오기
+    private func memberUserInfo(uid: String) {
+        Firestore.firestore().collection("users").document(uid).addSnapshotListener { documentSnapshot, error in
+            guard let document = documentSnapshot else {
+                // 탈퇴 사용자인 경우 리스트에서 삭제
+//                self.chat = self.chatRooms.members.filter{
+//                    var chatRoom = $0
+//                    chatRoom.members = $0.members.filter{ $0.key != uid }
+//                    return chatRoom
+//                }
+                return
+            }
+            do {
+                let userInfo = try document.data(as: User.self)
+                self.userInfo[uid] = userInfo
+            } catch {
+                print("Error decoding document: \(error)")
+            }
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -39,7 +142,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         tableView.separatorStyle = .none
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "messageCell")
+        tableView.register(ChatMessageCell.self, forCellReuseIdentifier: "messageCell")
         return tableView
     }()
     
@@ -87,16 +190,20 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         startListening()
+        resetUnreadCounter()
+        
+        // 레이아웃 관련
         setupViews()
         setupNavigationBar()
         
         // 탭 제스처 인식기를 생성합니다.
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
-            // 제스처 인식기가 뷰의 다른 터치 이벤트를 방해하지 않도록 설정합니다.
-            tapGesture.cancelsTouchesInView = false
-            // 뷰에 제스처 인식기를 추가합니다.
-            view.addGestureRecognizer(tapGesture)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
+        // 제스처 인식기가 뷰의 다른 터치 이벤트를 방해하지 않도록 설정
+        tapGesture.cancelsTouchesInView = false
+        // 뷰에 제스처 인식기를 추가
+        tableView.addGestureRecognizer(tapGesture)
         
         // 스와이프로 이전 화면 갈 수 있도록 추가
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self
@@ -111,6 +218,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         super.viewWillDisappear(animated)
         // 리스너 종료
         stopListening()
+        resetUnreadCounter()
     }
 
     private func setupNavigationBar() {
@@ -165,7 +273,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     // 전송 버튼 이벤트 함수
     @objc private func sendMessage() {
         guard let text = messageTextView.text, !text.isEmpty else { return }
-        let newMessage = Message(sendMember: currentUid, timeStamp: Date(), messageType: .text, data: text)
+        let newMessage = Message(sendMember: currentUserUid, timeStamp: Date(), messageType: .text, data: text)
+        // 신규 채팅일 경우
+        
         
         if chat.group {
             // 그룹 메세지 - 각 사용자별 메세지 저장소에 저장
@@ -186,16 +296,23 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             }
         }
         
-        // 안읽은 메세지수 갱신
-//        guard let chatroom = ChatRoomManager.shared.chatRooms.filter({ chatroom in
-//            chatroom.uid == chat.uid
-//        }).first else { return }
-//        
-        var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
-        //var usersUnreadCountInfo = chatroom.usersUnreadCountInfo
-        usersUnreadCountInfo[currentUid] = 0
-        db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+        if newChat {
+            startListening()
+        }
+        
+        if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
+            // 기존 채팅방 띄우기
+            var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
+            usersUnreadCountInfo[currentUserUid] = 0
+            db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+        } else {
+            var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
+            usersUnreadCountInfo[currentUserUid] = 0
+            db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+        }
     }
+    
+    
     
     // 사이드 메뉴 보이기
     @objc private func showSideMenu() {
@@ -260,9 +377,18 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
     }
     
+    // 본인 신규 메세지 갯수 초기화
+    private func resetUnreadCounter() {
+        if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
+            var usersUnreadCountInfo = chat.usersUnreadCountInfo
+            usersUnreadCountInfo[currentUserUid] = 0
+            db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+        }
+    }
+    
     /// 채팅방 리스너 추가
     private func startListening() {
-        listener = db.document(chat.uid).collection(currentUid)
+        listener = db.document(chat.uid).collection(currentUserUid)
             .order(by: "timeStamp", descending: false)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
@@ -315,6 +441,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     /// 스크롤뷰 하단으로 내리기
     private func scrollToBottom() {
+        guard messages.count > 0 else { return }
         let indexPath = IndexPath(row: messages.count - 1, section: 0)
         tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
     }
@@ -329,6 +456,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         let messageMap = messageMap[indexPath.row]
         cell.configure(messageMap: messageMap)
+        cell.delegate = self
         cell.selectionStyle = .none
         return cell
     }
@@ -359,7 +487,7 @@ extension ChatRoomVC: SideMenuDelegate {
     func didSelectLeaveChatRoom(chatRoomID: String) {
         // 채팅방 나가기
         db.document(chatRoomID).updateData([
-            "members.\(currentUid)": false
+            "members.\(currentUserUid)": false
         ]) { error in
             if let error = error {
                 print("Error updating document: \(error)")
@@ -368,7 +496,7 @@ extension ChatRoomVC: SideMenuDelegate {
         
         // 안읽은 메세지수 카운터 제거
         db.document(chatRoomID).updateData([
-            "usersUnreadCountInfo.\(currentUid)": FieldValue.delete()
+            "usersUnreadCountInfo.\(currentUserUid)": FieldValue.delete()
         ]) { error in
             if let error = error {
                 print("Error updating document: \(error)")
@@ -376,7 +504,7 @@ extension ChatRoomVC: SideMenuDelegate {
         }
         
         // firebase 본인 채팅 저장소 삭제 -> 코어데이터 적용시 수정
-        db.document(chatRoomID).collection(currentUid).getDocuments { snapshot, error in
+        db.document(chatRoomID).collection(currentUserUid).getDocuments { snapshot, error in
             guard let snapshot = snapshot else {
                 return
             }
@@ -391,7 +519,7 @@ extension ChatRoomVC: SideMenuDelegate {
         }
         
         // 나가기 안내 메세지
-        let newMessage = Message(sendMember: currentUid, timeStamp: Date(), messageType: .userInout, data: false)
+        let newMessage = Message(sendMember: currentUserUid, timeStamp: Date(), messageType: .userInout, data: false)
         
         // 그룹 채팅방만 해당
         if chat.group {
@@ -411,3 +539,9 @@ extension ChatRoomVC: SideMenuDelegate {
     }
 }
     
+extension ChatRoomVC: ChatMessageCellDelegate{
+    func didTapProfileImage(for uid: String) {
+        let otherProfileVC = OtherProfileVC(userId: uid)
+        navigationController?.pushViewController(otherProfileVC, animated: true)
+    }
+}

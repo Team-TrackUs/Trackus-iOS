@@ -7,7 +7,15 @@
 
 import UIKit
 
+protocol ChatMessageCellDelegate: AnyObject {
+    func didTapProfileImage(for uid: String)
+}
+
+
 class ChatMessageCell: UITableViewCell {
+    
+    weak var delegate: ChatMessageCellDelegate?
+    private var uid: String = ""
     
     private lazy var dateLabel = {
         let dateLabel = UILabel()
@@ -109,13 +117,13 @@ class ChatMessageCell: UITableViewCell {
         spacerView.setContentHuggingPriority(UILayoutPriority(rawValue: 249), for: .horizontal)
     }
     
-    @objc private func profileImageTap() {
-        // 이미지 버튼 클릭
-        print("이미지 클릭")
+    @objc private func didTapProfileImage() {
+        delegate?.didTapProfileImage(for: uid)
     }
     
     /// ui출력별 종류
     func configure(messageMap: MessageMap) {
+        self.uid = messageMap.message.sendMember
         let message = messageMap.message
         
         // 제약조건 초기화
@@ -223,7 +231,7 @@ class ChatMessageCell: UITableViewCell {
                 userNameLabel.text = sendMember.name.isEmpty ? "탈퇴 회원" : sendMember.name
                 
                 // 탭 제스처 추가
-                tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(profileImageTap))
+                tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
                 profileImageView.addGestureRecognizer(tapGestureRecognizer)
                 
             } else {

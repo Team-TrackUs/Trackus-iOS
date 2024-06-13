@@ -40,7 +40,7 @@ class ChatRoomManager {
                     } catch {
                         print(error)
                     }
-
+                    
                     return nil
                 }.sorted {
                     guard let date1 = $0.latestMessage?.timestamp, let date2 = $1.latestMessage?.timestamp else {
@@ -95,6 +95,58 @@ class ChatRoomManager {
                 print("Error decoding document: \(error)")
             }
         }
+    }
+    
+    // 1대1 채팅방 있는지 확인
+    func joinChatRoom(opponentUid: String, completionHandler: @escaping (Chat, Bool) -> Void) {
+        // 채팅방 정보, 신규 채팅방 여부 반환
+        let currentUid = User.currentUid
+        // 기존 채팅방 있는 경우
+        if let chat = chatRooms.first(where: { chat in
+            !chat.group && chat.nonSelfMembers.contains(opponentUid)
+        }) {
+            completionHandler(chat, false)
+        }
+        
+        ref.whereField("group", isEqualTo: false)
+            .whereField("members.\(currentUid)", in: [false])
+            .whereField("members.\(opponentUid)", in: [true, false])
+            .getDocuments { [weak self] (querySnapshot, error) in
+                if let error = error {
+                    print("Error getting documents: \(error)")
+                    //completionHandler(nil)
+                    return
+                }
+                // 기존 채팅방 정보 있을 경우
+                if let document = querySnapshot?.documents.first {
+                    do {
+                        let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
+                        if let chat = self?.makeChatRooms(firestoreChatRoom, currentUid){
+                            completionHandler(chat, false)
+                        }
+                        return
+                    } catch {
+                        print("Error decoding document: \(error)")
+                    }
+                }
+                
+                // 3. 1:1 채팅방이 없으면 새로운 채팅방 생성
+                let newChatRoom = Chat(
+                    uid: UUID().uuidString,
+                    group: false,
+                    title: "", // 상대방 이름으로 설정하거나 다른 로직 추가 가능
+                    members: [currentUid: true, opponentUid: true],
+                    usersUnreadCountInfo: [currentUid: 0, opponentUid: 0],
+                    latestMessage: nil
+                )
+                // 없을경우 신규 채팅
+                self?.chatRooms.append(newChatRoom)
+                completionHandler(newChatRoom, true)
+            }
+    }
+    
+    func creatChat() {
+        
     }
     
 }

@@ -380,7 +380,7 @@ class OtherProfileVC: UIViewController {
     
     // MARK: - 채팅뷰로 이동
     @objc private func editProfileButtonTapped() {
-        let myProfileEditVC = MyChatListVC()
+        let myProfileEditVC = ChatListVC()
         self.navigationController?.pushViewController(myProfileEditVC, animated: true)
     }
     
