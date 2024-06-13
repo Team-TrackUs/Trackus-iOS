@@ -151,6 +151,10 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
             if !isRegionSet {
                 
                 guard let region = testcoords.makeRegionToFit() else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now()) {
+                    self.drawMapView.setVisibleMapRect(self.drawMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: false)
+                }
+                
                 drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
                 
                 isRegionSet = true
