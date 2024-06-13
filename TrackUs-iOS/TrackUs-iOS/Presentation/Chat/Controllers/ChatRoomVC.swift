@@ -11,19 +11,14 @@ import FirebaseFirestore
 class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate {
     private var chatUId: String
     private var chat: Chat
-    private var newChat: Bool{
-        didSet{
-            subscribeChat(chatUid: chatUId) { chat in
-                self.chat = chat
-            }
-        }
-    }
+    private var newChat: Bool
     private var messageMap: [MessageMap] = []
     private var messages: [Message] = [] // 메시지 배열
     
     private var userInfo = ChatRoomManager.shared.userInfo
     
     // 메인 버튼 하단 위치 제약조건
+    private var tableViewBottomConstraint: NSLayoutConstraint!
     private var inputStackViewBottomConstraint: NSLayoutConstraint!
     
     var lock = NSRecursiveLock()
@@ -58,90 +53,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             
         }
         super.init(nibName: nil, bundle: nil)
-    }
-    
-    // 채팅방 정보 불러오기 용도
-    private func subscribeChat(chatUid: String, completionHandler: @escaping (Chat) -> Void) {
-        let ref = Firestore.firestore().collection("chats")
-        ref.document(chatUid).addSnapshotListener(){ [weak self] (snapshot, _) in
-            guard let document = snapshot, document.exists else {
-                return
-            }
-            do {
-            let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
-                guard let chat = self?.makeChatRooms(firestoreChatRoom) else { return }
-                completionHandler(chat)
-            } catch {
-                print(error)
-            }
-        }
-    }
-//    // 채팅방 Firebase 정보 가져오기
-//    private func storeChatRooms(_ snapshot: QuerySnapshot?, _ currentUId: String) {
-//        DispatchQueue.main.async { [weak self] in
-//            self?.chatRooms = snapshot?.documents
-//                .compactMap { [weak self] document in
-//                    do {
-//                        let firestoreChatRoom = try document.data(as: FirestoreChatRoom.self)
-//                        return self?.makeChatRooms(firestoreChatRoom, currentUId)
-//                    } catch {
-//                        print(error)
-//                    }
-//                    
-//                    return nil
-//                }.sorted {
-//                    guard let date1 = $0.latestMessage?.timestamp, let date2 = $1.latestMessage?.timestamp else {
-//                        return $0.title < $1.title
-//                    }
-//                    return date1 > date2
-//                }
-//            ?? []
-//        }
-//    }
-//    
-    // ChatRoom타입에 맞게 변환
-    private func makeChatRooms(_ firestoreChatRoom: FirestoreChatRoom) -> Chat {
-        var message: LastetMessage? = nil
-        if let flm = firestoreChatRoom.latestMessage {
-            message = LastetMessage(
-                //senderName: user.name,
-                timestamp: flm.timestamp,
-                text: flm.text.isEmpty ? "사진을 보냈습니다." : flm.text
-            )
-        }
-        _ = firestoreChatRoom.members.map { memberId in
-            memberUserInfo(uid: memberId.key)
-        }
-        let chatRoom = Chat(
-            uid: firestoreChatRoom.id ?? "",
-            group: firestoreChatRoom.group,
-            title: firestoreChatRoom.title,
-            members: firestoreChatRoom.members,
-            usersUnreadCountInfo: firestoreChatRoom.usersUnreadCountInfo,
-            latestMessage: message
-        )
-        return chatRoom
-    }
-//    
-    // 채팅방 멤버 닉네임, 프로필사진url 불러오기
-    private func memberUserInfo(uid: String) {
-        Firestore.firestore().collection("users").document(uid).addSnapshotListener { documentSnapshot, error in
-            guard let document = documentSnapshot else {
-                // 탈퇴 사용자인 경우 리스트에서 삭제
-//                self.chat = self.chatRooms.members.filter{
-//                    var chatRoom = $0
-//                    chatRoom.members = $0.members.filter{ $0.key != uid }
-//                    return chatRoom
-//                }
-                return
-            }
-            do {
-                let userInfo = try document.data(as: User.self)
-                self.userInfo[uid] = userInfo
-            } catch {
-                print("Error decoding document: \(error)")
-            }
-        }
     }
     
     required init?(coder: NSCoder) {
@@ -259,13 +170,14 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         tableView.dataSource = self
         tableView.register(ChatMessageCell.self, forCellReuseIdentifier: "ChatMessageCell")
         
+        tableViewBottomConstraint = tableView.bottomAnchor.constraint(equalTo: inputStackView.topAnchor)
         inputStackViewBottomConstraint = inputStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: inputStackView.topAnchor),
+            tableViewBottomConstraint,
             
             inputStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
             inputStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
@@ -370,6 +282,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             inputStackViewBottomConstraint.constant = 25 - keyboardSize.height
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
+                self.scrollToBottom()
             }
         }
     }
