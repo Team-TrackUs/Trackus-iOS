@@ -9,6 +9,7 @@ import UIKit
 import Firebase
 
 class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
+
     private let defaultProfileImage = UIImage(systemName: "person.crop.circle.fill")
         
     private lazy var profileImageView: ProfilePictureInputView = {
@@ -106,6 +107,10 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         self.tabBarController?.tabBar.isHidden = true
         
         fetchUserProfile()
+        
+        // 화면 터치 인식 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
     }
     
     private func setupNavBar() {
@@ -118,7 +123,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
     }
     
     @objc private func backButtonTapped() {
-        self.navigationController?.popViewController(animated: true)
+        self.navigationController?.popViewController(animated:true)
     }
     
     private func setupViews() {
@@ -187,6 +192,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
             updateUserData(currentUser.uid)
         }
     }
+    
     private func isDefaultImage(_ image: UIImage) -> Bool {
         return image == defaultProfileImage
     }
@@ -194,10 +200,8 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
     private func updateUserData(_ uid: String) {
         UserManager.shared.updateUserData(uid: uid) { success in
             if success {
-                //print("User data updated successfully")
                 self.navigationController?.popViewController(animated: true)
             } else {
-                //print("Failed to update user data")
             }
         }
     }
@@ -232,5 +236,8 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
             }
         }
     }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
 }
-
