@@ -312,6 +312,10 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
         let barButton = UIBarButtonItem(customView: navigationMenuButton)
         courseDetailVC.navigationItem.rightBarButtonItem = barButton
         
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: courseDetailVC, action: #selector(courseDetailVC.backButtonTapped))
+        backButton.tintColor = .black
+        courseDetailVC.navigationItem.leftBarButtonItem = backButton
+        
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)
     }

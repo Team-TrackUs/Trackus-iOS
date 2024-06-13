@@ -67,6 +67,10 @@ class OtherProfileVC: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    @objc func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
+    }
 
     // MARK: - 나의 러닝 정보
     private let runningTitleLabel: UILabel = {

@@ -181,6 +181,10 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         }
     }
     
+    @objc private func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
     
     // MARK: - Helpers
     
@@ -283,6 +287,10 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     }
     
     private func setupNavBar() {
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        self.navigationItem.leftBarButtonItem = backButton
+        
         self.navigationItem.title = "코스 등록"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()

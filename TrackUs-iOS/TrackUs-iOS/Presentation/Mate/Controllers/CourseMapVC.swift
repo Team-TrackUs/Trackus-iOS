@@ -73,6 +73,10 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         drawMapView.setRegion(mapRegion, animated: true)
     }
     
+    @objc private func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
     // MARK: - Helpers
     
     func configureUI() {
@@ -127,6 +131,10 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
     }
     
     private func setupNavBar() {
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        self.navigationItem.leftBarButtonItem = backButton
+        
         self.navigationItem.title = "코스 상세보기"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()

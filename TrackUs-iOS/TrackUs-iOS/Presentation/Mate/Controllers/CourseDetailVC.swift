@@ -348,6 +348,10 @@ class CourseDetailVC: UIViewController {
         self.present(alert, animated: true)
     }
     
+    @objc func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
     // MARK: - Helpers
     
     func configureUI() {
@@ -706,6 +710,10 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let memberUid = members[indexPath.item]
         let otherProfileVC = OtherProfileVC(userId: memberUid)
+        
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: otherProfileVC, action: #selector(otherProfileVC.backButtonTapped))
+        backButton.tintColor = .black
+        otherProfileVC.navigationItem.leftBarButtonItem = backButton
         
         otherProfileVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(otherProfileVC, animated: true)
