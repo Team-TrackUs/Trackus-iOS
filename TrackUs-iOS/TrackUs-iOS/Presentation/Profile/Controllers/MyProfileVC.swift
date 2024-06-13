@@ -8,7 +8,7 @@
 import UIKit
 import Firebase
 
-class MyProfileVC: UIViewController {
+class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     // MARK: - 사용자 프로필
     private let profileImageView: UIImageView = {
@@ -122,15 +122,14 @@ class MyProfileVC: UIViewController {
     }()
 
 
-    // MARK: - 러닝기록
-    private lazy var segmentControl: CustomSegmentedControl = {
-        let segment = CustomSegmentedControl()
-        segment.segments = ["기록", "글 목록"]
+    private lazy var segmentControl: UISegmentedControl = {
+        let segment = UISegmentedControl(items: ["기록", "글 목록"])
         segment.selectedSegmentIndex = 0
         segment.translatesAutoresizingMaskIntoConstraints = false
         segment.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
         return segment
     }()
+
     
     private let recordsView: UIView = {
         let view = UIView()
@@ -145,6 +144,15 @@ class MyProfileVC: UIViewController {
         return view
     }()
     
+    private var posts: [Post] = []
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
+    }()
+    
     // MARK: - 날짜 표시
     private let dateButton: UIButton = {
         let button = UIButton(type: .system)
@@ -155,7 +163,12 @@ class MyProfileVC: UIViewController {
         return button
     }()
 
-    private var currentDate: Date = Date()
+    private var currentDate: Date = Date() {
+        didSet {
+            updateDateButton()
+            fetchPosts()
+        }
+    }
 
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -218,6 +231,43 @@ class MyProfileVC: UIViewController {
         profileImageView.layer.cornerRadius = 35
         setupConstraints()
         fetchUserProfile()
+        setupTableView()
+        fetchPosts()
+    }
+    
+    private func setupTableView() {
+        postsView.addSubview(tableView)
+        tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
+
+        
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: postsView.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: postsView.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: postsView.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: postsView.bottomAnchor)
+        ])
+        
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+    }
+    
+    // MARK: - UITableViewDataSource
+        
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return posts.count
+    }
+        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: MateViewCell.identifier, for: indexPath) as! MateViewCell
+
+        let post = posts[indexPath.row]
+        cell.configure(post: post)
+        return cell
+    }
+        
+    // MARK: - UITableViewDelegate
+        
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 
     private func setupNavBar() {
@@ -232,6 +282,26 @@ class MyProfileVC: UIViewController {
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+    
+    func fetchPosts() {
+        let db = Firestore.firestore()
+        db.collection("posts").getDocuments { [weak self] (querySnapshot, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error getting documents: \(error)")
+            } else {
+                self.posts = querySnapshot?.documents.compactMap { document in
+                    do {
+                        return try document.data(as: Post.self)
+                    } catch {
+                        print("Error decoding post: \(error)")
+                        return nil
+                    }
+                } ?? []
+                self.tableView.reloadData()
+            }
+        }
     }
 
     private func setupViews() {
@@ -368,7 +438,6 @@ class MyProfileVC: UIViewController {
                 
                 self.nameLabel.text = user.name
             } else {
-                // Handle case where user data doesn't exist
                 self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
                 self.nameLabel.text = "No Name"
             }
@@ -382,6 +451,7 @@ class MyProfileVC: UIViewController {
         } else {
             recordsView.isHidden = true
             postsView.isHidden = false
+            tableView.reloadData()
         }
     }
     
@@ -402,17 +472,5 @@ class MyProfileVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchUserProfile()
-    }
-}
-
-
-class CustomSegmentedControl: UISegmentedControl {
-    var segments: [String] = [] {
-        didSet {
-            removeAllSegments()
-            for (index, segment) in segments.enumerated() {
-                insertSegment(withTitle: segment, at: index, animated: false)
-            }
-        }
     }
 }
