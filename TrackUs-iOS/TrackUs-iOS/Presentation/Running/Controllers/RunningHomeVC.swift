@@ -213,46 +213,42 @@ extension RunningHomeVC: MKMapViewDelegate {
                 imageView.image = UIImage(systemName: "flag.circle.fill")
                 imageView.contentMode = .scaleAspectFit
                 imageView.clipsToBounds = true
-                imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-                imageView.layer.cornerRadius = 50 / 2
+                imageView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+                imageView.layer.cornerRadius = 40 / 2
                 imageView.backgroundColor = .white
-                imageView.layer.borderColor = UIColor.mainBlue.cgColor
-                imageView.layer.borderWidth = 2
                 
                 annotationView?.subviews.forEach { $0.removeFromSuperview() }
                 
-                annotationView?.frame.size = CGSize(width: 50, height: 50)
+                annotationView?.frame.size = CGSize(width: 40, height: 40)
                 annotationView?.addSubview(imageView)
                 
                 imageView.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
                     imageView.centerXAnchor.constraint(equalTo: annotationView!.centerXAnchor),
                     imageView.centerYAnchor.constraint(equalTo: annotationView!.centerYAnchor),
-                    imageView.widthAnchor.constraint(equalToConstant: 50),
-                    imageView.heightAnchor.constraint(equalToConstant: 50)
+                    imageView.widthAnchor.constraint(equalToConstant: 40),
+                    imageView.heightAnchor.constraint(equalToConstant: 40)
                 ])
             } else {
                 let imageView = UIImageView()
-                imageView.image = UIImage(named: "trackus_icon")?.withRenderingMode(.alwaysTemplate)
+                imageView.image = UIImage(named: "mapMarker_icon")?.withRenderingMode(.alwaysOriginal)
                 imageView.contentMode = .scaleAspectFit
                 imageView.clipsToBounds = true
-                imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-                imageView.layer.cornerRadius = 50 / 2
+                imageView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+                imageView.layer.cornerRadius = 40 / 2
                 imageView.backgroundColor = .white
-                imageView.layer.borderColor = UIColor.mainBlue.cgColor
-                imageView.layer.borderWidth = 2
                 
                 annotationView?.subviews.forEach { $0.removeFromSuperview() }
                 
-                annotationView?.frame.size = CGSize(width: 50, height: 50)
+                annotationView?.frame.size = CGSize(width: 40, height: 40)
                 annotationView?.addSubview(imageView)
                 
                 imageView.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
                     imageView.centerXAnchor.constraint(equalTo: annotationView!.centerXAnchor),
                     imageView.centerYAnchor.constraint(equalTo: annotationView!.centerYAnchor),
-                    imageView.widthAnchor.constraint(equalToConstant: 50),
-                    imageView.heightAnchor.constraint(equalToConstant: 50)
+                    imageView.widthAnchor.constraint(equalToConstant: 40),
+                    imageView.heightAnchor.constraint(equalToConstant: 40)
                 ])
             }
         }
