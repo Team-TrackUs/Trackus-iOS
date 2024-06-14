@@ -9,6 +9,7 @@ import UIKit
 import CoreMotion
 
 final class CustomTabBarVC: UITabBarController {
+    
     private let pedometer = CMPedometer()
     lazy var mainButton: UIButton = {
         let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
@@ -28,12 +29,14 @@ final class CustomTabBarVC: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(updateChatBadge), name: .newMessageCountDidChange, object: nil)
     }
     
     override func loadView() {
         super.loadView()
         addTabItems()
         setupMainButton()
+        updateChatBadge()
     }
     
     func setupMainButton() {
@@ -95,5 +98,16 @@ final class CustomTabBarVC: UITabBarController {
         if UIApplication.shared.canOpenURL(settingURL) {
             UIApplication.shared.open(settingURL)
         }
+    }
+    
+    // 채팅 뱃지 갯수 업데이트
+    @objc func updateChatBadge() {
+        guard let items = self.tabBar.items else { return }
+        
+        let chatBadgeCount = ChatRoomManager.shared.newMessageCount
+        items[2].badgeValue = chatBadgeCount
+    }
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .newMessageCountDidChange, object: nil)
     }
 }

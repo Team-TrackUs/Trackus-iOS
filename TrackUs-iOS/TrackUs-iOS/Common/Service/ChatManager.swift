@@ -15,7 +15,12 @@ class ChatRoomManager {
     var chatRooms: [Chat] = []
     var userInfo: [String: User] = [:]
     
-    
+    // 신규 메세지 총 갯수
+    var newMessageCount: String? = nil {
+        didSet {
+            NotificationCenter.default.post(name: .newMessageCountDidChange, object: nil)
+        }
+    }
     
     private let ref = Firestore.firestore().collection("chats")
     
@@ -49,7 +54,16 @@ class ChatRoomManager {
                     return date1 > date2
                 }
             ?? []
-            
+            // 신규 메세지 갯수 합산
+            if let count = self?.chatRooms.reduce (0, { $0 + ($1.usersUnreadCountInfo[User.currentUid] ?? 0) }){
+                var newCount: String?
+                switch count{
+                    case 1...999: newCount = String(count)
+                    case 999...: newCount = "999+"
+                    default: newCount = nil
+                }
+                self?.newMessageCount = newCount
+            }
             dispatchGroup.notify(queue: .main) {
                 completionHandler()
             }
@@ -158,4 +172,8 @@ class ChatRoomManager {
                 }
         }
     }
+}
+
+extension Notification.Name {
+    static let newMessageCountDidChange = Notification.Name("newMessageCountDidChange")
 }
