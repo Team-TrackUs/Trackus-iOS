@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		610F3C732C1C34E800DF0744 /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610F3C722C1C34E800DF0744 /* NetworkService.swift */; };
 		6140CCFA2C15686500094202 /* RunningMapCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6140CCF92C15686500094202 /* RunningMapCell.swift */; };
 		615ADADC2C04D45D005CAC75 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 82BE455D2BEFA948007AE54A /* Main.storyboard */; };
 		615ADAE22C07802B005CAC75 /* RefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 615ADAE12C07802B005CAC75 /* RefreshView.swift */; };
@@ -136,6 +137,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		610F3C722C1C34E800DF0744 /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		6140CCF92C15686500094202 /* RunningMapCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningMapCell.swift; sourceTree = "<group>"; };
 		615ADADD2C059D5D005CAC75 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Config.xcconfig; path = ../../../Config.xcconfig; sourceTree = "<group>"; };
 		615ADAE12C07802B005CAC75 /* RefreshView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshView.swift; sourceTree = "<group>"; };
@@ -618,6 +620,7 @@
 				987E2FE42C08548300B1970F /* ChatManager.swift */,
 				61625E392BFE75A500E6D1F3 /* PostService.swift */,
 				967D829A2C0CAD6E00CC1F2A /* RecordService.swift */,
+				610F3C722C1C34E800DF0744 /* NetworkService.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -823,6 +826,7 @@
 				98601D5D2C07219A0056E407 /* ChatRoomCell.swift in Sources */,
 				82C38AD32BFCE445004819C1 /* Double+.swift in Sources */,
 				987E2FE92C08645500B1970F /* Date+.swift in Sources */,
+				610F3C732C1C34E800DF0744 /* NetworkService.swift in Sources */,
 				82707D0F2BF72BD40038E4A7 /* Haptic.swift in Sources */,
 				826922E52C04664000D506C2 /* RunInfoModel.swift in Sources */,
 				61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */,
