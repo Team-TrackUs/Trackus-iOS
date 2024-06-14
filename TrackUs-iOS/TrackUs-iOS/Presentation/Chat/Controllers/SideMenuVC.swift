@@ -149,7 +149,7 @@ class SideMenuVC: UIViewController {
         let profileImageView = UIImageView()
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         // Assume `Member` has a method to load image from URL
-        profileImageView.loadProfileImage(url: member.profileImageUrl)
+        profileImageView.loadProfileImage(url: member.profileImageUrl) {}
         profileImageView.layer.cornerRadius = 20
         profileImageView.clipsToBounds = true
         

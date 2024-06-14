@@ -32,6 +32,7 @@ class ChatMessageCell: UITableViewCell {
         profileImageView.layer.cornerRadius = 20
         profileImageView.clipsToBounds = true
         profileImageView.contentMode = .scaleAspectFill
+        profileImageView.tintColor = .gray3
         profileImageView.isUserInteractionEnabled = true
         return profileImageView
     }()
@@ -225,9 +226,18 @@ class ChatMessageCell: UITableViewCell {
                 //constraints.append(messageBackgroundView.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 8))
                 
                 // 사용자 이미지 있을 경우 이미지 표시 - 없을경우 기본
-                if let url = sendMember.profileImageUrl {
-                    profileImageView.loadImage(url: url)
+                
+//                if let url = sendMember.profileImageUrl {
+//                    ImageCacheManager.shared.loadImage(imageUrl: url) { image in
+//                        self.profileImageView.image = image
+//                    }
+//                    //profileImageView.loadProfileImage(url: url)
+//                }else{
+//                    self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
+//                }
+                profileImageView.loadProfileImage(url: sendMember.profileImageUrl) {
                 }
+                    
                 userNameLabel.text = sendMember.name.isEmpty ? "탈퇴 회원" : sendMember.name
                 
                 // 탭 제스처 추가
