@@ -214,6 +214,7 @@ class CourseDetailVC: UIViewController {
         
         collectionView.delegate = self
         collectionView.dataSource = self
+        backGesture()
         
         fetchPostDetail()
         runningStyleColor()
@@ -818,5 +819,12 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
     func addPolylineToMap() {
         let polyline = MKPolyline(coordinates: courseCoords, count: courseCoords.count)
         preMapView.addOverlay(polyline)
+    }
+}
+
+extension CourseDetailVC: UIGestureRecognizerDelegate {
+    // 스와이프로 이전 화면 갈 수 있도록 추가
+    func backGesture() {
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
     }
 }

@@ -160,15 +160,15 @@ class RunningMapCell: UICollectionViewCell {
         self.contentView.addSubview(runningStyleLabel)
         runningStyleLabel.translatesAutoresizingMaskIntoConstraints = false
         runningStyleLabel.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
-        runningStyleLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
+        runningStyleLabel.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
         runningStyleLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
         runningStyleLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
         
         self.contentView.addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.topAnchor.constraint(equalTo: runningStyleLabel.bottomAnchor, constant: 3).isActive = true
+        titleLabel.topAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.topAnchor).isActive = true
         titleLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
-        
+
         let locationStack = UIStackView(arrangedSubviews: [locationIcon, locationLabel])
         locationStack.axis = .horizontal
         locationStack.spacing = 5
@@ -187,28 +187,28 @@ class RunningMapCell: UICollectionViewCell {
         
         self.contentView.addSubview(locationStack)
         locationStack.translatesAutoresizingMaskIntoConstraints = false
-        locationStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
+        locationStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8).isActive = true
         locationStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
-        
-        self.contentView.addSubview(timeStack)
-        timeStack.translatesAutoresizingMaskIntoConstraints = false
-        timeStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        timeStack.leadingAnchor.constraint(equalTo: locationStack.trailingAnchor, constant: 8).isActive = true
         
         self.contentView.addSubview(distanceStack)
         distanceStack.translatesAutoresizingMaskIntoConstraints = false
-        distanceStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 3).isActive = true
-        distanceStack.leadingAnchor.constraint(equalTo: timeStack.trailingAnchor, constant: 8).isActive = true
-        
-        self.contentView.addSubview(peopleStack)
-        peopleStack.translatesAutoresizingMaskIntoConstraints = false
-        peopleStack.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor).isActive = true
-        peopleStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
+        distanceStack.topAnchor.constraint(equalTo: locationStack.bottomAnchor, constant: 8).isActive = true
+        distanceStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
         
         self.contentView.addSubview(dateLabel)
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         dateLabel.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor).isActive = true
-        dateLabel.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
+        dateLabel.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
+        
+        self.contentView.addSubview(timeStack)
+        timeStack.translatesAutoresizingMaskIntoConstraints = false
+        timeStack.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor).isActive = true
+        timeStack.leadingAnchor.constraint(equalTo: dateLabel.trailingAnchor, constant: 8).isActive = true
+        
+        self.contentView.addSubview(peopleStack)
+        peopleStack.translatesAutoresizingMaskIntoConstraints = false
+        peopleStack.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor).isActive = true
+        peopleStack.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor).isActive = true
     }
     
     public func configure(post: Post) {
@@ -227,17 +227,13 @@ class RunningMapCell: UICollectionViewCell {
         self.timeLabel.text = post.startDate.toString(format: "h:mm a")
         self.distanceLabel.text = "\(String(format: "%.2f", post.distance))km"
         self.peopleLabel.text = "\(post.members.count) / \(post.numberOfPeoples)"
-        self.dateLabel.text = post.startDate.toString(format: "yyyy년 MM월 dd일")
+        self.dateLabel.text = post.startDate.toString(format: "MM월 dd일")
         
         if post.startDate < Date() {
             closingLabel.text = "종료"
         } else if post.members.count >= post.numberOfPeoples {
             closingLabel.text = "마감"
         }
-        
-//        if post.members.count >= post.numberOfPeoples {
-//            closingLabel.text = "마감"
-//        }
         
         if post.members.count >= post.numberOfPeoples || post.startDate < Date() {
             closingLabel.isHidden = false

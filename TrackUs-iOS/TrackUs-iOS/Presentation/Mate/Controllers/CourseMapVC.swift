@@ -61,6 +61,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         
         setupNavBar()
         configureUI()
+        backGesture()
     }
     
     // MARK: - Selectors
@@ -212,4 +213,11 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         drawMapView.addOverlay(polyline)
     }
     
+}
+
+extension CourseMapVC: UIGestureRecognizerDelegate {
+    // 스와이프로 이전 화면 갈 수 있도록 추가
+    func backGesture() {
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+    }
 }

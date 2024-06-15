@@ -96,6 +96,9 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         if let courseRegisterVC = navigationController?.viewControllers.first(where: { $0 is CourseRegisterVC }) as? CourseRegisterVC {
             self.courseRegisterVC = courseRegisterVC
         }
+        
+        // 스와이프로 이전 화면 갈 수 있도록 추가
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
     }
     
     // MARK: - Selectors

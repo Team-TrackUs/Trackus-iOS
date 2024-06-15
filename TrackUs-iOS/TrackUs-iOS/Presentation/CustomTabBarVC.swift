@@ -36,6 +36,7 @@ final class CustomTabBarVC: UITabBarController {
         networkErrorView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         networkErrorView.frame.origin.y = -networkErrorView.frame.height
         networkErrorView.translatesAutoresizingMaskIntoConstraints = false
+        networkErrorView.isHidden = true
         
         // 네트워크 체크 시작
         networkCheck.startCheckingNetwork()
@@ -102,10 +103,12 @@ final class CustomTabBarVC: UITabBarController {
         if let userInfo = notification.userInfo, let isConnected = userInfo["isConnected"] as? Bool {
             DispatchQueue.main.async {
                 if isConnected {
+                    self.networkErrorView.isHidden = true
                     UIView.animate(withDuration: 0.3) {
                         self.networkErrorView.frame.origin.y = -self.networkErrorView.frame.height
                     }
                 } else {
+                    self.networkErrorView.isHidden = false
                     UIView.animate(withDuration: 0.3) {
                         self.networkErrorView.frame.origin.y = 64
                     }

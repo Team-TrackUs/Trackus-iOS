@@ -181,6 +181,7 @@ class ReportPostVC: UIViewController {
         setupPlaceholder()
         hideKeyboardWhenTappedAround()
         updateReportButton()
+        backGesture()
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -451,5 +452,12 @@ extension ReportPostVC: UITextViewDelegate {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
+    }
+}
+
+extension ReportPostVC: UIGestureRecognizerDelegate {
+    // 스와이프로 이전 화면 갈 수 있도록 추가
+    func backGesture() {
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
     }
 }
