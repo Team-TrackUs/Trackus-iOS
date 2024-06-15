@@ -475,7 +475,7 @@ class CourseRegisterVC: UIViewController {
                                 print("DEBUG: Failed to upload post: \(error.localizedDescription)")
                             } else {
                                 DispatchQueue.main.async {
-                                    let courseDetailVC = CourseDetailVC()
+                                    let courseDetailVC = CourseDetailVC(isBack: false)
                                     
                                     courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
                                         
@@ -573,7 +573,7 @@ class CourseRegisterVC: UIViewController {
                             } else {
                                 DispatchQueue.main.async {
                                     
-                                    let courseDetailVC = CourseDetailVC()
+                                    let courseDetailVC = CourseDetailVC(isBack: false)
                                     courseDetailVC.hidesBottomBarWhenPushed = true
                                     
                                     if let xmark = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate) {

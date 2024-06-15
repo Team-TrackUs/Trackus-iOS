@@ -378,7 +378,7 @@ extension RunningHomeVC: UICollectionViewDelegate, UICollectionViewDataSource, U
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let post = posts[indexPath.row]
         
-        let courseDetailVC = CourseDetailVC()
+        let courseDetailVC = CourseDetailVC(isBack: true)
         courseDetailVC.hidesBottomBarWhenPushed = true
         courseDetailVC.postUid = post.uid
         

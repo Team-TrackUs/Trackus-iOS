@@ -155,7 +155,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let post = searchResultsPosts[indexPath.row]
 
-        let courseDetailVC = CourseDetailVC()
+        let courseDetailVC = CourseDetailVC(isBack: true)
         courseDetailVC.hidesBottomBarWhenPushed = true
 
         courseDetailVC.postUid = post.uid

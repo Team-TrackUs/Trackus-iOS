@@ -203,6 +203,8 @@ class CourseDetailVC: UIViewController {
     var mapUIComplete = false
     var viewUIComplete = false
     
+    var isBack: Bool
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -233,6 +235,15 @@ class CourseDetailVC: UIViewController {
         if fetchComplete && mapUIComplete && viewUIComplete {
             self.hideSkeletonViewWithFadeIn()
         }
+    }
+    
+    init(isBack: Bool) {
+        self.isBack = isBack
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - Selectors
@@ -825,6 +836,11 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
 extension CourseDetailVC: UIGestureRecognizerDelegate {
     // 스와이프로 이전 화면 갈 수 있도록 추가
     func backGesture() {
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+        if isBack {
+            self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+            self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        } else {
+            self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        }
     }
 }

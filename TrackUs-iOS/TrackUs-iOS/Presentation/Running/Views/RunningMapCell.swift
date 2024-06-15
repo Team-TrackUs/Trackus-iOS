@@ -52,25 +52,25 @@ class RunningMapCell: UICollectionViewCell {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 16)
+        label.font = UIFont.boldSystemFont(ofSize: 18)
         return label
     }()
     
     private let locationLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.font = UIFont.systemFont(ofSize: 13)
         return label
     }()
     
     private let timeLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.font = UIFont.systemFont(ofSize: 13)
         return label
     }()
     
     private let distanceLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.font = UIFont.systemFont(ofSize: 13)
         return label
     }()
     
@@ -82,7 +82,7 @@ class RunningMapCell: UICollectionViewCell {
     
     private let dateLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = UIFont.boldSystemFont(ofSize: 14)
         return label
     }()
     
@@ -171,7 +171,7 @@ class RunningMapCell: UICollectionViewCell {
 
         let locationStack = UIStackView(arrangedSubviews: [locationIcon, locationLabel])
         locationStack.axis = .horizontal
-        locationStack.spacing = 5
+        locationStack.spacing = 7
         
         let timeStack = UIStackView(arrangedSubviews: [timeIcon, timeLabel])
         timeStack.axis = .horizontal
@@ -188,7 +188,7 @@ class RunningMapCell: UICollectionViewCell {
         self.contentView.addSubview(locationStack)
         locationStack.translatesAutoresizingMaskIntoConstraints = false
         locationStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8).isActive = true
-        locationStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
+        locationStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 11).isActive = true
         
         self.contentView.addSubview(distanceStack)
         distanceStack.translatesAutoresizingMaskIntoConstraints = false

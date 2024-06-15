@@ -167,7 +167,7 @@ class MateViewCell: UITableViewCell {
 
         let locationStack = UIStackView(arrangedSubviews: [locationIcon, locationLabel])
         locationStack.axis = .horizontal
-        locationStack.spacing = 5
+        locationStack.spacing = 7
         
         let timeStack = UIStackView(arrangedSubviews: [timeIcon, timeLabel])
         timeStack.axis = .horizontal
@@ -184,7 +184,7 @@ class MateViewCell: UITableViewCell {
         self.contentView.addSubview(locationStack)
         locationStack.translatesAutoresizingMaskIntoConstraints = false
         locationStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8).isActive = true
-        locationStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 9).isActive = true
+        locationStack.leadingAnchor.constraint(equalTo: postImageView.trailingAnchor, constant: 11).isActive = true
         
         self.contentView.addSubview(distanceStack)
         distanceStack.translatesAutoresizingMaskIntoConstraints = false
