@@ -78,6 +78,10 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }
+    
+    private var userRecordsCollection: CollectionReference {
+        return Firestore.firestore().collection("users").document(Auth.auth().currentUser!.uid).collection("records")
+    }
 
     private lazy var distanceView: UIView = createRunningInfoView()
     private lazy var timeView: UIView = createRunningInfoView()
@@ -102,25 +106,114 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     }
 
     private lazy var distanceLabel: UILabel = {
-        let text = createRunningInfoText(header: "러닝 거리(km)", main: "12.7", sub: "2.8")
+        let text = createRunningInfoText(header: "러닝 거리(km)", main: "12.7", sub: "0.0")
         return createLabel(withText: text)
     }()
 
     private lazy var timeLabel: UILabel = {
-        let text = createRunningInfoText(header: "시간", main: "00:00:00", sub: "2.8")
+        let text = createRunningInfoText(header: "시간", main: "00:00:00", sub: "00:00:00")
         return createLabel(withText: text)
     }()
 
     private lazy var countLabel: UILabel = {
-        let text = createRunningInfoText(header: "러닝 횟수", main: "11", sub: "1")
+        let text = createRunningInfoText(header: "러닝 횟수", main: "11", sub: "0")
         return createLabel(withText: text)
     }()
 
     private lazy var paceLabel: UILabel = {
-        let text = createRunningInfoText(header: "페이스", main: "0'00''", sub: "2'08''")
+        let text = createRunningInfoText(header: "페이스", main: "0'00''", sub: "0'00''")
         return createLabel(withText: text)
     }()
+    
+    
+    private func fetchRunningStats() {
+        userRecordsCollection.getDocuments { [weak self] (querySnapshot, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error fetching running stats: \(error)")
+                return
+            }
+            
+            var totalDistance = 0.0
+            var totalTime = 0.0
+            var totalCount = 0
+            var totalPace = 0.0
+            
+            var latestDistance = 0.0
+            var latestTime = 0.0
+            var latestCount = 0
+            var latestPace = 0.0
+            
+            var previousDistance = 0.0
+            var previousTime = 0.0
+            var previousCount = 0
+            var previousPace = 0.0
+            
+            if let snapshot = querySnapshot {
+                var latestRecord: QueryDocumentSnapshot?
+                snapshot.documents.forEach { document in
+                    let data = document.data()
+                    let distance = data["distance"] as? Double ?? 0.0
+                    let time = data["seconds"] as? Double ?? 0.0
+                    let pace = data["pace"] as? Double ?? 0.0
+                    
+                    totalDistance += distance
+                    totalTime += time
+                    totalCount += 1
+                    totalPace += pace
+                    
+                    if latestRecord == nil {
+                        latestRecord = document
+                        latestDistance = distance
+                        latestTime = time
+                        latestCount = 1
+                        latestPace = pace
+                    } else {
+                        let documentTimestamp = document["timestamp"] as? Timestamp ?? Timestamp()
+                        let latestTimestamp = latestRecord?["timestamp"] as? Timestamp ?? Timestamp()
+                        if documentTimestamp.seconds > latestTimestamp.seconds {
+                            latestRecord = document
+                            previousDistance = latestDistance
+                            previousTime = latestTime
+                            previousCount = latestCount
+                            previousPace = latestPace
+                            
+                            latestDistance = distance
+                            latestTime = time
+                            latestCount = 1
+                            latestPace = pace
+                        } else {
+                            previousDistance = distance
+                            previousTime = time
+                            previousCount = 1
+                            previousPace = pace
+                        }
+                    }
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.distanceLabel.attributedText = self.createRunningInfoText(header: "러닝 거리(km)", main: String(format: "%.1f", totalDistance), sub: String(format: "%.1f", latestDistance - previousDistance))
+                self.timeLabel.attributedText = self.createRunningInfoText(header: "시간", main: self.formatTime(totalTime), sub: self.formatTime(latestTime - previousTime))
+                self.countLabel.attributedText = self.createRunningInfoText(header: "러닝 횟수", main: "\(totalCount)", sub: "1")
+                self.paceLabel.attributedText = self.createRunningInfoText(header: "페이스", main: self.formatPace(totalPace), sub: self.formatPace(latestPace - previousPace))
+            }
+        }
+    }
 
+    private func formatTime(_ seconds: Double) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .positional
+        formatter.zeroFormattingBehavior = .pad
+        return formatter.string(from: seconds) ?? "00:00:00"
+    }
+
+    private func formatPace(_ secondsPerKm: Double) -> String {
+        let minutes = Int(secondsPerKm / 60)
+        let seconds = Int(secondsPerKm.truncatingRemainder(dividingBy: 60))
+        return String(format: "%d'%02d''", minutes, seconds)
+    }
 
     private lazy var segmentControl: UISegmentedControl = {
         let segment = UISegmentedControl(items: ["기록", "글 목록"])
@@ -233,6 +326,7 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         fetchUserProfile()
         setupTableView()
         fetchPosts()
+        fetchRunningStats()
     }
     
     private func setupTableView() {
@@ -441,6 +535,7 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     // MARK: - 프로필편집뷰로 이동
     @objc private func editProfileButtonTapped() {
         let myProfileEditVC = MyProfileEditVC()
+        myProfileEditVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(myProfileEditVC, animated: true)
     }
     

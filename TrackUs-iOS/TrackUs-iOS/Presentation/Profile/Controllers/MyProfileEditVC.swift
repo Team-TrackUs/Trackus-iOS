@@ -9,9 +9,9 @@ import UIKit
 import Firebase
 
 class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
-
+    
     private let defaultProfileImage = UIImage(systemName: "person.crop.circle.fill")
-        
+    
     private lazy var profileImageView: ProfilePictureInputView = {
         let view = ProfilePictureInputView()
         view.delegate = self
@@ -103,9 +103,6 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         setupViews()
         view.backgroundColor = .white
         
-        hidesBottomBarWhenPushed = true
-        self.tabBarController?.tabBar.isHidden = true
-        
         fetchUserProfile()
         
         // 화면 터치 인식 추가
@@ -165,11 +162,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
     }
     
     func didChooseImage(_ image: UIImage?) {
-        if let selectedImage = image {
-            profileImageView.imageView.image = selectedImage
-        } else {
-            profileImageView.imageView.image = defaultProfileImage
-        }
+        profileImageView.imageView.image = image ?? defaultProfileImage
     }
     
     @objc private func saveButtonTapped() {
@@ -183,27 +176,27 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         let isProfilePublic = toggleSwitch.isOn
         UserManager.shared.user.isProfilePublic = isProfilePublic
         
-        if let profileImage = profileImageView.imageView.image {
+        // 이미지가 변경되었는지 확인
+        if let profileImage = profileImageView.imageView.image, !isDefaultImage(profileImage) {
             let imageUrl = "profileImages/\(currentUser.uid)"
             ImageCacheManager.shared.setImage(image: profileImage, url: imageUrl)
             UserManager.shared.user.profileImageUrl = imageUrl
-            updateUserData(currentUser.uid)
         } else {
-            updateUserData(currentUser.uid)
+            UserManager.shared.user.profileImageUrl = nil // 기본 이미지 사용을 의미하는 값 설정
+        }
+        
+        // 사용자 데이터 업데이트
+        UserManager.shared.updateUserData(uid: currentUser.uid) { success in
+            if success {
+                self.navigationController?.popViewController(animated: true)
+            } else {
+                // 업데이트 실패 처리
+            }
         }
     }
     
     private func isDefaultImage(_ image: UIImage) -> Bool {
         return image == defaultProfileImage
-    }
-    
-    private func updateUserData(_ uid: String) {
-        UserManager.shared.updateUserData(uid: uid) { success in
-            if success {
-                self.navigationController?.popViewController(animated: true)
-            } else {
-            }
-        }
     }
     
     private func fetchUserProfile() {

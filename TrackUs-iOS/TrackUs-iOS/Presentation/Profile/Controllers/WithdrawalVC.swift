@@ -131,14 +131,12 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         // 화면 터치 인식 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
-
-        self.tabBarController?.tabBar.isHidden = true
     }
 
     private func setupNavBar() {
         self.navigationItem.title = "회원탈퇴"
         
-    let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+    let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
         backButton.tintColor = .black
         self.navigationItem.leftBarButtonItem = backButton
         

@@ -480,7 +480,9 @@ class OtherProfileVC: UIViewController {
     
     private func reportUser() {
         let reportUserVC = ReportUserVC(userId: self.userId)
+        reportUserVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(reportUserVC, animated: true)
+        
     }
 }
 

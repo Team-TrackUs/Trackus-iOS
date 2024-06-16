@@ -144,8 +144,6 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         fetchUserProfile(userId: userId)
         setupPicker()
         setupTextView()
-        hidesBottomBarWhenPushed = true
-        self.tabBarController?.tabBar.isHidden = true
         
         // 화면 터치 인식 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
@@ -156,7 +154,7 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
     private func setupNavBar() {
         self.navigationItem.title = "신고하기"
         
-        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
         backButton.tintColor = .black
         self.navigationItem.leftBarButtonItem = backButton
         

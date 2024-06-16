@@ -39,7 +39,7 @@ class SettingVC: UIViewController {
     private func setupNavBar() {
         self.navigationItem.title = "설정"
         
-    let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+    let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
         backButton.tintColor = .black
         self.navigationItem.leftBarButtonItem = backButton
         
@@ -210,6 +210,7 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
             } else {
                 let withdrawalVC = WithdrawalVC()
                 navigationController?.pushViewController(withdrawalVC, animated: true)
+                withdrawalVC.hidesBottomBarWhenPushed = true
             }
         default:
             break
