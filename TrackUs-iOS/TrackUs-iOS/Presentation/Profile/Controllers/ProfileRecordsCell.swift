@@ -15,7 +15,7 @@ class ProfileRecordsCell: UITableViewCell {
     
     private let postImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.widthAnchor.constraint(equalToConstant: 87).isActive = true
