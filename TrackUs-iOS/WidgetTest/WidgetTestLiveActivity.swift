@@ -14,46 +14,67 @@ struct WidgetTestLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: WidgetTestAttributes.self) { context in
             // Lock screen/banner UI goes here
-            VStack {
-                HStack {
-                    Spacer()
-                    VStack {
-                        Text(context.state.isActive ? "러닝중 🔥" : "휴식중 😓")
-                    }
-                                      
-                    HStack(spacing: 17) {
+            ZStack(alignment: .topTrailing) {
+                Image(.trackusIcon)
+                    .resizable()
+                    .frame(width: 20, height: 20, alignment: .topTrailing)
+                    .padding(10)
+                    
+                VStack {
+                    HStack {
+                        Spacer()
                         VStack(alignment: .leading) {
+                            Spacer()
                             Text(context.state.kilometer)
                                 .font(.system(size: 32, weight: .bold))
+                                .foregroundStyle(.black)
                             Text("킬로미터")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.gray1)
                         }
-                       
-                        VStack(alignment: .center) {
+                        Spacer()
+                        VStack(alignment: .leading) {
                             Spacer()
                             Text(context.state.time)
-                                .font(.system(size: 24, weight: .bold))
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundStyle(.black)
                             Text("시간")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.gray1)
                         }
-                      
                         
-                        VStack(alignment: .center) {
+                        Spacer()
+                        VStack(alignment: .leading) {
                             Spacer()
                             Text(context.state.pace)
-                                .font(.system(size: 24, weight: .bold))
-                            Text("페이스")
-                                
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundStyle(.black)
+                            Text("평균 페이스")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.gray1)
                         }
-                       
+                        
+                        Spacer()
+                        VStack(alignment: .leading) {
+                            Spacer()
+                            Text(context.state.cadance)
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundStyle(.black)
+                            Text("케이던스")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.gray1)
+                        }
+                        Spacer()
                     }
-                    Spacer()
+                    .padding(.vertical, 20)
                 }
-                .padding(.vertical, 15)
+                .contentTransition(.identity)
+                .activitySystemActionForegroundColor(Color.white)
+                .foregroundStyle(.white)
+                .activityBackgroundTint(Color.white.opacity(0.3))
             }
-            .contentTransition(.identity)
-            .foregroundStyle(.white)
-            .activityBackgroundTint(Color.black.opacity(0.5))
-            .activitySystemActionForegroundColor(Color.white)
-
+            
+            
         } dynamicIsland: { context in
             DynamicIsland {
                 // Expanded UI goes here.  Compose the expanded UI through
@@ -89,12 +110,12 @@ extension WidgetTestAttributes {
 
 extension WidgetTestAttributes.ContentState {
     fileprivate static var smiley: WidgetTestAttributes.ContentState {
-        WidgetTestAttributes.ContentState(time: "00:00", pace: "", kilometer: "", isActive: false)
-     }
-     
-     fileprivate static var starEyes: WidgetTestAttributes.ContentState {
-         WidgetTestAttributes.ContentState(time: "00:00", pace: "", kilometer: "", isActive: false)
-     }
+        WidgetTestAttributes.ContentState(time: "00:00", pace: "", kilometer: "", cadance: "")
+    }
+    
+    fileprivate static var starEyes: WidgetTestAttributes.ContentState {
+        WidgetTestAttributes.ContentState(time: "00:00", pace: "", kilometer: "", cadance: "")
+    }
 }
 
 //#Preview("Notification", as: .content, using: WidgetTestAttributes.preview) {

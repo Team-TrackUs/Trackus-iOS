@@ -425,7 +425,7 @@ final class RunTrackingVC: UIViewController {
         Task {
             await activity.update(using: WidgetTestAttributes.ContentState(time: runModel.seconds.toMMSSTimeFormat,
                                                                            pace: runModel.pace.asString(style: .pace), kilometer: String(format: "%.2f", runModel.distance / 1000.0),
-                                                                           isActive: isActive))
+                                                                           cadance: "\(runModel.cadance)"))
         }
     }
     
@@ -497,7 +497,7 @@ final class RunTrackingVC: UIViewController {
     func displayWidget() {
         if ActivityAuthorizationInfo().areActivitiesEnabled {
             let attributes = WidgetTestAttributes(name: "test")
-            let initialState = WidgetTestAttributes.ContentState(time: "00:00", pace: "-'--''", kilometer: "0.00", isActive: false)
+            let initialState = WidgetTestAttributes.ContentState(time: "00:00", pace: "-'--''", kilometer: "0.00", cadance: "\(runModel.cadance)")
             
             do {
                 WidgetManager.shared.activity = try Activity<WidgetTestAttributes>.request(
@@ -669,7 +669,7 @@ extension RunTrackingVC: MKMapViewDelegate {
             return MKOverlayRenderer()
         }
         let renderer = MKPolylineRenderer(polyline: polyLine)
-        renderer.strokeColor = .mainBlue
+        renderer.strokeColor = .green
         renderer.lineWidth = 5.0
         renderer.alpha = 1.0
         return renderer
