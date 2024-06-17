@@ -8,10 +8,12 @@
 import UIKit
 import Firebase
 
-class OtherProfileVC: UIViewController {
+class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var userId: String
     private var blockingUserList = [String]() // 내가 상대방
     private var blockingMeList = [String]() // 상대방이 나
+    
+    private var user: User?
 
     init(userId: String) {
         self.userId = userId
@@ -72,7 +74,7 @@ class OtherProfileVC: UIViewController {
     // MARK: - 나의 러닝 정보
     private let runningTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "나의 러닝"
+        label.text = "너의 러닝"
         label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -108,6 +110,9 @@ class OtherProfileVC: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }
+    private var userRecordsCollection: CollectionReference {
+        return Firestore.firestore().collection("users").document(Auth.auth().currentUser!.uid).collection("records")
+    }
 
     private lazy var distanceView: UIView = createRunningInfoView()
     private lazy var timeView: UIView = createRunningInfoView()
@@ -132,38 +137,134 @@ class OtherProfileVC: UIViewController {
     }
 
     private lazy var distanceLabel: UILabel = {
-        let text = createRunningInfoText(header: "러닝 거리(km)", main: "12.7", sub: "2.8")
+        let text = createRunningInfoText(header: "러닝 거리(km)", main: "12.7", sub: "0.0")
         return createLabel(withText: text)
     }()
 
     private lazy var timeLabel: UILabel = {
-        let text = createRunningInfoText(header: "시간", main: "00:00:00", sub: "2.8")
+        let text = createRunningInfoText(header: "시간", main: "00:00:00", sub: "00:00:00")
         return createLabel(withText: text)
     }()
 
     private lazy var countLabel: UILabel = {
-        let text = createRunningInfoText(header: "러닝 횟수", main: "11", sub: "1")
+        let text = createRunningInfoText(header: "러닝 횟수", main: "11", sub: "0")
         return createLabel(withText: text)
     }()
 
     private lazy var paceLabel: UILabel = {
-        let text = createRunningInfoText(header: "페이스", main: "0'00''", sub: "2'08''")
+        let text = createRunningInfoText(header: "페이스", main: "0'00''", sub: "0'00''")
         return createLabel(withText: text)
     }()
+    
+    private func fetchRunningStats(userId: String) {
+        let userRecordsCollection = Firestore.firestore()
+            .collection("users")
+            .document(userId)
+            .collection("records")
+
+        userRecordsCollection.getDocuments { [weak self] (querySnapshot, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error fetching running stats: \(error)")
+                return
+            }
+
+            var totalDistance = 0.0
+            var totalTime = 0.0
+            var totalCount = 0
+            var totalPace = 0.0
+
+            var latestDistance = 0.0
+            var latestTime = 0.0
+            var latestCount = 0
+            var latestPace = 0.0
+
+            var previousDistance = 0.0
+            var previousTime = 0.0
+            var previousCount = 0
+            var previousPace = 0.0
+
+            if let snapshot = querySnapshot {
+                var latestRecord: QueryDocumentSnapshot?
+                snapshot.documents.forEach { document in
+                    let data = document.data()
+                    let distance = data["distance"] as? Double ?? 0.0
+                    let time = data["seconds"] as? Double ?? 0.0
+                    let pace = data["pace"] as? Double ?? 0.0
+
+                    totalDistance += distance
+                    totalTime += time
+                    totalCount += 1
+                    totalPace += pace
+
+                    if latestRecord == nil {
+                        latestRecord = document
+                        latestDistance = distance
+                        latestTime = time
+                        latestCount = 1
+                        latestPace = pace
+                    } else {
+                        let documentTimestamp = document["timestamp"] as? Timestamp ?? Timestamp()
+                        let latestTimestamp = latestRecord?["timestamp"] as? Timestamp ?? Timestamp()
+                        if documentTimestamp.seconds > latestTimestamp.seconds {
+                            latestRecord = document
+                            previousDistance = latestDistance
+                            previousTime = latestTime
+                            previousCount = latestCount
+                            previousPace = latestPace
+
+                            latestDistance = distance
+                            latestTime = time
+                            latestCount = 1
+                            latestPace = pace
+                        } else {
+                            previousDistance = distance
+                            previousTime = time
+                            previousCount = 1
+                            previousPace = pace
+                        }
+                    }
+                }
+            }
+
+            DispatchQueue.main.async {
+                self.distanceLabel.attributedText = self.createRunningInfoText(header: "러닝 거리(km)", main: String(format: "%.1f", totalDistance), sub: String(format: "%.1f", latestDistance - previousDistance))
+                self.timeLabel.attributedText = self.createRunningInfoText(header: "시간", main: self.formatTime(totalTime), sub: self.formatTime(latestTime - previousTime))
+                self.countLabel.attributedText = self.createRunningInfoText(header: "러닝 횟수", main: "\(totalCount)", sub: "1")
+                self.paceLabel.attributedText = self.createRunningInfoText(header: "페이스", main: self.formatPace(totalPace), sub: self.formatPace(latestPace - previousPace))
+            }
+        }
+    }
+
+
+    private func formatTime(_ seconds: Double) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .positional
+        formatter.zeroFormattingBehavior = .pad
+        return formatter.string(from: seconds) ?? "00:00:00"
+    }
+
+    private func formatPace(_ secondsPerKm: Double) -> String {
+        let minutes = Int(secondsPerKm / 60)
+        let seconds = Int(secondsPerKm.truncatingRemainder(dividingBy: 60))
+        return String(format: "%d'%02d''", minutes, seconds)
+    }
 
     private let recordsView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
-    private let postsView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.isHidden = true
-        return view
+    private let recordService = RecordService.shared
+    private var listener: ListenerRegistration?
+    private var records: [Running] = []
+    private lazy var recordsTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
     }()
-    
+
     // MARK: - 날짜 표시
     private let dateButton: UIButton = {
         let button = UIButton(type: .system)
@@ -174,7 +275,12 @@ class OtherProfileVC: UIViewController {
         return button
     }()
 
-    private var currentDate: Date = Date()
+    private var currentDate: Date = Date() {
+        didSet {
+            updateDateButton()
+            fetchRecords()
+        }
+    }
 
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -234,10 +340,91 @@ class OtherProfileVC: UIViewController {
         currentDate = Date()
         updateDateButton()
         profileImageView.layer.cornerRadius = 35
+        setupTableView()
         setupConstraints()
         fetchUserProfile(userId: userId)
+        fetchRunningStats(userId: userId)
         checkIfUserIsBlocked()
+        fetchRecords()
     }
+    
+    private func setupTableView() {
+        recordsView.addSubview(recordsTableView)
+        recordsTableView.delegate = self
+        recordsTableView.dataSource = self
+        recordsTableView.register(ProfileRecordsCell.self, forCellReuseIdentifier: ProfileRecordsCell.identifier)
+
+        
+        NSLayoutConstraint.activate([
+            recordsTableView.topAnchor.constraint(equalTo: recordsView.topAnchor),
+            recordsTableView.leadingAnchor.constraint(equalTo: recordsView.leadingAnchor),
+            recordsTableView.trailingAnchor.constraint(equalTo: recordsView.trailingAnchor),
+            recordsTableView.bottomAnchor.constraint(equalTo: recordsView.bottomAnchor)
+        ])
+        
+        recordsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+    }
+    
+    // MARK: - UITableViewDataSource
+        
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if tableView == recordsTableView {
+            return records.count
+        }
+        return 0
+    }
+        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if tableView == recordsTableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: ProfileRecordsCell.identifier, for: indexPath) as! ProfileRecordsCell
+            
+            let record = records[indexPath.row]
+            cell.configure(running: record)
+            return cell
+        }
+        return UITableViewCell()
+    }
+
+
+        
+    // MARK: - UITableViewDelegate
+        
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    func fetchRecords() {
+        let db = Firestore.firestore()
+        let startTimeField = "startTime"
+        
+        let startOfDay = Calendar.current.startOfDay(for: currentDate)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        db.collection("users").document(userId).collection("records")
+            .whereField(startTimeField, isGreaterThanOrEqualTo: Timestamp(date: startOfDay))
+            .whereField(startTimeField, isLessThan: Timestamp(date: endOfDay))
+            .getDocuments { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                if let error = error {
+                    print("Error getting documents: \(error)")
+                } else {
+                    self.records = querySnapshot?.documents.compactMap { document in
+                        do {
+                            let record = try document.data(as: Running.self)
+                            return record
+                        } catch {
+                            print("Error decoding record: \(error)")
+                            return nil
+                        }
+                    } ?? []
+                    
+                    DispatchQueue.main.async {
+                        self.recordsTableView.reloadData()
+                    }
+                }
+            }
+    }
+
 
     private func setupNavBar() {
         self.navigationItem.title = "프로필보기"
@@ -304,9 +491,9 @@ class OtherProfileVC: UIViewController {
         runningStatsView.addArrangedSubview(horizontalStackView2)
         
         runningStatsContainerView.addSubview(runningStatsView)
-
+        
         view.addSubview(recordsView)
-        view.addSubview(postsView)
+        recordsView.addSubview(recordsTableView)
         
         NSLayoutConstraint.activate([
             profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
@@ -349,10 +536,6 @@ class OtherProfileVC: UIViewController {
             recordsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             recordsView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            postsView.topAnchor.constraint(equalTo: dateButton.bottomAnchor, constant: 20),
-            postsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            postsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            postsView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     // MARK: - 설정뷰로 이동
@@ -403,6 +586,7 @@ class OtherProfileVC: UIViewController {
             
             if let userName = data?["name"] as? String {
                 self.nameLabel.text = userName
+                self.runningTitleLabel.text = "\(userName)님의 러닝"
             }
         }
     }
