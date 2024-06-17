@@ -457,7 +457,7 @@ final class RunTrackingVC: UIViewController {
         
         guard coordinates.count >= 2, let polyline = polyline, let annotation2 = annotation2 else { return }
         mapView.addOverlay(polyline)
-        mapView.addAnnotations([annotation, annotation2])
+        mapView.addAnnotations([annotation, annotation2])       
     }
     
     func removePath() {
@@ -669,8 +669,8 @@ extension RunTrackingVC: MKMapViewDelegate {
             return MKOverlayRenderer()
         }
         let renderer = MKPolylineRenderer(polyline: polyLine)
-        renderer.strokeColor = .green
-        renderer.lineWidth = 4.0
+        renderer.strokeColor = .mainBlue
+        renderer.lineWidth = 5.0
         renderer.alpha = 1.0
         return renderer
     }
