@@ -121,17 +121,14 @@ final class PhotoEditVC: UIViewController {
         view.backgroundColor = .systemBackground
         navigationItem.title = "사진 편집"
         
-        let completButton = UIButton(type: .system)
-        completButton.setImage(UIImage(systemName: "app.badge.checkmark.fill"), for: .normal)
-        completButton.tintColor = .black
-        completButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
+        navigationItem.hidesBackButton = true
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        navigationItem.leftBarButtonItem = backButton
         
-        let menuBarItem = UIBarButtonItem(customView: completButton)
-        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
-        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 25).isActive = true
-        
-        navigationItem.rightBarButtonItem = menuBarItem
+        let completeButton = UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(completeButtonTapped))
+        completeButton.tintColor = .black
+        navigationItem.rightBarButtonItem = completeButton
     }
     
     private func updateImage() {
@@ -195,7 +192,10 @@ final class PhotoEditVC: UIViewController {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(imageSaved(image:didFinishSavingWithError:contextInfo:)), nil)
         }
     }
-
+    
+    @objc func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
+    }
     
     @objc func imageSaved(image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if error != nil {
@@ -210,12 +210,13 @@ final class PhotoEditVC: UIViewController {
     }
     
     @objc private func completeButtonTapped() {
-        let alert = UIAlertController(title: "열심히 만들었으니 공유하자!", message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "꾸며진 러닝 사진을 공유해 보세요!", message: nil, preferredStyle: .actionSheet)
         
         let share = UIAlertAction(title: "공유하기", style: .default, handler: shareButtonTapped)
         let photo = UIAlertAction(title: "갤러리 저장", style: .default, handler: checkAddPhotoPermission)
+        let close = UIAlertAction(title: "취소", style: .cancel)
         
-        [share, photo].forEach { alert.addAction($0) }
+        [share, photo, close].forEach { alert.addAction($0) }
         
         present(alert, animated: true)
     }

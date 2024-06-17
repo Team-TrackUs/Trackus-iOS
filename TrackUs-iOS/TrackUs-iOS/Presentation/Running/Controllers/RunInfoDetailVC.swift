@@ -51,7 +51,12 @@ class RunInfoDetailVC: UIViewController {
     // MARK: - Helpers
     func setupNavBar() {
         view.backgroundColor = .systemBackground
+        navigationController?.interactivePopGestureRecognizer?.delegate = self
         self.navigationItem.title = "상세 기록"
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = backButton
     }
     func setTableView() {
         tableView.dataSource = self
@@ -92,6 +97,10 @@ class RunInfoDetailVC: UIViewController {
         
         tableView.reloadData()
     }
+    
+    @objc func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
+    }
 }
 
 extension RunInfoDetailVC: UITableViewDataSource {
@@ -107,4 +116,10 @@ extension RunInfoDetailVC: UITableViewDataSource {
     }
     
     
+}
+
+extension RunInfoDetailVC: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
 }

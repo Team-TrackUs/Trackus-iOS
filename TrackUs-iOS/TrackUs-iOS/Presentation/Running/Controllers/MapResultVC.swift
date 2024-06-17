@@ -41,11 +41,20 @@ class MapResultVC: UIViewController {
     
     func setupNavBar() {
         self.navigationItem.title = "지도 보기"
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        navigationItem.hidesBackButton = true
+        navigationItem.leftBarButtonItem = backButton
+        
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+    
+    @objc func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
     }
     /*
     // MARK: - Navigation
