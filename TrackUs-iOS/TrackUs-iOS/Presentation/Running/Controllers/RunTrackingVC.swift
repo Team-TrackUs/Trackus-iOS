@@ -381,6 +381,7 @@ final class RunTrackingVC: UIViewController {
     
     func goToResultVC() {
         runModel.setEndTime()
+        disableBackgroundTracking()
         HapticManager.shared.hapticImpact(style: .medium)
         let resultVC = RunningResultVC()
         resultVC.runModel = runModel
@@ -634,10 +635,13 @@ extension RunTrackingVC: UserLocationDelegate {
         
     }
     
-    
-    func stopTracking() {
+    func disableBackgroundTracking() {
         locationService.allowBackgroundUpdates = false
         locationService.userLocationDelegate = nil
+    }
+    
+    func stopTracking() {
+        disableBackgroundTracking()
         pedometer.stopUpdates()
         altimeter.stopRelativeAltitudeUpdates()
         tempData["steps"] = runModel.steps
@@ -645,7 +649,6 @@ extension RunTrackingVC: UserLocationDelegate {
     }
     
     func updateUI() {
-        print("UpdateUI!!")
         timeLabel.text = runModel.seconds.toMMSSTimeFormat
         kilometerLabel.text = runModel.distance.asString(style: .km)
         paceLabel.text = runModel.pace.asString(style: .pace)

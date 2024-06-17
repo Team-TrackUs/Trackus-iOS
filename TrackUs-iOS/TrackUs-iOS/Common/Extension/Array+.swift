@@ -42,6 +42,7 @@ extension Array where Element == CLLocationCoordinate2D {
     }
     
     func makeRegionToFit() -> MKCoordinateRegion? {
+        /// 위도, 경도의 4개지점 구하기
         let maxLatitude = self.map {Double($0.latitude)}.max()
         let minLatitude = self.map {Double($0.latitude)}.min()
         let maxLongitude = self.map {Double($0.longitude)}.max()
@@ -61,10 +62,12 @@ extension Array where Element == CLLocationCoordinate2D {
             return nil
         }
         
+        ///  직선거리 계산에 사용될 더미데이터
         let commLongitude = center.longitude
         let commLatitude = center.latitude
         
         let latitudeDistance = CLLocationCoordinate2D(latitude: CLLocationDegrees(floatLiteral: minLatitude), longitude: commLongitude).distance(to: CLLocationCoordinate2D(latitude: maxLatitude, longitude: commLongitude))
+        
         let longitudeDistance = CLLocationCoordinate2D(latitude: CLLocationDegrees(floatLiteral: commLatitude), longitude: minLongitude).distance(to: CLLocationCoordinate2D(latitude: commLatitude, longitude: maxLongitude))
         
         let maxValue = Swift.max(latitudeDistance, longitudeDistance)
