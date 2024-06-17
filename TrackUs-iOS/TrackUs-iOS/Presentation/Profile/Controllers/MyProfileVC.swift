@@ -9,6 +9,7 @@ import UIKit
 import Firebase
 
 class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
+    
 
     // MARK: - 사용자 프로필
     private let profileImageView: UIImageView = {
@@ -367,6 +368,8 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         recordsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
     }
     
+    
+    
     // MARK: - UITableViewDataSource
         
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -400,8 +403,30 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     // MARK: - UITableViewDelegate
         
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let post = posts[indexPath.row]
+        
+        let courseDetailVC = CourseDetailVC()
+        
+        courseDetailVC.hidesBottomBarWhenPushed = true
+        courseDetailVC.postUid = post.uid
+        
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        courseDetailVC.navigationItem.leftBarButtonItem = backButton
+        
+        let navigationMenuButton = UIButton(type: .custom)
+        navigationMenuButton.setImage(UIImage(named: "menu_icon"), for: .normal)
+        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+        courseDetailVC.navigationItem.rightBarButtonItem = barButton
+        
+        navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    @objc private func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
+    }
+
 
     private func setupNavBar() {
         self.navigationItem.title = "마이페이지"
