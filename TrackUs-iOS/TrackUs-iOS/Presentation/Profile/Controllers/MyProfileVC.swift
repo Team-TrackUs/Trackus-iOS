@@ -229,6 +229,16 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    private let recordService = RecordService.shared
+    private var listener: ListenerRegistration?
+    private var records: [Running] = []
+    private lazy var recordsTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
+    }()
     
     private let postsView: UIView = {
         let view = UIView()
@@ -238,7 +248,7 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     }()
     
     private var posts: [Post] = []
-    private lazy var tableView: UITableView = {
+    private lazy var postsTableView: UITableView = {
         let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
@@ -260,6 +270,7 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         didSet {
             updateDateButton()
             fetchPosts()
+            fetchRecords()
         }
     }
 
@@ -327,36 +338,64 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         setupTableView()
         fetchPosts()
         fetchRunningStats()
+        fetchRecords()
     }
     
     private func setupTableView() {
-        postsView.addSubview(tableView)
-        tableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
+        postsView.addSubview(postsTableView)
+        recordsView.addSubview(recordsTableView)
+        postsTableView.register(MateViewCell.self, forCellReuseIdentifier: MateViewCell.identifier)
+        recordsTableView.register(ProfileRecordsCell.self, forCellReuseIdentifier: ProfileRecordsCell.identifier)
 
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: postsView.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: postsView.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: postsView.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: postsView.bottomAnchor)
+            postsTableView.topAnchor.constraint(equalTo: postsView.topAnchor),
+            postsTableView.leadingAnchor.constraint(equalTo: postsView.leadingAnchor),
+            postsTableView.trailingAnchor.constraint(equalTo: postsView.trailingAnchor),
+            postsTableView.bottomAnchor.constraint(equalTo: postsView.bottomAnchor)
         ])
         
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        postsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        
+        NSLayoutConstraint.activate([
+            recordsTableView.topAnchor.constraint(equalTo: recordsView.topAnchor),
+            recordsTableView.leadingAnchor.constraint(equalTo: recordsView.leadingAnchor),
+            recordsTableView.trailingAnchor.constraint(equalTo: recordsView.trailingAnchor),
+            recordsTableView.bottomAnchor.constraint(equalTo: recordsView.bottomAnchor)
+        ])
+        
+        recordsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
     }
     
     // MARK: - UITableViewDataSource
         
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return posts.count
+        if tableView == postsTableView {
+            return posts.count
+        } else if tableView == recordsTableView {
+            return records.count
+        }
+        return 0
     }
         
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: MateViewCell.identifier, for: indexPath) as! MateViewCell
-
-        let post = posts[indexPath.row]
-        cell.configure(post: post)
-        return cell
+        if tableView == postsTableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: MateViewCell.identifier, for: indexPath) as! MateViewCell
+            
+            let post = posts[indexPath.row]
+            cell.configure(post: post)
+            return cell
+        } else if tableView == recordsTableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: ProfileRecordsCell.identifier, for: indexPath) as! ProfileRecordsCell
+            
+            let record = records[indexPath.row]
+            cell.configure(running: record)
+            return cell
+        }
+        return UITableViewCell()
     }
+
+
         
     // MARK: - UITableViewDelegate
         
@@ -380,13 +419,14 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     
     func fetchPosts() {
         let db = Firestore.firestore()
+        let startDateField = "startDate"
         
         let startOfDay = Calendar.current.startOfDay(for: currentDate)
         let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
         
         db.collection("posts")
-            .whereField("startDate", isGreaterThanOrEqualTo: Timestamp(date: startOfDay))
-            .whereField("startDate", isLessThan: Timestamp(date: endOfDay))
+            .whereField(startDateField, isGreaterThanOrEqualTo: Timestamp(date: startOfDay))
+            .whereField(startDateField, isLessThan: Timestamp(date: endOfDay))
             .getDocuments { [weak self] (querySnapshot, error) in
                 guard let self = self else { return }
                 if let error = error {
@@ -404,10 +444,42 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
                     
                     self.posts = self.posts.filter { self.shouldIncludePost($0) }
 
-                    self.tableView.reloadData()
+                    self.postsTableView.reloadData()
                 }
             }
     }
+    func fetchRecords() {
+        let db = Firestore.firestore()
+        let startTimeField = "startTime"
+        
+        let startOfDay = Calendar.current.startOfDay(for: currentDate)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        db.collection("users").document(Auth.auth().currentUser!.uid).collection("records")
+            .whereField(startTimeField, isGreaterThanOrEqualTo: Timestamp(date: startOfDay))
+            .whereField(startTimeField, isLessThan: Timestamp(date: endOfDay))
+            .getDocuments { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                if let error = error {
+                    print("Error getting documents: \(error)")
+                } else {
+                    self.records = querySnapshot?.documents.compactMap { document in
+                        do {
+                            let record = try document.data(as: Running.self)
+                            return record
+                        } catch {
+                            print("Error decoding record: \(error)")
+                            return nil
+                        }
+                    } ?? []
+                    
+                    DispatchQueue.main.async {
+                        self.recordsTableView.reloadData()
+                    }
+                }
+            }
+    }
+
 
     private func shouldIncludePost(_ post: Post) -> Bool {
         guard let currentUserUID = Auth.auth().currentUser?.uid else {
@@ -566,10 +638,11 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         if segmentControl.selectedSegmentIndex == 0 {
             recordsView.isHidden = false
             postsView.isHidden = true
+            recordsTableView.reloadData()
         } else {
             recordsView.isHidden = true
             postsView.isHidden = false
-            tableView.reloadData()
+            postsTableView.reloadData()
         }
     }
     
@@ -590,5 +663,9 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchUserProfile()
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        listener?.remove()
     }
 }

@@ -66,6 +66,7 @@
 		82D845932C0E0BA200313CA2 /* WidgetTestLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */; };
 		82E7638B2C087C220078E5C9 /* MyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E7638A2C087C220078E5C9 /* MyMapView.swift */; };
 		9664CA3F2C196C8000035168 /* report_user.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9664CA3E2C196C8000035168 /* report_user.swift */; };
+		9664CA4B2C20045D00035168 /* ProfileRecordsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9664CA4A2C20045D00035168 /* ProfileRecordsCell.swift */; };
 		967D829B2C0CAD6E00CC1F2A /* RecordService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967D829A2C0CAD6E00CC1F2A /* RecordService.swift */; };
 		96AC57342C059CAA00F1A73C /* WithdrawalVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96AC57332C059CAA00F1A73C /* WithdrawalVC.swift */; };
 		96AC57362C059CC700F1A73C /* SettingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96AC57352C059CC700F1A73C /* SettingVC.swift */; };
@@ -201,6 +202,7 @@
 		82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTestLiveActivity.swift; sourceTree = "<group>"; };
 		82E7638A2C087C220078E5C9 /* MyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyMapView.swift; sourceTree = "<group>"; };
 		9664CA3E2C196C8000035168 /* report_user.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = report_user.swift; sourceTree = "<group>"; };
+		9664CA4A2C20045D00035168 /* ProfileRecordsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRecordsCell.swift; sourceTree = "<group>"; };
 		967D829A2C0CAD6E00CC1F2A /* RecordService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordService.swift; sourceTree = "<group>"; };
 		96AC57332C059CAA00F1A73C /* WithdrawalVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithdrawalVC.swift; sourceTree = "<group>"; };
 		96AC57352C059CC700F1A73C /* SettingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingVC.swift; sourceTree = "<group>"; };
@@ -556,6 +558,7 @@
 				96AC573D2C059D1700F1A73C /* OtherProfileVC.swift */,
 				96D43F9F2C0CD2D90059C377 /* UserListVC.swift */,
 				96D43FA12C0D8CEB0059C377 /* ReportUserVC.swift */,
+				9664CA4A2C20045D00035168 /* ProfileRecordsCell.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -813,6 +816,7 @@
 				98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */,
 				820069162C10BD86009FDA6C /* DataCollectionCell.swift in Sources */,
 				615ADAE42C086F18005CAC75 /* LoadingView.swift in Sources */,
+				9664CA4B2C20045D00035168 /* ProfileRecordsCell.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
 				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
 				98601D582C07103E0056E407 /* Chat.swift in Sources */,
