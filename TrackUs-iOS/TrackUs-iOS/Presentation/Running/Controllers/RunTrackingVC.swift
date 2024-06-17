@@ -512,13 +512,13 @@ final class RunTrackingVC: UIViewController {
     }
     
     @available (iOS 16.2, *)
-    func removeWidget() {
+    func removeWidget() {        
         Task {
             await WidgetManager.shared.activity.end(nil, dismissalPolicy: .immediate)
         }
     }
     
-    // MARK: - objc Methods
+
     @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
         let translation = sender.translation(in: actionButton)
         let inset = UIEdgeInsets(top: -40, left: -40, bottom: -40, right: 30)
