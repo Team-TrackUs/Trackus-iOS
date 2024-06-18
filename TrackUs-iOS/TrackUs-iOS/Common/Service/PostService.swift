@@ -135,7 +135,7 @@ class PostService {
                 guard let post = try? queryDocumentSnapshot.data(as: Post.self) else {
                     return nil
                 }
-
+                
                 guard let courseRoute = post.courseRoutes.first else {
                     return nil
                 }
@@ -345,7 +345,7 @@ class PostService {
                                         whoReportAt: whoReportAt,
                                         createdAt: createdAtTimestamp.dateValue(),
                                         runningStyle: runningStyle,
-                                        members: members, 
+                                        members: members,
                                         ownerUid: ownerUid)
                         
                         filterPosts.append(post)
@@ -355,6 +355,7 @@ class PostService {
             }
     }
     
+    // 모집글 신고
     func reportPost(postUid: String, userUid: String, category: String, text: String, completion: @escaping (Bool) -> Void) {
         let db = Firestore.firestore()
         let postRef = db.collection("posts").document(postUid)

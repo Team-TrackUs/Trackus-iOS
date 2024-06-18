@@ -199,8 +199,9 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
                 navigationController?.pushViewController(withdrawalVC, animated: true)
             }
         case 2:
-            let withdrawalVC = WithdrawalVC()
-            navigationController?.pushViewController(withdrawalVC, animated: true)
+            let askusVC = AskusVC()
+            askusVC.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(askusVC, animated: true)
         case 3:
             let withdrawalVC = UserListVC()
             navigationController?.pushViewController(withdrawalVC, animated: true)

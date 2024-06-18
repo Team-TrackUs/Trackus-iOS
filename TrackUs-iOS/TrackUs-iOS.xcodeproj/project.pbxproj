@@ -16,6 +16,7 @@
 		61625E3A2BFE75A500E6D1F3 /* PostService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61625E392BFE75A500E6D1F3 /* PostService.swift */; };
 		6193AD182BF34C9C00C59D43 /* CourseRegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */; };
 		61A51B0A2C0BB1EF00FEE7E3 /* MateDetailSkeletonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A51B092C0BB1EF00FEE7E3 /* MateDetailSkeletonView.swift */; };
+		61A5B9352C219D7B00A71942 /* AskusVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A5B9342C219D7B00A71942 /* AskusVC.swift */; };
 		61B0DEC82BF74D5C009E360B /* CourseDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */; };
 		61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DEC92BF8F950009E360B /* CourseMapVC.swift */; };
 		61B0DECE2BF92174009E360B /* MateViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B0DECD2BF92174009E360B /* MateViewCell.swift */; };
@@ -147,6 +148,7 @@
 		61625E392BFE75A500E6D1F3 /* PostService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostService.swift; sourceTree = "<group>"; };
 		6193AD172BF34C9C00C59D43 /* CourseRegisterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseRegisterVC.swift; sourceTree = "<group>"; };
 		61A51B092C0BB1EF00FEE7E3 /* MateDetailSkeletonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MateDetailSkeletonView.swift; sourceTree = "<group>"; };
+		61A5B9342C219D7B00A71942 /* AskusVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskusVC.swift; sourceTree = "<group>"; };
 		61B0DEC72BF74D5C009E360B /* CourseDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailVC.swift; sourceTree = "<group>"; };
 		61B0DEC92BF8F950009E360B /* CourseMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMapVC.swift; sourceTree = "<group>"; };
 		61B0DECD2BF92174009E360B /* MateViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MateViewCell.swift; sourceTree = "<group>"; };
@@ -556,6 +558,7 @@
 				96AC573D2C059D1700F1A73C /* OtherProfileVC.swift */,
 				96D43F9F2C0CD2D90059C377 /* UserListVC.swift */,
 				96D43FA12C0D8CEB0059C377 /* ReportUserVC.swift */,
+				61A5B9342C219D7B00A71942 /* AskusVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -843,6 +846,7 @@
 				820069142C10BA3F009FDA6C /* DataCollectionVC.swift in Sources */,
 				98AB54472BF71B390047310A /* NicknameInputView.swift in Sources */,
 				6140CCFA2C15686500094202 /* RunningMapCell.swift in Sources */,
+				61A5B9352C219D7B00A71942 /* AskusVC.swift in Sources */,
 				61B0DECE2BF92174009E360B /* MateViewCell.swift in Sources */,
 				82C38ACF2BFCA57B004819C1 /* Array+.swift in Sources */,
 				827F97482C0DB85200DAD821 /* WidgetAttribute.swift in Sources */,
