@@ -627,6 +627,7 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     // MARK: - 설정뷰로 이동
     @objc private func settingsButtonTapped() {
         let settingVC = SettingVC()
+        settingVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(settingVC, animated: true)
     }
     // MARK: - 프로필편집뷰로 이동
