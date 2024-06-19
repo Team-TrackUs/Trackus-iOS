@@ -5,10 +5,17 @@
 //  Created by 박소희 on 5/19/24.
 //
 
+//
+//  MyProfileEditVC.swift
+//  TrackUs-iOS
+//
+//  Created by 박소희 on 5/19/24.
+//
+
 import UIKit
 import Firebase
 
-class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
+class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDelegate, MainButtonEnabledDelegate {
     
     private let defaultProfileImage = UIImage(systemName: "person.crop.circle.fill")
     
@@ -30,39 +37,11 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         return label
     }()
     
-    class CustomTextField: UITextField {
-        var textInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        
-        override func textRect(forBounds bounds: CGRect) -> CGRect {
-            return bounds.inset(by: textInsets)
-        }
-        
-        override func editingRect(forBounds bounds: CGRect) -> CGRect {
-            return bounds.inset(by: textInsets)
-        }
-        
-        override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
-            return bounds.inset(by: textInsets)
-        }
-    }
-    
-    private let textFieldHeight: CGFloat = 47
-    
-    private let nicknameTextField: CustomTextField = {
-        let textField = CustomTextField()
-        textField.placeholder = "닉네임을 입력하세요"
-        textField.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        textField.tintColor = UIColor(named: "Gray1")
-        textField.borderStyle = .roundedRect
-        textField.layer.borderColor = UIColor(named: "Gray3")?.cgColor
-        textField.layer.borderWidth = 1.0
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        
-        textField.textInsets = UIEdgeInsets(top: 13, left: 16, bottom: 13, right: 16)
-        
-        return textField
+    private let nicknameInputView: NicknameInputView = {
+        let view = NicknameInputView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
-    
     private let userRelatedTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "사용자 관련"
@@ -93,9 +72,12 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         let button = MainButton()
         button.title = "수정 완료"
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.isEnabled = false
         button.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         return button
     }()
+    
+    private var currentUserId: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -108,6 +90,11 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         // 화면 터치 인식 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
+        
+        nicknameInputView.delegate = self
+        nicknameInputView.textField.delegate = self
+        
+        currentUserId = Auth.auth().currentUser?.uid
     }
     
     private func setupNavBar() {
@@ -126,7 +113,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
     private func setupViews() {
         view.addSubview(profileImageView)
         view.addSubview(nicknameTitleLabel)
-        view.addSubview(nicknameTextField)
+        view.addSubview(nicknameInputView)
         view.addSubview(userRelatedTitleLabel)
         view.addSubview(publicProfileLabel)
         view.addSubview(toggleSwitch)
@@ -141,11 +128,11 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
             nicknameTitleLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 26),
             nicknameTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
-            nicknameTextField.topAnchor.constraint(equalTo: nicknameTitleLabel.bottomAnchor, constant: 20),
-            nicknameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            nicknameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nicknameInputView.topAnchor.constraint(equalTo: nicknameTitleLabel.bottomAnchor, constant: 20),
+            nicknameInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nicknameInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            userRelatedTitleLabel.topAnchor.constraint(equalTo: nicknameTextField.bottomAnchor, constant: 38),
+            userRelatedTitleLabel.topAnchor.constraint(equalTo: nicknameInputView.bottomAnchor, constant: 38),
             userRelatedTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
             publicProfileLabel.topAnchor.constraint(equalTo: userRelatedTitleLabel.bottomAnchor, constant: 20),
@@ -170,29 +157,69 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
             return
         }
         
-        let newNickname = nicknameTextField.text ?? ""
-        UserManager.shared.user.name = newNickname
+        let newNickname = nicknameInputView.getNickname()
         
-        let isProfilePublic = toggleSwitch.isOn
-        UserManager.shared.user.isProfilePublic = isProfilePublic
-        
-        // 이미지가 변경되었는지 확인
-        if let profileImage = profileImageView.imageView.image, !isDefaultImage(profileImage) {
-            let imageUrl = "profileImages/\(currentUser.uid)"
-            ImageCacheManager.shared.setImage(image: profileImage, url: imageUrl)
-            UserManager.shared.user.profileImageUrl = imageUrl
-        } else {
-            UserManager.shared.user.profileImageUrl = nil // 기본 이미지 사용을 의미하는 값 설정
+        guard !newNickname.isEmpty else {
+            return
         }
         
-        // 사용자 데이터 업데이트
-        UserManager.shared.updateUserData(uid: currentUser.uid) { success in
-            if success {
-                self.navigationController?.popViewController(animated: true)
+        // 중복 확인
+        checkUser(name: newNickname) { isUnique in
+            if isUnique {
+                UserManager.shared.user.name = newNickname
+                
+                let isProfilePublic = self.toggleSwitch.isOn
+                UserManager.shared.user.isProfilePublic = isProfilePublic
+                
+                // 이미지가 변경되었는지 확인
+                if let profileImage = self.profileImageView.imageView.image, !self.isDefaultImage(profileImage) {
+                    let imageUrl = "profileImages/\(currentUser.uid)"
+                    ImageCacheManager.shared.setImage(image: profileImage, url: imageUrl)
+                    UserManager.shared.user.profileImageUrl = imageUrl
+                } else {
+                    UserManager.shared.user.profileImageUrl = nil
+                }
+                
+                // 사용자 데이터 업데이트
+                UserManager.shared.updateUserData(uid: currentUser.uid) { success in
+                    if success {
+                        DispatchQueue.main.async {
+                            self.navigationController?.popViewController(animated: true)
+                        }
+                    } else {
+                        // 업데이트 실패 처리
+                    }
+                }
             } else {
-                // 업데이트 실패 처리
+                DispatchQueue.main.async {
+                    let alert = UIAlertController(title: "닉네임 중복", message: "이미 등록된 닉네임입니다.\n다시 입력해주시기 바랍니다.", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                    
+                    self.saveButton.isEnabled = true
+                }
             }
         }
+    }
+    
+    /// 닉네임 중복 확인
+    func checkUser(name: String, completionHandler: @escaping (Bool) -> Void) {
+        Firestore.firestore().collection("users")
+            .whereField("name", isEqualTo: name)
+            .whereField("uid", isEqualTo: currentUserId)
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    print("Error checking user: \(error.localizedDescription)")
+                    completionHandler(false)
+                    return
+                }
+                // 현재 사용자꺼는 중복 처리 x
+                if let querySnapshot = querySnapshot, !querySnapshot.isEmpty {
+                    completionHandler(true)
+                } else {
+                    completionHandler(false)
+                }
+            }
     }
     
     private func isDefaultImage(_ image: UIImage) -> Bool {
@@ -221,16 +248,44 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
             }
             
             if let userName = data?["name"] as? String {
-                self.nicknameTextField.text = userName
+                self.nicknameInputView.textField.text = userName
+                
+                self.checkNicknameValidity(userName)
             }
             
             if let isProfilePublic = data?["isProfilePublic"] as? Bool {
                 self.toggleSwitch.isOn = isProfilePublic
             }
+            self.checkSaveButtonValidity()
         }
+    }
+    
+    private func checkNicknameValidity(_ nickname: String) {
+        nicknameInputView.isError = !isValidNickname(nickname)
+        checkSaveButtonValidity()
+    }
+
+    private func isValidNickname(_ nickname: String) -> Bool {
+        let specialCharacters = CharacterSet(charactersIn: "!?@#$%^&*()_+=-<>,.;|/:[]{}")
+        return nickname.count >= 2 && nickname.count <= 10 && !nickname.contains(" ") && nickname.rangeOfCharacter(from: specialCharacters) == nil
+    }
+    
+    private func checkSaveButtonValidity() {
+        let isNicknameValid = isValidNickname(nicknameInputView.getNickname())
+        saveButton.isEnabled = isNicknameValid
     }
     
     @objc private func dismissKeyboard() {
         view.endEditing(true)
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string) ?? ""
+        checkNicknameValidity(currentText)
+        return true
+    }
+
+    func MainButtonDidChangeEnabled(_ enabled: Bool) {
+        saveButton.isEnabled = enabled
     }
 }

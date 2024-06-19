@@ -128,79 +128,73 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     
     
     private func fetchRunningStats() {
+        let today = Date()
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: today)
+
         userRecordsCollection.getDocuments { [weak self] (querySnapshot, error) in
             guard let self = self else { return }
             if let error = error {
                 print("Error fetching running stats: \(error)")
                 return
             }
-            
+
             var totalDistance = 0.0
             var totalTime = 0.0
             var totalCount = 0
-            var totalPace = 0.0
-            
-            var latestDistance = 0.0
-            var latestTime = 0.0
-            var latestCount = 0
-            var latestPace = 0.0
-            
-            var previousDistance = 0.0
-            var previousTime = 0.0
-            var previousCount = 0
-            var previousPace = 0.0
-            
+
+            var todayDistance = 0.0
+            var todayTime = 0.0
+            var todayCount = 0
+
             if let snapshot = querySnapshot {
-                var latestRecord: QueryDocumentSnapshot?
                 snapshot.documents.forEach { document in
                     let data = document.data()
                     let distance = data["distance"] as? Double ?? 0.0
                     let time = data["seconds"] as? Double ?? 0.0
-                    let pace = data["pace"] as? Double ?? 0.0
-                    
+                    let timestamp = data["createdAt"] as? Timestamp ?? Timestamp()
+                    let recordDate = calendar.startOfDay(for: timestamp.dateValue())
+
                     totalDistance += distance
                     totalTime += time
                     totalCount += 1
-                    totalPace += pace
-                    
-                    if latestRecord == nil {
-                        latestRecord = document
-                        latestDistance = distance
-                        latestTime = time
-                        latestCount = 1
-                        latestPace = pace
-                    } else {
-                        let documentTimestamp = document["timestamp"] as? Timestamp ?? Timestamp()
-                        let latestTimestamp = latestRecord?["timestamp"] as? Timestamp ?? Timestamp()
-                        if documentTimestamp.seconds > latestTimestamp.seconds {
-                            latestRecord = document
-                            previousDistance = latestDistance
-                            previousTime = latestTime
-                            previousCount = latestCount
-                            previousPace = latestPace
-                            
-                            latestDistance = distance
-                            latestTime = time
-                            latestCount = 1
-                            latestPace = pace
-                        } else {
-                            previousDistance = distance
-                            previousTime = time
-                            previousCount = 1
-                            previousPace = pace
-                        }
+
+                    if calendar.isDate(recordDate, inSameDayAs: startOfDay) {
+                        todayDistance += distance
+                        todayTime += time
+                        todayCount += 1
                     }
                 }
             }
-            
+
             DispatchQueue.main.async {
-                self.distanceLabel.attributedText = self.createRunningInfoText(header: "러닝 거리(km)", main: String(format: "%.1f", totalDistance), sub: String(format: "%.1f", latestDistance - previousDistance))
-                self.timeLabel.attributedText = self.createRunningInfoText(header: "시간", main: self.formatTime(totalTime), sub: self.formatTime(latestTime - previousTime))
-                self.countLabel.attributedText = self.createRunningInfoText(header: "러닝 횟수", main: "\(totalCount)", sub: "1")
-                self.paceLabel.attributedText = self.createRunningInfoText(header: "페이스", main: self.formatPace(totalPace), sub: self.formatPace(latestPace - previousPace))
+                self.distanceLabel.attributedText = self.createRunningInfoText(
+                    header: "러닝 거리(km)",
+                    main: totalDistance.asString(style: .km),
+                    sub: todayDistance.asString(style: .km)
+                )
+                self.timeLabel.attributedText = self.createRunningInfoText(
+                    header: "시간",
+                    main: totalTime.toMMSSTimeFormat,
+                    sub: todayTime.toMMSSTimeFormat
+                )
+                self.countLabel.attributedText = self.createRunningInfoText(
+                    header: "러닝 횟수",
+                    main: "\(totalCount)",
+                    sub: "\(todayCount)"
+                )
+                
+                let averageTotalPace = totalTime != 0 ? totalDistance / totalTime : 0
+                let averageTodayPace = todayTime != 0 ? todayDistance / todayTime : 0
+                self.paceLabel.attributedText = self.createRunningInfoText(
+                    header: "페이스",
+                    main: averageTotalPace.asString(style: .pace),
+                    sub: averageTodayPace.asString(style: .pace)
+                )
             }
         }
     }
+
 
     private func formatTime(_ seconds: Double) -> String {
         let formatter = DateComponentsFormatter()
@@ -208,12 +202,6 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         formatter.unitsStyle = .positional
         formatter.zeroFormattingBehavior = .pad
         return formatter.string(from: seconds) ?? "00:00:00"
-    }
-
-    private func formatPace(_ secondsPerKm: Double) -> String {
-        let minutes = Int(secondsPerKm / 60)
-        let seconds = Int(secondsPerKm.truncatingRemainder(dividingBy: 60))
-        return String(format: "%d'%02d''", minutes, seconds)
     }
 
     private lazy var segmentControl: UISegmentedControl = {
@@ -685,9 +673,30 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         }
     }
+    private func setupRealtimeUpdates() {
+        let userRef = Firestore.firestore().collection("users").document(Auth.auth().currentUser!.uid)
+        
+        userRef.addSnapshotListener { [weak self] (documentSnapshot, error) in
+            guard let self = self else { return }
+            if let document = documentSnapshot, document.exists {
+                self.fetchUserProfile()
+                self.fetchRunningStats()
+                self.fetchPosts()
+                self.fetchRecords()
+            } else {
+                print("Document does not exist")
+            }
+        }
+        
+        userRecordsCollection.addSnapshotListener { [weak self] (querySnapshot, error) in
+            guard let self = self else { return }
+            self.fetchRunningStats()
+        }
+    }
     // MARK: - 최신 정보 유지
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        setupRealtimeUpdates()
         fetchUserProfile()
     }
     override func viewWillDisappear(_ animated: Bool) {
