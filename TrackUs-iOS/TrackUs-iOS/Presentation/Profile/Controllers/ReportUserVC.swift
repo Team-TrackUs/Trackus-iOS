@@ -170,8 +170,8 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
     }
     
     @objc private func dismissKeyboard() {
-            view.endEditing(true)
-        }
+        view.endEditing(true)
+    }
     
     private func setupViews() {
         view.addSubview(scrollView)
@@ -345,11 +345,22 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
                     print("Error saving report: \(error.localizedDescription)")
                 } else {
                     print("Report successfully saved.")
-                    let alert = UIAlertController(title: "신고 완료", message: "신고가 성공적으로 접수되었습니다.", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "확인", style: .default, handler: { _ in
-                        self.navigationController?.popViewController(animated: true)
-                    }))
-                    self.present(alert, animated: true, completion: nil)
+                    let userRef = db.collection("users").document(currentUser.uid)
+                    userRef.updateData([
+                        "reportIDList": FieldValue.arrayUnion([self.userId])
+                    ]) { error in
+                        if let error = error {
+                            print("Error updating reportIDList: \(error.localizedDescription)")
+                        } else {
+                            print("ReportIDList successfully updated.")
+                            
+                            let alert = UIAlertController(title: "신고 완료", message: "신고가 성공적으로 접수되었습니다.", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "확인", style: .default, handler: { _ in
+                                self.navigationController?.popViewController(animated: true)
+                            }))
+                            self.present(alert, animated: true, completion: nil)
+                        }
+                    }
                 }
             }
         } catch let error {
