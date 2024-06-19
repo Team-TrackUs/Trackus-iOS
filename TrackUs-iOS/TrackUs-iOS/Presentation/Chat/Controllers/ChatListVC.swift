@@ -25,7 +25,7 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         //chat.dummyData()
-        ChatRoomManager.shared.subscribeToUpdates(){
+        ChatManager.shared.subscribeToUpdates(){
             DispatchQueue.main.async {
                 self.chatListTableView.reloadData()
             }
@@ -61,13 +61,13 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     // MARK: - view 관련 함수
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatRoomCell", for: indexPath) as! ChatRoomCell
-        let chatRoom = ChatRoomManager.shared.chatRooms[indexPath.row]
-        cell.configure(with: chatRoom, users: ChatRoomManager.shared.userInfo)
+        let chatRoom = ChatManager.shared.chatRooms[indexPath.row]
+        cell.configure(with: chatRoom, users: ChatManager.shared.userInfo)
         return cell
     }
         
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let chatRoomVC = ChatRoomVC(chatUId: ChatRoomManager.shared.chatRooms[indexPath.row].uid)
+        let chatRoomVC = ChatRoomVC(chatUId: ChatManager.shared.chatRooms[indexPath.row].uid)
         chatRoomVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(chatRoomVC, animated: true)
     }
@@ -75,7 +75,7 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "나가기") { [self] (action, view, completionHandler) in
             // 나가기 함수 추가
-            let chat = ChatRoomManager.shared.chatRooms[indexPath.row]
+            let chat = ChatManager.shared.chatRooms[indexPath.row]
             didSelectLeaveChatRoom(chat: chat)
             completionHandler(true)
         }
@@ -83,7 +83,7 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if ChatRoomManager.shared.chatRooms.count == 0 {
+        if ChatManager.shared.chatRooms.count == 0 {
             let label = UILabel(frame: tableView.bounds)
             label.text = "참여한 채팅방이 없습니다"
             label.textAlignment = .center
@@ -92,7 +92,7 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             return 0
         } else {
             tableView.backgroundView = nil
-            return ChatRoomManager.shared.chatRooms.count
+            return ChatManager.shared.chatRooms.count
         }
         //return chat.chatRooms.count
     }

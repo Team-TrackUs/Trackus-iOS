@@ -10,7 +10,7 @@ import UIKit
 class SideMenuVC: UIViewController {
     
     private let chat: Chat
-    private let userInfo = ChatRoomManager.shared.userInfo
+    private let userInfo = ChatManager.shared.userInfo
     
     init(chat: Chat) {
         self.chat = chat

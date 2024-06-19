@@ -9,11 +9,13 @@ import Foundation
 import Firebase
 import FirebaseFirestore
 
-class ChatRoomManager {
-    static let shared = ChatRoomManager()
+class ChatManager {
+    static let shared = ChatManager()
     
     var chatRooms: [Chat] = []
     var userInfo: [String: User] = [:]
+    
+    var currentChatUid: String = ""
     
     // 신규 메세지 총 갯수
     var newMessageCount: String? = nil {

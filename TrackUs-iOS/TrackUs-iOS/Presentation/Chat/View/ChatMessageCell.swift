@@ -132,7 +132,7 @@ class ChatMessageCell: UITableViewCell {
         
         var constraints = [NSLayoutConstraint]()
         // 사용자 정보 가져오기
-        guard let sendMember = ChatRoomManager.shared.userInfo[message.sendMember] else { return }
+        guard let sendMember = ChatManager.shared.userInfo[message.sendMember] else { return }
         
         // 날짜 출력 여부 (공통)
         if messageMap.sameDate {

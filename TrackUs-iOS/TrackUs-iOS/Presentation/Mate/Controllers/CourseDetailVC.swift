@@ -256,10 +256,10 @@ class CourseDetailVC: UIViewController {
             }
         }
         // 채팅방 참여
-        if ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }) == nil {
+        if ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }) == nil {
             // 채팅방이 없을 때만 실행
             joinChat(){ [self] in
-                if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+                if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
                     // 기존 채팅방 띄우기
                     joinMessage(chat: chat)
                 }
@@ -278,14 +278,14 @@ class CourseDetailVC: UIViewController {
     @objc func goChatRoomButtonTapped() {
         if members.contains(uid){
             // 채팅방 참여된 경우
-            if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+            if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
                 // 기존 채팅방 띄우기
                 presentChatView(chat: chat)
             }else {
                 // 채팅방 참여하기
                 DispatchQueue.main.async {
                     self.joinChat(){ [self] in
-                        if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+                        if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
                             // 기존 채팅방 띄우기
                             joinMessage(chat: chat)
                             presentChatView(chat: chat, newChat: true)
@@ -299,7 +299,7 @@ class CourseDetailVC: UIViewController {
             }
         }else {
             // 참여 안된 경우 - 방장 1:1 대화하기
-            ChatRoomManager.shared.joinChatRoom(opponentUid: ownerUid) { chat, newChat in
+            ChatManager.shared.joinChatRoom(opponentUid: ownerUid) { chat, newChat in
                 let chatRoomVC = ChatRoomVC(chat: chat, newChat: newChat)
                 self.navigationController?.pushViewController(chatRoomVC, animated: true)
             }

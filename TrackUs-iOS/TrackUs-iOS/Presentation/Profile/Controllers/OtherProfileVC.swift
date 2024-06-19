@@ -380,7 +380,7 @@ class OtherProfileVC: UIViewController {
     
     // MARK: - 채팅뷰로 이동
     @objc private func editProfileButtonTapped() {
-        ChatRoomManager.shared.joinChatRoom(opponentUid: userId) { chat, newChat in
+        ChatManager.shared.joinChatRoom(opponentUid: userId) { chat, newChat in
             
             let chatRoomVC = ChatRoomVC(chat: chat, newChat: newChat)
             self.navigationController?.pushViewController(chatRoomVC, animated: true)

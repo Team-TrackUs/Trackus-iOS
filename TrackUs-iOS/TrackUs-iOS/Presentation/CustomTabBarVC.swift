@@ -104,7 +104,7 @@ final class CustomTabBarVC: UITabBarController {
     @objc func updateChatBadge() {
         guard let items = self.tabBar.items else { return }
         
-        let chatBadgeCount = ChatRoomManager.shared.newMessageCount
+        let chatBadgeCount = ChatManager.shared.newMessageCount
         items[2].badgeValue = chatBadgeCount
     }
     deinit {

@@ -15,7 +15,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     private var messageMap: [MessageMap] = []
     private var messages: [Message] = [] // 메시지 배열
     
-    private var userInfo = ChatRoomManager.shared.userInfo
+    private var userInfo = ChatManager.shared.userInfo
     
     // 메인 버튼 하단 위치 제약조건
     private var tableViewBottomConstraint: NSLayoutConstraint!
@@ -30,7 +30,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     /// 그룹채팅용
     init(chatUId: String, newChat: Bool = false) {
         self.chat = {
-            if let chat = ChatRoomManager.shared.chatRooms.first(where: { $0.uid == chatUId }){
+            if let chat = ChatManager.shared.chatRooms.first(where: { $0.uid == chatUId }){
                 return chat
             }
             // 없을 경우 새로 불러오기
@@ -113,6 +113,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        ChatManager.shared.currentChatUid = chatUId
+        
         startListening()
         resetUnreadCounter()
         
@@ -139,6 +141,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // 리스너 종료
+        ChatManager.shared.currentChatUid = ""
         stopListening()
         resetUnreadCounter()
     }
@@ -249,7 +252,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         updateLatesMessage(message: newMessage)
         
-        if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
+        if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
             // 기존 채팅방 띄우기
             var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
             usersUnreadCountInfo[currentUserUid] = 0
@@ -355,7 +358,11 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             "token": token,
             "title": chat.group ? chat.title : UserManager.shared.user.name,
             "body": body,
-            "imageUrl": message.imageUrl ?? ""
+            // 메세지 전송 이미지
+            "imageUrl": message.imageUrl ?? "",
+            // 채팅방 식별용
+            "chatUid": chatUId,
+            "profileUrl": UserManager.shared.user.profileImageUrl ?? ""
         ]
 
         do {
@@ -387,7 +394,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     // 본인 신규 메세지 갯수 초기화
     private func resetUnreadCounter() {
-        if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
+        if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
             var usersUnreadCountInfo = chat.usersUnreadCountInfo
             usersUnreadCountInfo[currentUserUid] = 0
             db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])

@@ -95,13 +95,16 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         
-        //let userInfo = notification.request.content.userInfo
+        let userInfo = notification.request.content.userInfo
+        guard let chatUid = userInfo["chatUid"] as? String else { return }
+        print(chatUid + "@@@@@@@@@@@@@@@@ 여기는 인식 됨 @@@@@@@@@@@@@@@")
+        print(userInfo)
+        print("currentChatUid : " + ChatManager.shared.currentChatUid)
         
-        //guard let chatRoomId = userInfo["chatRoomId"] as? String else { return }
-        // 현재 열려있느 채팅방이 아닐 경우에만 Notification 알림
-        //if ChatListViewModel.shared.currentChatRoom != chatRoomId {
+        // 현재 열려있는 채팅방이 아닐 경우에만 Notification 알림
+        if chatUid != ChatManager.shared.currentChatUid {
             completionHandler([.banner, .sound, .badge])
-        //}
+        }
     }
     
     // 푸시메세지 받을때
@@ -145,7 +148,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
 //                completionHandler(bestAttemptContent)
 //            }
 //        }
-        
         completionHandler()
     }
 }
