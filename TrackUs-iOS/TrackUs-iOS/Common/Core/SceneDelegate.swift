@@ -21,12 +21,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        
         window = UIWindow(windowScene: windowScene)
         // 스플래시 화면 표시
         window?.rootViewController = SplashView()
         window?.makeKeyAndVisible()
         // 로그인 여부 확인
         loginCheck()
+        if let notificationResponse = connectionOptions.notificationResponse {
+            let userInfo = notificationResponse.notification.request.content.userInfo
+            if let chatUid = userInfo["chatUid"] as? String {
+                showChatRoom(chatUid: chatUid)
+            }
+        }
     }
     
     // Kakao 로그인 관련
@@ -118,6 +126,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         DispatchQueue.main.async {
             self.window?.rootViewController = CustomTabBarVC()
         }
+    }
+    
+    // MARK: - Notification관련 view 이동
+    func showChatRoom(chatUid: String) {
+        guard let rootViewController = window?.rootViewController as? UINavigationController else {
+            return
+        }
+        
+        let chatRoomVC = ChatRoomVC(chatUId: chatUid)
+        rootViewController.pushViewController(chatRoomVC, animated: true)
     }
 }
 

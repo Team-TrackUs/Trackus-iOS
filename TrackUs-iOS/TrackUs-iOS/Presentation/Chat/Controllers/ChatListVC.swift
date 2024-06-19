@@ -25,11 +25,7 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         //chat.dummyData()
-        ChatManager.shared.subscribeToUpdates(){
-            DispatchQueue.main.async {
-                self.chatListTableView.reloadData()
-            }
-        }
+        NotificationCenter.default.addObserver(self, selector: #selector(updateChatList), name: .newMessageCountDidChange, object: nil)
         setupNavBar()
         view.backgroundColor = .systemBackground
         chatListTableView.delegate = self
@@ -56,6 +52,13 @@ class ChatListVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             chatListTableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             chatListTableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
         ])
+    }
+    
+    // 채팅방 정보 변할때 UI 업데이트
+    @objc private func updateChatList() {
+        DispatchQueue.main.async {
+            self.chatListTableView.reloadData()
+        }
     }
     
     // MARK: - view 관련 함수

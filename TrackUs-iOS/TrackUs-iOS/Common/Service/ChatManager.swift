@@ -26,6 +26,13 @@ class ChatManager {
     
     private let ref = Firestore.firestore().collection("chats")
     
+    private init() {
+        // Call subscribeToUpdates when the ChatManager is initialized
+        subscribeToUpdates {
+            print("Subscribed to chat updates")
+        }
+    }
+    
     // MARK: - 채팅방 리스너 관련
     // 채팅방 listener 추가
     func subscribeToUpdates(completionHandler: @escaping () -> Void) {

@@ -15,6 +15,7 @@ import KakaoSDKUser
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
+    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
@@ -123,31 +124,13 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         UIApplication.shared.applicationIconBadgeNumber +=  1
         
         // notification tap 했을때 실행
-//        if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
-//            guard let chatRoomId = userInfo["chatRoomId"] as? String else { return }
-//            print(chatRoomId)
-//            NotificationChatManager.shared.navigateToChatRoom(chatRoomID: chatRoomId)
-//            ChatListViewModel.shared.currentChatRoom = chatRoomId
-//        }
-        
-//        if let bestAttemptContent = bestAttemptContent {
-//            // 사용자 프로필 이미지 추가
-//            if let imageUrlString = userInfo["image"] as? String, let imageUrl = URL(string: imageUrlString) {
-//
-//                guard let imageUrl = URL(string: imageUrlString) else { return }
-//                do {
-//                    let attachment = try UNNotificationAttachment(identifier: "image", url: imageUrl, options: nil)
-//                    bestAttemptContent.attachments = [attachment]
-//                    //response.notification.request.content = bestAttemptContent!
-//                } catch {
-//                    print(error)
-//                }
-//
-//                completionHandler(bestAttemptContent)
-//            } else {
-//                completionHandler(bestAttemptContent)
-//            }
-//        }
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
+            guard let chatUid = userInfo["chatUid"] as? String else { return }
+            let rootView = UIApplication.getMostTopViewController()
+            let chatRoomVC = ChatRoomVC(chatUId: chatUid)
+            chatRoomVC.hidesBottomBarWhenPushed = true
+            rootView?.navigationController?.pushViewController(chatRoomVC, animated: true)
+        }
         completionHandler()
     }
 }
