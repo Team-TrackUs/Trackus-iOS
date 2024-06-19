@@ -11,8 +11,6 @@ class AskusVC: UIViewController {
     
     // MARK: - Properties
     
-    var userUid = ""
-    
     let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.backgroundColor = .white
@@ -145,7 +143,15 @@ class AskusVC: UIViewController {
     // MARK: - Selectors
     
     @objc func reportButtonTapped() {
+        let userUid = User.currentUid
         
+        AskService().askus(userUid: userUid, text: reportText) { error in
+            if let error = error {
+                self.showAlert(title: "", message: "오류가 발생하였습니다.", action: "실패")
+            } else {
+                self.showAlert(title: "", message: "접수되었습니다.", action: "성공")
+            }
+        }
     }
     
     @objc func btnDoneBarTapped(sender: Any) {
