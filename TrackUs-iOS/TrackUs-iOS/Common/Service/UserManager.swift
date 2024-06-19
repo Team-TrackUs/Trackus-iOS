@@ -74,4 +74,20 @@ class UserManager {
             }
         }
     }
+    
+    // FCM token 업데이트
+    func updateToken(token: String?)  {
+        guard let uid = Auth.auth().currentUser?.uid, let token = token else { return }
+        
+        let data = ["token": token]
+        Firestore.firestore().collection("users").document(uid).updateData(data) { error in
+            if let error = error {
+                // 업데이트 중에 오류가 발생한 경우 처리
+                print("Error updating token: \(error.localizedDescription)")
+            } else {
+                // 업데이트가 성공한 경우 처리
+                print("Token updated successfully")
+            }
+        }
+    }
 }

@@ -23,6 +23,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let nativeAppKey = Bundle.main.infoDictionary?["KAKAO_NATIVE_APP_KEY"] ?? ""
         KakaoSDK.initSDK(appKey: nativeAppKey as! String)
         
+        // push 포그라운드 설정
+        UNUserNotificationCenter.current().delegate = self
+        
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        // 알림 권한 요청
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: authOptions,
+            completionHandler: { _, _ in }
+        )
+        
+        application.registerForRemoteNotifications()
+        
+        // 메세지 델리게이트
+        Messaging.messaging().delegate = self
+        // 현재 등록 토큰 가져오기
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token = token {
+                print("FCM registration token: \(token)")
+            }
+        }
+        
         return true
     }
     
@@ -33,6 +56,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         return false
+    }
+    
+    // fcm 토큰 등록 되었을 때
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
     }
 
     // MARK: UISceneSession Lifecycle
@@ -52,3 +80,72 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+extension AppDelegate : MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("AppDelegate - token: \(String(describing: fcmToken))")
+        // FCM 토큰 저장
+        UserManager.shared.updateToken(token: fcmToken)
+    }
+}
+
+// MARK: - 알림 델리게이트
+extension AppDelegate : UNUserNotificationCenterDelegate {
+    // 앱이 켜져있을때 푸시메세지 받아올때
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        
+        //let userInfo = notification.request.content.userInfo
+        
+        //guard let chatRoomId = userInfo["chatRoomId"] as? String else { return }
+        // 현재 열려있느 채팅방이 아닐 경우에만 Notification 알림
+        //if ChatListViewModel.shared.currentChatRoom != chatRoomId {
+            completionHandler([.banner, .sound, .badge])
+        //}
+    }
+    
+    // 푸시메세지 받을때
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        
+        let userInfo = response.notification.request.content.userInfo
+        //var bestAttemptContent = response.notification.request.content.mutableCopy() as? UNMutableNotificationContent        //신규추가
+        NotificationCenter.default.post(
+                    name: Notification.Name("didReceiveRemoteNotification"),
+                    object: nil,
+                    userInfo: userInfo
+                )
+        // badge 숫자 추가
+        UIApplication.shared.applicationIconBadgeNumber +=  1
+        
+        // notification tap 했을때 실행
+//        if response.actionIdentifier == UNNotificationDefaultActionIdentifier {
+//            guard let chatRoomId = userInfo["chatRoomId"] as? String else { return }
+//            print(chatRoomId)
+//            NotificationChatManager.shared.navigateToChatRoom(chatRoomID: chatRoomId)
+//            ChatListViewModel.shared.currentChatRoom = chatRoomId
+//        }
+        
+//        if let bestAttemptContent = bestAttemptContent {
+//            // 사용자 프로필 이미지 추가
+//            if let imageUrlString = userInfo["image"] as? String, let imageUrl = URL(string: imageUrlString) {
+//
+//                guard let imageUrl = URL(string: imageUrlString) else { return }
+//                do {
+//                    let attachment = try UNNotificationAttachment(identifier: "image", url: imageUrl, options: nil)
+//                    bestAttemptContent.attachments = [attachment]
+//                    //response.notification.request.content = bestAttemptContent!
+//                } catch {
+//                    print(error)
+//                }
+//
+//                completionHandler(bestAttemptContent)
+//            } else {
+//                completionHandler(bestAttemptContent)
+//            }
+//        }
+        
+        completionHandler()
+    }
+}

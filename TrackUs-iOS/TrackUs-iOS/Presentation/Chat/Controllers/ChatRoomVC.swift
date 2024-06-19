@@ -207,7 +207,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 if $0.value == true {
                     // 해당 사용자 메세지 정보에 저장
                     let db = db.document(chat.uid).collection($0.key)
-                    sendMessageFireStore(db: db, message: newMessage)
+                    sendMessageFireStore(db: db, message: newMessage, opponentUid: $0.key)
                 }
             }
         }else { // 개인 채팅
@@ -217,7 +217,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     _ = chat.members.map{
                         // 해당 사용자 메세지 정보에 저장
                         let db = db.document(chat.uid).collection($0.key)
-                        sendMessageFireStore(db: db, message: newMessage)
+                        sendMessageFireStore(db: db, message: newMessage, opponentUid: $0.key)
                     }
                 }
                 startListening()
@@ -242,7 +242,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 _ = chat.members.map{
                     // 해당 사용자 메세지 정보에 저장
                     let db = db.document(chat.uid).collection($0.key)
-                    sendMessageFireStore(db: db, message: newMessage)
+                    sendMessageFireStore(db: db, message: newMessage, opponentUid: $0.key)
                 }
             }
         }
@@ -308,7 +308,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     // MARK: - Firebase 관련 함수
     // 메세지 전송
-    private func sendMessageFireStore(db: CollectionReference, message: Message) {
+    private func sendMessageFireStore(db: CollectionReference, message: Message, opponentUid: String) {
         db.addDocument(data: [
             "sendMember": message.sendMember,
             "timeStamp": message.timeStamp,
@@ -321,11 +321,68 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 print("Error adding message: \(error)")
             } else {
                 DispatchQueue.main.async {
+                    if opponentUid != self.currentUserUid && message.messageType != .userInout {
+                        self.sendFCMNotification(to: opponentUid, message: message)
+                    }
                     self.messageTextView.text = nil
                     self.scrollToBottom()
                 }
             }
         }
+    }
+    
+    private func sendFCMNotification(to OpponentUid: String, message: Message) {
+        let urlString = "https://sendfcmnotification-p5womzw3ra-uc.a.run.app/sendFCMNotification"
+        guard let url = URL(string: urlString), let token = userInfo[OpponentUid]?.token else { return }
+        var body: String
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        switch message.messageType {
+            case .text:
+                body = message.text!
+            case .image:
+                body = "사진을 보냈습니다."
+            case .location:
+                body = "위치 장소를 보냈습니다."
+            case .userInout:
+                return
+        }
+
+        let message: [String: Any] = [
+            "token": token,
+            "title": chat.group ? chat.title : UserManager.shared.user.name,
+            "body": body,
+            "imageUrl": message.imageUrl ?? ""
+        ]
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: message, options: .prettyPrinted)
+            request.httpBody = jsonData
+        } catch {
+            print("Error: unable to create JSON data")
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error)")
+                return
+            }
+
+            if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
+                print("Server error: \(response.statusCode)")
+                return
+            }
+
+            if let data = data, let responseJSON = try? JSONSerialization.jsonObject(with: data, options: []) {
+                print("Response JSON: \(responseJSON)")
+            }
+        }
+
+        task.resume()
     }
     
     // 본인 신규 메세지 갯수 초기화
@@ -524,7 +581,7 @@ extension ChatRoomVC: SideMenuDelegate {
                 if $0.value == true {
                     // 해당 사용자 메세지 정보에 저장
                     let db = db.document(chat.uid).collection($0.key)
-                    sendMessageFireStore(db: db, message: newMessage)
+                    sendMessageFireStore(db: db, message: newMessage, opponentUid: $0.key)
                 }
             }
         }

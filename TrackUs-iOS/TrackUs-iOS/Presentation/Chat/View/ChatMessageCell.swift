@@ -235,8 +235,7 @@ class ChatMessageCell: UITableViewCell {
 //                }else{
 //                    self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
 //                }
-                profileImageView.loadProfileImage(url: sendMember.profileImageUrl) {
-                }
+                profileImageView.loadProfileImage(url: sendMember.profileImageUrl) {}
                     
                 userNameLabel.text = sendMember.name.isEmpty ? "탈퇴 회원" : sendMember.name
                 

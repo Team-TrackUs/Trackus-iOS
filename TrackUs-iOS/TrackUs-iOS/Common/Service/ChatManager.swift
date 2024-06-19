@@ -99,7 +99,7 @@ class ChatRoomManager {
     
     // 채팅방 멤버 닉네임, 프로필사진url 불러오기
     private func memberUserInfo(uid: String, completionHandler: @escaping () -> ()) {
-        Firestore.firestore().collection("users").document(uid).addSnapshotListener { documentSnapshot, error in
+        Firestore.firestore().collection("users").document(uid).getDocument { documentSnapshot, error in
             guard let document = documentSnapshot else {
                 // 탈퇴 사용자인 경우 리스트에서 삭제
                 self.chatRooms = self.chatRooms.map{
