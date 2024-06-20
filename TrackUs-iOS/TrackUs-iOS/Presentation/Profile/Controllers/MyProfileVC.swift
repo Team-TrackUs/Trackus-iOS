@@ -99,33 +99,53 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         return label
     }
 
-    private func createRunningInfoText(header: String, main: String, sub: String) -> NSMutableAttributedString {
+    private func createRunningInfoText(header: String, main: String, sub: String, todayCount: Int, maxPace: Double? = nil, todayPace: Double? = nil) -> NSMutableAttributedString {
         let text = NSMutableAttributedString(string: "\(header)\n", attributes: [.font: UIFont.systemFont(ofSize: 16, weight: .regular)])
         text.append(NSAttributedString(string: "\(main)\n", attributes: [.font: UIFont.systemFont(ofSize: 18, weight: .bold)]))
-        text.append(NSAttributedString(string: sub, attributes: [.font: UIFont.systemFont(ofSize: 10, weight: .regular)]))
+        
+        if header == "페이스", let maxPace = maxPace, let todayPace = todayPace, todayCount != 0 {
+            let imageAttachment = NSTextAttachment()
+            if todayPace > maxPace {
+                imageAttachment.image = UIImage(named: "profilePlus_icon")
+            } else {
+                imageAttachment.image = UIImage(named: "profileMinus_icon")
+            }
+            let imageString = NSMutableAttributedString(attachment: imageAttachment)
+            imageString.append(NSAttributedString(string: " \(sub)", attributes: [.font: UIFont.systemFont(ofSize: 10, weight: .regular)]))
+            text.append(imageString)
+        } else if todayCount != 0 {
+            let imageAttachment = NSTextAttachment()
+            imageAttachment.image = UIImage(named: "profilePlus_icon")
+            let imageString = NSMutableAttributedString(attachment: imageAttachment)
+            imageString.append(NSAttributedString(string: " \(sub)", attributes: [.font: UIFont.systemFont(ofSize: 10, weight: .regular)]))
+            text.append(imageString)
+        } else {
+            text.append(NSAttributedString(string: sub, attributes: [.font: UIFont.systemFont(ofSize: 10, weight: .regular)]))
+        }
+        
         return text
     }
 
+
     private lazy var distanceLabel: UILabel = {
-        let text = createRunningInfoText(header: "러닝 거리(km)", main: "12.7", sub: "0.0")
+        let text = createRunningInfoText(header: "러닝 거리(km)", main: "12.7", sub: "0.0" ,todayCount: 0)
         return createLabel(withText: text)
     }()
 
     private lazy var timeLabel: UILabel = {
-        let text = createRunningInfoText(header: "시간", main: "00:00:00", sub: "00:00:00")
+        let text = createRunningInfoText(header: "시간", main: "00:00:00", sub: "00:00:00",todayCount: 0)
         return createLabel(withText: text)
     }()
 
     private lazy var countLabel: UILabel = {
-        let text = createRunningInfoText(header: "러닝 횟수", main: "11", sub: "0")
+        let text = createRunningInfoText(header: "러닝 횟수", main: "11", sub: "0",todayCount: 0)
         return createLabel(withText: text)
     }()
 
     private lazy var paceLabel: UILabel = {
-        let text = createRunningInfoText(header: "페이스", main: "0'00''", sub: "0'00''")
+        let text = createRunningInfoText(header: "페이스", main: "0'00''", sub: "0'00''",todayCount: 0)
         return createLabel(withText: text)
     }()
-    
     
     private func fetchRunningStats() {
         let today = Date()
@@ -142,27 +162,37 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
             var totalDistance = 0.0
             var totalTime = 0.0
             var totalCount = 0
+            var totalPace = 0.0
 
             var todayDistance = 0.0
             var todayTime = 0.0
             var todayCount = 0
+            var todayPace = 0.0
+            
+            var maxPace = 0.0
 
             if let snapshot = querySnapshot {
                 snapshot.documents.forEach { document in
                     let data = document.data()
                     let distance = data["distance"] as? Double ?? 0.0
                     let time = data["seconds"] as? Double ?? 0.0
+                    let pace = data["pace"] as? Double ?? 0.0
                     let timestamp = data["createdAt"] as? Timestamp ?? Timestamp()
                     let recordDate = calendar.startOfDay(for: timestamp.dateValue())
 
                     totalDistance += distance
                     totalTime += time
+                    totalPace += pace
                     totalCount += 1
 
                     if calendar.isDate(recordDate, inSameDayAs: startOfDay) {
                         todayDistance += distance
                         todayTime += time
+                        todayPace += pace
                         todayCount += 1
+                    }
+                    if pace > maxPace {
+                        maxPace = pace
                     }
                 }
             }
@@ -171,25 +201,31 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
                 self.distanceLabel.attributedText = self.createRunningInfoText(
                     header: "러닝 거리(km)",
                     main: totalDistance.asString(style: .km),
-                    sub: todayDistance.asString(style: .km)
+                    sub: todayDistance.asString(style: .km),
+                    todayCount: todayCount
                 )
                 self.timeLabel.attributedText = self.createRunningInfoText(
                     header: "시간",
                     main: totalTime.toMMSSTimeFormat,
-                    sub: todayTime.toMMSSTimeFormat
+                    sub: todayTime.toMMSSTimeFormat,
+                    todayCount: todayCount
                 )
                 self.countLabel.attributedText = self.createRunningInfoText(
                     header: "러닝 횟수",
                     main: "\(totalCount)",
-                    sub: "\(todayCount)"
+                    sub: "\(todayCount)",
+                    todayCount: todayCount
                 )
                 
-                let averageTotalPace = totalTime != 0 ? totalDistance / totalTime : 0
-                let averageTodayPace = todayTime != 0 ? todayDistance / todayTime : 0
+                let averageTotalPace = totalCount != 0 ? Double(totalPace) / Double(totalCount) : 0.0
+                let averageTodayPace = todayTime != 0 ? Double(todayPace) / Double(todayCount) : 0.0
                 self.paceLabel.attributedText = self.createRunningInfoText(
                     header: "페이스",
                     main: averageTotalPace.asString(style: .pace),
-                    sub: averageTodayPace.asString(style: .pace)
+                    sub: averageTodayPace.asString(style: .pace),
+                    todayCount: todayCount,
+                    maxPace: maxPace,
+                    todayPace: averageTodayPace
                 )
             }
         }

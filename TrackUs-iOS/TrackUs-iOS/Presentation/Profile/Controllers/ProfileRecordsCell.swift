@@ -72,7 +72,7 @@ class ProfileRecordsCell: UITableViewCell {
     }
     
     // MARK: - Helpers
-        
+    
     func configureUI() {
         backgroundColor = .white
         
@@ -87,6 +87,7 @@ class ProfileRecordsCell: UITableViewCell {
         horizontalStackView.axis = .horizontal
         horizontalStackView.spacing = 8
         horizontalStackView.alignment = .center
+        horizontalStackView.distribution = .equalSpacing
         horizontalStackView.translatesAutoresizingMaskIntoConstraints = false
         
         let verticalStackView = UIStackView(arrangedSubviews: [horizontalStackView, startTimeLabel, addressLabel])
@@ -102,25 +103,20 @@ class ProfileRecordsCell: UITableViewCell {
             verticalStackView.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor)
         ])
     }
-
-        func configure(running: Running) {
-            postImageView.loadImage(url: running.routeImageUrl)
-            
-            distanceLabel.text = "\(String(format: "%.2f", running.distance)) km"
-            
-            let minutes = Int(running.pace / 60)
-            let seconds = Int(running.pace) % 60
-            paceLabel.text = "\(Int(running.pace / 60))\"\(Int(running.pace) % 60)\""
-            
-            let totalSeconds = Int(running.seconds)
-            let formattedSeconds = String(format: "%02d:%02d", totalSeconds / 60, totalSeconds % 60)
-            secondsLabel.text = formattedSeconds
-            
-            let formatter = DateFormatter()
-            formatter.dateFormat = "h:mm a"
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            startTimeLabel.text = formatter.string(from: running.startTime)
-            
-            addressLabel.text = running.address
-        }
+    
+    func configure(running: Running) {
+        postImageView.loadImage(url: running.routeImageUrl)
+        
+        distanceLabel.text = running.distance.asString(style: .km)
+        paceLabel.text = running.pace.asString(style: .pace)
+        
+        secondsLabel.text = running.seconds.toMMSSTimeFormat
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        startTimeLabel.text = formatter.string(from: running.startTime)
+        
+        addressLabel.text = running.address
     }
+}
