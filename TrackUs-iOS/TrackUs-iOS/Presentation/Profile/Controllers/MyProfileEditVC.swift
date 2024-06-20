@@ -5,63 +5,43 @@
 //  Created by 박소희 on 5/19/24.
 //
 
+//
+//  MyProfileEditVC.swift
+//  TrackUs-iOS
+//
+//  Created by 박소희 on 5/19/24.
+//
+
 import UIKit
 import Firebase
-import FirebaseStorage
 
-class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
+class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDelegate, MainButtonEnabledDelegate {
+    
+    private let defaultProfileImage = UIImage(systemName: "person.crop.circle.fill")
     
     private lazy var profileImageView: ProfilePictureInputView = {
         let view = ProfilePictureInputView()
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         view.imageView.layer.cornerRadius = 80
-            view.imageView.layer.masksToBounds = true 
+        view.imageView.layer.masksToBounds = true
         return view
     }()
     
-    private let nicknameTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "닉네임"
-        label.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        label.tintColor = .black
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+//    private let nicknameTitleLabel: UILabel = {
+//        let label = UILabel()
+//        label.text = "닉네임"
+//        label.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+//        label.tintColor = .black
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        return label
+//    }()
+    
+    private let nicknameInputView: NicknameInputView = {
+        let view = NicknameInputView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
-    
-    class CustomTextField: UITextField {
-        var textInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        
-        override func textRect(forBounds bounds: CGRect) -> CGRect {
-            return bounds.inset(by: textInsets)
-        }
-        
-        override func editingRect(forBounds bounds: CGRect) -> CGRect {
-            return bounds.inset(by: textInsets)
-        }
-        
-        override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
-            return bounds.inset(by: textInsets)
-        }
-    }
-    
-    private let textFieldHeight: CGFloat = 47
-    
-    private let nicknameTextField: CustomTextField = {
-        let textField = CustomTextField()
-        textField.placeholder = "닉네임을 입력하세요"
-        textField.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        textField.tintColor = UIColor(named: "Gray1")
-        textField.borderStyle = .roundedRect
-        textField.layer.borderColor = UIColor(named: "Gray3")?.cgColor
-        textField.layer.borderWidth = 1.0
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        
-        textField.textInsets = UIEdgeInsets(top: 13, left: 16, bottom: 13, right: 16)
-        
-        return textField
-    }()
-    
     private let userRelatedTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "사용자 관련"
@@ -92,9 +72,12 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         let button = MainButton()
         button.title = "수정 완료"
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.isEnabled = false
         button.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         return button
     }()
+    
+    private var currentUserId: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -102,10 +85,16 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         setupViews()
         view.backgroundColor = .white
         
-        hidesBottomBarWhenPushed = true
-        self.tabBarController?.tabBar.isHidden = true
-        
         fetchUserProfile()
+        
+        // 화면 터치 인식 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
+        
+        nicknameInputView.delegate = self
+        nicknameInputView.textField.delegate = self
+        
+        currentUserId = Auth.auth().currentUser?.uid
     }
     
     private func setupNavBar() {
@@ -118,13 +107,13 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
     }
     
     @objc private func backButtonTapped() {
-        self.navigationController?.popViewController(animated: true)
+        self.navigationController?.popViewController(animated:true)
     }
     
     private func setupViews() {
         view.addSubview(profileImageView)
-        view.addSubview(nicknameTitleLabel)
-        view.addSubview(nicknameTextField)
+        //view.addSubview(nicknameTitleLabel)
+        view.addSubview(nicknameInputView)
         view.addSubview(userRelatedTitleLabel)
         view.addSubview(publicProfileLabel)
         view.addSubview(toggleSwitch)
@@ -136,14 +125,14 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
             profileImageView.widthAnchor.constraint(equalToConstant: 160),
             profileImageView.heightAnchor.constraint(equalToConstant: 160),
             
-            nicknameTitleLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 26),
-            nicknameTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+//            nicknameTitleLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 26),
+//            nicknameTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
-            nicknameTextField.topAnchor.constraint(equalTo: nicknameTitleLabel.bottomAnchor, constant: 20),
-            nicknameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            nicknameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nicknameInputView.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 20),
+            nicknameInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nicknameInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            userRelatedTitleLabel.topAnchor.constraint(equalTo: nicknameTextField.bottomAnchor, constant: 38),
+            userRelatedTitleLabel.topAnchor.constraint(equalTo: nicknameInputView.bottomAnchor, constant: 38),
             userRelatedTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
             publicProfileLabel.topAnchor.constraint(equalTo: userRelatedTitleLabel.bottomAnchor, constant: 20),
@@ -160,10 +149,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
     }
     
     func didChooseImage(_ image: UIImage?) {
-        guard let selectedImage = image else {
-            return
-        }
-        profileImageView.imageView.image = selectedImage
+        profileImageView.imageView.image = image ?? defaultProfileImage
     }
     
     @objc private func saveButtonTapped() {
@@ -171,59 +157,78 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
             return
         }
         
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(currentUser.uid)
+        let newNickname = nicknameInputView.getNickname()
         
-        guard let newNickname = nicknameTextField.text else {
+        guard !newNickname.isEmpty else {
             return
         }
         
-        userRef.updateData(["name": newNickname]) { [weak self] error in
-            guard let self = self else { return }
-            if let error = error {
-                print("Error updating document: \(error)")
+        // 중복 확인
+        checkUser(name: newNickname) { isUnique in
+            if isUnique {
+                UserManager.shared.user.name = newNickname
+                
+                let isProfilePublic = self.toggleSwitch.isOn
+                UserManager.shared.user.isProfilePublic = isProfilePublic
+                
+                // 이미지가 변경되었는지 확인
+                if let profileImage = self.profileImageView.imageView.image, !self.isDefaultImage(profileImage) {
+                    let imageUrl = "profileImages/\(currentUser.uid)"
+                    ImageCacheManager.shared.setImage(image: profileImage, url: imageUrl)
+                    UserManager.shared.user.profileImageUrl = imageUrl
+                } else {
+                    UserManager.shared.user.profileImageUrl = nil
+                }
+                
+                // 사용자 데이터 업데이트
+                UserManager.shared.updateUserData(uid: currentUser.uid) { success in
+                    if success {
+                        DispatchQueue.main.async {
+                            self.navigationController?.popViewController(animated: true)
+                        }
+                    } else {
+                        // 업데이트 실패 처리
+                    }
+                }
             } else {
-                print("Nickname successfully updated")
+                DispatchQueue.main.async {
+                    let alert = UIAlertController(title: "닉네임 중복", message: "이미 등록된 닉네임입니다.\n다시 입력해주시기 바랍니다.", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                    
+                    self.saveButton.isEnabled = true
+                }
             }
         }
-        
-        let isProfilePublic = toggleSwitch.isOn
-        userRef.updateData(["isProfilePublic": isProfilePublic]) { error in
-            if let error = error {
-                print("Error updating document: \(error)")
-            } else {
-                print("Profile visibility successfully updated")
-            }
+    }
+    
+    /// 닉네임 중복 확인
+    func checkUser(name: String, completionHandler: @escaping (Bool) -> Void) {
+        guard let currentUserId = currentUserId else {
+            completionHandler(false)
+            return
         }
         
-        if let profileImage = profileImageView.imageView.image,
-           let imageData = profileImage.jpegData(compressionQuality: 0.5) {
-            let storageRef = Storage.storage().reference().child("profileImages/\(currentUser.uid)")
-            
-            let metadata = StorageMetadata()
-            metadata.contentType = "image/jpeg"
-            
-            storageRef.putData(imageData, metadata: metadata) { [weak self] metadata, error in
-                guard let self = self, let _ = metadata else {
-                    print("Error uploading profile image: \(error?.localizedDescription ?? "")")
+        Firestore.firestore().collection("users")
+            .whereField("name", isEqualTo: name)
+            .whereField("uid", isEqualTo: currentUserId)
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    print("Error checking user: \(error.localizedDescription)")
+                    completionHandler(false)
                     return
                 }
-                storageRef.downloadURL { url, error in
-                    guard let downloadURL = url else {
-                        print("Error getting download URL: \(error?.localizedDescription ?? "")")
-                        return
-                    }
-                    
-                    userRef.updateData(["profileImageUrl": downloadURL.absoluteString]) { error in
-                        if let error = error {
-                            print("Error updating profile image URL: \(error)")
-                        } else {
-                            print("Profile image URL successfully updated")
-                        }
-                    }
+                
+                if let querySnapshot = querySnapshot, !querySnapshot.isEmpty {
+                    completionHandler(true)
+                } else {
+                    completionHandler(false)
                 }
             }
-        }
+    }
+    
+    private func isDefaultImage(_ image: UIImage) -> Bool {
+        return image == defaultProfileImage
     }
     
     private func fetchUserProfile() {
@@ -234,8 +239,8 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(currentUser.uid)
         
-        userRef.getDocument { [weak self] document, error in
-            guard let self = self, let document = document, document.exists else {
+        userRef.getDocument { document, error in
+            guard let document = document, document.exists else {
                 return
             }
             
@@ -248,12 +253,44 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate {
             }
             
             if let userName = data?["name"] as? String {
-                self.nicknameTextField.text = userName
+                self.nicknameInputView.textField.text = userName
+                
+                self.checkNicknameValidity(userName)
             }
             
             if let isProfilePublic = data?["isProfilePublic"] as? Bool {
                 self.toggleSwitch.isOn = isProfilePublic
             }
+            self.checkSaveButtonValidity()
         }
+    }
+    
+    private func checkNicknameValidity(_ nickname: String) {
+        nicknameInputView.isError = !isValidNickname(nickname)
+        checkSaveButtonValidity()
+    }
+
+    private func isValidNickname(_ nickname: String) -> Bool {
+        let specialCharacters = CharacterSet(charactersIn: "!?@#$%^&*()_+=-<>,.;|/:[]{}")
+        return nickname.count >= 2 && nickname.count <= 10 && !nickname.contains(" ") && nickname.rangeOfCharacter(from: specialCharacters) == nil
+    }
+    
+    private func checkSaveButtonValidity() {
+        let isNicknameValid = isValidNickname(nicknameInputView.getNickname())
+        saveButton.isEnabled = isNicknameValid
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string) ?? ""
+        checkNicknameValidity(currentText)
+        return true
+    }
+
+    func MainButtonDidChangeEnabled(_ enabled: Bool) {
+        saveButton.isEnabled = enabled
     }
 }

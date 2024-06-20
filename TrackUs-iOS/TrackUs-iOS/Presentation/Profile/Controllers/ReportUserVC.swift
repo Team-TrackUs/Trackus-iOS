@@ -12,6 +12,18 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
     
     var userId: String
     
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
+        
+    private let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private let reportTargetLabel: UILabel = {
         let label = UILabel()
         label.text = "신고대상"
@@ -115,14 +127,12 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         return label
     }()
     
-    private let reportButton: UIButton = {
-        let button = UIButton()
+    private lazy var mainButton: MainButton = {
+        let button = MainButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("신고하기", for: .normal)
+        button.title = "신고하기"
         button.backgroundColor = .red
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 25.0
-        //button.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -134,12 +144,17 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         fetchUserProfile(userId: userId)
         setupPicker()
         setupTextView()
+        
+        // 화면 터치 인식 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
     }
     
     private func setupNavBar() {
         self.navigationItem.title = "신고하기"
         
-        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
         backButton.tintColor = .black
         self.navigationItem.leftBarButtonItem = backButton
         
@@ -154,52 +169,70 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         self.navigationController?.popViewController(animated: true)
     }
     
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     private func setupViews() {
-        view.addSubview(reportTargetLabel)
-        view.addSubview(profileImageView)
-        view.addSubview(nameLabel)
-        view.addSubview(reasonLabel)
-        view.addSubview(reasonTextField)
-        view.addSubview(reportContentLabel)
-        view.addSubview(reportTextView)
-        view.addSubview(confirmationLabel)
-        view.addSubview(reportButton)
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(reportTargetLabel)
+        contentView.addSubview(profileImageView)
+        contentView.addSubview(nameLabel)
+        contentView.addSubview(reasonLabel)
+        contentView.addSubview(reasonTextField)
+        contentView.addSubview(reportContentLabel)
+        contentView.addSubview(reportTextView)
+        contentView.addSubview(confirmationLabel)
+        contentView.addSubview(mainButton)
         
         NSLayoutConstraint.activate([
-            reportTargetLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            reportTargetLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
+            reportTargetLabel.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor, constant: 20),
+            reportTargetLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             
             profileImageView.topAnchor.constraint(equalTo: reportTargetLabel.bottomAnchor, constant: 20),
-            profileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            profileImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             profileImageView.widthAnchor.constraint(equalToConstant: 116),
             profileImageView.heightAnchor.constraint(equalToConstant: 116),
             
             nameLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 20),
-            nameLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            nameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
             reasonLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 20),
             reasonLabel.leadingAnchor.constraint(equalTo: reasonTextField.leadingAnchor, constant: 16),
             
             reasonTextField.topAnchor.constraint(equalTo: reasonLabel.bottomAnchor, constant: 10),
-            reasonTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            reasonTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            reasonTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            reasonTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             reasonTextField.heightAnchor.constraint(equalToConstant: 40),
             
             reportContentLabel.topAnchor.constraint(equalTo: reasonTextField.bottomAnchor, constant: 20),
-            reportContentLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            reportContentLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             
             reportTextView.topAnchor.constraint(equalTo: reportContentLabel.bottomAnchor, constant: 10),
-            reportTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            reportTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            reportTextView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            reportTextView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             reportTextView.heightAnchor.constraint(equalToConstant: 150),
             
             confirmationLabel.topAnchor.constraint(equalTo: reportTextView.bottomAnchor, constant: 14),
             confirmationLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             
-            reportButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            reportButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            reportButton.heightAnchor.constraint(equalToConstant: 58),
-            reportButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            mainButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            mainButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            mainButton.heightAnchor.constraint(equalToConstant: 56),
+            mainButton.topAnchor.constraint(equalTo: confirmationLabel.bottomAnchor, constant: 130),
+            contentView.bottomAnchor.constraint(greaterThanOrEqualTo: mainButton.bottomAnchor, constant: 16)
         ])
         
         reasonTextField.text = reasons[0]
@@ -286,6 +319,52 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
             if let userName = data?["name"] as? String {
                 self.nameLabel.text = userName
             }
+        }
+    }
+    
+    @objc private func reportButtonTapped() {
+        guard let currentUser = Auth.auth().currentUser else { return }
+        
+        let db = Firestore.firestore()
+        let reportId = UUID().uuidString
+        let reportRef = db.collection("report_user").document(reportId)
+        
+        let report = report_user(
+            uid: reportId,
+            toUser: nameLabel.text ?? "Unknown User",
+            toUserUid: userId,
+            category: reasonTextField.text ?? "",
+            text: reportTextView.text ?? "",
+            fromUser: currentUser.uid,
+            createdAt: Timestamp()
+        )
+        
+        do {
+            try reportRef.setData(from: report) { error in
+                if let error = error {
+                    print("Error saving report: \(error.localizedDescription)")
+                } else {
+                    print("Report successfully saved.")
+                    let userRef = db.collection("users").document(currentUser.uid)
+                    userRef.updateData([
+                        "reportIDList": FieldValue.arrayUnion([self.userId])
+                    ]) { error in
+                        if let error = error {
+                            print("Error updating reportIDList: \(error.localizedDescription)")
+                        } else {
+                            print("ReportIDList successfully updated.")
+                            
+                            let alert = UIAlertController(title: "신고 완료", message: "신고가 성공적으로 접수되었습니다.", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "확인", style: .default, handler: { _ in
+                                self.navigationController?.popViewController(animated: true)
+                            }))
+                            self.present(alert, animated: true, completion: nil)
+                        }
+                    }
+                }
+            }
+        } catch let error {
+            print("Error encoding report: \(error.localizedDescription)")
         }
     }
 }
