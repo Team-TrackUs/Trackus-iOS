@@ -33,7 +33,7 @@ extension Notification.Name {
 class NetworkErrorView: UIView {
     private let textlabel: UILabel = {
         let label = UILabel()
-        label.text = "인터넷 연결에 실패하였습니다."
+        label.text = "네트워크 연결에 실패하였습니다."
         label.font = UIFont.boldSystemFont(ofSize: 12)
         label.textColor = UIColor.black
         label.textAlignment = .center
