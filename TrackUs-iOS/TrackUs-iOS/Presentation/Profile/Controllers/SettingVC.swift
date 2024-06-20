@@ -88,8 +88,8 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
         case 2:
             return 1
         case 3:
-            //return 1
-            return 2
+            return 1
+            //return 2
         case 4:
             return 2
         default:
@@ -130,8 +130,8 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
         case 2:
             cell.textLabel?.text = "문의하기"
         case 3:
-            //cell.textLabel?.text = "차단된 계정"
-            cell.textLabel?.text = indexPath.row == 0 ? "차단된 계정" : "모든 사용자"
+            cell.textLabel?.text = "차단된 계정"
+            //cell.textLabel?.text = indexPath.row == 0 ? "차단된 계정" : "모든 사용자"
         case 4:
             cell.textLabel?.text = indexPath.row == 0 ? "로그아웃" : "회원탈퇴"
         default:
