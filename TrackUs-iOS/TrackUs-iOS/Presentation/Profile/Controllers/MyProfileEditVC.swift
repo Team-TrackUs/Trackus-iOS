@@ -28,14 +28,14 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDel
         return view
     }()
     
-    private let nicknameTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "닉네임"
-        label.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        label.tintColor = .black
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+//    private let nicknameTitleLabel: UILabel = {
+//        let label = UILabel()
+//        label.text = "닉네임"
+//        label.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+//        label.tintColor = .black
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        return label
+//    }()
     
     private let nicknameInputView: NicknameInputView = {
         let view = NicknameInputView()
@@ -112,7 +112,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDel
     
     private func setupViews() {
         view.addSubview(profileImageView)
-        view.addSubview(nicknameTitleLabel)
+        //view.addSubview(nicknameTitleLabel)
         view.addSubview(nicknameInputView)
         view.addSubview(userRelatedTitleLabel)
         view.addSubview(publicProfileLabel)
@@ -125,10 +125,10 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDel
             profileImageView.widthAnchor.constraint(equalToConstant: 160),
             profileImageView.heightAnchor.constraint(equalToConstant: 160),
             
-            nicknameTitleLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 26),
-            nicknameTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+//            nicknameTitleLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 26),
+//            nicknameTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
-            nicknameInputView.topAnchor.constraint(equalTo: nicknameTitleLabel.bottomAnchor, constant: 20),
+            nicknameInputView.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 20),
             nicknameInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             nicknameInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
@@ -204,6 +204,11 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDel
     
     /// 닉네임 중복 확인
     func checkUser(name: String, completionHandler: @escaping (Bool) -> Void) {
+        guard let currentUserId = currentUserId else {
+            completionHandler(false)
+            return
+        }
+        
         Firestore.firestore().collection("users")
             .whereField("name", isEqualTo: name)
             .whereField("uid", isEqualTo: currentUserId)
@@ -213,7 +218,7 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDel
                     completionHandler(false)
                     return
                 }
-                // 현재 사용자꺼는 중복 처리 x
+                
                 if let querySnapshot = querySnapshot, !querySnapshot.isEmpty {
                     completionHandler(true)
                 } else {
