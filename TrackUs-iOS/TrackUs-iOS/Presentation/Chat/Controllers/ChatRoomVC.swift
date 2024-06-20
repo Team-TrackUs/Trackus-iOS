@@ -19,7 +19,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     // 메인 버튼 하단 위치 제약조건
     private var tableViewBottomConstraint: NSLayoutConstraint!
-    private var inputStackViewBottomConstraint: NSLayoutConstraint!
+    private var inputViewBottomConstraint: NSLayoutConstraint!
+    private var messageTextViewHeightConstraint: NSLayoutConstraint!
+    private var stackViewHeightConstraint: NSLayoutConstraint!
     
     var lock = NSRecursiveLock()
     
@@ -79,7 +81,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         let textView = UITextView()
         textView.font = .systemFont(ofSize: 16)
         textView.isScrollEnabled = false
-        textView.delegate = self
         //textField.numberOfLines = 0
         return textView
     }()
@@ -98,16 +99,15 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         return button
     }()
     
-    private lazy var inputStackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [plusButton, messageTextView, sendButton])
-        stackView.axis = .horizontal
-        stackView.backgroundColor = .systemBackground
-        stackView.spacing = 0
-        stackView.layer.cornerRadius = 18
-        stackView.clipsToBounds = true
-        stackView.layer.borderColor = UIColor.gray3.cgColor
-        stackView.layer.borderWidth = 1
-        return stackView
+    private lazy var messageInputView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .systemBackground
+        view.layer.cornerRadius = 19
+        view.clipsToBounds = true
+        view.layer.borderColor = UIColor.gray3.cgColor
+        view.layer.borderWidth = 1
+        return view
     }()
     
     override func viewDidLoad() {
@@ -145,7 +145,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         stopListening()
         resetUnreadCounter()
     }
-
+    // MARK: - 오토레이아웃 관련
     private func setupNavigationBar() {
         let sideMenuButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal"), style: .plain, target: self, action: #selector(showSideMenu))
         let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backAction))
@@ -161,40 +161,54 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     private func setupViews() {
         view.backgroundColor = .systemBackground
         view.addSubview(tableView)
-        view.addSubview(inputStackView)
+        view.addSubview(messageInputView)
+        messageInputView.addSubview(plusButton)
+        messageInputView.addSubview(messageTextView)
+        messageInputView.addSubview(sendButton)
+
         tableView.translatesAutoresizingMaskIntoConstraints = false
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         sendButton.translatesAutoresizingMaskIntoConstraints = false
-        inputStackView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         messageTextView.delegate = self
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(ChatMessageCell.self, forCellReuseIdentifier: "ChatMessageCell")
-        
-        tableViewBottomConstraint = tableView.bottomAnchor.constraint(equalTo: inputStackView.topAnchor)
-        inputStackViewBottomConstraint = inputStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
-        
+
+        tableViewBottomConstraint = tableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor, constant: -4)
+        inputViewBottomConstraint = messageInputView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8)
+
+        stackViewHeightConstraint = messageInputView.heightAnchor.constraint(equalToConstant: 38)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableViewBottomConstraint,
-            
-            inputStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            inputStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
-            inputStackViewBottomConstraint,
-            
+
+            messageInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            messageInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            //messageInputView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            stackViewHeightConstraint,
+            inputViewBottomConstraint,
+
+            plusButton.leadingAnchor.constraint(equalTo: messageInputView.leadingAnchor),
+            plusButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
             plusButton.heightAnchor.constraint(equalToConstant: 36),
             plusButton.widthAnchor.constraint(equalToConstant: 36),
-            
+
+            sendButton.trailingAnchor.constraint(equalTo: messageInputView.trailingAnchor, constant: -1),
+            sendButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
             sendButton.heightAnchor.constraint(equalToConstant: 36),
             sendButton.widthAnchor.constraint(equalToConstant: 36),
-            
-            messageTextView.heightAnchor.constraint(equalToConstant: 40)
+
+            messageTextView.leadingAnchor.constraint(equalTo: plusButton.trailingAnchor, constant: 2),
+            messageTextView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: -2),
+            messageTextView.topAnchor.constraint(equalTo: messageInputView.topAnchor, constant: 1),
+            messageTextView.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
         ])
     }
+    
     // MARK: - 액션 관련 함수
     // 전송 버튼 이벤트 함수
     @objc private func sendMessage() {
@@ -282,7 +296,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @objc private func keyboardWillShow(notification: NSNotification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             // 키보드 높이만큼 bottom constraint 조정
-            inputStackViewBottomConstraint.constant = 25 - keyboardSize.height
+            inputViewBottomConstraint.constant = 25 - keyboardSize.height
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
                 self.scrollToBottom()
@@ -293,7 +307,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     // 키보드 사라질 때
     @objc private func keyboardWillHide(notification: NSNotification) {
         // 키보드가 사라질 때 원래대로 복귀
-        inputStackViewBottomConstraint.constant = -10
+        inputViewBottomConstraint.constant = -10
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
@@ -521,12 +535,15 @@ extension ChatRoomVC: UITextViewDelegate {
         // 텍스트 뷰의 크기를 콘텐츠에 맞게 조정
         let size = CGSize(width: textView.frame.width, height: .infinity)
         let estimatedSize = textView.sizeThatFits(size)
+        // 최대 3줄 높이 계산
+        let maxHeight: CGFloat = 4 * textView.font!.lineHeight
+        let height = min(estimatedSize.height, maxHeight)
         
-        textView.constraints.forEach { (constraint) in
-            if constraint.firstAttribute == .height {
-                constraint.constant = estimatedSize.height
-            }
-        }
+        messageTextViewHeightConstraint?.constant = height
+        stackViewHeightConstraint.constant = height > 38 ? height+4 : 38
+        
+        textView.isScrollEnabled = estimatedSize.height >= maxHeight
+        view.layoutIfNeeded()
     }
 }
 
