@@ -61,6 +61,7 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         
         setupNavBar()
         configureUI()
+        backGesture()
     }
     
     // MARK: - Selectors
@@ -71,6 +72,10 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         mapRegion.span = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
         
         drawMapView.setRegion(mapRegion, animated: true)
+    }
+    
+    @objc private func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
     }
     
     // MARK: - Helpers
@@ -127,6 +132,10 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
     }
     
     private func setupNavBar() {
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        self.navigationItem.leftBarButtonItem = backButton
+        
         self.navigationItem.title = "코스 상세보기"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -143,6 +152,10 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
             if !isRegionSet {
                 
                 guard let region = testcoords.makeRegionToFit() else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now()) {
+                    self.drawMapView.setVisibleMapRect(self.drawMapView.visibleMapRect, edgePadding: UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40), animated: false)
+                }
+                
                 drawMapView.setRegion(region, animated: true) // 위치를 사용자의 위치로
                 
                 isRegionSet = true
@@ -200,4 +213,11 @@ class CourseMapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegat
         drawMapView.addOverlay(polyline)
     }
     
+}
+
+extension CourseMapVC: UIGestureRecognizerDelegate {
+    // 스와이프로 이전 화면 갈 수 있도록 추가
+    func backGesture() {
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+    }
 }

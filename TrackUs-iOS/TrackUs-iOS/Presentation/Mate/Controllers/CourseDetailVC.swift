@@ -203,6 +203,8 @@ class CourseDetailVC: UIViewController {
     var mapUIComplete = false
     var viewUIComplete = false
     
+    var isBack: Bool
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -214,6 +216,7 @@ class CourseDetailVC: UIViewController {
         
         collectionView.delegate = self
         collectionView.dataSource = self
+        backGesture()
         
         fetchPostDetail()
         runningStyleColor()
@@ -234,6 +237,15 @@ class CourseDetailVC: UIViewController {
         }
     }
     
+    init(isBack: Bool) {
+        self.isBack = isBack
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Selectors
     
     @objc func goCourseDetail(_ sender: UITapGestureRecognizer) {
@@ -246,17 +258,32 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func courseEnterButtonTapped() {
-        PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updatedMembers, error in
-            if let error = error {
-                print("Error: \(error.localizedDescription)")
-                
-                self.showAlert(title: "", message: "해당 모집글에 인원이 다 찼습니다.", action: "참여")
-            } else if let updatedMembers = updatedMembers {
-                self.members = updatedMembers
+        let userManager = UserManager.shared
+        let userUid = User.currentUid
+        userManager.getUserData(uid: userUid)
+        let user = userManager.user
+        
+        let message = """
+        자세한 내용은
+        마이페이지 > 설정 > 문의하기
+        에서 문의해주시기 바랍니다.
+        """
+        
+        if user.isBlock {
+            showAlert(title: "이용이 제한되었습니다.", message: message, action: "제한")
+        } else {
+            PostService().enterPost(postUid: postUid, userUid: uid, members: members) { updatedMembers, error in
+                if let error = error {
+                    print("Error: \(error.localizedDescription)")
+                    
+                    self.showAlert(title: "", message: "해당 모집글에 인원이 다 찼습니다.", action: "참여")
+                } else if let updatedMembers = updatedMembers {
+                    self.members = updatedMembers
+                }
             }
+            // 채팅방 참여
+            joinChat()
         }
-        // 채팅방 참여
-        joinChat()
     }
     
     @objc func courseExitButtonTapped() {
@@ -266,34 +293,49 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func goChatRoomButtonTapped() {
-        let ref = Firestore.firestore().collection("chats")
-        if members.contains(uid){
-            // 채팅방 참여된 경우
-            if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
-                // 기존 채팅방 띄우기
-                presentChatView(chat: chat)
-            }else {
-                // 채팅방 참여하기
-                DispatchQueue.main.async {
-                    self.joinChat()
+        
+        let userManager = UserManager.shared
+        let userUid = User.currentUid
+        userManager.getUserData(uid: userUid)
+        let user = userManager.user
+        
+        let message = """
+        자세한 내용은
+        마이페이지 > 설정 > 문의하기
+        에서 문의해주시기 바랍니다.
+        """
+
+        if user.isBlock {
+            showAlert(title: "이용이 제한되었습니다.", message: message, action: "제한")
+        } else {
+            let ref = Firestore.firestore().collection("chats")
+            if members.contains(uid){
+                // 채팅방 참여된 경우
+                if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+                    // 기존 채팅방 띄우기
+                    presentChatView(chat: chat)
+                }else {
+                    // 채팅방 참여하기
+                    DispatchQueue.main.async {
+                        self.joinChat()
+                    }
+                    
+                    let chat = Chat(uid: postUid, group: true, title: "", members: [:], usersUnreadCountInfo: [:])
+                    // 기존 채팅방 띄우기
+                    presentChatView(chat: chat)
                 }
-                
-                let chat = Chat(uid: postUid, group: true, title: "", members: [:], usersUnreadCountInfo: [:])
-                // 기존 채팅방 띄우기
-                presentChatView(chat: chat)
-            }
-        }else {
-            // 참여 안된 경우 - 방장 1:1 대화하기
-            if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in 
-                // 개인 채팅방 - 방장 uid통해 채팅 유무 여부 확인
-                !chatRoom.group && chatRoom.nonSelfMembers.contains(ownerUid)  }){
-                // 채팅방 표시
-                presentChatView(chat: chat)
-            } else {
-                
+            }else {
+                // 참여 안된 경우 - 방장 1:1 대화하기
+                if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in
+                    // 개인 채팅방 - 방장 uid통해 채팅 유무 여부 확인
+                    !chatRoom.group && chatRoom.nonSelfMembers.contains(ownerUid)  }){
+                    // 채팅방 표시
+                    presentChatView(chat: chat)
+                } else {
+                    
+                }
             }
         }
-        
     }
     
     @objc func menuButtonTapped() {
@@ -346,6 +388,10 @@ class CourseDetailVC: UIViewController {
         alert.addAction(cancelAction)
         
         self.present(alert, animated: true)
+    }
+    
+    @objc func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
     }
     
     // MARK: - Helpers
@@ -637,6 +683,10 @@ class CourseDetailVC: UIViewController {
             alertController.addAction(okAction)
             alertController.addAction(cancelAction)
             
+        case "제한":
+            let okAction = UIAlertAction(title: "확인", style: .default)
+            alertController.addAction(okAction)
+            
         default:
             break
         }
@@ -647,7 +697,7 @@ class CourseDetailVC: UIViewController {
     func searchAddress(completion: @escaping (String) -> Void) {
         let addLoc = CLLocation(latitude: courseCoords[0].latitude, longitude: courseCoords[0].longitude)
         var address = ""
-
+        
         CLGeocoder().reverseGeocodeLocation(addLoc, completionHandler: { place, error in
             if let pm = place?.first {
                 if let administrativeArea = pm.administrativeArea {
@@ -701,6 +751,24 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         
         return UIEdgeInsets(top: 0, left: 10, bottom: 20, right: 10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let memberUid = members[indexPath.item]
+        let userUid = User.currentUid
+        
+        if memberUid == userUid {
+            // 자신의 프로필은 선택이 안되도록
+            return
+        } else {
+            let otherProfileVC = OtherProfileVC(userId: memberUid)
+            let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: otherProfileVC, action: #selector(otherProfileVC.backButtonTapped))
+            backButton.tintColor = .black
+            otherProfileVC.navigationItem.leftBarButtonItem = backButton
+            
+            otherProfileVC.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(otherProfileVC, animated: true)
+        }
     }
     
 }
@@ -801,5 +869,17 @@ extension CourseDetailVC: CLLocationManagerDelegate, MKMapViewDelegate {
     func addPolylineToMap() {
         let polyline = MKPolyline(coordinates: courseCoords, count: courseCoords.count)
         preMapView.addOverlay(polyline)
+    }
+}
+
+extension CourseDetailVC: UIGestureRecognizerDelegate {
+    // 스와이프로 이전 화면 갈 수 있도록 추가
+    func backGesture() {
+        if isBack {
+            self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+            self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        } else {
+            self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        }
     }
 }

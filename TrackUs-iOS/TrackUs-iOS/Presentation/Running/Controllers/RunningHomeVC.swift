@@ -8,7 +8,7 @@
 import UIKit
 import MapKit
 
-final class RunningHomeVC: UIViewController, MKMapViewDelegate {
+final class RunningHomeVC: UIViewController {
     
     // MARK: - Properties
     
@@ -35,8 +35,8 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
     
     private lazy var navigationMenuButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        button.tintColor = .gray1
+        button.setImage(UIImage(named: "dots_icon"), for: .normal)
+        button.tintColor = .black
         return button
     }()
     
@@ -146,8 +146,11 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         myLocationButton.bottomAnchor.constraint(equalTo: mapView.bottomAnchor, constant: -110).isActive = true
         myLocationButton.rightAnchor.constraint(equalTo: mapView.rightAnchor, constant: -16).isActive = true
     }
+}
+    // MARK: - MapView
+ 
+extension RunningHomeVC: MKMapViewDelegate {
     
-    // 맵설정
     func setupMapView() {
         mapView = MKMapView(frame: self.view.bounds)
         mapView.showsUserLocation = true
@@ -189,8 +192,6 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         }
     }
     
-    // MARK: - MapView
-    
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         guard !(annotation is MKUserLocation) else {
             return nil
@@ -212,46 +213,42 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
                 imageView.image = UIImage(systemName: "flag.circle.fill")
                 imageView.contentMode = .scaleAspectFit
                 imageView.clipsToBounds = true
-                imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-                imageView.layer.cornerRadius = 50 / 2
+                imageView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+                imageView.layer.cornerRadius = 40 / 2
                 imageView.backgroundColor = .white
-                imageView.layer.borderColor = UIColor.mainBlue.cgColor
-                imageView.layer.borderWidth = 2
                 
                 annotationView?.subviews.forEach { $0.removeFromSuperview() }
                 
-                annotationView?.frame.size = CGSize(width: 50, height: 50)
+                annotationView?.frame.size = CGSize(width: 40, height: 40)
                 annotationView?.addSubview(imageView)
                 
                 imageView.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
                     imageView.centerXAnchor.constraint(equalTo: annotationView!.centerXAnchor),
                     imageView.centerYAnchor.constraint(equalTo: annotationView!.centerYAnchor),
-                    imageView.widthAnchor.constraint(equalToConstant: 50),
-                    imageView.heightAnchor.constraint(equalToConstant: 50)
+                    imageView.widthAnchor.constraint(equalToConstant: 40),
+                    imageView.heightAnchor.constraint(equalToConstant: 40)
                 ])
             } else {
                 let imageView = UIImageView()
-                imageView.image = UIImage(named: "trackus_icon")?.withRenderingMode(.alwaysTemplate)
+                imageView.image = UIImage(named: "mapMarker_icon")?.withRenderingMode(.alwaysOriginal)
                 imageView.contentMode = .scaleAspectFit
                 imageView.clipsToBounds = true
-                imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-                imageView.layer.cornerRadius = 50 / 2
+                imageView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+                imageView.layer.cornerRadius = 40 / 2
                 imageView.backgroundColor = .white
-                imageView.layer.borderColor = UIColor.mainBlue.cgColor
-                imageView.layer.borderWidth = 2
                 
                 annotationView?.subviews.forEach { $0.removeFromSuperview() }
                 
-                annotationView?.frame.size = CGSize(width: 50, height: 50)
+                annotationView?.frame.size = CGSize(width: 40, height: 40)
                 annotationView?.addSubview(imageView)
                 
                 imageView.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
                     imageView.centerXAnchor.constraint(equalTo: annotationView!.centerXAnchor),
                     imageView.centerYAnchor.constraint(equalTo: annotationView!.centerYAnchor),
-                    imageView.widthAnchor.constraint(equalToConstant: 50),
-                    imageView.heightAnchor.constraint(equalToConstant: 50)
+                    imageView.widthAnchor.constraint(equalToConstant: 40),
+                    imageView.heightAnchor.constraint(equalToConstant: 40)
                 ])
             }
         }
@@ -317,7 +314,6 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
             
             mapView.isZoomEnabled = false
             mapView.isScrollEnabled = false
-            mapView.isRotateEnabled = false
             self.myLocationButton.isHidden = true
             isSelected = true
         }
@@ -346,7 +342,6 @@ final class RunningHomeVC: UIViewController, MKMapViewDelegate {
         
         mapView.isZoomEnabled = true
         mapView.isScrollEnabled = true
-        mapView.isRotateEnabled = true
         self.myLocationButton.isHidden = false
         isSelected = false
         selectedAnnotation = nil
@@ -383,13 +378,17 @@ extension RunningHomeVC: UICollectionViewDelegate, UICollectionViewDataSource, U
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let post = posts[indexPath.row]
         
-        let courseDetailVC = CourseDetailVC()
+        let courseDetailVC = CourseDetailVC(isBack: true)
         courseDetailVC.hidesBottomBarWhenPushed = true
         courseDetailVC.postUid = post.uid
         
         navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
         let barButton = UIBarButtonItem(customView: navigationMenuButton)
         courseDetailVC.navigationItem.rightBarButtonItem = barButton
+        
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: courseDetailVC, action: #selector(courseDetailVC.backButtonTapped))
+        backButton.tintColor = .black
+        courseDetailVC.navigationItem.leftBarButtonItem = backButton
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         collectionView.deselectItem(at: indexPath, animated: false)

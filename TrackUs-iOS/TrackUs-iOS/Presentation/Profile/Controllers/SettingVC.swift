@@ -209,8 +209,9 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
                 showWebView(with: "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4", title: "개인정보 처리방침")
             }
         case 2:
-            let withdrawalVC = UserListVC()
-            navigationController?.pushViewController(withdrawalVC, animated: true)
+            let askusVC = AskusVC()
+            askusVC.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(askusVC, animated: true)
         case 3:
             let withdrawalVC = UserListVC()
             navigationController?.pushViewController(withdrawalVC, animated: true)

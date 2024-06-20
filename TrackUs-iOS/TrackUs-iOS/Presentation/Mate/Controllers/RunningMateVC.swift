@@ -102,8 +102,8 @@ class RunningMateVC: UIViewController {
     
     private lazy var navigationMenuButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        button.tintColor = .gray1
+        button.setImage(UIImage(named: "dots_icon"), for: .normal)
+        button.tintColor = .black
         return button
     }()
     
@@ -129,11 +129,26 @@ class RunningMateVC: UIViewController {
     // MARK: - Selectors
     
     @objc func moveButtonTapped() {
-        HapticManager.shared.hapticImpact(style: .light)
-        let courseRegisterVC = CourseRegisterVC()
-        let navController = UINavigationController(rootViewController: courseRegisterVC)
-        navController.modalPresentationStyle = .fullScreen
-        self.present(navController, animated: true, completion: nil)
+        let userManager = UserManager.shared
+        let userUid = User.currentUid
+        userManager.getUserData(uid: userUid)
+        let user = userManager.user
+        
+        let message = """
+        자세한 내용은
+        마이페이지 > 설정 > 문의하기
+        에서 문의해주시기 바랍니다.
+        """
+        
+        if user.isBlock {
+            showAlert(title: "이용이 제한되었습니다.", message: message)
+        } else {
+            HapticManager.shared.hapticImpact(style: .light)
+            let courseRegisterVC = CourseRegisterVC()
+            let navController = UINavigationController(rootViewController: courseRegisterVC)
+            navController.modalPresentationStyle = .fullScreen
+            self.present(navController, animated: true, completion: nil)
+        }
     }
     
     @objc func searchButtonTapped() {
@@ -283,8 +298,17 @@ class RunningMateVC: UIViewController {
             self.isLoadingMore = false
         }
     }
+    
+    func showAlert(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "확인", style: .default)
+        alertController.addAction(action)
+        self.present(alertController, animated: true, completion: nil)
+    }
 }
 
+// MARK: - TableViewDelegate
 extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return posts.count
@@ -303,7 +327,7 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let post = posts[indexPath.row]
         
-        let courseDetailVC = CourseDetailVC()
+        let courseDetailVC = CourseDetailVC(isBack: true)
         courseDetailVC.hidesBottomBarWhenPushed = true
         
         courseDetailVC.postUid = post.uid
@@ -311,6 +335,10 @@ extension RunningMateVC: UITableViewDelegate, UITableViewDataSource, UIScrollVie
         navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
         let barButton = UIBarButtonItem(customView: navigationMenuButton)
         courseDetailVC.navigationItem.rightBarButtonItem = barButton
+        
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: courseDetailVC, action: #selector(courseDetailVC.backButtonTapped))
+        backButton.tintColor = .black
+        courseDetailVC.navigationItem.leftBarButtonItem = backButton
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: false)

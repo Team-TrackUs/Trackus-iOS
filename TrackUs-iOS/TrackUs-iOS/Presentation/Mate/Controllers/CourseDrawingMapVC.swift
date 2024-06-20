@@ -96,6 +96,9 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         if let courseRegisterVC = navigationController?.viewControllers.first(where: { $0 is CourseRegisterVC }) as? CourseRegisterVC {
             self.courseRegisterVC = courseRegisterVC
         }
+        
+        // 스와이프로 이전 화면 갈 수 있도록 추가
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
     }
     
     // MARK: - Selectors
@@ -179,6 +182,10 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
         } else {
             addActionToAlert()
         }
+    }
+    
+    @objc private func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
     }
     
     
@@ -283,6 +290,10 @@ class CourseDrawingMapVC: UIViewController, CLLocationManagerDelegate, MKMapView
     }
     
     private func setupNavBar() {
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        self.navigationItem.leftBarButtonItem = backButton
+        
         self.navigationItem.title = "코스 등록"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()

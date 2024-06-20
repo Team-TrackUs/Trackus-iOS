@@ -57,8 +57,8 @@ class SearchVC: UIViewController, UITextFieldDelegate {
     
     private lazy var navigationMenuButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        button.tintColor = .gray1
+        button.setImage(UIImage(named: "dots_icon"), for: .normal)
+        button.tintColor = .black
         return button
     }()
 
@@ -155,7 +155,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let post = searchResultsPosts[indexPath.row]
 
-        let courseDetailVC = CourseDetailVC()
+        let courseDetailVC = CourseDetailVC(isBack: true)
         courseDetailVC.hidesBottomBarWhenPushed = true
 
         courseDetailVC.postUid = post.uid
@@ -163,6 +163,10 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
         navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
         let barButton = UIBarButtonItem(customView: navigationMenuButton)
         courseDetailVC.navigationItem.rightBarButtonItem = barButton
+        
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: courseDetailVC, action: #selector(courseDetailVC.backButtonTapped))
+        backButton.tintColor = .black
+        courseDetailVC.navigationItem.leftBarButtonItem = backButton
 
         self.searchBar.resignFirstResponder()
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
