@@ -1,18 +1,15 @@
 //
-//  ReportPostVC.swift
+//  AskusVC.swift
 //  TrackUs-iOS
 //
-//  Created by 박선구 on 6/5/24.
+//  Created by 박선구 on 6/18/24.
 //
 
 import UIKit
 
-class ReportPostVC: UIViewController {
+class AskusVC: UIViewController {
     
     // MARK: - Properties
-    
-    var postUid = ""
-    var userUid = ""
     
     let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -21,82 +18,43 @@ class ReportPostVC: UIViewController {
         return scrollView
     }()
     
-    let spacerView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    private let postLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "신고 게시물"
+        label.text = "문의사항 & 개선사항"
         label.textColor = .black
         label.textAlignment = .left
-        label.font = UIFont.boldSystemFont(ofSize: 14)
+        label.font = UIFont.boldSystemFont(ofSize: 16)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private let reasonLabel: UILabel = {
+    private let subTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "신고 사유"
-        label.textColor = .black
+        label.text = """
+        1. 앱 사용 시 불편사항 혹은 개선사항을 입력해주세요.
+        
+        2. 답변을 받으실 이메일을 기재해 주세요.
+        
+        """
+        label.textColor = .gray1
         label.textAlignment = .left
-        label.font = UIFont.boldSystemFont(ofSize: 14)
+        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private let descriptionLabel: UILabel = {
+    private let alertLabel: UILabel = {
         let label = UILabel()
-        label.text = "신고 내용"
-        label.textColor = .black
-        label.textAlignment = .left
-        label.font = UIFont.boldSystemFont(ofSize: 14)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let alertText: UILabel = {
-        let label = UILabel()
-        label.text = "허위 신고 적발시 허위 신고 유저에게 불이익이 발생할 수 있습니다."
+        label.text = "소중한 피드백을 반영하여, 더 나은 TrackUs가 되도록 노력하겠습니다."
         label.textColor = .gray2
         label.textAlignment = .left
         label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
-    }()
-    
-    private let imageView: UIImageView = { // 포스트 이미지
-        let view = UIImageView()
-        view.contentMode = .scaleAspectFit
-        view.clipsToBounds = true
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.widthAnchor.constraint(equalToConstant: 87).isActive = true
-        view.heightAnchor.constraint(equalToConstant: 87).isActive = true
-        view.layer.cornerRadius = 12
-        view.backgroundColor = .gray
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    private let titleLabel: UILabel = { // 포스트 제목
-        let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 18)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private lazy var reasonButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("커뮤니티 위반사례", for: .normal)
-        button.setTitleColor(UIColor.gray1, for: .normal)
-        button.layer.cornerRadius = 8
-        button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.gray2.cgColor
-        button.addTarget(self, action: #selector(reasonButtonTapped), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
     }()
     
     private lazy var toolBarKeyboard: UIToolbar = {
@@ -126,7 +84,7 @@ class ReportPostVC: UIViewController {
     
     private let textViewPlaceholder: UILabel = {
         let label = UILabel()
-        label.text = "신고 사유에 대한 내용을 자세히 입력해주세요."
+        label.text = "문의사항과 이메일을 입력해주세요."
         label.font = UIFont.systemFont(ofSize: 16)
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -135,7 +93,7 @@ class ReportPostVC: UIViewController {
     
     private lazy var reportButton: UIButton = {
         let button = UIButton()
-        button.setTitle("신고하기", for: .normal)
+        button.setTitle("문의하기", for: .normal)
         button.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.textAlignment = .center
@@ -158,12 +116,7 @@ class ReportPostVC: UIViewController {
         view.backgroundColor = .gray3
         return view
     }()
-    
-    var reportReason: String = "" {
-        didSet {
-            updateReportButton()
-        }
-    }
+
     var reportText: String = "" {
         didSet {
             updateReportButton()
@@ -189,66 +142,14 @@ class ReportPostVC: UIViewController {
     
     // MARK: - Selectors
     
-    @objc func reasonButtonTapped() {
-        let action1 = UIAlertAction(title: "욕설, 비방, 혐오표현을 해요", style: .default) { action in
-            self.reasonButton.setTitle("욕설, 비방, 혐오표현을 해요", for: .normal)
-            self.reportReason = "욕설, 비방, 혐오표현을 해요"
-            self.reasonButton.setTitleColor(.black, for: .normal)
-        }
-        
-        let action2 = UIAlertAction(title: "연애 목적의 대화를 시도해요", style: .default) { action in
-            self.reasonButton.setTitle("연애 목적의 대화를 시도해요", for: .normal)
-            self.reportReason = "연애 목적의 대화를 시도해요"
-            self.reasonButton.setTitleColor(.black, for: .normal)
-        }
-        
-        let action3 = UIAlertAction(title: "갈등 조장 및 허위 사실을 유포해요", style: .default) { action in
-            self.reasonButton.setTitle("갈등 조장 및 허위 사실을 유포해요", for: .normal)
-            self.reportReason = "갈등 조장 및 허위 사실을 유포해요"
-            self.reasonButton.setTitleColor(.black, for: .normal)
-        }
-        
-        let action4 = UIAlertAction(title: "채팅방 도배 및 광고를 해요", style: .default) { action in
-            self.reasonButton.setTitle("채팅방 도배 및 광고를 해요", for: .normal)
-            self.reportReason = "채팅방 도배 및 광고를 해요"
-            self.reasonButton.setTitleColor(.black, for: .normal)
-        }
-        
-        let action5 = UIAlertAction(title: "성적 수취심이나 혐오감을 일으켜요", style: .default) { action in
-            self.reasonButton.setTitle("성적 수취심이나 혐오감을 일으켜요", for: .normal)
-            self.reportReason = "성적 수취심이나 혐오감을 일으켜요"
-            self.reasonButton.setTitleColor(.black, for: .normal)
-        }
-        
-        let action6 = UIAlertAction(title: "다른 문제가 있어요", style: .default) { action in
-            self.reasonButton.setTitle("다른 문제가 있어요", for: .normal)
-            self.reportReason = "다른 문제가 있어요"
-            self.reasonButton.setTitleColor(.black, for: .normal)
-        }
-        
-        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
-        
-        let alert = UIAlertController(title: "신고사유", message: nil, preferredStyle: .actionSheet)
-        
-        alert.addAction(action1)
-        alert.addAction(action2)
-        alert.addAction(action3)
-        alert.addAction(action4)
-        alert.addAction(action5)
-        alert.addAction(action6)
-        alert.addAction(cancelAction)
-        
-        self.present(alert, animated: true)
-    }
-    
     @objc func reportButtonTapped() {
-        PostService().reportPost(postUid: postUid, userUid: userUid, category: reportReason, text: reportText) { bool in
-            if bool == false {
-                // error alert 보여주기
-                self.showAlert(title: "", message: "이미 신고완료된 모집글이거나 해당 모집글이 없습니다.", action: "실패")
+        let userUid = User.currentUid
+        
+        AskService().askus(userUid: userUid, text: reportText) { error in
+            if let error = error {
+                self.showAlert(title: "", message: "오류가 발생하였습니다.", action: "실패")
             } else {
-                // success alert 보여주기
-                self.showAlert(title: "", message: "신고가 완료되었습니다.", action: "성공")
+                self.showAlert(title: "", message: "문의가 접수되었습니다.", action: "성공")
             }
         }
     }
@@ -308,49 +209,26 @@ class ReportPostVC: UIViewController {
         scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         scrollView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         
-        scrollView.addSubview(postLabel)
-        postLabel.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 16).isActive = true
-        postLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
         
-        scrollView.addSubview(imageView)
-        imageView.topAnchor.constraint(equalTo: postLabel.bottomAnchor, constant: 12).isActive = true
-        imageView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
-        
-        scrollView.addSubview(titleLabel)
-        titleLabel.leftAnchor.constraint(equalTo: imageView.rightAnchor, constant: 8).isActive = true
-        titleLabel.centerYAnchor.constraint(equalTo: imageView.centerYAnchor).isActive = true
-        
-        scrollView.addSubview(reasonLabel)
-        reasonLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 20).isActive = true
-        reasonLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
-        
-        scrollView.addSubview(reasonButton)
-        reasonButton.topAnchor.constraint(equalTo: reasonLabel.bottomAnchor, constant: 12).isActive = true
-        reasonButton.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
-        reasonButton.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
-        reasonButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        
-        let descriptionStack = UIStackView()
-        descriptionStack.axis = .vertical
-        descriptionStack.spacing = 12
-        descriptionStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        descriptionStack.addArrangedSubview(descriptionLabel)
-        
-        descriptionStack.addArrangedSubview(textView)
-        textView.leadingAnchor.constraint(equalTo: descriptionStack.leadingAnchor).isActive = true
-        textView.trailingAnchor.constraint(equalTo: descriptionStack.trailingAnchor).isActive = true
+        stack.addArrangedSubview(titleLabel)
+        stack.addArrangedSubview(subTitleLabel)
+        stack.addArrangedSubview(textView)
+        textView.leadingAnchor.constraint(equalTo: stack.leadingAnchor).isActive = true
+        textView.trailingAnchor.constraint(equalTo: stack.trailingAnchor).isActive = true
         textView.heightAnchor.constraint(equalToConstant: 180).isActive = true
         
-        descriptionStack.addArrangedSubview(alertText)
+        stack.addArrangedSubview(alertLabel)
         
-        scrollView.addSubview(descriptionStack)
-        descriptionStack.topAnchor.constraint(equalTo: reasonButton.bottomAnchor, constant: 20).isActive = true
-        descriptionStack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
-        descriptionStack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
-        descriptionStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -32).isActive = true
-        descriptionStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -32).isActive = true
-        
+        scrollView.addSubview(stack)
+        stack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 16).isActive = true
+        stack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
+        stack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
+        stack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -32).isActive = true
+        stack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -32).isActive = true
     }
     
     private func setupNavBar() {
@@ -358,7 +236,7 @@ class ReportPostVC: UIViewController {
         backButton.tintColor = .black
         self.navigationItem.leftBarButtonItem = backButton
         
-        self.navigationItem.title = "모집글 신고"
+        self.navigationItem.title = "문의하기"
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor.white
@@ -366,15 +244,8 @@ class ReportPostVC: UIViewController {
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
     
-    public func configure(uid: String, imageUrl: String, title: String, userUid: String) {
-        self.imageView.loadImage(url: imageUrl)
-        self.titleLabel.text = title
-        self.postUid = uid
-        self.userUid = userUid
-    }
-    
     func updateReportButton() {
-        if reportReason == "" || reportText == "" {
+        if reportText == "" {
             reportButton.backgroundColor = .systemGray
             reportButton.isEnabled = false
         } else {
@@ -407,7 +278,7 @@ class ReportPostVC: UIViewController {
     }
 }
 
-extension ReportPostVC: UITextViewDelegate {
+extension AskusVC: UITextViewDelegate {
     
     func setupPlaceholder() {
         textView.addSubview(textViewPlaceholder)
@@ -455,7 +326,7 @@ extension ReportPostVC: UITextViewDelegate {
     }
 }
 
-extension ReportPostVC: UIGestureRecognizerDelegate {
+extension AskusVC: UIGestureRecognizerDelegate {
     // 스와이프로 이전 화면 갈 수 있도록 추가
     func backGesture() {
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self

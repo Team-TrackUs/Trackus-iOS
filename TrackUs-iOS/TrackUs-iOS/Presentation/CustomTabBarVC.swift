@@ -27,8 +27,21 @@ final class CustomTabBarVC: UITabBarController {
     
     private let mainBtnWidth: CGFloat = 48
     
+    let networkCheck = NetworkService()
+    let networkErrorView = NetworkErrorView(frame: CGRect(x: 0, y: 0, width: 150, height: 50))
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        view.addSubview(networkErrorView)
+        networkErrorView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        networkErrorView.frame.origin.y = -networkErrorView.frame.height
+        networkErrorView.translatesAutoresizingMaskIntoConstraints = false
+        networkErrorView.isHidden = true
+        
+        // 네트워크 체크 시작
+        networkCheck.startCheckingNetwork()
+        
         NotificationCenter.default.addObserver(self, selector: #selector(updateChatBadge), name: .newMessageCountDidChange, object: nil)
     }
     
@@ -37,6 +50,12 @@ final class CustomTabBarVC: UITabBarController {
         addTabItems()
         setupMainButton()
         updateChatBadge()
+        updateChatBadge()
+        networkCheck.startCheckingNetwork()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     func setupMainButton() {
@@ -79,6 +98,24 @@ final class CustomTabBarVC: UITabBarController {
                 self.present(viewController, animated: false)
             } else if status == .denied {
                 self.showAuthorizationAlert()
+            }
+        }
+    }
+    
+    @objc func handleNetworkStatusChange(_ notification: Notification) {
+        if let userInfo = notification.userInfo, let isConnected = userInfo["isConnected"] as? Bool {
+            DispatchQueue.main.async {
+                if isConnected {
+                    self.networkErrorView.isHidden = true
+                    UIView.animate(withDuration: 0.3) {
+                        self.networkErrorView.frame.origin.y = -self.networkErrorView.frame.height
+                    }
+                } else {
+                    self.networkErrorView.isHidden = false
+                    UIView.animate(withDuration: 0.3) {
+                        self.networkErrorView.frame.origin.y = 64
+                    }
+                }
             }
         }
     }

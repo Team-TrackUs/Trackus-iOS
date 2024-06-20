@@ -475,7 +475,7 @@ class CourseRegisterVC: UIViewController {
                                 print("DEBUG: Failed to upload post: \(error.localizedDescription)")
                             } else {
                                 DispatchQueue.main.async {
-                                    let courseDetailVC = CourseDetailVC()
+                                    let courseDetailVC = CourseDetailVC(isBack: false)
                                     
                                     courseDetailVC.courseCoords = post.courseRoutes.map { geoPoint in
                                         
@@ -571,7 +571,7 @@ class CourseRegisterVC: UIViewController {
                             } else {
                                 DispatchQueue.main.async {
                                     
-                                    let courseDetailVC = CourseDetailVC()
+                                    let courseDetailVC = CourseDetailVC(isBack: false)
                                     courseDetailVC.hidesBottomBarWhenPushed = true
                                     
                                     if let xmark = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate) {
@@ -903,15 +903,21 @@ class CourseRegisterVC: UIViewController {
     
     // 지도 스냅샷
     func mapSnapshot(with annotations: [MKAnnotation], polyline: MKPolyline, completion: @escaping (UIImage) -> Void) {
+        
+        let sizeWidth = 300
+        let sizeHeight = 300
+        
+        // 이미지 생성 전 지도에 패딩 넣기
         let options = MKMapSnapshotter.Options()
-        options.region = testcoords.makeRegionToFit() ?? MKCoordinateRegion(center: testcoords[testcoords.count / 2], span: MKCoordinateSpan(latitudeDelta: self.distance < 3 ? 0.02 : 0.04, longitudeDelta: self.distance < 3 ? 0.02 : 0.04))
-        options.size = CGSize(width: 300, height: 300)
+        let mapRect = polyline.boundingMapRect
+        let edgePadding = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        let paddedMapRect = mapRect.insetBy(dx: -mapRect.size.width * Double(edgePadding.left) / Double(sizeWidth), dy: -mapRect.size.height * Double(edgePadding.top) / Double(sizeHeight))
+        let paddedRegion = MKCoordinateRegion(paddedMapRect)
+        
+        options.region = paddedRegion
+        options.size = CGSize(width: sizeWidth, height: sizeHeight)
         options.mapType = .mutedStandard
         options.showsBuildings = false
-        
-        // 이미지를 다크모드로
-        //        options.traitCollection = .init(userInterfaceStyle: .dark)
-        
         let snapshotter = MKMapSnapshotter(options: options)
         snapshotter.start { snapshot, error in
             guard let snapshot = snapshot else {
@@ -939,7 +945,7 @@ class CourseRegisterVC: UIViewController {
                 }
             }
             UIColor.mainBlue.setStroke()
-            path.lineWidth = 3
+            path.lineWidth = 7
             path.stroke()
             
             // Annotation 그리기
