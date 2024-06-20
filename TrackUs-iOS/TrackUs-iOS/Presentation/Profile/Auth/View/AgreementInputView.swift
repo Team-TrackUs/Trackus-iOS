@@ -14,11 +14,11 @@ class AgreementInputView: UIView {
     // 이용 약관 페이지 url -> 이후 수정
     private let urls = [
         // 서비스 이용 약관 동의
-        "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4",
+        "https://colorful-force-5d2.notion.site/1a86de3148a64dc6a1625b9aab3ffa37?pvs=4",
         // 개인정보 처리방침 동의
-        "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4",
+        "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e",
         //위처정보 서비스 이용약관 동의
-        "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4"
+        "https://colorful-force-5d2.notion.site/TrackUs-be971d4c799c4c12ab9e984aeafedc1d"
     ]
     
     var delegate: MainButtonEnabledDelegate?
