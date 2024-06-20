@@ -8,6 +8,8 @@
 import UIKit
 import Firebase
 import FirebaseAuth
+import WebKit
+
 
 class SettingVC: UIViewController {
     
@@ -15,11 +17,16 @@ class SettingVC: UIViewController {
     
     private func performLogout() {
         authService.logOut()
-        //print("로그아웃 완료")
         
         let loginVC = LoginVC()
         navigationController?.setViewControllers([loginVC], animated: true)
     }
+    
+    private lazy var webView: WKWebView = {
+        let webView = WKWebView()
+        webView.navigationDelegate = self
+        return webView
+    }()
 
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
@@ -57,7 +64,7 @@ class SettingVC: UIViewController {
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
-        
+
         tableView.separatorStyle = .none
     }
 
@@ -77,7 +84,7 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
         case 0:
             return 1
         case 1:
-            return 2
+            return 3
         case 2:
             return 1
         case 3:
@@ -119,7 +126,7 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
         case 0:
             cell.textLabel?.text = "버전 정보"
         case 1:
-            cell.textLabel?.text = indexPath.row == 0 ? "이용약관" : "오픈소스/라이센스"
+            cell.textLabel?.text = indexPath.row == 0 ? "오픈소스/라이센스" : (indexPath.row == 1 ? "위치정보 서비스 및 이용약관" : "개인정보 처리방침")
         case 2:
             cell.textLabel?.text = "문의하기"
         case 3:
@@ -136,8 +143,8 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
         
         return cell
     }
-
-
+    
+    
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0:
@@ -178,7 +185,7 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
             return nil
         }
     }
-
+    
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         if section < tableView.numberOfSections - 1 {
             return 1
@@ -186,7 +193,7 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
             return 0
         }
     }
-
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -194,13 +201,15 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
         case 0:
             break
         case 1:
-            if let userId = Auth.auth().currentUser?.uid {
-                let withdrawalVC = OtherProfileVC(userId: userId)
-                navigationController?.pushViewController(withdrawalVC, animated: true)
+            if indexPath.row == 0 {
+                showWebView(with: "https://lizard-basketball-e41.notion.site/OPEN-SOURCE-LICENSE-a57a3078e21c4821932d2189859b8bcb?pvs=4", title: "오픈소스/라이센스")
+            } else if indexPath.row == 1 {
+                showWebView(with: "https://colorful-force-5d2.notion.site/TrackUs-be971d4c799c4c12ab9e984aeafedc1d?pvs=4", title: "위치정보 서비스 및 이용약관")
+            } else if indexPath.row == 2 {
+                showWebView(with: "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4", title: "개인정보 처리방침")
             }
         case 2:
-            let withdrawalVC = WithdrawalVC()
-            withdrawalVC.hidesBottomBarWhenPushed = true
+            let withdrawalVC = UserListVC()
             navigationController?.pushViewController(withdrawalVC, animated: true)
         case 3:
             let withdrawalVC = UserListVC()
@@ -217,4 +226,27 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
             break
         }
     }
+    private func showWebView(with url: String, title: String) {
+        if let url = URL(string: url) {
+            let request = URLRequest(url: url)
+            webView.load(request)
+            
+            let webViewController = UIViewController()
+            webViewController.view.addSubview(webView)
+            webView.frame = webViewController.view.bounds
+            webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            
+            webViewController.navigationItem.title = title
+            webViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(webViewBackButtonTapped))
+            webViewController.navigationItem.leftBarButtonItem?.tintColor = .black
+            
+            navigationController?.pushViewController(webViewController, animated: true)
+        }
+    }
+    
+    @objc private func webViewBackButtonTapped() {
+        navigationController?.popViewController(animated: true)
+    }
+}
+extension SettingVC: WKNavigationDelegate {
 }

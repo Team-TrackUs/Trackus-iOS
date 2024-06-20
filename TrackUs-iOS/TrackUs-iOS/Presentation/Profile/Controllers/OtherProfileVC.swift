@@ -425,9 +425,11 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
             }
     }
 
-
     private func setupNavBar() {
         self.navigationItem.title = "프로필보기"
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        self.navigationItem.leftBarButtonItem = backButton
         
         let dotsButton = UIBarButtonItem(image: UIImage(named: "dots_icon"), style: .plain, target: self, action: #selector(dotsButtonButtonTapped))
         dotsButton.tintColor = .black
@@ -438,6 +440,10 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+    
+    @objc private func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
     }
 
     private func setupViews() {

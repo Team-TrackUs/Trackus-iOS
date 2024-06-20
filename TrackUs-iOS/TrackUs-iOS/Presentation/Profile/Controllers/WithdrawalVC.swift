@@ -242,8 +242,6 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         let confirmAction = UIAlertAction(title: "탈퇴", style: .destructive) { _ in
             self.deleteUserAccount()
-            // 우선 임시로 이거로 함 ㅇㅅㅇ
-            print("회원탈퇴 처리")
         }
         alert.addAction(cancelAction)
         alert.addAction(confirmAction)
