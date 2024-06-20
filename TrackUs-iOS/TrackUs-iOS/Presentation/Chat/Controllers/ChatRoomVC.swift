@@ -16,6 +16,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     private var messages: [Message] = [] // 메시지 배열
     
     private var userInfo = ChatManager.shared.userInfo
+    // 사용자 차단 여부
+    private var blackStatus: Bool = false
     
     // 메인 버튼 하단 위치 제약조건
     private var tableViewBottomConstraint: NSLayoutConstraint!
@@ -40,8 +42,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }()
         self.chatUId = chatUId
         self.newChat = newChat
-        if newChat {
-            
+        if !chat.group ,let blockedUserList = UserManager.shared.user.blockedUserList, let opponentUid = chat.nonSelfMembers.first, blockedUserList.contains(opponentUid) {
+            self.blackStatus = true
         }
         super.init(nibName: nil, bundle: nil)
     }
@@ -51,8 +53,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         self.chat = chat
         self.chatUId = chat.uid
         self.newChat = newChat
-        if newChat {
-            
+        if let blockedUserList = UserManager.shared.user.blockedUserList, let opponentUid = chat.nonSelfMembers.first, blockedUserList.contains(opponentUid) {
+            self.blackStatus = true
         }
         super.init(nibName: nil, bundle: nil)
     }
@@ -81,6 +83,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         let textView = UITextView()
         textView.font = .systemFont(ofSize: 16)
         textView.isScrollEnabled = false
+        textView.isEditable = blackStatus ? false : true
+        textView.text = blackStatus ? "차단 사용자와는 대화가 불가능합니다." : ""
+        textView.textColor = blackStatus ? .gray2 : .label
         //textField.numberOfLines = 0
         return textView
     }()
@@ -89,12 +94,10 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         let button = UIButton()
         //button.setTitle("전송", for: .normal)
         let image = UIImage(systemName: "paperplane.circle.fill")?.withTintColor(.mainBlue).resize(width: 36, height: 36)
+        button.isEnabled = blackStatus ? false : true
         button.setImage(image, for: .normal)
         button.tintColor = .mainBlue
         button.layer.cornerRadius = 18
-        button.clipsToBounds = true
-        button.layer.borderColor = UIColor.mainBlue.cgColor
-        button.layer.borderWidth = 3
         button.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
         return button
     }()
@@ -194,13 +197,13 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 
             plusButton.leadingAnchor.constraint(equalTo: messageInputView.leadingAnchor),
             plusButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
-            plusButton.heightAnchor.constraint(equalToConstant: 36),
-            plusButton.widthAnchor.constraint(equalToConstant: 36),
+            plusButton.heightAnchor.constraint(equalToConstant: 38),
+            plusButton.widthAnchor.constraint(equalToConstant: 38),
 
-            sendButton.trailingAnchor.constraint(equalTo: messageInputView.trailingAnchor, constant: -1),
-            sendButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
-            sendButton.heightAnchor.constraint(equalToConstant: 36),
-            sendButton.widthAnchor.constraint(equalToConstant: 36),
+            sendButton.trailingAnchor.constraint(equalTo: messageInputView.trailingAnchor),
+            sendButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor),
+            sendButton.heightAnchor.constraint(equalToConstant: 38),
+            sendButton.widthAnchor.constraint(equalToConstant: 38),
 
             messageTextView.leadingAnchor.constraint(equalTo: plusButton.trailingAnchor, constant: 2),
             messageTextView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: -2),
@@ -223,43 +226,54 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 // 참여중인 사용자 확인
                 if $0.value == true {
                     // 해당 사용자 메세지 정보에 저장
-                    let db = db.document(chat.uid).collection($0.key)
-                    sendMessageFireStore(db: db, message: newMessage, opponentUid: $0.key)
+                    sendMessageFireStore(message: newMessage, opponentUid: $0.key)
                 }
             }
         }else { // 개인 채팅
-            // 차단 여부 추가
-            if newChat {
-                createChatRoom { [self] in
-                    _ = chat.members.map{
-                        // 해당 사용자 메세지 정보에 저장
-                        let db = db.document(chat.uid).collection($0.key)
-                        sendMessageFireStore(db: db, message: newMessage, opponentUid: $0.key)
+            // 상대방 차단여부 확인
+            if !chat.group ,let blockingMeList = UserManager.shared.user.blockingMeList, let opponentUid = chat.nonSelfMembers.first, blockingMeList.contains(opponentUid) {
+                if newChat {
+                    chat.members[opponentUid] = false
+                    createChatRoom { [self] in
+                        sendMessageFireStore(message: newMessage, opponentUid: currentUserUid)
+                        newChat.toggle()
                     }
+                    startListening()
+                } else {
+                    sendMessageFireStore(message: newMessage, opponentUid: currentUserUid)
                 }
-                startListening()
-            }else {
                 
-                // 나간 여부로 되어있을 경우 true 처리
-                if chat.members.values.contains(false) {
-                    for key in chat.members.keys {
-                        chat.members[key] = true
+                // 본인에게만 전송
+            } else {
+                if newChat {
+                    createChatRoom { [self] in
+                        _ = chat.members.map{
+                            sendMessageFireStore(message: newMessage, opponentUid: $0.key)
+                        }
+                        newChat.toggle()
                     }
-                    db.document(chatUId).updateData([
-                        "members": chat.members
-                    ]) { error in
-                        if let error = error {
-                            print("Error updating document: \(error)")
-                        } else {
-                            print("Document successfully updated")
+                    startListening()
+                }else {
+                    
+                    // 나간 여부로 되어있을 경우 true 처리
+                    if chat.members.values.contains(false) {
+                        for key in chat.members.keys {
+                            chat.members[key] = true
+                        }
+                        db.document(chatUId).updateData([
+                            "members": chat.members
+                        ]) { error in
+                            if let error = error {
+                                print("Error updating document: \(error)")
+                            } else {
+                                print("Document successfully updated")
+                            }
                         }
                     }
-                }
-                
-                _ = chat.members.map{
-                    // 해당 사용자 메세지 정보에 저장
-                    let db = db.document(chat.uid).collection($0.key)
-                    sendMessageFireStore(db: db, message: newMessage, opponentUid: $0.key)
+                    
+                    _ = chat.members.map{
+                        sendMessageFireStore(message: newMessage, opponentUid: $0.key)
+                    }
                 }
             }
         }
@@ -325,7 +339,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     // MARK: - Firebase 관련 함수
     // 메세지 전송
-    private func sendMessageFireStore(db: CollectionReference, message: Message, opponentUid: String) {
+    private func sendMessageFireStore(message: Message, opponentUid: String) {
+        let db = db.document(chat.uid).collection(opponentUid)
         db.addDocument(data: [
             "sendMember": message.sendMember,
             "timeStamp": message.timeStamp,
@@ -604,8 +619,7 @@ extension ChatRoomVC: SideMenuDelegate {
                 // 참여중인 사용자 확인
                 if $0.value == true {
                     // 해당 사용자 메세지 정보에 저장
-                    let db = db.document(chat.uid).collection($0.key)
-                    sendMessageFireStore(db: db, message: newMessage, opponentUid: $0.key)
+                    sendMessageFireStore(message: newMessage, opponentUid: $0.key)
                 }
             }
         }
