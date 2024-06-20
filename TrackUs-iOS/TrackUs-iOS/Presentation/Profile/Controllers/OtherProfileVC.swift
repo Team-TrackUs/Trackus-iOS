@@ -40,6 +40,33 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
         return label
     }()
     
+    private let privateProfileImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.image = UIImage(named: "privateLock_icon")
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private let privateProfileLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        label.textColor = .gray1
+        label.text = "프로필 비공개 유저입니다."
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private let privateProfileLabel2: UILabel = {
+        let label = UILabel()
+        label.textColor = .gray2
+        label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "비공개 유저의 러닝 기록은 열람할 수 없습니다."
+        return label
+    }()
     private let editProfileButton: UIButton = {
         let button = UIButton(type: .system)
         
@@ -425,12 +452,13 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
             }
     }
 
+
     private func setupNavBar() {
         self.navigationItem.title = "프로필보기"
         let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
         backButton.tintColor = .black
         self.navigationItem.leftBarButtonItem = backButton
-        
+
         let dotsButton = UIBarButtonItem(image: UIImage(named: "dots_icon"), style: .plain, target: self, action: #selector(dotsButtonButtonTapped))
         dotsButton.tintColor = .black
         self.navigationItem.rightBarButtonItem = dotsButton
@@ -449,6 +477,9 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
     private func setupViews() {
         view.addSubview(profileImageView)
         view.addSubview(nameLabel)
+        view.addSubview(privateProfileImageView)
+        view.addSubview(privateProfileLabel)
+        view.addSubview(privateProfileLabel2)
         view.addSubview(editProfileButton)
         view.addSubview(runningTitleLabel)
         view.addSubview(runningStatsContainerView)
@@ -510,6 +541,15 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
             nameLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 52),
             nameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 9),
             
+            privateProfileImageView.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 236),
+            privateProfileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            privateProfileLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 387),
+            privateProfileLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            privateProfileLabel2.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 424),
+            privateProfileLabel2.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+
             editProfileButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 45),
             editProfileButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             editProfileButton.widthAnchor.constraint(equalToConstant: 80),
@@ -584,16 +624,44 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
             }
             
             let data = document.data()
-            if let profileImageUrl = data?["profileImageUrl"] as? String {
-                self.profileImageView.loadImage(url: profileImageUrl)
+            if let isProfilePublic = data?["isProfilePublic"] as? Bool, !isProfilePublic {
+                DispatchQueue.main.async {
+                    self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
+                    if let userName = data?["name"] as? String {
+                        self.nameLabel.text = userName
+                    }
+                    self.privateProfileLabel.isHidden = false
+                    self.hideNonPublicProfileElements()
+                }
             } else {
-                self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
+                DispatchQueue.main.async {
+                    self.privateProfileImageView.isHidden = true
+                    self.privateProfileLabel.isHidden = true
+                    self.privateProfileLabel2.isHidden = true
+                    
+                    if let profileImageUrl = data?["profileImageUrl"] as? String {
+                        self.profileImageView.loadImage(url: profileImageUrl)
+                    } else {
+                        self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
+                    }
+                    
+                    if let userName = data?["name"] as? String {
+                        self.nameLabel.text = userName
+                        self.runningTitleLabel.text = "\(userName)님의 러닝"
+                    }
+                }
             }
-            
-            if let userName = data?["name"] as? String {
-                self.nameLabel.text = userName
-                self.runningTitleLabel.text = "\(userName)님의 러닝"
-            }
+        }
+    }
+    // MARK: - 프로필 비공ㄱ개 일 경우 숨김 목록
+    private func hideNonPublicProfileElements() {
+        DispatchQueue.main.async {
+            self.runningTitleLabel.isHidden = true
+            self.runningStatsContainerView.isHidden = true
+            self.previousDateButton.isHidden = true
+            self.dateButton.isHidden = true
+            self.nextDateButton.isHidden = true
+            self.recordsView.isHidden = true
         }
     }
     
