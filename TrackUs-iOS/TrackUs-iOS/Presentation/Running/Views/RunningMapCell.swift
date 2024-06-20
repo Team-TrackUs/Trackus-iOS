@@ -218,7 +218,7 @@ class RunningMapCell: UICollectionViewCell {
         self.runningStyleLabel.text = runningStyleString(for: post.runningStyle)
         
         if post.title.count > 15 {
-            self.titleLabel.text = "\(post.title.prefix(15))..."
+            self.titleLabel.text = "\(post.title.prefix(11))..."
         } else {
             self.titleLabel.text = post.title
         }
