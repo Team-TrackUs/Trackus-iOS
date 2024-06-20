@@ -68,7 +68,9 @@ class ChatManager {
                 var newCount: String?
                 switch count{
                     case 1...999: newCount = String(count)
+                        UIApplication.shared.applicationIconBadgeNumber = count
                     case 999...: newCount = "999+"
+                        UIApplication.shared.applicationIconBadgeNumber = 999
                     default: newCount = nil
                 }
                 self?.newMessageCount = newCount
