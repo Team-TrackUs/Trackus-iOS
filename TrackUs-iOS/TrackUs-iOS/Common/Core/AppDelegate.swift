@@ -78,7 +78,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
-
+    func applicationWillTerminate(_ application: UIApplication) {
+        let semaphore = DispatchSemaphore(value: 0)
+                Task.detached
+                {
+                    if #available(iOS 16.2, *) {
+                        await WidgetManager.shared.activity.end(nil, dismissalPolicy: .immediate)
+                    }
+                    semaphore.signal()
+                }
+                semaphore.wait()
+            
+    }
 }
 
 extension AppDelegate : MessagingDelegate {

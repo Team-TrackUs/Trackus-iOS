@@ -25,6 +25,7 @@
 		820069122C10838B009FDA6C /* StickerCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820069112C10838B009FDA6C /* StickerCollectionVC.swift */; };
 		820069142C10BA3F009FDA6C /* DataCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820069132C10BA3F009FDA6C /* DataCollectionVC.swift */; };
 		820069162C10BD86009FDA6C /* DataCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820069152C10BD86009FDA6C /* DataCollectionCell.swift */; };
+		82159C912C1887BB0054B684 /* WidgetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82159C902C1887BB0054B684 /* WidgetManager.swift */; };
 		822E06B62BF1EC2500636CCC /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B52BF1EC2500636CCC /* LocationService.swift */; };
 		822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */; };
 		823E7A4A2C13452000EFA983 /* StickerCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823E7A492C13451F00EFA983 /* StickerCollectionCell.swift */; };
@@ -65,6 +66,8 @@
 		82D845922C0E0B7900313CA2 /* WidgetTestLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */; };
 		82D845932C0E0BA200313CA2 /* WidgetTestLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */; };
 		82E7638B2C087C220078E5C9 /* MyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E7638A2C087C220078E5C9 /* MyMapView.swift */; };
+		9664CA3F2C196C8000035168 /* report_user.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9664CA3E2C196C8000035168 /* report_user.swift */; };
+		9664CA4B2C20045D00035168 /* ProfileRecordsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9664CA4A2C20045D00035168 /* ProfileRecordsCell.swift */; };
 		967D829B2C0CAD6E00CC1F2A /* RecordService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967D829A2C0CAD6E00CC1F2A /* RecordService.swift */; };
 		96AC57342C059CAA00F1A73C /* WithdrawalVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96AC57332C059CAA00F1A73C /* WithdrawalVC.swift */; };
 		96AC57362C059CC700F1A73C /* SettingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96AC57352C059CC700F1A73C /* SettingVC.swift */; };
@@ -159,6 +162,7 @@
 		820069112C10838B009FDA6C /* StickerCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCollectionVC.swift; sourceTree = "<group>"; };
 		820069132C10BA3F009FDA6C /* DataCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCollectionVC.swift; sourceTree = "<group>"; };
 		820069152C10BD86009FDA6C /* DataCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataCollectionCell.swift; sourceTree = "<group>"; };
+		82159C902C1887BB0054B684 /* WidgetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetManager.swift; sourceTree = "<group>"; };
 		822E06B52BF1EC2500636CCC /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		822E06B82BF1EEED00636CCC /* UserLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDelegate.swift; sourceTree = "<group>"; };
 		823E7A492C13451F00EFA983 /* StickerCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCollectionCell.swift; sourceTree = "<group>"; };
@@ -201,6 +205,8 @@
 		82C38AD22BFCE445004819C1 /* Double+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+.swift"; sourceTree = "<group>"; };
 		82D845912C0E0B7900313CA2 /* WidgetTestLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTestLiveActivity.swift; sourceTree = "<group>"; };
 		82E7638A2C087C220078E5C9 /* MyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyMapView.swift; sourceTree = "<group>"; };
+		9664CA3E2C196C8000035168 /* report_user.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = report_user.swift; sourceTree = "<group>"; };
+		9664CA4A2C20045D00035168 /* ProfileRecordsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRecordsCell.swift; sourceTree = "<group>"; };
 		967D829A2C0CAD6E00CC1F2A /* RecordService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordService.swift; sourceTree = "<group>"; };
 		96AC57332C059CAA00F1A73C /* WithdrawalVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithdrawalVC.swift; sourceTree = "<group>"; };
 		96AC57352C059CC700F1A73C /* SettingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingVC.swift; sourceTree = "<group>"; };
@@ -317,6 +323,7 @@
 				822E06B52BF1EC2500636CCC /* LocationService.swift */,
 				82707D0E2BF72BD40038E4A7 /* Haptic.swift */,
 				82596A892C034CAC00DA6C70 /* CoreMotion.swift */,
+				82159C902C1887BB0054B684 /* WidgetManager.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -558,6 +565,7 @@
 				96AC573D2C059D1700F1A73C /* OtherProfileVC.swift */,
 				96D43F9F2C0CD2D90059C377 /* UserListVC.swift */,
 				96D43FA12C0D8CEB0059C377 /* ReportUserVC.swift */,
+				9664CA4A2C20045D00035168 /* ProfileRecordsCell.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -598,6 +606,7 @@
 				826922E42C04664000D506C2 /* RunInfoModel.swift */,
 				61625E372BFE6EE500E6D1F3 /* Post.swift */,
 				98601D572C07103E0056E407 /* Chat.swift */,
+				9664CA3E2C196C8000035168 /* report_user.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -782,6 +791,7 @@
 				82ABF39B2C1039D7002B25CE /* PhotoEditVC.swift in Sources */,
 				9898034B2BF5F14200F5DFBD /* AgreementInputView.swift in Sources */,
 				9886183A2BF4FFEB002ACB4E /* MainButton.swift in Sources */,
+				82159C912C1887BB0054B684 /* WidgetManager.swift in Sources */,
 				61B0DECA2BF8F950009E360B /* CourseMapVC.swift in Sources */,
 				82596A8A2C034CAC00DA6C70 /* CoreMotion.swift in Sources */,
 				96D43FA02C0CD2D90059C377 /* UserListVC.swift in Sources */,
@@ -793,6 +803,7 @@
 				988618332BF34AE0002ACB4E /* User.swift in Sources */,
 				826922E32C045B8B00D506C2 /* RunInfoCell.swift in Sources */,
 				61B8F98E2BF1D502005F0728 /* CourseDrawingMapVC.swift in Sources */,
+				9664CA3F2C196C8000035168 /* report_user.swift in Sources */,
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
 				98887F922C00938F006F929E /* UserManager.swift in Sources */,
 				82D845922C0E0B7900313CA2 /* WidgetTestLiveActivity.swift in Sources */,
@@ -815,6 +826,7 @@
 				98887F8E2BFDBDCB006F929E /* ImageCacheManager.swift in Sources */,
 				820069162C10BD86009FDA6C /* DataCollectionCell.swift in Sources */,
 				615ADAE42C086F18005CAC75 /* LoadingView.swift in Sources */,
+				9664CA4B2C20045D00035168 /* ProfileRecordsCell.swift in Sources */,
 				8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */,
 				988618302BF348C8002ACB4E /* AuthService.swift in Sources */,
 				98601D582C07103E0056E407 /* Chat.swift in Sources */,

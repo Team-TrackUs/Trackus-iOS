@@ -32,13 +32,13 @@ final class PhotoEditVC: UIViewController {
     }()
     
     private lazy var segmentedControl: UISegmentedControl = {
-        let control = UISegmentedControl(items: ["러닝데이터", "스티커"])
+        let control = UISegmentedControl(items: ["러닝데이터"])
         control.selectedSegmentIndex = 0
         control.translatesAutoresizingMaskIntoConstraints = false
         control.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.black], for: .selected)
         control.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.lightGray], for: .normal)
         control.addTarget(self, action: #selector(didChangeValue(segment:)), for: .valueChanged)
-        control.setBackgroundImage(UIImage(), for: .normal, barMetrics: .default)        
+        control.setBackgroundImage(UIImage(), for: .normal, barMetrics: .default)
         return control
     }()
     
@@ -87,10 +87,10 @@ final class PhotoEditVC: UIViewController {
     }
     
     func setDelegates() {
-        pageViewController.delegate = self
-        pageViewController.dataSource = self
+        //        pageViewController.delegate = self
+        //        pageViewController.dataSource = self
         colVC1.delegate = self
-        colVC2.delegate = self
+        //        colVC2.delegate = self
     }
     
     private func setConstrains() {
@@ -121,17 +121,14 @@ final class PhotoEditVC: UIViewController {
         view.backgroundColor = .systemBackground
         navigationItem.title = "사진 편집"
         
-        let completButton = UIButton(type: .system)
-        completButton.setImage(UIImage(systemName: "app.badge.checkmark.fill"), for: .normal)
-        completButton.tintColor = .black
-        completButton.addTarget(self, action: #selector(completeButtonTapped), for: .touchUpInside)
+        navigationItem.hidesBackButton = true
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        navigationItem.leftBarButtonItem = backButton
         
-        let menuBarItem = UIBarButtonItem(customView: completButton)
-        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
-        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 25).isActive = true
-        
-        navigationItem.rightBarButtonItem = menuBarItem
+        let completeButton = UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(completeButtonTapped))
+        completeButton.tintColor = .black
+        navigationItem.rightBarButtonItem = completeButton
     }
     
     private func updateImage() {
@@ -195,7 +192,10 @@ final class PhotoEditVC: UIViewController {
             UIImageWriteToSavedPhotosAlbum(image, self, #selector(imageSaved(image:didFinishSavingWithError:contextInfo:)), nil)
         }
     }
-
+    
+    @objc func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
+    }
     
     @objc func imageSaved(image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if error != nil {
@@ -210,12 +210,13 @@ final class PhotoEditVC: UIViewController {
     }
     
     @objc private func completeButtonTapped() {
-        let alert = UIAlertController(title: "열심히 만들었으니 공유하자!", message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "꾸며진 러닝 사진을 공유해 보세요!", message: nil, preferredStyle: .actionSheet)
         
         let share = UIAlertAction(title: "공유하기", style: .default, handler: shareButtonTapped)
         let photo = UIAlertAction(title: "갤러리 저장", style: .default, handler: checkAddPhotoPermission)
+        let close = UIAlertAction(title: "취소", style: .cancel)
         
-        [share, photo].forEach { alert.addAction($0) }
+        [share, photo, close].forEach { alert.addAction($0) }
         
         present(alert, animated: true)
     }
@@ -262,30 +263,32 @@ extension PhotoEditVC: DataCollectionDelegate {
             photoPreview.addTextLayerBottom(string: runModel.distance.asString(style: .km).uppercased())
         case .timeOnly:
             photoPreview.addTextLayerBottom(string: runModel.seconds.toMMSSTimeFormat)
+        case .pathImage:
+            photoPreview.addMapLayer(string1: runModel.distance.asString(style: .km).uppercased(), string2: "\(runModel.address), 에서 러닝", location: runModel.coordinates)
         }
     }
     
-    func stickerCellTapped(_ image: UIImage) {
-        let imageView = UIImageView(image: image)
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
-        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(pinchGestureHandler))
-        let rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(rotaionGestureHandler))
-        
-        let touchAreaView = UIImageView(frame: imageView.frame)
-        touchAreaView.frame.size.width += 20
-        touchAreaView.frame.size.height += 20
-        imageView.layer.position = touchAreaView.layer.position
-        touchAreaView.addSubview(imageView)
-        
-        touchAreaView.addGestureRecognizer(panGesture)
-        touchAreaView.addGestureRecognizer(pinchGesture)
-        touchAreaView.addGestureRecognizer(rotationGesture)
-        touchAreaView.isUserInteractionEnabled = true
-        
-        photoPreview.addImageView(touchAreaView)
-    }
+    //    func stickerCellTapped(_ image: UIImage) {
+    //        let imageView = UIImageView(image: image)
+    //        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
+    //        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(pinchGestureHandler))
+    //        let rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(rotaionGestureHandler))
+    //
+    //        let touchAreaView = UIImageView(frame: imageView.frame)
+    //        touchAreaView.frame.size.width += 20
+    //        touchAreaView.frame.size.height += 20
+    //        imageView.layer.position = touchAreaView.layer.position
+    //        touchAreaView.addSubview(imageView)
+    //
+    //        touchAreaView.addGestureRecognizer(panGesture)
+    //        touchAreaView.addGestureRecognizer(pinchGesture)
+    //        touchAreaView.addGestureRecognizer(rotationGesture)
+    //        touchAreaView.isUserInteractionEnabled = true
+    //
+    //        photoPreview.addImageView(touchAreaView)
+    //    }
     
-
+    
     
     @objc func panGestureHandler(sender: UIPanGestureRecognizer) {
         guard let view = sender.view else {
@@ -312,16 +315,14 @@ extension PhotoEditVC: DataCollectionDelegate {
         view.transform = view.transform.rotated(by: sender.rotation)
         sender.rotation = 0.0
     }
+    
+    
 }
 
 extension UIImageView {
     /// ImageView위에 텍스트레이어를 추가한다.
     func addTextLayerBottom(string: String) {
-        if let _ = layer.sublayers {
-            layer.sublayers = layer.sublayers!.filter {
-                $0 as? CATextLayer == nil
-            }
-        }
+        clearLayer()
         
         let textLayer = CATextLayer()
         textLayer.string = string
@@ -332,6 +333,16 @@ extension UIImageView {
         textLayer.contentsScale = UIScreen.main.scale
         textLayer.frame = CGRect(x: 0, y: frame.height - 40, width: frame.width, height: 50)
         layer.addSublayer(textLayer)
+    }
+    
+    func clearLayer() {
+        if let _ = layer.sublayers {
+            layer.sublayers = layer.sublayers!.filter {
+                $0 as? CATextLayer == nil
+            }
+        }
+        subviews.forEach { $0.removeFromSuperview() }
+        addLogo()
     }
     
     func addImageView(_ imageView: UIImageView) {
@@ -347,6 +358,80 @@ extension UIImageView {
         addSubview(imageView)
     }
     
+    func addMapLayer(string1: String, string2: String, location: [CLLocationCoordinate2D]) {
+        clearLayer()
+        
+        let textView = UIStackView()
+        addSubview(textView)
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.axis = .vertical
+        textView.distribution = .equalSpacing
+        textView.alignment = .trailing
+        
+        textView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20).isActive = true
+        textView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20).isActive = true
+        
+        let text1 = UILabel()
+        text1.text = string1
+        text1.textColor = .white
+        text1.font = UIFont.boldSystemFont(ofSize: 30)
+        let text2 = UILabel()
+        text2.text = string2
+        text2.textColor = .white
+        text2.font = UIFont.boldSystemFont(ofSize: 25)
+        
+        [text1, text2].forEach { textView.addArrangedSubview($0) }
+        
+        let pathView = PathView(frame: self.bounds.inset(by: .init(top: 150, left: 150, bottom: 150, right: 150)))
+        pathView.backgroundColor = .clear
+        
+        
+        let points = location.convertCoordinatesToImagePoints(coordinates: location, rect: pathView.bounds)
+        
+        pathView.updatePath(points: points)
+        addSubview(pathView)
+    }
 }
 
 
+class PathView: UIView {
+    var points: [CGPoint] = []
+    
+    private func addCircleLayer(point: CGPoint) {
+        let circle = CALayer()
+        circle.frame = .init(origin: point, size: .init(width: 10, height: 10))
+        circle.cornerRadius = 5
+        circle.backgroundColor = UIColor.white.cgColor
+        circle.position = point
+        layer.addSublayer(circle)
+    }
+    
+    override func draw(_ rect: CGRect) {
+        guard points.count > 1 else { return }
+        
+        let path = UIBezierPath()
+        path.move(to: points.first!)
+        addCircleLayer(point: points.first!)
+        
+        for (index, point) in points.dropFirst().enumerated() {
+            // lastIndex
+            if index == points.count - 2 {
+                addCircleLayer(point: point)
+            }
+            
+            path.addLine(to: point)
+        }
+        
+        UIColor.white.setStroke()
+        path.lineWidth = 4.0
+        path.lineCapStyle = .round
+        path.lineJoinStyle = .round
+        path.stroke()
+        path.close()
+    }
+    
+    func updatePath(points: [CGPoint]) {
+        self.points = points
+        setNeedsDisplay()
+    }
+}

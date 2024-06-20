@@ -99,19 +99,10 @@ final class SelectePhotoVC: UIViewController {
         view.backgroundColor = .systemBackground
         navigationItem.title = "사진 촬영"
         
-        let closeButton = UIButton(type: .system)
-        closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
-        closeButton.tintColor = .black
-        closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
-        
-        let menuBarItem = UIBarButtonItem(customView: closeButton)
-        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
-        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        
-        navigationItem.leftBarButtonItem = menuBarItem
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeButtonTapped))
+        backButton.tintColor = .black
         navigationItem.hidesBackButton = true
-        navigationItem.rightBarButtonItem?.tintColor = .black
+        navigationItem.leftBarButtonItem = backButton
     }
     
     private func checkCameraPermissions() {

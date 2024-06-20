@@ -14,7 +14,7 @@ struct WidgetTestAttributes: ActivityAttributes {
         var time: String
         var pace: String
         var kilometer: String
-        var isActive: Bool
+        var cadance: String
     }
 
     // Fixed non-changing properties about your activity go here!

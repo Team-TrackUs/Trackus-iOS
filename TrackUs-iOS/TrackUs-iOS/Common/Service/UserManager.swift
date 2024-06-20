@@ -11,9 +11,9 @@ import Firebase
 /// 사용자 본인 데이터 관리
 class UserManager {
     static let shared = UserManager()
-
+    
     var user: User
-
+    
     private init() {
         self.user = User()
     }
@@ -75,10 +75,29 @@ class UserManager {
         }
     }
     
+    // 사용자 데이터 업데이트
+    func updateUserData(uid: String, completion: @escaping (Bool) -> Void) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(uid)
+        
+        userRef.updateData([
+            "name": user.name,
+            "isProfilePublic": user.isProfilePublic,
+            "profileImageUrl": user.profileImageUrl
+        ]) { error in
+            if let error = error {
+                print("Error updating user data: \(error)")
+                completion(false)
+            } else {
+                completion(true)
+            }
+        }
+    }
+    
     // FCM token 업데이트
     func updateToken(token: String?)  {
         guard let uid = Auth.auth().currentUser?.uid, let token = token else { return }
-        
+        ]) { error in
         let data = ["token": token]
         Firestore.firestore().collection("users").document(uid).updateData(data) { error in
             if let error = error {
