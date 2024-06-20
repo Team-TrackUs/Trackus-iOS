@@ -67,6 +67,8 @@ class ChatManager {
             if let count = self?.chatRooms.reduce (0, { $0 + ($1.usersUnreadCountInfo[User.currentUid] ?? 0) }){
                 var newCount: String?
                 switch count{
+                    case 0 :
+                        UIApplication.shared.applicationIconBadgeNumber = count
                     case 1...999: newCount = String(count)
                         UIApplication.shared.applicationIconBadgeNumber = count
                     case 999...: newCount = "999+"

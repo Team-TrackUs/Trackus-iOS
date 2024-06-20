@@ -279,11 +279,14 @@ class CourseDetailVC: UIViewController {
                     self.showAlert(title: "", message: "해당 모집글에 인원이 다 찼습니다.", action: "참여")
                 } else if let updatedMembers = updatedMembers {
                     self.members = updatedMembers
+                    self.joinRunningChat()
                 }
             }
-            // 채팅방 참여
-            joinChat()
         }
+        
+    }
+    
+    func joinRunningChat() {
         // 채팅방 참여
         if ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }) == nil {
             // 채팅방이 없을 때만 실행
@@ -295,7 +298,6 @@ class CourseDetailVC: UIViewController {
             }
             return
         }
-        
     }
     
     @objc func courseExitButtonTapped() {
@@ -305,6 +307,11 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func goChatRoomButtonTapped() {
+        let message = """
+        자세한 내용은
+        마이페이지 > 설정 > 문의하기
+        에서 문의해주시기 바랍니다.
+        """
         if UserManager.shared.user.isBlock {
             showAlert(title: "이용이 제한되었습니다.", message: message, action: "제한")
         } else {

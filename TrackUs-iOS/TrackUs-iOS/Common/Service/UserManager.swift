@@ -76,14 +76,14 @@ class UserManager {
     }
     
     // 사용자 데이터 업데이트
-    func updateUserData(uid: String, completion: @escaping (Bool) -> Void) {
+    func updateUserData(user: User ,completion: @escaping (Bool) -> Void) {
         let db = Firestore.firestore()
-        let userRef = db.collection("users").document(uid)
+        let userRef = db.collection("users").document(user.uid)
         
         userRef.updateData([
             "name": user.name,
             "isProfilePublic": user.isProfilePublic,
-            "profileImageUrl": user.profileImageUrl
+            "profileImageUrl": user.profileImageUrl as Any
         ]) { error in
             if let error = error {
                 print("Error updating user data: \(error)")
@@ -97,7 +97,7 @@ class UserManager {
     // FCM token 업데이트
     func updateToken(token: String?)  {
         guard let uid = Auth.auth().currentUser?.uid, let token = token else { return }
-        ]) { error in
+        
         let data = ["token": token]
         Firestore.firestore().collection("users").document(uid).updateData(data) { error in
             if let error = error {

@@ -310,11 +310,7 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
             }
             
             let data = document.data()
-            if let profileImageUrl = data?["profileImageUrl"] as? String {
-                self.profileImageView.loadImage(url: profileImageUrl)
-            } else {
-                self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
-            }
+            self.profileImageView.loadProfileImage(url: data?["profileImageUrl"] as? String) {}
             
             if let userName = data?["name"] as? String {
                 self.nameLabel.text = userName

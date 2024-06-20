@@ -258,19 +258,19 @@ extension UIImageView {
     }
     
     /// 프로필 이미지 불러오기 -> url: String? - 없을 경우 기본 이미지 반환
-    func loadProfileImage(url: String?, ompletionHandler: @escaping () -> Void) {
+    func loadProfileImage(url: String?, borderWidth: CGFloat = 4,completionHandler: @escaping () -> Void) {
         self.layer.borderColor = UIColor.gray3.cgColor
         if let url = url{
             ImageCacheManager.shared.memoryloadImage(imageUrl: url) { image in
                 self.image = image
                 self.layer.borderWidth = 1
-                ompletionHandler()
+                completionHandler()
             }
         }else {
             self.image = UIImage(systemName: "person.crop.circle.fill")?.withTintColor(.gray3)
             self.tintColor = .gray3
-            self.layer.borderWidth = 3
-            ompletionHandler()
+            self.layer.borderWidth = borderWidth
+            completionHandler()
         }
     }
 }

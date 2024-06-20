@@ -14,10 +14,12 @@
 
 import UIKit
 import Firebase
+import FirebaseStorage
 
 class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDelegate, MainButtonEnabledDelegate {
     
-    private let defaultProfileImage = UIImage(systemName: "person.crop.circle.fill")
+    // 선택 이미지
+    private var selectImage: UIImage?
     
     private lazy var profileImageView: ProfilePictureInputView = {
         let view = ProfilePictureInputView()
@@ -149,45 +151,36 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDel
     }
     
     func didChooseImage(_ image: UIImage?) {
-        profileImageView.imageView.image = image ?? defaultProfileImage
+        self.selectImage = image
     }
     
     @objc private func saveButtonTapped() {
         guard let currentUser = Auth.auth().currentUser else {
             return
         }
-        
+        var user = UserManager.shared.user
         let newNickname = nicknameInputView.getNickname()
+        user.name = newNickname
+        user.isProfilePublic = self.toggleSwitch.isOn
         
         guard !newNickname.isEmpty else {
             return
         }
         
         // 중복 확인
-        checkUser(name: newNickname) { isUnique in
-            if isUnique {
-                UserManager.shared.user.name = newNickname
-                
-                let isProfilePublic = self.toggleSwitch.isOn
-                UserManager.shared.user.isProfilePublic = isProfilePublic
-                
-                // 이미지가 변경되었는지 확인
-                if let profileImage = self.profileImageView.imageView.image, !self.isDefaultImage(profileImage) {
-                    let imageUrl = "profileImages/\(currentUser.uid)"
-                    ImageCacheManager.shared.setImage(image: profileImage, url: imageUrl)
-                    UserManager.shared.user.profileImageUrl = imageUrl
-                } else {
-                    UserManager.shared.user.profileImageUrl = nil
-                }
-                
-                // 사용자 데이터 업데이트
-                UserManager.shared.updateUserData(uid: currentUser.uid) { success in
-                    if success {
-                        DispatchQueue.main.async {
-                            self.navigationController?.popViewController(animated: true)
+        checkUser(name: newNickname) { [self] isUnique in
+            if !isUnique {
+                saveImage(image: selectImage) { url in
+                    user.profileImageUrl = url
+                    // 사용자 데이터 업데이트
+                    UserManager.shared.updateUserData(user: user) { success in
+                        if success {
+                            DispatchQueue.main.async {
+                                self.navigationController?.popViewController(animated: true)
+                            }
+                        } else {
+                            // 업데이트 실패 처리
                         }
-                    } else {
-                        // 업데이트 실패 처리
                     }
                 }
             } else {
@@ -202,6 +195,43 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDel
         }
     }
     
+    // 이미지 저장
+    func saveImage(image: UIImage?, completionHandler: @escaping (String?) -> Void) {
+        // 이미지 저장 -> url 포함 User 저장
+        guard let image = image else { return completionHandler(nil) }
+        let uid = User.currentUid
+        let ref = Storage.storage().reference().child("profileImages/\(uid)")
+        
+        // 이미지 비율 줄이기 (용량 감소 목적)
+        guard let resizedImage = image.resizeWithWidth(width: 300) else { return }
+        // 이미지 포멧 JPEG 변경
+        guard let jpegData = resizedImage.jpegData(compressionQuality: 0.5) else { return }
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
+        // 이미지 storage에 저장
+        ref.putData(jpegData, metadata: metadata) { metadata, error in
+            if let error = error {
+                print("Failed to push image to Storage: \(error)")
+                return
+            }
+            // url 받아오기
+            ref.downloadURL { url, error in
+                if let error = error{
+                    print("Failed to retrieve downloadURL: \(error)")
+                    return
+                }
+                
+                // 이미지 url 저장
+                guard let url = url else { return }
+                ImageCacheManager.shared.setImage(image: image, url: url.absoluteString)
+                completionHandler(url.absoluteString)
+                return
+            }
+        }
+    }
+    
     /// 닉네임 중복 확인
     func checkUser(name: String, completionHandler: @escaping (Bool) -> Void) {
         guard let currentUserId = currentUserId else {
@@ -211,58 +241,33 @@ class MyProfileEditVC: UIViewController, ProfileImageViewDelegate,UITextFieldDel
         
         Firestore.firestore().collection("users")
             .whereField("name", isEqualTo: name)
-            .whereField("uid", isEqualTo: currentUserId)
             .getDocuments { (querySnapshot, error) in
                 if let error = error {
-                    print("Error checking user: \(error.localizedDescription)")
+                    print("Error getting documents: \(error)")
                     completionHandler(false)
                     return
                 }
                 
-                if let querySnapshot = querySnapshot, !querySnapshot.isEmpty {
-                    completionHandler(true)
+                // Assuming there's only one document with the specified name
+                if let document = querySnapshot?.documents.first {
+                    if let userUid = document.data()["uid"] as? String {
+                        completionHandler(currentUserId == userUid ? false : true)
+                    } else {
+                        completionHandler(false)
+                    }
                 } else {
                     completionHandler(false)
                 }
             }
     }
     
-    private func isDefaultImage(_ image: UIImage) -> Bool {
-        return image == defaultProfileImage
-    }
-    
     private func fetchUserProfile() {
-        guard let currentUser = Auth.auth().currentUser else {
-            return
-        }
-        
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(currentUser.uid)
-        
-        userRef.getDocument { document, error in
-            guard let document = document, document.exists else {
-                return
-            }
-            
-            let data = document.data()
-            if let profileImageUrl = data?["profileImageUrl"] as? String {
-                self.profileImageView.imageView.loadImage(url: profileImageUrl)
-            } else {
-                self.profileImageView.imageView.image = UIImage(systemName: "person.crop.circle.fill")
-                self.profileImageView.imageView.tintColor = .gray3
-            }
-            
-            if let userName = data?["name"] as? String {
-                self.nicknameInputView.textField.text = userName
-                
-                self.checkNicknameValidity(userName)
-            }
-            
-            if let isProfilePublic = data?["isProfilePublic"] as? Bool {
-                self.toggleSwitch.isOn = isProfilePublic
-            }
-            self.checkSaveButtonValidity()
-        }
+        let user = UserManager.shared.user
+        self.profileImageView.imageView.loadProfileImage(url: user.profileImageUrl, borderWidth: 10) {}
+        self.nicknameInputView.textField.text = user.name
+        self.checkNicknameValidity(user.name)
+        self.toggleSwitch.isOn = user.isProfilePublic
+        self.checkSaveButtonValidity()
     }
     
     private func checkNicknameValidity(_ nickname: String) {

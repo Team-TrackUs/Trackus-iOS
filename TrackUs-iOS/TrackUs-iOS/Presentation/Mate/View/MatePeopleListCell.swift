@@ -21,8 +21,8 @@ class MatePeopleListCell: UICollectionViewCell {
         imageView.widthAnchor.constraint(equalToConstant: 60).isActive = true
         imageView.heightAnchor.constraint(equalToConstant: 60).isActive = true
         imageView.layer.cornerRadius = 60 / 2
-        imageView.backgroundColor = .gray2
         imageView.tintColor = .gray3
+        imageView.layer.borderColor = UIColor.gray3.cgColor
         return imageView
     }()
     
@@ -115,8 +115,10 @@ class MatePeopleListCell: UICollectionViewCell {
             // 이미지 존재 확인 없으면 기본 프로필
             if url == "" {
                 self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")?.withRenderingMode(.alwaysTemplate)
+                self.profileImageView.layer.borderWidth = 4
             } else {
                 self.profileImageView.loadImage(url: url ?? "")
+                self.profileImageView.layer.borderWidth = 1
             }
             
             // 이름 존재 확인 없으면 탈퇴유저

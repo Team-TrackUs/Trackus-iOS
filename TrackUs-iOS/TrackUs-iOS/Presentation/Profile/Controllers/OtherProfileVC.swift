@@ -497,10 +497,6 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
-    
-    @objc private func backButtonTapped() {
-        self.navigationController?.popViewController(animated: true)
-    }
 
     private func setupViews() {
         view.addSubview(profileImageView)
@@ -670,11 +666,7 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
                     self.privateProfileLabel.isHidden = true
                     self.privateProfileLabel2.isHidden = true
                     
-                    if let profileImageUrl = data?["profileImageUrl"] as? String {
-                        self.profileImageView.loadImage(url: profileImageUrl)
-                    } else {
-                        self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
-                    }
+                    self.profileImageView.loadProfileImage(url: data?["profileImageUrl"] as? String, borderWidth: 5) {}
                     
                     if let userName = data?["name"] as? String {
                         self.nameLabel.text = userName

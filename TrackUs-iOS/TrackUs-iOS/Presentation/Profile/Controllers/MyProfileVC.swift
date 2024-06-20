@@ -429,7 +429,7 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let post = posts[indexPath.row]
         
-        let courseDetailVC = CourseDetailVC()
+        let courseDetailVC = CourseDetailVC(isBack: true)
         
         courseDetailVC.hidesBottomBarWhenPushed = true
         courseDetailVC.postUid = post.uid
@@ -670,12 +670,7 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
             guard let self = self else { return }
             if exists {
                 let user = UserManager.shared.user
-                if let profileImageUrl = user.profileImageUrl {
-                    self.profileImageView.loadImage(url: profileImageUrl)
-                } else {
-                    self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
-                }
-                
+                self.profileImageView.loadProfileImage(url: user.profileImageUrl, borderWidth: 5) {}
                 self.nameLabel.text = user.name
             } else {
                 self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")

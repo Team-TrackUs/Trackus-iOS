@@ -56,6 +56,7 @@ final class CustomTabBarVC: UITabBarController {
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+        NotificationCenter.default.removeObserver(self, name: .newMessageCountDidChange, object: nil)
     }
     
     func setupMainButton() {
@@ -143,8 +144,5 @@ final class CustomTabBarVC: UITabBarController {
         
         let chatBadgeCount = ChatManager.shared.newMessageCount
         items[2].badgeValue = chatBadgeCount
-    }
-    deinit {
-        NotificationCenter.default.removeObserver(self, name: .newMessageCountDidChange, object: nil)
     }
 }
