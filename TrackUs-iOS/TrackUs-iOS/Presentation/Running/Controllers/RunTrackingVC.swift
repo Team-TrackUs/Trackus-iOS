@@ -5,18 +5,11 @@
 //  Created by 석기권 on 5/27/24.
 //
 
-import Foundation
-import ActivityKit
 import UIKit
 import MapKit
+import ActivityKit
 import CoreMotion
 
-@available(iOS 16.2, *)
-final class WidgetManager {
-    static let shared = WidgetManager()
-    private init() {}
-    var activity: Activity<WidgetTestAttributes>!
-}
 final class RunTrackingVC: UIViewController {
     // MARK: - Properties
     private let pedometer = CMPedometer()
@@ -388,6 +381,7 @@ final class RunTrackingVC: UIViewController {
     
     func goToResultVC() {
         runModel.setEndTime()
+        disableBackgroundTracking()
         HapticManager.shared.hapticImpact(style: .medium)
         let resultVC = RunningResultVC()
         resultVC.runModel = runModel
@@ -431,7 +425,7 @@ final class RunTrackingVC: UIViewController {
         Task {
             await activity.update(using: WidgetTestAttributes.ContentState(time: runModel.seconds.toMMSSTimeFormat,
                                                                            pace: runModel.pace.asString(style: .pace), kilometer: String(format: "%.2f", runModel.distance / 1000.0),
-                                                                           isActive: isActive))
+                                                                           cadance: "\(runModel.cadance)"))
         }
     }
     
@@ -463,7 +457,7 @@ final class RunTrackingVC: UIViewController {
         
         guard coordinates.count >= 2, let polyline = polyline, let annotation2 = annotation2 else { return }
         mapView.addOverlay(polyline)
-        mapView.addAnnotations([annotation, annotation2])
+        mapView.addAnnotations([annotation, annotation2])       
     }
     
     func removePath() {
@@ -503,7 +497,7 @@ final class RunTrackingVC: UIViewController {
     func displayWidget() {
         if ActivityAuthorizationInfo().areActivitiesEnabled {
             let attributes = WidgetTestAttributes(name: "test")
-            let initialState = WidgetTestAttributes.ContentState(time: "00:00", pace: "-'--''", kilometer: "0.00", isActive: false)
+            let initialState = WidgetTestAttributes.ContentState(time: "00:00", pace: "-'--''", kilometer: "0.00", cadance: "\(runModel.cadance)")
             
             do {
                 WidgetManager.shared.activity = try Activity<WidgetTestAttributes>.request(
@@ -518,13 +512,13 @@ final class RunTrackingVC: UIViewController {
     }
     
     @available (iOS 16.2, *)
-    func removeWidget() {
+    func removeWidget() {        
         Task {
             await WidgetManager.shared.activity.end(nil, dismissalPolicy: .immediate)
         }
     }
     
-    // MARK: - objc Methods
+
     @objc func pangestureHandler(sender: UIPanGestureRecognizer) {
         let translation = sender.translation(in: actionButton)
         let inset = UIEdgeInsets(top: -40, left: -40, bottom: -40, right: 30)
@@ -641,10 +635,13 @@ extension RunTrackingVC: UserLocationDelegate {
         
     }
     
-    
-    func stopTracking() {
+    func disableBackgroundTracking() {
         locationService.allowBackgroundUpdates = false
         locationService.userLocationDelegate = nil
+    }
+    
+    func stopTracking() {
+        disableBackgroundTracking()
         pedometer.stopUpdates()
         altimeter.stopRelativeAltitudeUpdates()
         tempData["steps"] = runModel.steps
@@ -673,7 +670,7 @@ extension RunTrackingVC: MKMapViewDelegate {
         }
         let renderer = MKPolylineRenderer(polyline: polyLine)
         renderer.strokeColor = .green
-        renderer.lineWidth = 4.0
+        renderer.lineWidth = 5.0
         renderer.alpha = 1.0
         return renderer
     }
