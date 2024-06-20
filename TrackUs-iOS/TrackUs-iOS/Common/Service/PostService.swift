@@ -82,6 +82,14 @@ class PostService {
     func fetchPostTable(startAfter: DocumentSnapshot?, limit: Int, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
         var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true).limit(to: limit)
         
+        let userUid = User.currentUid
+        let userManager = UserManager.shared
+        userManager.getUserData(uid: userUid)
+        let user = userManager.user
+        let blockList = user.blockList
+        
+        var filteredPosts = [Post]()
+        
         if let startAfter = startAfter {
             query = query.start(afterDocument: startAfter)
         }
@@ -97,15 +105,23 @@ class PostService {
                 return
             }
             
-            let posts = documents.compactMap { queryDocumentSnapshot -> Post? in
+            let _ = documents.compactMap { queryDocumentSnapshot -> Post? in
                 guard let post = try? queryDocumentSnapshot.data(as: Post.self) else {
                     return nil
                 }
+                
+                let postMembers = post.members
+                let whoReportAt = post.whoReportAt
+                
+                if !postMembers.contains(where: blockList.contains) && (whoReportAt.count) <= 2 {
+                    filteredPosts.append(post)
+                }
+                
                 return post
             }
             
             let lastDocumentSnapshot = documents.last
-            completion(posts, lastDocumentSnapshot, nil)
+            completion(filteredPosts, lastDocumentSnapshot, nil)
         }
     }
     
@@ -120,6 +136,14 @@ class PostService {
     func fetchMap(regionCenter: CLLocationCoordinate2D, completion: @escaping ([Post]?, DocumentSnapshot?, Error?) -> Void) {
         var query = Firestore.firestore().collection("posts").order(by: "createdAt", descending: true)
         
+        let userUid = User.currentUid
+        let userManager = UserManager.shared
+        userManager.getUserData(uid: userUid)
+        let user = userManager.user
+        let blockList = user.blockList
+        
+        var filteredPosts = [Post]()
+        
         query.getDocuments { (querySnapshot, error) in
             if let error = error {
                 completion(nil, nil, error)
@@ -131,7 +155,7 @@ class PostService {
                 return
             }
             
-            let posts = documents.compactMap { queryDocumentSnapshot -> Post? in
+            let _ = documents.compactMap { queryDocumentSnapshot -> Post? in
                 guard let post = try? queryDocumentSnapshot.data(as: Post.self) else {
                     return nil
                 }
@@ -142,11 +166,20 @@ class PostService {
                 
                 let courseRouteStart = CLLocationCoordinate2D(latitude: courseRoute.latitude, longitude: courseRoute.longitude)
                 let distance = self.distanceBetweenCourse(regionCenter, courseRouteStart)
-                return distance <= 5000 ? post : nil // 5km 이내
+                
+                
+                let postMembers = post.members
+                let whoReportAt = post.whoReportAt
+                
+                if !postMembers.contains(where: blockList.contains) && distance <= 5000 && (whoReportAt.count) <= 2 {
+                    filteredPosts.append(post)
+                }
+                
+                return post
             }
             
             let lastDocumentSnapshot = documents.last
-            completion(posts, lastDocumentSnapshot, nil)
+            completion(filteredPosts, lastDocumentSnapshot, nil)
         }
     }
     

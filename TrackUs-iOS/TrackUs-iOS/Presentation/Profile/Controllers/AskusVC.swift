@@ -149,7 +149,7 @@ class AskusVC: UIViewController {
             if let error = error {
                 self.showAlert(title: "", message: "오류가 발생하였습니다.", action: "실패")
             } else {
-                self.showAlert(title: "", message: "접수되었습니다.", action: "성공")
+                self.showAlert(title: "", message: "문의가 접수되었습니다.", action: "성공")
             }
         }
     }

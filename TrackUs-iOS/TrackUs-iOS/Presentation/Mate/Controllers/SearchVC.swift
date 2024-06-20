@@ -57,8 +57,8 @@ class SearchVC: UIViewController, UITextFieldDelegate {
     
     private lazy var navigationMenuButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        button.tintColor = .gray1
+        button.setImage(UIImage(named: "dots_icon"), for: .normal)
+        button.tintColor = .black
         return button
     }()
 
