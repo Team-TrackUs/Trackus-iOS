@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol SideMenuDelegate {
+    func didSelectLeaveChatRoom(chatRoomID: String)
+}
+
 class SideMenuVC: UIViewController {
     
     private let chat: Chat
@@ -22,6 +26,7 @@ class SideMenuVC: UIViewController {
     }
     
     var delegate: SideMenuDelegate?
+    var profileImageDelegate: UserCellDelegate?
     
     private let menuWidth: CGFloat = 300
     private var menuView: UIView!
@@ -29,7 +34,7 @@ class SideMenuVC: UIViewController {
     
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
-        if chat.group{
+        if chat.group {
             titleLabel.text = chat.title
         } else {
             titleLabel.text = (userInfo[chat.nonSelfMembers[0]]?.name ?? "") + "님과 채팅"
@@ -42,7 +47,7 @@ class SideMenuVC: UIViewController {
     
     private lazy var countLabel: UILabel = {
         let countLabel = UILabel()
-        if chat.group{
+        if chat.group {
             countLabel.text = String(chat.nonSelfMembers.count + 1)
             countLabel.isHidden = false
         } else {
@@ -61,6 +66,17 @@ class SideMenuVC: UIViewController {
         membersLabel.textColor = .gray2
         membersLabel.translatesAutoresizingMaskIntoConstraints = false
         return membersLabel
+    }()
+    
+    private lazy var membersTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.separatorStyle = .none
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(MemberCell.self, forCellReuseIdentifier: "MemberCell")
+        tableView.tableFooterView = UIView()
+        return tableView
     }()
     
     override func viewDidLoad() {
@@ -87,6 +103,7 @@ class SideMenuVC: UIViewController {
         menuView.addSubview(titleLabel)
         menuView.addSubview(countLabel)
         menuView.addSubview(membersLabel)
+        menuView.addSubview(membersTableView)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: menuView.safeAreaLayoutGuide.topAnchor, constant: 16),
@@ -97,35 +114,12 @@ class SideMenuVC: UIViewController {
             
             membersLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
             membersLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
-        ])
-        
-        // Add members profiles
-        var previousMemberView: UIView = membersLabel
-        
-        // 본인 정보 출력
-        var myInfo = UserManager.shared.user
-        myInfo.name += " (나)"
-        let memberView = createMemberView(member: myInfo)
-        menuView.addSubview(memberView)
-        
-        NSLayoutConstraint.activate([
-            memberView.topAnchor.constraint(equalTo: previousMemberView.bottomAnchor, constant: 8),
-            memberView.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16)
-        ])
-        previousMemberView = memberView
-        
-        // 나머지 멤버 출력
-        for member in chat.nonSelfMembers {
-            guard let member = userInfo[member] else { return }
-            let memberView = createMemberView(member: member)
-            menuView.addSubview(memberView)
             
-            NSLayoutConstraint.activate([
-                memberView.topAnchor.constraint(equalTo: previousMemberView.bottomAnchor, constant: 8),
-                memberView.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16)
-            ])
-            previousMemberView = memberView
-        }
+            membersTableView.topAnchor.constraint(equalTo: membersLabel.bottomAnchor, constant: 8),
+            membersTableView.leadingAnchor.constraint(equalTo: menuView.leadingAnchor),
+            membersTableView.trailingAnchor.constraint(equalTo: menuView.trailingAnchor),
+            membersTableView.bottomAnchor.constraint(equalTo: menuView.bottomAnchor)
+        ])
         
         let leaveButton = UIButton()
         leaveButton.setImage(UIImage(systemName: "rectangle.portrait.and.arrow.forward"), for: .normal)
@@ -139,42 +133,6 @@ class SideMenuVC: UIViewController {
             leaveButton.bottomAnchor.constraint(equalTo: menuView.safeAreaLayoutGuide.bottomAnchor),
             leaveButton.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16)
         ])
-    }
-    
-    // 사용자 목록 view 만들기
-    private func createMemberView(member: User) -> UIView {
-        let memberView = UIView()
-        memberView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let profileImageView = UIImageView()
-        profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        // Assume `Member` has a method to load image from URL
-        profileImageView.loadProfileImage(url: member.profileImageUrl) {}
-        profileImageView.layer.cornerRadius = 20
-        profileImageView.clipsToBounds = true
-        
-        let nameLabel = UILabel()
-        nameLabel.text = member.name
-        nameLabel.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        nameLabel.textColor = .label
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        memberView.addSubview(profileImageView)
-        memberView.addSubview(nameLabel)
-        
-        NSLayoutConstraint.activate([
-            profileImageView.leadingAnchor.constraint(equalTo: memberView.leadingAnchor),
-            profileImageView.topAnchor.constraint(equalTo: memberView.topAnchor),
-            profileImageView.bottomAnchor.constraint(equalTo: memberView.bottomAnchor),
-            profileImageView.widthAnchor.constraint(equalToConstant: 40),
-            profileImageView.heightAnchor.constraint(equalToConstant: 40),
-            
-            nameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 8),
-            nameLabel.centerYAnchor.constraint(equalTo: memberView.centerYAnchor),
-            nameLabel.trailingAnchor.constraint(equalTo: memberView.trailingAnchor)
-        ])
-        
-        return memberView
     }
     
     // 오른쪽 스와이프 제스쳐
@@ -222,6 +180,41 @@ class SideMenuVC: UIViewController {
     }
 }
 
-protocol SideMenuDelegate {
-    func didSelectLeaveChatRoom(chatRoomID: String)
+extension SideMenuVC: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return chat.nonSelfMembers.count + 1 // 본인 포함
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MemberCell", for: indexPath) as? MemberCell else {
+            return UITableViewCell()
+        }
+        
+        if indexPath.row == 0 {
+            // 본인 정보
+            var myInfo = UserManager.shared.user
+            myInfo.name += " (나)"
+            cell.configure(with: myInfo)
+        } else {
+            let memberUid = chat.nonSelfMembers[indexPath.row - 1]
+            if let memberInfo = userInfo[memberUid] {
+                cell.configure(with: memberInfo)
+            }
+        }
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        var uid: String
+        if indexPath.row == 0 {
+            // 본인 정보
+            uid = UserManager.shared.user.uid
+        } else {
+            uid = chat.nonSelfMembers[indexPath.row - 1]
+        }
+        
+        profileImageDelegate?.didTapProfileImage(for: uid)
+        hideMenu()
+    }
 }

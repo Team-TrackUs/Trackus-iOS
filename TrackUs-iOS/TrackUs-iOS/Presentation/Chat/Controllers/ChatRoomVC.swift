@@ -299,7 +299,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @objc private func showSideMenu() {
         let sideMenuVC = SideMenuVC(chat: chat)
         sideMenuVC.delegate = self
-        
+        sideMenuVC.profileImageDelegate = self
         sideMenuVC.modalPresentationStyle = .overFullScreen
         present(sideMenuVC, animated: false) {
             sideMenuVC.showMenu()
@@ -629,7 +629,7 @@ extension ChatRoomVC: SideMenuDelegate {
     }
 }
     
-extension ChatRoomVC: ChatMessageCellDelegate{
+extension ChatRoomVC: UserCellDelegate{
     func didTapProfileImage(for uid: String) {
         let otherProfileVC = OtherProfileVC(userId: uid)
         navigationController?.pushViewController(otherProfileVC, animated: true)
