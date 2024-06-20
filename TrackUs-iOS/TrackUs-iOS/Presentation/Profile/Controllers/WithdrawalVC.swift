@@ -109,16 +109,15 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         return button
     }()
     
-    private let withdrawalButton: UIButton = {
-        let button = UIButton()
+    private lazy var mainButton: MainButton = {
+        let button = MainButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("회원탈퇴", for: .normal)
+        button.title = "회원탈퇴"
         button.backgroundColor = .red
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 25.0
         button.addTarget(self, action: #selector(withdrawalButtonTapped), for: .touchUpInside)
         return button
     }()
+
     
     private var isRadioButtonSelected = false
 
@@ -129,13 +128,15 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         setupViews()
         reasonTextView.delegate = self
         
-        self.tabBarController?.tabBar.isHidden = true
+        // 화면 터치 인식 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
     }
 
     private func setupNavBar() {
         self.navigationItem.title = "회원탈퇴"
         
-    let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+    let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
         backButton.tintColor = .black
         self.navigationItem.leftBarButtonItem = backButton
         
@@ -159,7 +160,7 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         contentView.addSubview(reasonTextView)
         contentView.addSubview(agreementLabel)
         contentView.addSubview(radioButton)
-        contentView.addSubview(withdrawalButton)
+        contentView.addSubview(mainButton)
         
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -170,7 +171,6 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
@@ -203,11 +203,11 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
             radioButton.heightAnchor.constraint(equalToConstant: 25),
             radioButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
-            withdrawalButton.topAnchor.constraint(equalTo: radioButton.bottomAnchor, constant: 16),
-            withdrawalButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            withdrawalButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            withdrawalButton.heightAnchor.constraint(equalToConstant: 58),
-            withdrawalButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
+            mainButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            mainButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            mainButton.heightAnchor.constraint(equalToConstant: 56),
+            mainButton.topAnchor.constraint(equalTo: agreementLabel.bottomAnchor, constant: 20),
+            contentView.bottomAnchor.constraint(greaterThanOrEqualTo: mainButton.bottomAnchor, constant: 16)
         ])
     }
 
@@ -248,19 +248,18 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
         
         present(alert, animated: true, completion: nil)
     }
-    
     private func deleteUserAccount() {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(User.currentUid)
         userRef.delete { error in
             if let error = error {
-                print("Error deleting user document: \(error)")
+                //print("Error deleting user document: \(error)")
                 return
             }
             
             Auth.auth().currentUser?.delete { error in
                 if let error = error {
-                    print("Error deleting user account: \(error)")
+                    //print("Error deleting user account: \(error)")
                     return
                 }
                 
@@ -274,12 +273,15 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
                     
                     
                 } catch let signOutError as NSError {
-                    print("Error signing out: %@", signOutError)
+                    //print("Error signing out: %@", signOutError)
                 }
             }
         }
     }
 
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
 
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.textColor == UIColor.lightGray {

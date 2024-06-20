@@ -10,10 +10,10 @@ import UIKit
 // MARK: - 닉네임 view
 class NicknameInputView: UIView, UITextFieldDelegate {
     // MARK: - MainButtonEnable 델리게이트
-    weak var delegate: MainButtonEnabledDelegate?
+    public weak var delegate: MainButtonEnabledDelegate?
     
     // 닉네임 조건 확인 여부
-    private var isError: Bool = false {
+    public var isError: Bool = false {
         didSet {
             if isError {
                 guidelabel.textColor = .red
@@ -24,7 +24,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     }
     
     // 메인 버튼 활성화 여부
-    private var availability: Bool = false {
+    public var availability: Bool = false {
         didSet {
             delegate?.MainButtonDidChangeEnabled(availability)
         }
@@ -43,7 +43,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
         return label
     }()
     
-    lazy var textField: UITextField = {
+    public lazy var textField: UITextField = {
         var textField = UITextField()
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .clear
@@ -97,7 +97,7 @@ class NicknameInputView: UIView, UITextFieldDelegate {
     }()
     
     // MARK: - Initializers
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         setupAutoLayout()
     }

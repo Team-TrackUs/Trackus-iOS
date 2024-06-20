@@ -12,6 +12,7 @@ import UIKit
 enum TemplateStyle {
     case distanceOnly
     case timeOnly
+    case pathImage
 }
 
 struct TemplateData {
@@ -22,7 +23,8 @@ struct TemplateData {
 class DataCollectionVC: UICollectionViewController {
     let imageTemplates: [TemplateData] = [
         TemplateData(resource: .photoCell, style: .distanceOnly),
-        TemplateData(resource: .photoCell2, style: .timeOnly)
+        TemplateData(resource: .photoCell2, style: .timeOnly),
+        TemplateData(resource: .photoCell3, style: .pathImage)
     ]
     
     weak var delegate: DataCollectionDelegate?

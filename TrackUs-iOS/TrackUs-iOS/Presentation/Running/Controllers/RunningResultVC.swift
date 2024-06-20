@@ -128,33 +128,19 @@ class RunningResultVC: ExtensionVC {
     func setupNavBar() {
         view.backgroundColor = .systemBackground
         navigationItem.title = "기록"
-        let closeButton = UIButton(type: .system)
-        closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
-        closeButton.tintColor = .black
-        closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
-        
-        let shareButton = UIButton(type: .system)
-        shareButton.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
-        shareButton.tintColor = .black
-        shareButton.addTarget(self, action: #selector(shareButtonTapped), for: .touchUpInside)
-        
-        let menuBarItem = UIBarButtonItem(customView: closeButton)
-        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
-        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        
-        let menuBarItem2 = UIBarButtonItem(customView: shareButton)
-        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
-        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        
-        
-        navigationItem.leftBarButtonItem = menuBarItem
-        navigationItem.rightBarButtonItem = menuBarItem2
         navigationItem.hidesBackButton = true
-        navigationItem.rightBarButtonItem?.tintColor = .black
-        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-        navigationController?.navigationBar.shadowImage = UIImage()
+        
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(backButtonTapped))
+        backButton.tintColor = .black
+        navigationItem.leftBarButtonItem = backButton
+        
+        let shareButton = UIBarButtonItem(image: UIImage(systemName: "camera"), style: .plain, target: self, action: #selector(shareButtonTapped))
+        shareButton.tintColor = .black
+        navigationItem.rightBarButtonItem = shareButton
+    }
+    
+    @objc func backButtonTapped() {
+        dismiss(animated: true)
     }
     
     func setConstraint() {
@@ -310,10 +296,7 @@ class ExtensionVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
-
 }
 
 extension UIViewController {
@@ -341,3 +324,5 @@ extension UIViewController {
          }
      }
 }
+
+

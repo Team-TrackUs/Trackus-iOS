@@ -42,6 +42,7 @@ extension Array where Element == CLLocationCoordinate2D {
     }
     
     func makeRegionToFit() -> MKCoordinateRegion? {
+        /// 위도, 경도의 4개지점 구하기
         let maxLatitude = self.map {Double($0.latitude)}.max()
         let minLatitude = self.map {Double($0.latitude)}.min()
         let maxLongitude = self.map {Double($0.longitude)}.max()
@@ -61,17 +62,38 @@ extension Array where Element == CLLocationCoordinate2D {
             return nil
         }
         
+        ///  직선거리 계산에 사용될 더미데이터
         let commLongitude = center.longitude
         let commLatitude = center.latitude
         
         let latitudeDistance = CLLocationCoordinate2D(latitude: CLLocationDegrees(floatLiteral: minLatitude), longitude: commLongitude).distance(to: CLLocationCoordinate2D(latitude: maxLatitude, longitude: commLongitude))
-        let longitudeDistance = CLLocationCoordinate2D(latitude: CLLocationDegrees(floatLiteral: commLatitude), longitude: minLongitude).distance(to: CLLocationCoordinate2D(latitude: commLatitude, longitude: maxLongitude))
         
-        let maxValue = Swift.max(latitudeDistance, longitudeDistance)
+        let longitudeDistance = CLLocationCoordinate2D(latitude: CLLocationDegrees(floatLiteral: commLatitude), longitude: minLongitude).distance(to: CLLocationCoordinate2D(latitude: commLatitude, longitude: maxLongitude))
         
         let region = MKCoordinateRegion(center: center, latitudinalMeters: latitudeDistance, longitudinalMeters: longitudeDistance)
         
         return region
+    }
+    
+    func convertCoordinatesToImagePoints(coordinates: [CLLocationCoordinate2D], rect: CGRect) -> [CGPoint] {
+        var points: [CGPoint] = []
+        
+        let minLat = coordinates.min { $0.latitude < $1.latitude }!.latitude
+        let maxLat = coordinates.max { $0.latitude < $1.latitude }!.latitude
+        let minLon = coordinates.min { $0.longitude < $1.longitude }!.longitude
+        let maxLon = coordinates.max { $0.longitude < $1.longitude }!.longitude
+        
+        let latRange = maxLat - minLat // 최대위도, 최소위도
+        let lonRange = maxLon - minLon // 최대경도, 최소경도
+        
+        for coordinate in coordinates {
+            let x = (coordinate.longitude - minLon) / lonRange * Double(rect.width)
+            let y = (1 - (coordinate.latitude - minLat) / latRange) * Double(rect.height)
+            
+            points.append(CGPoint(x: x, y: y))
+        }
+        
+        return points
     }
 }
 
@@ -80,4 +102,5 @@ extension Array where Element == GeoPoint {
         self.map {CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)}
     }
 }
+
 
