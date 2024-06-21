@@ -42,15 +42,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>카메라에 접근하기 위해서 접근 권한이 필요합니다.</string>
+	<string>사진을 촬영하고 이미지를 공유하기 위해 카메라 접근 권한이 필요합니다.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>앱을 이용하려면 위치정보 접근 권한이 필요합니다.</string>
+	<string>현재 위치를 추적하여 러닝정보를 추적하기 위해 위치정보 접근 권한이 필요합니다.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>앱을 이용하려면 위치정보 접근 권한이 필요합니다.</string>
+	<string>주변 러닝정보를 확인하기 위해 위치정보 접근 권한이 필요합니다.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>운동정보를 기록하기 위해서 움직임 활동 권한이 필요합니다.</string>
+	<string>러닝 정보를 기록하기 위해 움직임 활동 권한이 필요합니다.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>사진앨범에 접근하기 위해서 접근 권한이 필요합니다.</string>
+	<string>사용자의 사진을 공유하기 위해 사진앨법 접근 권한이 필요합니다.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
@@ -104,5 +104,10 @@
 	<false/>
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>com.example.app.refresh</string>
+        <string>com.example.app.cleanup</string>
+    </array>
 </dict>
 </plist>
