@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "82BE45532BEFA947007AE54A"
-               BuildableName = "TrackUs-iOS.app"
-               BlueprintName = "TrackUs-iOS"
-               ReferencedContainer = "container:TrackUs-iOS.xcodeproj">
+               BuildableName = "TrackUs.app"
+               BlueprintName = "TrackUs"
+               ReferencedContainer = "container:TrackUs.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "82BE45532BEFA947007AE54A"
-            BuildableName = "TrackUs-iOS.app"
-            BlueprintName = "TrackUs-iOS"
-            ReferencedContainer = "container:TrackUs-iOS.xcodeproj">
+            BuildableName = "TrackUs.app"
+            BlueprintName = "TrackUs"
+            ReferencedContainer = "container:TrackUs.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -68,9 +68,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "82BE45532BEFA947007AE54A"
-            BuildableName = "TrackUs-iOS.app"
-            BlueprintName = "TrackUs-iOS"
-            ReferencedContainer = "container:TrackUs-iOS.xcodeproj">
+            BuildableName = "TrackUs.app"
+            BlueprintName = "TrackUs"
+            ReferencedContainer = "container:TrackUs.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
