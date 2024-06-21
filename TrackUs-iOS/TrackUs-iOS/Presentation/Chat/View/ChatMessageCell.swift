@@ -7,7 +7,15 @@
 
 import UIKit
 
+protocol UserCellDelegate: AnyObject {
+    func didTapProfileImage(for uid: String)
+}
+
+
 class ChatMessageCell: UITableViewCell {
+    
+    weak var delegate: UserCellDelegate?
+    private var uid: String = ""
     
     private lazy var dateLabel = {
         let dateLabel = UILabel()
@@ -24,6 +32,7 @@ class ChatMessageCell: UITableViewCell {
         profileImageView.layer.cornerRadius = 20
         profileImageView.clipsToBounds = true
         profileImageView.contentMode = .scaleAspectFill
+        profileImageView.tintColor = .gray3
         profileImageView.isUserInteractionEnabled = true
         return profileImageView
     }()
@@ -109,13 +118,13 @@ class ChatMessageCell: UITableViewCell {
         spacerView.setContentHuggingPriority(UILayoutPriority(rawValue: 249), for: .horizontal)
     }
     
-    @objc private func profileImageTap() {
-        // 이미지 버튼 클릭
-        print("이미지 클릭")
+    @objc private func didTapProfileImage() {
+        delegate?.didTapProfileImage(for: uid)
     }
     
     /// ui출력별 종류
     func configure(messageMap: MessageMap) {
+        self.uid = messageMap.message.sendMember
         let message = messageMap.message
         
         // 제약조건 초기화
@@ -123,7 +132,7 @@ class ChatMessageCell: UITableViewCell {
         
         var constraints = [NSLayoutConstraint]()
         // 사용자 정보 가져오기
-        guard let sendMember = ChatRoomManager.shared.userInfo[message.sendMember] else { return }
+        guard let sendMember = ChatManager.shared.userInfo[message.sendMember] else { return }
         
         // 날짜 출력 여부 (공통)
         if messageMap.sameDate {
@@ -217,13 +226,12 @@ class ChatMessageCell: UITableViewCell {
                 //constraints.append(messageBackgroundView.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 8))
                 
                 // 사용자 이미지 있을 경우 이미지 표시 - 없을경우 기본
-                if let url = sendMember.profileImageUrl {
-                    profileImageView.loadImage(url: url)
-                }
+                profileImageView.loadProfileImage(url: sendMember.profileImageUrl) {}
+                    
                 userNameLabel.text = sendMember.name.isEmpty ? "탈퇴 회원" : sendMember.name
                 
                 // 탭 제스처 추가
-                tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(profileImageTap))
+                tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
                 profileImageView.addGestureRecognizer(tapGestureRecognizer)
                 
             } else {

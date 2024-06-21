@@ -103,6 +103,7 @@ class ChatRoomCell: UITableViewCell {
             
             latestMessageLabel.leadingAnchor.constraint(equalTo: chatProfileImageView.trailingAnchor, constant: 12),
             latestMessageLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            latestMessageLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -70),
             
             timestampLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             timestampLabel.bottomAnchor.constraint(equalTo: titleLabel.bottomAnchor),

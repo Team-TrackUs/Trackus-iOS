@@ -17,7 +17,11 @@ struct Chat {
     var members: [String: Bool]
     // 본인 제외 사용자 uid -> 채팅 출력 판별용
     var nonSelfMembers: [String] {
-        members.filter { $0.value == true && $0.key != User.currentUid }.map { $0.key }
+        if group{
+            members.filter { $0.value == true && $0.key != User.currentUid }.map { $0.key }
+        } else {
+            members.filter { $0.key != User.currentUid }.map { $0.key }
+        }
     }
     // 메세지 안읽은 갯수
     var usersUnreadCountInfo: [String: Int]

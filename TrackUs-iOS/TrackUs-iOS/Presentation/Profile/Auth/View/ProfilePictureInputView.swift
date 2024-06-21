@@ -70,8 +70,8 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
             imageView.topAnchor.constraint(equalTo: topAnchor),
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
-            cameraIcon.centerYAnchor.constraint(equalTo: imageView.centerYAnchor, constant: 50),
-            cameraIcon.centerXAnchor.constraint(equalTo: imageView.centerXAnchor, constant: 50)
+            cameraIcon.centerYAnchor.constraint(equalTo: imageView.centerYAnchor, constant: 55),
+            cameraIcon.centerXAnchor.constraint(equalTo: imageView.centerXAnchor, constant: 55)
         ])
         
         // 탭 제스처 추가
@@ -87,7 +87,7 @@ class ProfilePictureInputView: UIView, UIImagePickerControllerDelegate, UINaviga
         }))
         actionSheet.addAction(UIAlertAction(title: "기본 이미지 설정", style: .destructive, handler: { _ in
             self.imageView.image = UIImage(systemName: "person.crop.circle.fill") // 기본 이미지로 설정
-            self.imageView.layer.borderWidth = 0
+            self.imageView.layer.borderWidth = 10
             self.delegate?.didChooseImage(nil)
             
             self.cameraIcon.isHidden = false

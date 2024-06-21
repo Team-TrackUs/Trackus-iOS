@@ -9,6 +9,7 @@ import UIKit
 import CoreMotion
 
 final class CustomTabBarVC: UITabBarController {
+    
     private let pedometer = CMPedometer()
     lazy var mainButton: UIButton = {
         let btn = UIButton(frame: CGRect(x: 0, y: 0, width: 48, height: 48))
@@ -41,18 +42,21 @@ final class CustomTabBarVC: UITabBarController {
         // 네트워크 체크 시작
         networkCheck.startCheckingNetwork()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(handleNetworkStatusChange(_:)), name: .networkStatusChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateChatBadge), name: .newMessageCountDidChange, object: nil)
     }
     
     override func loadView() {
         super.loadView()
         addTabItems()
         setupMainButton()
+        updateChatBadge()
+        updateChatBadge()
         networkCheck.startCheckingNetwork()
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+        NotificationCenter.default.removeObserver(self, name: .newMessageCountDidChange, object: nil)
     }
     
     func setupMainButton() {
@@ -63,7 +67,7 @@ final class CustomTabBarVC: UITabBarController {
     func addTabItems() {
         let homeVC = UINavigationController(rootViewController: RunningHomeVC())
         let mateVC = UINavigationController(rootViewController: RunningMateVC())
-        let chatVC = UINavigationController(rootViewController: MyChatListVC())
+        let chatVC = UINavigationController(rootViewController: ChatListVC())
         let profileVC = UINavigationController(rootViewController: MyProfileVC())
         
         homeVC.title = "러닝맵"
@@ -132,5 +136,13 @@ final class CustomTabBarVC: UITabBarController {
         if UIApplication.shared.canOpenURL(settingURL) {
             UIApplication.shared.open(settingURL)
         }
+    }
+    
+    // 채팅 뱃지 갯수 업데이트
+    @objc func updateChatBadge() {
+        guard let items = self.tabBar.items else { return }
+        
+        let chatBadgeCount = ChatManager.shared.newMessageCount
+        items[2].badgeValue = chatBadgeCount
     }
 }

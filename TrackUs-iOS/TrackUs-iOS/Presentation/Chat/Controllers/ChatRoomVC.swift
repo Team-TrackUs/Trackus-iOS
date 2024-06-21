@@ -9,24 +9,53 @@ import UIKit
 import FirebaseFirestore
 
 class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate {
-    
+    private var chatUId: String
     private var chat: Chat
+    private var newChat: Bool
     private var messageMap: [MessageMap] = []
     private var messages: [Message] = [] // 메시지 배열
     
-    private var userInfo = ChatRoomManager.shared.userInfo
+    private var userInfo = ChatManager.shared.userInfo
+    // 사용자 차단 여부
+    private var blackStatus: Bool = false
     
     // 메인 버튼 하단 위치 제약조건
-    private var inputStackViewBottomConstraint: NSLayoutConstraint!
+    private var tableViewBottomConstraint: NSLayoutConstraint!
+    private var inputViewBottomConstraint: NSLayoutConstraint!
+    private var messageTextViewHeightConstraint: NSLayoutConstraint!
+    private var stackViewHeightConstraint: NSLayoutConstraint!
     
     var lock = NSRecursiveLock()
     
     private var listener: ListenerRegistration?
-    let currentUid = User.currentUid
+    let currentUserUid = User.currentUid
     let db = Firestore.firestore().collection("chats")
     
-    init(chat: Chat) {
+    /// 그룹채팅용
+    init(chatUId: String, newChat: Bool = false) {
+        self.chat = {
+            if let chat = ChatManager.shared.chatRooms.first(where: { $0.uid == chatUId }){
+                return chat
+            }
+            // 없을 경우 새로 불러오기
+            return Chat(uid: chatUId, group: true, title: "", members: [:], usersUnreadCountInfo: [:])
+        }()
+        self.chatUId = chatUId
+        self.newChat = newChat
+        if !chat.group ,let blockedUserList = UserManager.shared.user.blockedUserList, let opponentUid = chat.nonSelfMembers.first, blockedUserList.contains(opponentUid) {
+            self.blackStatus = true
+        }
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    /// 개인채팅용
+    init(chat: Chat, newChat: Bool = false) {
         self.chat = chat
+        self.chatUId = chat.uid
+        self.newChat = newChat
+        if let blockedUserList = UserManager.shared.user.blockedUserList, let opponentUid = chat.nonSelfMembers.first, blockedUserList.contains(opponentUid) {
+            self.blackStatus = true
+        }
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -39,7 +68,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         tableView.separatorStyle = .none
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "messageCell")
+        tableView.register(ChatMessageCell.self, forCellReuseIdentifier: "messageCell")
         return tableView
     }()
     
@@ -54,7 +83,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         let textView = UITextView()
         textView.font = .systemFont(ofSize: 16)
         textView.isScrollEnabled = false
-        textView.delegate = self
+        textView.isEditable = blackStatus ? false : true
+        textView.text = blackStatus ? "차단 사용자와는 대화가 불가능합니다." : ""
+        textView.textColor = blackStatus ? .gray2 : .label
         //textField.numberOfLines = 0
         return textView
     }()
@@ -63,40 +94,43 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         let button = UIButton()
         //button.setTitle("전송", for: .normal)
         let image = UIImage(systemName: "paperplane.circle.fill")?.withTintColor(.mainBlue).resize(width: 36, height: 36)
+        button.isEnabled = blackStatus ? false : true
         button.setImage(image, for: .normal)
         button.tintColor = .mainBlue
         button.layer.cornerRadius = 18
-        button.clipsToBounds = true
-        button.layer.borderColor = UIColor.mainBlue.cgColor
-        button.layer.borderWidth = 3
         button.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
         return button
     }()
     
-    private lazy var inputStackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [plusButton, messageTextView, sendButton])
-        stackView.axis = .horizontal
-        stackView.backgroundColor = .systemBackground
-        stackView.spacing = 0
-        stackView.layer.cornerRadius = 18
-        stackView.clipsToBounds = true
-        stackView.layer.borderColor = UIColor.gray3.cgColor
-        stackView.layer.borderWidth = 1
-        return stackView
+    private lazy var messageInputView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .systemBackground
+        view.layer.cornerRadius = 19
+        view.clipsToBounds = true
+        view.layer.borderColor = UIColor.gray3.cgColor
+        view.layer.borderWidth = 1
+        return view
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        ChatManager.shared.currentChatUid = chatUId
+        
         startListening()
+        resetUnreadCounter()
+        
+        // 레이아웃 관련
         setupViews()
         setupNavigationBar()
         
         // 탭 제스처 인식기를 생성합니다.
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
-            // 제스처 인식기가 뷰의 다른 터치 이벤트를 방해하지 않도록 설정합니다.
-            tapGesture.cancelsTouchesInView = false
-            // 뷰에 제스처 인식기를 추가합니다.
-            view.addGestureRecognizer(tapGesture)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
+        // 제스처 인식기가 뷰의 다른 터치 이벤트를 방해하지 않도록 설정
+        tapGesture.cancelsTouchesInView = false
+        // 뷰에 제스처 인식기를 추가
+        tableView.addGestureRecognizer(tapGesture)
         
         // 스와이프로 이전 화면 갈 수 있도록 추가
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self
@@ -110,9 +144,11 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // 리스너 종료
+        ChatManager.shared.currentChatUid = ""
         stopListening()
+        resetUnreadCounter()
     }
-
+    // MARK: - 오토레이아웃 관련
     private func setupNavigationBar() {
         let sideMenuButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal"), style: .plain, target: self, action: #selector(showSideMenu))
         let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backAction))
@@ -128,44 +164,61 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     private func setupViews() {
         view.backgroundColor = .systemBackground
         view.addSubview(tableView)
-        view.addSubview(inputStackView)
+        view.addSubview(messageInputView)
+        messageInputView.addSubview(plusButton)
+        messageInputView.addSubview(messageTextView)
+        messageInputView.addSubview(sendButton)
+
         tableView.translatesAutoresizingMaskIntoConstraints = false
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         sendButton.translatesAutoresizingMaskIntoConstraints = false
-        inputStackView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         messageTextView.delegate = self
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(ChatMessageCell.self, forCellReuseIdentifier: "ChatMessageCell")
-        
-        inputStackViewBottomConstraint = inputStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
-        
+
+        tableViewBottomConstraint = tableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor, constant: -4)
+        inputViewBottomConstraint = messageInputView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8)
+
+        stackViewHeightConstraint = messageInputView.heightAnchor.constraint(equalToConstant: 38)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: inputStackView.topAnchor),
-            
-            inputStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            inputStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
-            inputStackViewBottomConstraint,
-            
-            plusButton.heightAnchor.constraint(equalToConstant: 36),
-            plusButton.widthAnchor.constraint(equalToConstant: 36),
-            
-            sendButton.heightAnchor.constraint(equalToConstant: 36),
-            sendButton.widthAnchor.constraint(equalToConstant: 36),
-            
-            messageTextView.heightAnchor.constraint(equalToConstant: 40)
+            tableViewBottomConstraint,
+
+            messageInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            messageInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            //messageInputView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            stackViewHeightConstraint,
+            inputViewBottomConstraint,
+
+            plusButton.leadingAnchor.constraint(equalTo: messageInputView.leadingAnchor),
+            plusButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
+            plusButton.heightAnchor.constraint(equalToConstant: 38),
+            plusButton.widthAnchor.constraint(equalToConstant: 38),
+
+            sendButton.trailingAnchor.constraint(equalTo: messageInputView.trailingAnchor),
+            sendButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor),
+            sendButton.heightAnchor.constraint(equalToConstant: 38),
+            sendButton.widthAnchor.constraint(equalToConstant: 38),
+
+            messageTextView.leadingAnchor.constraint(equalTo: plusButton.trailingAnchor, constant: 2),
+            messageTextView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: -2),
+            messageTextView.topAnchor.constraint(equalTo: messageInputView.topAnchor, constant: 1),
+            messageTextView.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
         ])
     }
     
+    // MARK: - 액션 관련 함수
     // 전송 버튼 이벤트 함수
     @objc private func sendMessage() {
         guard let text = messageTextView.text, !text.isEmpty else { return }
-        let newMessage = Message(sendMember: currentUid, timeStamp: Date(), messageType: .text, data: text)
+        let newMessage = Message(sendMember: currentUserUid, timeStamp: Date(), messageType: .text, data: text)
+        // 신규 채팅일 경우
+        
         
         if chat.group {
             // 그룹 메세지 - 각 사용자별 메세지 저장소에 저장
@@ -173,35 +226,80 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 // 참여중인 사용자 확인
                 if $0.value == true {
                     // 해당 사용자 메세지 정보에 저장
-                    let db = db.document(chat.uid).collection($0.key)
-                    sendMessageFireStore(db: db, message: newMessage)
+                    sendMessageFireStore(message: newMessage, opponentUid: $0.key)
                 }
             }
         }else { // 개인 채팅
-            // 차단 여부 추가
-            _ = chat.members.map{
-                // 해당 사용자 메세지 정보에 저장
-                let db = db.document(chat.uid).collection($0.key)
-                sendMessageFireStore(db: db, message: newMessage)
+            // 상대방 차단여부 확인
+            if !chat.group ,let blockingMeList = UserManager.shared.user.blockingMeList, let opponentUid = chat.nonSelfMembers.first, blockingMeList.contains(opponentUid) {
+                if newChat {
+                    chat.members[opponentUid] = false
+                    createChatRoom { [self] in
+                        sendMessageFireStore(message: newMessage, opponentUid: currentUserUid)
+                        newChat.toggle()
+                    }
+                    startListening()
+                } else {
+                    sendMessageFireStore(message: newMessage, opponentUid: currentUserUid)
+                }
+                
+                // 본인에게만 전송
+            } else {
+                if newChat {
+                    createChatRoom { [self] in
+                        _ = chat.members.map{
+                            sendMessageFireStore(message: newMessage, opponentUid: $0.key)
+                        }
+                        newChat.toggle()
+                    }
+                    startListening()
+                }else {
+                    
+                    // 나간 여부로 되어있을 경우 true 처리
+                    if chat.members.values.contains(false) {
+                        for key in chat.members.keys {
+                            chat.members[key] = true
+                        }
+                        db.document(chatUId).updateData([
+                            "members": chat.members
+                        ]) { error in
+                            if let error = error {
+                                print("Error updating document: \(error)")
+                            } else {
+                                print("Document successfully updated")
+                            }
+                        }
+                    }
+                    
+                    _ = chat.members.map{
+                        sendMessageFireStore(message: newMessage, opponentUid: $0.key)
+                    }
+                }
             }
         }
         
-        // 안읽은 메세지수 갱신
-//        guard let chatroom = ChatRoomManager.shared.chatRooms.filter({ chatroom in
-//            chatroom.uid == chat.uid
-//        }).first else { return }
-//        
-        var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
-        //var usersUnreadCountInfo = chatroom.usersUnreadCountInfo
-        usersUnreadCountInfo[currentUid] = 0
-        db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+        updateLatesMessage(message: newMessage)
+        
+        if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
+            // 기존 채팅방 띄우기
+            var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
+            usersUnreadCountInfo[currentUserUid] = 0
+            db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+        } else {
+            // 초반 리스너 파일 불러와지기 전 업데이트 용도
+            var usersUnreadCountInfo = chat.usersUnreadCountInfo.mapValues { $0 + 1 }
+            usersUnreadCountInfo[currentUserUid] = 0
+            db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+        }
     }
+    
+    
     
     // 사이드 메뉴 보이기
     @objc private func showSideMenu() {
         let sideMenuVC = SideMenuVC(chat: chat)
         sideMenuVC.delegate = self
-        
+        sideMenuVC.profileImageDelegate = self
         sideMenuVC.modalPresentationStyle = .overFullScreen
         present(sideMenuVC, animated: false) {
             sideMenuVC.showMenu()
@@ -212,9 +310,10 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @objc private func keyboardWillShow(notification: NSNotification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             // 키보드 높이만큼 bottom constraint 조정
-            inputStackViewBottomConstraint.constant = 25 - keyboardSize.height
+            inputViewBottomConstraint.constant = 25 - keyboardSize.height
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
+                self.scrollToBottom()
             }
         }
     }
@@ -222,7 +321,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     // 키보드 사라질 때
     @objc private func keyboardWillHide(notification: NSNotification) {
         // 키보드가 사라질 때 원래대로 복귀
-        inputStackViewBottomConstraint.constant = -10
+        inputViewBottomConstraint.constant = -10
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
@@ -240,7 +339,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     // MARK: - Firebase 관련 함수
     // 메세지 전송
-    private func sendMessageFireStore(db: CollectionReference, message: Message) {
+    private func sendMessageFireStore(message: Message, opponentUid: String) {
+        let db = db.document(chat.uid).collection(opponentUid)
         db.addDocument(data: [
             "sendMember": message.sendMember,
             "timeStamp": message.timeStamp,
@@ -253,6 +353,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 print("Error adding message: \(error)")
             } else {
                 DispatchQueue.main.async {
+                    if opponentUid != self.currentUserUid && message.messageType != .userInout {
+                        self.sendFCMNotification(to: opponentUid, message: message)
+                    }
                     self.messageTextView.text = nil
                     self.scrollToBottom()
                 }
@@ -260,9 +363,98 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
     }
     
+    private func sendFCMNotification(to OpponentUid: String, message: Message) {
+        let urlString = "https://sendfcmnotification-p5womzw3ra-uc.a.run.app/sendFCMNotification"
+        guard let url = URL(string: urlString), let token = userInfo[OpponentUid]?.token else { return }
+        var body: String
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        switch message.messageType {
+            case .text:
+                body = message.text!
+            case .image:
+                body = "사진을 보냈습니다."
+            case .location:
+                body = "위치 장소를 보냈습니다."
+            case .userInout:
+                return
+        }
+
+        let message: [String: Any] = [
+            "token": token,
+            "title": chat.group ? chat.title : UserManager.shared.user.name,
+            "body": body,
+            // 메세지 전송 이미지
+            "imageUrl": message.imageUrl ?? "",
+            // 채팅방 식별용
+            "chatUid": chatUId,
+            "profileUrl": UserManager.shared.user.profileImageUrl ?? ""
+        ]
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: message, options: .prettyPrinted)
+            request.httpBody = jsonData
+        } catch {
+            print("Error: unable to create JSON data")
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error)")
+                return
+            }
+
+            if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
+                print("Server error: \(response.statusCode)")
+                return
+            }
+
+            if let data = data, let responseJSON = try? JSONSerialization.jsonObject(with: data, options: []) {
+                print("Response JSON: \(responseJSON)")
+            }
+        }
+
+        task.resume()
+    }
+    
+    // 본인 신규 메세지 갯수 초기화
+    private func resetUnreadCounter() {
+        if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == chatUId }){
+            var usersUnreadCountInfo = chat.usersUnreadCountInfo
+            usersUnreadCountInfo[currentUserUid] = 0
+            db.document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+        }
+    }
+    
+    // 최근 메세지 업데이트
+    private func updateLatesMessage (message: Message) {
+        if message.messageType == .userInout { return }
+        var text: String
+        switch message.messageType {
+            case .text:
+                text = message.text!
+            case .image:
+                text = "사진을 보냈습니다."
+            case .location:
+                text = "위치 장소를 보냈습니다."
+            case .userInout:
+                return
+        }
+        let latestMessageData : [String: Any] = [
+            "text": text,
+            // 이미지 작업 추가하면 해당 수정
+            "timestamp": Date() // 현재 시간을 타임스탬프로 변환
+        ]
+        db.document(chat.uid).updateData(["latestMessage" : latestMessageData])
+    }
+    
     /// 채팅방 리스너 추가
     private func startListening() {
-        listener = db.document(chat.uid).collection(currentUid)
+        listener = db.document(chat.uid).collection(currentUserUid)
             .order(by: "timeStamp", descending: false)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
@@ -307,6 +499,18 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 return MessageMap(message: $0.element, sameUser: prevMessageIsSameUser, sameDate: sameDate, sameTime: nextMessageIsSameUser && sameTime)
             }
     }
+    // 개인 신규 채팅방 생성하기
+    private func createChatRoom(completionHandler: @escaping () -> Void) {
+        let newChatRoom: [String: Any] = [
+            "title": chat.title,
+            "group": false,
+            "members": chat.members,
+            "usersUnreadCountInfo": chat.usersUnreadCountInfo
+            //"latestMessage": nil
+        ]  as [String : Any]
+        Firestore.firestore().collection("chats").document(chat.uid).setData(newChatRoom)
+        completionHandler()
+    }
     
     /// 채팅방 리스너 제거
     private func stopListening() {
@@ -315,6 +519,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     /// 스크롤뷰 하단으로 내리기
     private func scrollToBottom() {
+        guard messages.count > 0 else { return }
         let indexPath = IndexPath(row: messages.count - 1, section: 0)
         tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
     }
@@ -329,6 +534,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         let messageMap = messageMap[indexPath.row]
         cell.configure(messageMap: messageMap)
+        cell.delegate = self
         cell.selectionStyle = .none
         return cell
     }
@@ -344,12 +550,15 @@ extension ChatRoomVC: UITextViewDelegate {
         // 텍스트 뷰의 크기를 콘텐츠에 맞게 조정
         let size = CGSize(width: textView.frame.width, height: .infinity)
         let estimatedSize = textView.sizeThatFits(size)
+        // 최대 3줄 높이 계산
+        let maxHeight: CGFloat = 4 * textView.font!.lineHeight
+        let height = min(estimatedSize.height, maxHeight)
         
-        textView.constraints.forEach { (constraint) in
-            if constraint.firstAttribute == .height {
-                constraint.constant = estimatedSize.height
-            }
-        }
+        messageTextViewHeightConstraint?.constant = height
+        stackViewHeightConstraint.constant = height > 38 ? height+4 : 38
+        
+        textView.isScrollEnabled = estimatedSize.height >= maxHeight
+        view.layoutIfNeeded()
     }
 }
 
@@ -359,7 +568,7 @@ extension ChatRoomVC: SideMenuDelegate {
     func didSelectLeaveChatRoom(chatRoomID: String) {
         // 채팅방 나가기
         db.document(chatRoomID).updateData([
-            "members.\(currentUid)": false
+            "members.\(currentUserUid)": false
         ]) { error in
             if let error = error {
                 print("Error updating document: \(error)")
@@ -367,16 +576,26 @@ extension ChatRoomVC: SideMenuDelegate {
         }
         
         // 안읽은 메세지수 카운터 제거
-        db.document(chatRoomID).updateData([
-            "usersUnreadCountInfo.\(currentUid)": FieldValue.delete()
-        ]) { error in
-            if let error = error {
-                print("Error updating document: \(error)")
+        if chat.group {
+            db.document(chatRoomID).updateData([
+                "usersUnreadCountInfo.\(currentUserUid)": FieldValue.delete()
+            ]) { error in
+                if let error = error {
+                    print("Error updating document: \(error)")
+                }
+            }
+        } else { // 개인채팅
+            db.document(chatRoomID).updateData([
+                "usersUnreadCountInfo.\(currentUserUid)": 0
+            ]) { error in
+                if let error = error {
+                    print("Error updating document: \(error)")
+                }
             }
         }
         
         // firebase 본인 채팅 저장소 삭제 -> 코어데이터 적용시 수정
-        db.document(chatRoomID).collection(currentUid).getDocuments { snapshot, error in
+        db.document(chatRoomID).collection(currentUserUid).getDocuments { snapshot, error in
             guard let snapshot = snapshot else {
                 return
             }
@@ -391,7 +610,7 @@ extension ChatRoomVC: SideMenuDelegate {
         }
         
         // 나가기 안내 메세지
-        let newMessage = Message(sendMember: currentUid, timeStamp: Date(), messageType: .userInout, data: false)
+        let newMessage = Message(sendMember: currentUserUid, timeStamp: Date(), messageType: .userInout, data: false)
         
         // 그룹 채팅방만 해당
         if chat.group {
@@ -400,8 +619,7 @@ extension ChatRoomVC: SideMenuDelegate {
                 // 참여중인 사용자 확인
                 if $0.value == true {
                     // 해당 사용자 메세지 정보에 저장
-                    let db = db.document(chat.uid).collection($0.key)
-                    sendMessageFireStore(db: db, message: newMessage)
+                    sendMessageFireStore(message: newMessage, opponentUid: $0.key)
                 }
             }
         }
@@ -411,3 +629,9 @@ extension ChatRoomVC: SideMenuDelegate {
     }
 }
     
+extension ChatRoomVC: UserCellDelegate{
+    func didTapProfileImage(for uid: String) {
+        let otherProfileVC = OtherProfileVC(userId: uid)
+        navigationController?.pushViewController(otherProfileVC, animated: true)
+    }
+}

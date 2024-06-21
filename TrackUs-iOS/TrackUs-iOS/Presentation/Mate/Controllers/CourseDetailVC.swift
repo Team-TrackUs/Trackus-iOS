@@ -279,10 +279,24 @@ class CourseDetailVC: UIViewController {
                     self.showAlert(title: "", message: "해당 모집글에 인원이 다 찼습니다.", action: "참여")
                 } else if let updatedMembers = updatedMembers {
                     self.members = updatedMembers
+                    self.joinRunningChat()
                 }
             }
-            // 채팅방 참여
-            joinChat()
+        }
+        
+    }
+    
+    func joinRunningChat() {
+        // 채팅방 참여
+        if ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }) == nil {
+            // 채팅방이 없을 때만 실행
+            joinChat(){ [self] in
+                if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+                    // 기존 채팅방 띄우기
+                    joinMessage(chat: chat)
+                }
+            }
+            return
         }
     }
     
@@ -293,46 +307,37 @@ class CourseDetailVC: UIViewController {
     }
     
     @objc func goChatRoomButtonTapped() {
-        
-        let userManager = UserManager.shared
-        let userUid = User.currentUid
-        userManager.getUserData(uid: userUid)
-        let user = userManager.user
-        
         let message = """
         자세한 내용은
         마이페이지 > 설정 > 문의하기
         에서 문의해주시기 바랍니다.
         """
-
-        if user.isBlock {
+        if UserManager.shared.user.isBlock {
             showAlert(title: "이용이 제한되었습니다.", message: message, action: "제한")
         } else {
-            let ref = Firestore.firestore().collection("chats")
             if members.contains(uid){
                 // 채팅방 참여된 경우
-                if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+                if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
                     // 기존 채팅방 띄우기
                     presentChatView(chat: chat)
                 }else {
                     // 채팅방 참여하기
                     DispatchQueue.main.async {
-                        self.joinChat()
+                        self.joinChat(){ [self] in
+                            if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == postUid }){
+                                // 기존 채팅방 띄우기
+                                joinMessage(chat: chat)
+                                presentChatView(chat: chat, newChat: true)
+                            }
+                        }
                     }
                     
-                    let chat = Chat(uid: postUid, group: true, title: "", members: [:], usersUnreadCountInfo: [:])
-                    // 기존 채팅방 띄우기
-                    presentChatView(chat: chat)
                 }
             }else {
                 // 참여 안된 경우 - 방장 1:1 대화하기
-                if let chat = ChatRoomManager.shared.chatRooms.first(where: { chatRoom in
-                    // 개인 채팅방 - 방장 uid통해 채팅 유무 여부 확인
-                    !chatRoom.group && chatRoom.nonSelfMembers.contains(ownerUid)  }){
-                    // 채팅방 표시
-                    presentChatView(chat: chat)
-                } else {
-                    
+                ChatManager.shared.joinChatRoom(opponentUid: ownerUid) { chat, newChat in
+                    let chatRoomVC = ChatRoomVC(chat: chat, newChat: newChat)
+                    self.navigationController?.pushViewController(chatRoomVC, animated: true)
                 }
             }
         }
@@ -585,7 +590,9 @@ class CourseDetailVC: UIViewController {
             }
         }
     }
-    func joinChat() {
+    
+    // MARK: - 채팅 관련 함수
+    func joinChat(completionHandler: @escaping () -> Void) {
         // 채팅방 참여
         let ref = Firestore.firestore().collection("chats")
         ref.document(postUid).updateData([
@@ -601,6 +608,42 @@ class CourseDetailVC: UIViewController {
         ]) { error in
             if let error = error {
                 print("Error updating document: \(error)")
+            }
+            completionHandler()
+        }
+    }
+    
+    private func joinMessage(chat: Chat) {
+        let db = Firestore.firestore().collection("chats")
+        // 나가기 안내 메세지
+        let newMessage = Message(sendMember: uid, timeStamp: Date(), messageType: .userInout, data: true)
+        
+        // 그룹 채팅방만 해당
+        if chat.group {
+            // 그룹 메세지 - 각 사용자별 메세지 저장소에 저장
+            _ = chat.members.map{
+                // 참여중인 사용자 확인
+                if $0.value == true {
+                    // 해당 사용자 메세지 정보에 저장
+                    let db = db.document(chat.uid).collection($0.key)
+                    sendMessageFireStore(db: db, message: newMessage)
+                }
+            }
+        }
+    }
+    
+    // 메세지 전송
+    private func sendMessageFireStore(db: CollectionReference, message: Message) {
+        db.addDocument(data: [
+            "sendMember": message.sendMember,
+            "timeStamp": message.timeStamp,
+            "text": message.text as Any,
+            "imageUrl": message.imageUrl as Any,
+            "location": message.location as Any,
+            "userInOut": message.userInOut as Any
+        ]) { error in
+            if let error = error {
+                print("Error adding message: \(error)")
             }
         }
     }
@@ -722,8 +765,8 @@ class CourseDetailVC: UIViewController {
     }
     
     /// 채팅방 띄우기
-    private func presentChatView(chat: Chat){
-        let chatRoomVC = ChatRoomVC(chat: chat)
+    private func presentChatView(chat: Chat, newChat: Bool = false){
+        let chatRoomVC = ChatRoomVC(chatUId: chat.uid, newChat: newChat)
         chatRoomVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(chatRoomVC, animated: true)
     }
