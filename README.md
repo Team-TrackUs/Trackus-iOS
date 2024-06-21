@@ -36,3 +36,7 @@ Commit Message
 - 기본 명명규칙은 Swift Style Guide, API Design Guidelines , Swift Style Guide를 참고한다.
 - 함수, 메서드, 변수, 상수의 경우 **lowerCamelCase** 사용
 - 클래스, extension은 **UpserCamelCase**
+
+## Q&A
+If you would like to contact us please enter the URL
+- https://forms.gle/drvCZV4kHdgZJonRA
