@@ -36,6 +36,8 @@ class CourseDetailVC: UIViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .white
         collectionView.register(MatePeopleListCell.self, forCellWithReuseIdentifier: MatePeopleListCell.identifier)
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.showsVerticalScrollIndicator = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
@@ -222,6 +224,7 @@ class CourseDetailVC: UIViewController {
         runningStyleColor()
         
         configureUI()
+        setupLongGestureRecognizerOnCollection()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -397,6 +400,22 @@ class CourseDetailVC: UIViewController {
     
     @objc func backButtonTapped() {
         self.navigationController?.popViewController(animated: true)
+    }
+    
+    @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
+        if (gestureRecognizer.state != .began) {
+            return
+        }
+        
+        let isOwner = ownerUid == uid
+        
+        guard isOwner else { return }
+        
+        let p = gestureRecognizer.location(in: collectionView)
+        
+        if let indexPath = collectionView.indexPathForItem(at: p) {
+            LongPressCollectionCell(indexPath.row)
+        }
     }
     
     // MARK: - Helpers
@@ -589,6 +608,41 @@ class CourseDetailVC: UIViewController {
                 courseEnterButton.isEnabled = true
             }
         }
+    }
+    
+    private func setupLongGestureRecognizerOnCollection() {
+        let longPressedGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(gestureRecognizer:)))
+        longPressedGesture.minimumPressDuration = 0.5
+        longPressedGesture.delegate = self
+        longPressedGesture.delaysTouchesBegan = true
+        collectionView.addGestureRecognizer(longPressedGesture)
+    }
+    
+    private func LongPressCollectionCell(_ user: Int) {
+        let action = UIAlertAction(title: "내보내기", style: .destructive) { action in
+            
+            if self.members[user] == self.uid {
+                self.showAlert(title: "오류", message: "방장은 내보낼 수 없습니다.", action: "제한")
+                return
+            }
+            
+            PostService().kickUser(postUid: self.postUid, userUid: self.members[user]) { updateMembers, error in
+                if error != nil {
+                    // 에러 alert
+                    self.showAlert(title: "오류", message: "오류가 발생했습니다.", action: "제한")
+                } else {
+                    self.members = updateMembers ?? self.members
+                }
+            }
+        }
+        
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        alert.addAction(action)
+        alert.addAction(cancel)
+        
+        self.present(alert, animated: true)
     }
     
     // MARK: - 채팅 관련 함수
@@ -794,6 +848,13 @@ extension CourseDetailVC: UICollectionViewDelegate, UICollectionViewDataSource, 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         
         return UIEdgeInsets(top: 0, left: 10, bottom: 20, right: 10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? MatePeopleListCell else {
+            return true
+        }
+        return !cell.isUnknown
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

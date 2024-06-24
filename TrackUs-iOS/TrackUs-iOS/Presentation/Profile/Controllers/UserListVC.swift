@@ -64,8 +64,8 @@ class UserListVC: UIViewController {
         db.collection("users").document(currentUserId).getDocument { [weak self] (document, error) in
             guard let self = self, let document = document, document.exists else { return }
             
-            if let blockingUserList = document.data()?["blockingUserList"] as? [String] {
-                db.collection("users").whereField(FieldPath.documentID(), in: blockingUserList).getDocuments { (snapshot, error) in
+            if let blockedUserList = document.data()?["blockedUserList"] as? [String] {
+                db.collection("users").whereField(FieldPath.documentID(), in: blockedUserList).getDocuments { (snapshot, error) in
                     guard let snapshot = snapshot, error == nil else {
                         return
                     }
@@ -96,7 +96,7 @@ class UserListVC: UIViewController {
             let blockedUserId = userIds[index]
             
             db.collection("users").document(currentUserId).updateData([
-                "blockingUserList": FieldValue.arrayRemove([blockedUserId])
+                "blockedUserList": FieldValue.arrayRemove([blockedUserId])
             ]) { error in
                 if let error = error {
                     print("Error removing user from blocking list: \(error.localizedDescription)")
