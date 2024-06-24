@@ -148,6 +148,9 @@ extension UserListVC: UITableViewDelegate, UITableViewDataSource {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.users.removeAll()
+        self.userIds.removeAll()
+        tableView.reloadData()
         fetchUsers()
     }
 }
