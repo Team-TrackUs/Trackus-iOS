@@ -66,36 +66,51 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         return label
     }()
     
+    private let selectedReasonLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .gray2
+        label.text = "선택된 사유"
+        label.isUserInteractionEnabled = true
+        return label
+    }()
+    
+    private let arrowIconImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "arrowUpward_icon")
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private lazy var reasonStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.spacing = 16
+        stackView.alignment = .center
+        stackView.distribution = .fill
+        stackView.layer.borderWidth = 1
+        stackView.layer.borderColor = UIColor.lightGray.cgColor
+        stackView.layer.cornerRadius = 10
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+
+        stackView.addArrangedSubview(selectedReasonLabel)
+        stackView.addArrangedSubview(UIView())
+        stackView.addArrangedSubview(arrowIconImageView)
+
+        selectedReasonLabel.leadingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: 16).isActive = true
+
+        arrowIconImageView.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        arrowIconImageView.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        arrowIconImageView.trailingAnchor.constraint(equalTo: stackView.trailingAnchor, constant: -16).isActive = true
+
+        return stackView
+    }()
+
+    
     private let reasons = ["커뮤니티 위반 사례", "부정행위", "사기 행위"]
     
     private let reasonPicker = UIPickerView()
-    
-    private let reasonTextField: UITextField = {
-        let textField = UITextField()
-        textField.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        textField.textColor = .gray2
-        textField.layer.borderWidth = 1
-        textField.layer.borderColor = UIColor.lightGray.cgColor
-        textField.layer.cornerRadius = 10
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        
-        let arrowImageView = UIImageView(image: UIImage(named: "arrowUpward_icon"))
-        arrowImageView.tintColor = .black
-        arrowImageView.translatesAutoresizingMaskIntoConstraints = false
-        textField.addSubview(arrowImageView)
-        
-        NSLayoutConstraint.activate([
-            arrowImageView.trailingAnchor.constraint(equalTo: textField.trailingAnchor, constant: -16),
-            arrowImageView.centerYAnchor.constraint(equalTo: textField.centerYAnchor)
-            
-        ])
-        
-        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 40))
-        textField.leftView = paddingView
-        textField.leftViewMode = .always
-        
-        return textField
-    }()
     
     private let reportContentLabel: UILabel = {
         let label = UILabel()
@@ -145,10 +160,12 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         setupPicker()
         setupTextView()
         
-        // 화면 터치 인식 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
+        
+        let reasonLabelTapGesture = UITapGestureRecognizer(target: self, action: #selector(reasonLabelTapped))
+        reasonStackView.addGestureRecognizer(reasonLabelTapGesture)
     }
     
     private func setupNavBar() {
@@ -173,6 +190,11 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         view.endEditing(true)
     }
     
+    @objc private func reasonLabelTapped() {
+        reasonPicker.isHidden = false
+        selectedReasonLabel.becomeFirstResponder()
+    }
+    
     private func setupViews() {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
@@ -180,7 +202,7 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         contentView.addSubview(profileImageView)
         contentView.addSubview(nameLabel)
         contentView.addSubview(reasonLabel)
-        contentView.addSubview(reasonTextField)
+        contentView.addSubview(reasonStackView)
         contentView.addSubview(reportContentLabel)
         contentView.addSubview(reportTextView)
         contentView.addSubview(confirmationLabel)
@@ -210,63 +232,93 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
             nameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
             reasonLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 20),
-            reasonLabel.leadingAnchor.constraint(equalTo: reasonTextField.leadingAnchor, constant: 16),
+            reasonLabel.leadingAnchor.constraint(equalTo: reasonStackView.leadingAnchor, constant: 16),
             
-            reasonTextField.topAnchor.constraint(equalTo: reasonLabel.bottomAnchor, constant: 10),
-            reasonTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            reasonTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            reasonTextField.heightAnchor.constraint(equalToConstant: 40),
+            reasonStackView.topAnchor.constraint(equalTo: reasonLabel.bottomAnchor, constant: 10),
+            reasonStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            reasonStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            reasonStackView.heightAnchor.constraint(equalToConstant: 40),
             
-            reportContentLabel.topAnchor.constraint(equalTo: reasonTextField.bottomAnchor, constant: 20),
+            reportContentLabel.topAnchor.constraint(equalTo: reasonStackView.bottomAnchor, constant: 20),
             reportContentLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             
             reportTextView.topAnchor.constraint(equalTo: reportContentLabel.bottomAnchor, constant: 10),
             reportTextView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             reportTextView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            reportTextView.heightAnchor.constraint(equalToConstant: 150),
+            reportTextView.heightAnchor.constraint(equalToConstant: 216),
             
-            confirmationLabel.topAnchor.constraint(equalTo: reportTextView.bottomAnchor, constant: 14),
-            confirmationLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            confirmationLabel.topAnchor.constraint(equalTo: reportTextView.bottomAnchor, constant: 10),
+            confirmationLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            confirmationLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            mainButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            mainButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            mainButton.topAnchor.constraint(equalTo: confirmationLabel.bottomAnchor, constant: 30),
+            mainButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            mainButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             mainButton.heightAnchor.constraint(equalToConstant: 56),
-            mainButton.topAnchor.constraint(equalTo: confirmationLabel.bottomAnchor, constant: 130),
-            contentView.bottomAnchor.constraint(greaterThanOrEqualTo: mainButton.bottomAnchor, constant: 16)
+            mainButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
-        
-        reasonTextField.text = reasons[0]
     }
     
     private func setupPicker() {
         reasonPicker.delegate = self
         reasonPicker.dataSource = self
-        
-        reasonTextField.inputView = reasonPicker
-        
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
-        
-        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneTapped))
-        toolbar.setItems([doneButton], animated: true)
-        
-        reasonTextField.inputAccessoryView = toolbar
-    }
-    
-    @objc private func doneTapped() {
-        let selectedRow = reasonPicker.selectedRow(inComponent: 0)
-        reasonTextField.text = reasons[selectedRow]
-        reasonTextField.resignFirstResponder()
+        reasonPicker.translatesAutoresizingMaskIntoConstraints = false
+        reasonPicker.backgroundColor = .white
+        contentView.addSubview(reasonPicker)
+        reasonPicker.isHidden = true
+        NSLayoutConstraint.activate([
+            reasonPicker.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            reasonPicker.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            reasonPicker.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            reasonPicker.heightAnchor.constraint(equalToConstant: 216)
+        ])
     }
     
     private func setupTextView() {
         reportTextView.delegate = self
     }
     
+    private func fetchUserProfile(userId: String) {
+        Firestore.firestore().collection("users").document(userId).getDocument { [weak self] snapshot, error in
+            guard let self = self else { return }
+            if let error = error {
+                print("Failed to fetch user profile: \(error)")
+                return
+            }
+            guard let data = snapshot?.data(),
+                  let userName = data["name"] as? String,
+                  let profileImageUrl = data["profileImageUrl"] as? String else {
+                print("No user data found")
+                return
+            }
+            self.nameLabel.text = userName
+            if let url = URL(string: profileImageUrl) {
+                self.profileImageView.loadImage(from: url)
+            }
+        }
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return reasons.count
+    }
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return reasons[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        selectedReasonLabel.text = reasons[row]
+        reasonPicker.isHidden = true
+    }
+    
     func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == "신고 사유에 대한 내용을 자세히 입력해주세요." {
-            textView.text = ""
-            textView.textColor = .gray2
+        if textView.textColor == .gray2 {
+            textView.text = nil
+            textView.textColor = .black
         }
     }
     
@@ -277,90 +329,55 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
         }
     }
     
-    func textViewDidChange(_ textView: UITextView) {
-        if textView.text.isEmpty {
-            textView.text = "신고 사유에 대한 내용을 자세히 입력해주세요."
-            textView.textColor = .gray2
-            textView.selectedRange = NSMakeRange(0, 0)
-        } else if textView.textColor == .lightGray && textView.text.count > 0 {
-            textView.text = String(textView.text.dropFirst())
-            textView.textColor = .black
+    @objc private func reportButtonTapped() {
+        guard let reason = selectedReasonLabel.text, reason != "선택된 사유" else {
+            showAlert(message: "신고 사유를 선택해 주세요.")
+            return
+        }
+        guard let reportText = reportTextView.text, !reportText.isEmpty, reportText != "신고 사유에 대한 내용을 자세히 입력해주세요." else {
+            showAlert(message: "신고 내용을 입력해 주세요.")
+            return
+        }
+        
+        let reportData: [String: Any] = [
+            "reportedUserId": userId,
+            "reason": reason,
+            "details": reportText,
+            "timestamp": Timestamp()
+        ]
+        
+        Firestore.firestore().collection("reports").addDocument(data: reportData) { [weak self] error in
+            guard let self = self else { return }
+            if let error = error {
+                print("Failed to report user: \(error)")
+                self.showAlert(message: "신고에 실패했습니다. 다시 시도해 주세요.")
+            } else {
+                self.showAlert(message: "신고가 성공적으로 접수되었습니다.", completion: {
+                    self.navigationController?.popViewController(animated: true)
+                })
+            }
         }
     }
     
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
+    private func showAlert(message: String, completion: (() -> Void)? = nil) {
+        let alertController = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
+            completion?()
+        }
+        alertController.addAction(confirmAction)
+        present(alertController, animated: true, completion: nil)
     }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return reasons.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return reasons[row]
-    }
-    
-    private func fetchUserProfile(userId: String) {
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(userId)
-        
-        userRef.getDocument { [weak self] document, error in
-            guard let self = self, let document = document, document.exists else {
+}
+
+extension UIImageView {
+    func loadImage(from url: URL) {
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self, let data = data, error == nil else {
                 return
             }
-            
-            let data = document.data()
-            self.profileImageView.loadProfileImage(url: data?["profileImageUrl"] as? String) {}
-            
-            if let userName = data?["name"] as? String {
-                self.nameLabel.text = userName
+            DispatchQueue.main.async {
+                self.image = UIImage(data: data)
             }
-        }
-    }
-    
-    @objc private func reportButtonTapped() {
-        guard let currentUser = Auth.auth().currentUser else { return }
-        
-        let db = Firestore.firestore()
-        let reportId = UUID().uuidString
-        let reportRef = db.collection("report_user").document(reportId)
-        
-        let report = report_user(
-            uid: reportId,
-            toUser: nameLabel.text ?? "Unknown User",
-            toUserUid: userId,
-            category: reasonTextField.text ?? "",
-            text: reportTextView.text ?? "",
-            fromUser: currentUser.uid,
-            createdAt: Timestamp()
-        )
-        
-        do {
-            try reportRef.setData(from: report) { error in
-                if let error = error {
-                    print("Error saving report: \(error.localizedDescription)")
-                } else {
-                    print("Report successfully saved.")
-                    let userRef = db.collection("users").document(currentUser.uid)
-                    userRef.updateData([
-                        "reportIDList": FieldValue.arrayUnion([self.userId])
-                    ]) { error in
-                        if let error = error {
-                            print("Error updating reportIDList: \(error.localizedDescription)")
-                        } else {
-                            print("ReportIDList successfully updated.")
-                            
-                            let alert = UIAlertController(title: "신고 완료", message: "신고가 성공적으로 접수되었습니다.", preferredStyle: .alert)
-                            alert.addAction(UIAlertAction(title: "확인", style: .default, handler: { _ in
-                                self.navigationController?.popViewController(animated: true)
-                            }))
-                            self.present(alert, animated: true, completion: nil)
-                        }
-                    }
-                }
-            }
-        } catch let error {
-            print("Error encoding report: \(error.localizedDescription)")
-        }
+        }.resume()
     }
 }

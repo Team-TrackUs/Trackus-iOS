@@ -112,9 +112,11 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
     private lazy var mainButton: MainButton = {
         let button = MainButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.title = "회원탈퇴"
-        button.backgroundColor = .red
+        button.setTitle("회원탈퇴", for: .normal)
+        button.backgroundColor = .lightGray
+        //button.backgroundColor = .red
         button.addTarget(self, action: #selector(withdrawalButtonTapped), for: .touchUpInside)
+        button.isEnabled = false
         return button
     }()
 
@@ -213,12 +215,16 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
 
     @objc private func radioButtonTapped() {
         isRadioButtonSelected.toggle()
-        radioButton.backgroundColor = isRadioButtonSelected ? UIColor(named: "mainBlue") : .clear
+        radioButton.backgroundColor = isRadioButtonSelected ? UIColor.systemBlue : .clear
         if isRadioButtonSelected {
             radioButton.setImage(UIImage(systemName: "circle.fill"), for: .normal)
-            radioButton.tintColor = .mainBlue
+            radioButton.tintColor = .systemBlue
+            mainButton.isEnabled = true
+            mainButton.backgroundColor = .red
         } else {
             radioButton.setImage(nil, for: .normal)
+            mainButton.isEnabled = false
+            mainButton.backgroundColor = .lightGray
         }
     }
 
