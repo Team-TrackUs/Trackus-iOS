@@ -12,6 +12,8 @@ class MatePeopleListCell: UICollectionViewCell {
     // MARK: - Properties
     
     static let identifier = "HorizontalListCell"
+    private var currentUID: String?
+    var isUnknown: Bool = false // 탈퇴회원인지
     
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
@@ -34,7 +36,7 @@ class MatePeopleListCell: UICollectionViewCell {
         return label
     }()
     
-    private let OwnerCrownView: UIImageView = {
+    private let ownerCrownView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -71,7 +73,16 @@ class MatePeopleListCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Selectors
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        profileImageView.image = nil
+        nameLabel.text = nil
+        ownerCrownView.isHidden = true
+        overlayView.isHidden = true
+        xmarkView.isHidden = true
+        currentUID = nil
+    }
     
     // MARK: - Helpers
     
@@ -100,7 +111,7 @@ class MatePeopleListCell: UICollectionViewCell {
         stack.translatesAutoresizingMaskIntoConstraints = false
         
         stack.addArrangedSubview(nameLabel)
-        stack.addArrangedSubview(OwnerCrownView)
+        stack.addArrangedSubview(ownerCrownView)
         
         contentView.addSubview(stack)
         stack.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 8).isActive = true
@@ -108,53 +119,50 @@ class MatePeopleListCell: UICollectionViewCell {
     }
     
     func configure(uid: String, isOwner: Bool) {
-        PostService().fetchMembers(uid: uid) { name, url in
-            
-            let user = User.currentUid
-            
-            // 이미지 존재 확인 없으면 기본 프로필
-            if url == "" {
-                self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")?.withRenderingMode(.alwaysTemplate)
-                self.profileImageView.layer.borderWidth = 4
-            } else {
-                self.profileImageView.loadImage(url: url ?? "")
-                self.profileImageView.layer.borderWidth = 1
+        currentUID = uid
+        
+        profileImageView.image = UIImage(systemName: "person.crop.circle.fill")?.withRenderingMode(.alwaysTemplate)
+        profileImageView.layer.borderWidth = 4
+        nameLabel.text = "탈퇴회원"
+        nameLabel.textColor = .gray2
+        ownerCrownView.isHidden = true
+        overlayView.isHidden = true
+        xmarkView.isHidden = true
+        
+        isUnknown = true
+        
+        PostService().fetchMembers(uid: uid) { [weak self] name, url in
+            guard let self = self, self.currentUID == uid else { return }
+            guard let name = name, let url = url else {
+                // 데이터가 없는 경우 기본 설정 유지
+                self.ownerCrownView.isHidden = !isOwner
+                return
             }
             
-            // 이름 존재 확인 없으면 탈퇴유저
-            if name == "" {
-                self.nameLabel.text = "탈퇴유저"
-            } else {
-                self.nameLabel.text = name
-            }
-            
-            if user == uid {
-                self.nameLabel.textColor = .black
-            } else {
-                self.nameLabel.textColor = .gray2
-            }
-            
-            // 이름의 길이 확인 7글자 이상이면 .. 표시
-            if name?.count ?? 1 > 7 {
-                self.nameLabel.text = "\(String(describing: name?.prefix(6))).."
-            } else {
-                self.nameLabel.text = name
-            }
-            
-            // 글쓴이 확인 왕관표시
-            if isOwner {
-                self.OwnerCrownView.isHidden = false
-            } else {
-                self.OwnerCrownView.isHidden = true
-            }
-            
-            // 차단한 사용자인지 확인
-            if UserManager.shared.user.blockList.contains(uid) {
-                self.overlayView.isHidden = false
-                self.xmarkView.isHidden = false
-            } else {
-                self.overlayView.isHidden = true
-                self.xmarkView.isHidden = true
+            DispatchQueue.main.async {
+                if url.isEmpty {
+                    self.profileImageView.image = UIImage(systemName: "person.crop.circle.fill")?.withRenderingMode(.alwaysTemplate)
+                    self.profileImageView.layer.borderWidth = 4
+                } else {
+                    self.profileImageView.loadImage(url: url)
+                    self.profileImageView.layer.borderWidth = 1
+                }
+                
+                if name.isEmpty {
+                    self.nameLabel.text = "탈퇴회원"
+                } else {
+                    // 이름이 7글자 이상이면 줄임표 표시
+                    self.nameLabel.text = name.count > 7 ? "\(name.prefix(6)).." : name
+                }
+                
+                self.nameLabel.textColor = (User.currentUid == uid) ? .black : .gray2
+                self.ownerCrownView.isHidden = !isOwner
+                
+                // 차단한 사용자인지 확인
+                self.overlayView.isHidden = !UserManager.shared.user.blockList.contains(uid)
+                self.xmarkView.isHidden = self.overlayView.isHidden
+                
+                self.isUnknown = false
             }
         }
     }

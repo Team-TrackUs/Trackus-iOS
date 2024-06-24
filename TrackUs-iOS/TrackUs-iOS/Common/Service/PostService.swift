@@ -316,6 +316,12 @@ class PostService {
     // 모집글 참여인원의 프로필이미지와 이름 가져오기
     func fetchMembers(uid: String, completion: @escaping (String?, String?) -> Void) {
         Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
+            
+            if let error = error {
+                completion(nil, nil)
+                return
+            }
+            
             guard let data = snapshot?.data() else { return }
             let name = data["name"] as? String ?? ""
             let imageUrl = data["profileImageUrl"] as? String ?? ""
@@ -435,6 +441,32 @@ class PostService {
             } else {
                 print("Error: Post not found")
                 completion(false)
+            }
+        }
+    }
+    
+    // 사용자 내보내기
+    func kickUser(postUid: String, userUid: String, completion: @escaping ([String]?, Error?) -> Void) {
+        Firestore.firestore().collection("posts").document(postUid).getDocument { snapshot, error in
+            guard let document = try? snapshot?.data(as: Post.self), error == nil else {
+                completion(nil, error)
+                return
+            }
+            
+            var updateMembers = document.members
+            
+            if let index = updateMembers.firstIndex(of: userUid) {
+                updateMembers.remove(at: index)
+            } else {
+                return
+            }
+            
+            Firestore.firestore().collection("posts").document(postUid).updateData(["members": updateMembers]) { updateError in
+                if let updateError = updateError {
+                    completion(nil, updateError)
+                } else {
+                    completion(updateMembers, nil)
+                }
             }
         }
     }
