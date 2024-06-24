@@ -414,7 +414,6 @@ class CourseDetailVC: UIViewController {
         let p = gestureRecognizer.location(in: collectionView)
         
         if let indexPath = collectionView.indexPathForItem(at: p) {
-            print(indexPath.row)
             LongPressCollectionCell(indexPath.row)
         }
     }
