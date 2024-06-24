@@ -158,8 +158,10 @@ class MatePeopleListCell: UICollectionViewCell {
                 self.nameLabel.textColor = (User.currentUid == uid) ? .black : .gray2
                 self.ownerCrownView.isHidden = !isOwner
                 
+                guard let myBlockList = UserManager.shared.user.blockedUserList else { return }
+                
                 // 차단한 사용자인지 확인
-                self.overlayView.isHidden = !UserManager.shared.user.blockList.contains(uid)
+                self.overlayView.isHidden = !myBlockList.contains(uid)
                 self.xmarkView.isHidden = self.overlayView.isHidden
                 
                 self.isUnknown = false

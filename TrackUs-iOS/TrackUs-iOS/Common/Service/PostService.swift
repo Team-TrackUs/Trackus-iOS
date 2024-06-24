@@ -113,7 +113,7 @@ class PostService {
                 let postMembers = post.members
                 let whoReportAt = post.whoReportAt
                 
-                if !postMembers.contains(where: blockList.contains) && (whoReportAt.count) <= 2 {
+                if !blockList.contains(post.ownerUid) && (whoReportAt.count) <= 2 {
                     filteredPosts.append(post)
                 }
                 
@@ -171,7 +171,7 @@ class PostService {
                 let postMembers = post.members
                 let whoReportAt = post.whoReportAt
                 
-                if !postMembers.contains(where: blockList.contains) && distance <= 5000 && (whoReportAt.count) <= 2 {
+                if !blockList.contains(post.ownerUid) && distance <= 5000 && (whoReportAt.count) <= 2 {
                     filteredPosts.append(post)
                 }
                 
