@@ -260,8 +260,8 @@ class ChatMessageCell: UITableViewCell {
                     constraints.append(overlayerView.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor))
                     constraints.append(overlayerView.widthAnchor.constraint(equalToConstant: 40))
                     constraints.append(overlayerView.heightAnchor.constraint(equalToConstant: 40))
-                    constraints.append(iconView.widthAnchor.constraint(equalToConstant: 30))
-                    constraints.append(iconView.heightAnchor.constraint(equalToConstant: 30))
+                    constraints.append(iconView.widthAnchor.constraint(equalToConstant: 20))
+                    constraints.append(iconView.heightAnchor.constraint(equalToConstant: 20))
                     constraints.append(iconView.centerXAnchor.constraint(equalTo: overlayerView.centerXAnchor))
                     constraints.append(iconView.centerYAnchor.constraint(equalTo: overlayerView.centerYAnchor))
                 } else if let blockedUserList = UserManager.shared.user.blockedUserList, blockedUserList.contains(sendMember.uid) {
@@ -272,8 +272,8 @@ class ChatMessageCell: UITableViewCell {
                     constraints.append(overlayerView.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor))
                     constraints.append(overlayerView.widthAnchor.constraint(equalToConstant: 40))
                     constraints.append(overlayerView.heightAnchor.constraint(equalToConstant: 40))
-                    constraints.append(iconView.widthAnchor.constraint(equalToConstant: 30))
-                    constraints.append(iconView.heightAnchor.constraint(equalToConstant: 30))
+                    constraints.append(iconView.widthAnchor.constraint(equalToConstant: 20))
+                    constraints.append(iconView.heightAnchor.constraint(equalToConstant: 20))
                     constraints.append(iconView.centerXAnchor.constraint(equalTo: overlayerView.centerXAnchor))
                     constraints.append(iconView.centerYAnchor.constraint(equalTo: overlayerView.centerYAnchor))
                 } else {

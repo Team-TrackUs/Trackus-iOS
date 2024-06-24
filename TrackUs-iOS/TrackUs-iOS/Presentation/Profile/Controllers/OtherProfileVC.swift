@@ -782,6 +782,17 @@ extension OtherProfileVC {
                 self.updateBlockButton(toBlocked: true)
             }
         }
+        
+        db.collection("users").document(userId).updateData([
+            "blockedUserList": FieldValue.arrayUnion([currentUserUid])
+        ]) { error in
+            if let error = error {
+                print("차단하는 동안 오류 발생: \(error)")
+            } else {
+                print("사용자가 성공적으로 차단됨")
+                self.updateBlockButton(toBlocked: true)
+            }
+        }
     }
 }
 

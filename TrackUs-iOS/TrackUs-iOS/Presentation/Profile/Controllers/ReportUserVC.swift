@@ -346,7 +346,7 @@ class ReportUserVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSour
             "timestamp": Timestamp()
         ]
         
-        Firestore.firestore().collection("reports").addDocument(data: reportData) { [weak self] error in
+        Firestore.firestore().collection("report_user").addDocument(data: reportData) { [weak self] error in
             guard let self = self else { return }
             if let error = error {
                 print("Failed to report user: \(error)")
