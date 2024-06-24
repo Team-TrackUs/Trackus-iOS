@@ -444,4 +444,30 @@ class PostService {
             }
         }
     }
+    
+    // 사용자 내보내기
+    func kickUser(postUid: String, userUid: String, completion: @escaping ([String]?, Error?) -> Void) {
+        Firestore.firestore().collection("posts").document(postUid).getDocument { snapshot, error in
+            guard let document = try? snapshot?.data(as: Post.self), error == nil else {
+                completion(nil, error)
+                return
+            }
+            
+            var updateMembers = document.members
+            
+            if let index = updateMembers.firstIndex(of: userUid) {
+                updateMembers.remove(at: index)
+            } else {
+                return
+            }
+            
+            Firestore.firestore().collection("posts").document(postUid).updateData(["members": updateMembers]) { updateError in
+                if let updateError = updateError {
+                    completion(nil, updateError)
+                } else {
+                    completion(updateMembers, nil)
+                }
+            }
+        }
+    }
 }

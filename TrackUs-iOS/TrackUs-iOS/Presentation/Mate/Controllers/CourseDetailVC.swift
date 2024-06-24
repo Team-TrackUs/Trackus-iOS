@@ -224,6 +224,7 @@ class CourseDetailVC: UIViewController {
         runningStyleColor()
         
         configureUI()
+        setupLongGestureRecognizerOnCollection()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -399,6 +400,23 @@ class CourseDetailVC: UIViewController {
     
     @objc func backButtonTapped() {
         self.navigationController?.popViewController(animated: true)
+    }
+    
+    @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
+        if (gestureRecognizer.state != .began) {
+            return
+        }
+        
+        let isOwner = ownerUid == uid
+        
+        guard isOwner else { return }
+        
+        let p = gestureRecognizer.location(in: collectionView)
+        
+        if let indexPath = collectionView.indexPathForItem(at: p) {
+            print(indexPath.row)
+            LongPressCollectionCell(indexPath.row)
+        }
     }
     
     // MARK: - Helpers
@@ -591,6 +609,36 @@ class CourseDetailVC: UIViewController {
                 courseEnterButton.isEnabled = true
             }
         }
+    }
+    
+    private func setupLongGestureRecognizerOnCollection() {
+        let longPressedGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(gestureRecognizer:)))
+        longPressedGesture.minimumPressDuration = 0.5
+        longPressedGesture.delegate = self
+        longPressedGesture.delaysTouchesBegan = true
+        collectionView.addGestureRecognizer(longPressedGesture)
+    }
+    
+    private func LongPressCollectionCell(_ user: Int) {
+        let action = UIAlertAction(title: "내보내기", style: .destructive) { action in
+            
+            PostService().kickUser(postUid: self.postUid, userUid: self.members[user]) { updateMembers, error in
+                if error != nil {
+                    // 에러 alert
+                    self.showAlert(title: "오류", message: "오류가 발생했습니다.", action: "제한")
+                } else {
+                    self.members = updateMembers ?? self.members
+                }
+            }
+        }
+        
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        alert.addAction(action)
+        alert.addAction(cancel)
+        
+        self.present(alert, animated: true)
     }
     
     // MARK: - 채팅 관련 함수
