@@ -621,6 +621,11 @@ class CourseDetailVC: UIViewController {
     private func LongPressCollectionCell(_ user: Int) {
         let action = UIAlertAction(title: "내보내기", style: .destructive) { action in
             
+            if self.members[user] == self.uid {
+                self.showAlert(title: "오류", message: "방장은 내보낼 수 없습니다.", action: "제한")
+                return
+            }
+            
             PostService().kickUser(postUid: self.postUid, userUid: self.members[user]) { updateMembers, error in
                 if error != nil {
                     // 에러 alert
