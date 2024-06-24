@@ -109,10 +109,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         let userInfo = notification.request.content.userInfo
         guard let chatUid = userInfo["chatUid"] as? String else { return }
-        print(chatUid + "@@@@@@@@@@@@@@@@ 여기는 인식 됨 @@@@@@@@@@@@@@@")
-        print(userInfo)
-        print("currentChatUid : " + ChatManager.shared.currentChatUid)
-        
         // 현재 열려있는 채팅방이 아닐 경우에만 Notification 알림
         if chatUid != ChatManager.shared.currentChatUid {
             completionHandler([.banner, .sound, .badge])

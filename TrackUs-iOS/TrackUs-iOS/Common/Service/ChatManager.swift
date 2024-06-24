@@ -17,6 +17,13 @@ class ChatManager {
     
     var currentChatUid: String = ""
     
+    var currentChatInfo: Chat? {
+        if let chat = chatRooms.first(where: { $0.uid == currentChatUid }){
+            return chat
+        }
+        return nil
+    }
+    
     // 신규 메세지 총 갯수
     var newMessageCount: String? = nil {
         didSet {
@@ -129,6 +136,11 @@ class ChatManager {
                 completionHandler()
             } catch {
                 print("Error decoding document: \(error)")
+                self.chatRooms = self.chatRooms.map{
+                    var chatRoom = $0
+                    chatRoom.members.removeValue(forKey: uid)
+                    return chatRoom
+                }
                 completionHandler()
             }
         }
