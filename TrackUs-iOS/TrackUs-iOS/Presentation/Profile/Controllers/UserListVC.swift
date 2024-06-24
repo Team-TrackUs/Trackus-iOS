@@ -9,11 +9,11 @@ import UIKit
 import Firebase
 
 class UserListVC: UIViewController {
-
+    
     private var users: [User] = []
     private var userIds: [String] = []
     private let tableView = UITableView()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -25,7 +25,7 @@ class UserListVC: UIViewController {
     private func setupNavBar() {
         self.navigationItem.title = "차단된 계정"
         
-    let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(backButtonTapped))
         backButton.tintColor = .black
         self.navigationItem.leftBarButtonItem = backButton
         
@@ -38,7 +38,7 @@ class UserListVC: UIViewController {
     @objc private func backButtonTapped() {
         self.navigationController?.popViewController(animated: true)
     }
-
+    
     private func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
@@ -53,7 +53,7 @@ class UserListVC: UIViewController {
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "UserCell")
     }
-
+    
     private func fetchUsers() {
         guard let currentUserId = Auth.auth().currentUser?.uid else {
             return
@@ -65,50 +65,67 @@ class UserListVC: UIViewController {
             guard let self = self, let document = document, document.exists else { return }
             
             if let blockedUserList = document.data()?["blockedUserList"] as? [String] {
-                db.collection("users").whereField(FieldPath.documentID(), in: blockedUserList).getDocuments { (snapshot, error) in
-                    guard let snapshot = snapshot, error == nil else {
-                        return
-                    }
-
-                    self.users = snapshot.documents.compactMap { document in
-                        var user = User()
-                        let data = document.data()
-                        user.name = data["name"] as? String ?? ""
-                        user.profileImageUrl = data["profileImageUrl"] as? String
-                        self.userIds.append(document.documentID)
-                        return user
-                    }
-
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
+                if blockedUserList.isEmpty {
+                    self.showNoBlockedUsersMessage()
+                } else {
+                    db.collection("users").whereField(FieldPath.documentID(), in: blockedUserList).getDocuments { (snapshot, error) in
+                        guard let snapshot = snapshot, error == nil else {
+                            return
+                        }
+                        
+                        self.users = snapshot.documents.compactMap { document in
+                            var user = User()
+                            let data = document.data()
+                            user.name = data["name"] as? String ?? ""
+                            user.profileImageUrl = data["profileImageUrl"] as? String
+                            self.userIds.append(document.documentID)
+                            return user
+                        }
+                        
+                        DispatchQueue.main.async {
+                            self.tableView.reloadData()
+                        }
                     }
                 }
             } else {
+                self.showNoBlockedUsersMessage()
             }
         }
     }
+    
+    private func showNoBlockedUsersMessage() {
+        let messageLabel = UILabel()
+        messageLabel.text = "차단된 사용자가 없습니다."
+        messageLabel.textAlignment = .center
+        messageLabel.textColor = .gray
+        messageLabel.font = UIFont.systemFont(ofSize: 20)
+        tableView.backgroundView = messageLabel
+        tableView.separatorStyle = .none
+    }
     private func unblockUser(at index: Int) {
-            guard let currentUserId = Auth.auth().currentUser?.uid else {
-                return
-            }
-            
-            let db = Firestore.firestore()
-            let blockedUserId = userIds[index]
-            
-            db.collection("users").document(currentUserId).updateData([
-                "blockedUserList": FieldValue.arrayRemove([blockedUserId])
-            ]) { error in
-                if let error = error {
-                    print("Error removing user from blocking list: \(error.localizedDescription)")
+        guard let currentUserId = Auth.auth().currentUser?.uid else {
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let blockedUserId = userIds[index]
+        
+        db.collection("users").document(currentUserId).updateData([
+            "blockedUserList": FieldValue.arrayRemove([blockedUserId])
+        ]) { error in
+            if let error = error {
+            } else {
+                self.users.remove(at: index)
+                self.userIds.remove(at: index)
+                if self.users.isEmpty {
+                    self.showNoBlockedUsersMessage()
                 } else {
-                    print("User successfully unblocked.")
-                    self.users.remove(at: index)
-                    self.userIds.remove(at: index)
                     self.tableView.reloadData()
                 }
             }
         }
     }
+}
 extension UserListVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
