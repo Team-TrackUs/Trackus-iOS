@@ -14,10 +14,15 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     private var newChat: Bool
     private var messageMap: [MessageMap] = []
     private var messages: [Message] = [] // 메시지 배열
+    // ChatManager에 있는 데이터 활용 용도 -> 리스너 활용
+    private var currentChatInfo: Chat {
+        if let chat = ChatManger.chatRooms.first(where: { $0.uid == chatUId }){
+            return chat
+        }
+        return self.chat
+    }
     
-    private var userInfo = ChatManager.shared.userInfo
-    // 사용자 차단 여부
-    private var blackStatus: Bool = false
+    private var ChatManger = ChatManager.shared
     
     // 메인 버튼 하단 위치 제약조건
     private var tableViewBottomConstraint: NSLayoutConstraint!
@@ -42,9 +47,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }()
         self.chatUId = chatUId
         self.newChat = newChat
-        if !chat.group ,let blockedUserList = UserManager.shared.user.blockedUserList, let opponentUid = chat.nonSelfMembers.first, blockedUserList.contains(opponentUid) {
-            self.blackStatus = true
-        }
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -53,9 +55,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         self.chat = chat
         self.chatUId = chat.uid
         self.newChat = newChat
-        if let blockedUserList = UserManager.shared.user.blockedUserList, let opponentUid = chat.nonSelfMembers.first, blockedUserList.contains(opponentUid) {
-            self.blackStatus = true
-        }
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -83,9 +82,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         let textView = UITextView()
         textView.font = .systemFont(ofSize: 16)
         textView.isScrollEnabled = false
-        textView.isEditable = blackStatus ? false : true
-        textView.text = blackStatus ? "차단 사용자와는 대화가 불가능합니다." : ""
-        textView.textColor = blackStatus ? .gray2 : .label
         //textField.numberOfLines = 0
         return textView
     }()
@@ -94,7 +90,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         let button = UIButton()
         //button.setTitle("전송", for: .normal)
         let image = UIImage(systemName: "paperplane.circle.fill")?.withTintColor(.mainBlue).resize(width: 36, height: 36)
-        button.isEnabled = blackStatus ? false : true
         button.setImage(image, for: .normal)
         button.tintColor = .mainBlue
         button.layer.cornerRadius = 18
@@ -124,6 +119,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         // 레이아웃 관련
         setupViews()
         setupNavigationBar()
+        BlockedCheck()
         
         // 탭 제스처 인식기를 생성합니다.
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
@@ -141,12 +137,21 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // 뷰가 다시 나타날 때마다 호출
+        startListening()
+        BlockedCheck()
+        ChatManager.shared.currentChatUid = chatUId
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // 리스너 종료
-        ChatManager.shared.currentChatUid = ""
-        stopListening()
-        resetUnreadCounter()
+            ChatManger.currentChatUid = ""
+            stopListening()
+            resetUnreadCounter()
     }
     // MARK: - 오토레이아웃 관련
     private func setupNavigationBar() {
@@ -158,7 +163,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         navigationItem.rightBarButtonItem = sideMenuButton
         navigationItem.leftBarButtonItem = backButton
-        navigationItem.title = chat.group ? chat.title : userInfo[chat.nonSelfMembers[0]]?.name
+        navigationItem.title = chat.group ? chat.title : ChatManger.userInfo[chat.nonSelfMembers[0]]?.name
     }
     
     private func setupViews() {
@@ -191,7 +196,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 
             messageInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             messageInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            //messageInputView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             stackViewHeightConstraint,
             inputViewBottomConstraint,
 
@@ -212,13 +216,51 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         ])
     }
     
+    func BlockedCheck() {
+        if !chat.group ,let blockedUserList = UserManager.shared.user.blockedUserList, let opponentUid = chat.nonSelfMembers.first, blockedUserList.contains(opponentUid) {
+            messageTextView.isEditable = false
+            messageTextView.text = "차단 사용자와는 대화가 불가능합니다."
+            messageTextView.textColor = .gray2
+            sendButton.isEnabled = false
+        } else {
+            messageTextView.isEditable = true
+            messageTextView.text = ""
+            messageTextView.textColor = .label
+            sendButton.isEnabled = true
+        }
+    }
+    
     // MARK: - 액션 관련 함수
     // 전송 버튼 이벤트 함수
     @objc private func sendMessage() {
+        guard !UserManager.shared.user.isBlock else {
+            let alertController = UIAlertController(title: "메세지 전송 제한", message: "사용자 계정 이용이 제한되어 채팅이 불가능합니다.", preferredStyle: .alert)
+            
+            let action = UIAlertAction(title: "확인", style: .default)
+            alertController.addAction(action)
+            self.present(alertController, animated: true, completion: nil)
+            return
+        }
+        if let reportCount = UserManager.shared.user.reportIDList, reportCount.count > 3 {
+            let alertController = UIAlertController(title: "메세지 전송 제한", message: "신고로 인해 채팅이 일시 제한되었습니다.\n\n자세한 내용은 아래 메일을 통해\n문의해주시기 바랍니다.\nteam.trackus@gmail.com", preferredStyle: .alert)
+            
+            let action = UIAlertAction(title: "확인", style: .default)
+            alertController.addAction(action)
+            self.present(alertController, animated: true, completion: nil)
+            return
+        }
+        
         guard let text = messageTextView.text, !text.isEmpty else { return }
         let newMessage = Message(sendMember: currentUserUid, timeStamp: Date(), messageType: .text, data: text)
-        // 신규 채팅일 경우
         
+        // 정지 여부 확인
+        
+        // 신고 3회 이상 정지여부 확인
+        
+        
+        if let chat = ChatManger.currentChatInfo {
+            self.chat = chat
+        }
         
         if chat.group {
             // 그룹 메세지 - 각 사용자별 메세지 저장소에 저장
@@ -230,8 +272,21 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 }
             }
         }else { // 개인 채팅
+            // 상대방 계정 정지여부 확인
+            guard let opponentUid = chat.nonSelfMembers.first, let userInfo = ChatManger.userInfo[opponentUid], !userInfo.isBlock else {
+                // 개인 채팅일 경우 상대방 계정 정지 여부 alert으로 알림
+                if !currentChatInfo.group {
+                    let alertController = UIAlertController(title: "전송 실패", message: "상대의 계정 사용이 제한되어\n더 이상 메세지를 전송할 수 없습니다.", preferredStyle: .alert)
+                    
+                    let action = UIAlertAction(title: "확인", style: .default)
+                    alertController.addAction(action)
+                    self.present(alertController, animated: true, completion: nil)
+                }
+                return
+            }
             // 상대방 차단여부 확인
             if !chat.group ,let blockingMeList = UserManager.shared.user.blockingMeList, let opponentUid = chat.nonSelfMembers.first, blockingMeList.contains(opponentUid) {
+                // 상대방이 차단했을 경우 -> 나에게만 전송
                 if newChat {
                     chat.members[opponentUid] = false
                     createChatRoom { [self] in
@@ -242,9 +297,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 } else {
                     sendMessageFireStore(message: newMessage, opponentUid: currentUserUid)
                 }
-                
-                // 본인에게만 전송
             } else {
+                // 신규 채팅의 경우
                 if newChat {
                     createChatRoom { [self] in
                         _ = chat.members.map{
@@ -297,7 +351,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     // 사이드 메뉴 보이기
     @objc private func showSideMenu() {
-        let sideMenuVC = SideMenuVC(chat: chat)
+        let sideMenuVC = SideMenuVC(chat: currentChatInfo)
         sideMenuVC.delegate = self
         sideMenuVC.profileImageDelegate = self
         sideMenuVC.modalPresentationStyle = .overFullScreen
@@ -340,6 +394,11 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     // MARK: - Firebase 관련 함수
     // 메세지 전송
     private func sendMessageFireStore(message: Message, opponentUid: String) {
+        // 제한 사용자에게는 메세지 전송 x
+        if let userInfo = ChatManger.userInfo[opponentUid], userInfo.isBlock {
+            return
+        }
+        
         let db = db.document(chat.uid).collection(opponentUid)
         db.addDocument(data: [
             "sendMember": message.sendMember,
@@ -364,8 +423,10 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     }
     
     private func sendFCMNotification(to OpponentUid: String, message: Message) {
-        let urlString = "https://sendfcmnotification-p5womzw3ra-uc.a.run.app/sendFCMNotification"
-        guard let url = URL(string: urlString), let token = userInfo[OpponentUid]?.token else { return }
+        // 서버 주소값 불러오기
+        guard let baseUrlString = Bundle.main.object(forInfoDictionaryKey: "FCM_NOTIFICATION_SERVER_URL") as? String else { return }
+        let urlString = "https://" + baseUrlString
+        guard let url = URL(string: urlString), let token = ChatManger.userInfo[OpponentUid]?.token else { return }
         var body: String
         
         var request = URLRequest(url: url)
@@ -467,7 +528,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     .compactMap { try? $0.data(as: FirestoreMessage.self)}
                     .compactMap{ firestoreMessage -> Message? in
                         return Message(firestoreMessage: firestoreMessage)
-                    }                
+                    }
                 self.messages = firestoreMessages
                 // 메세지 맵핑
                 self.lock.withLock {
@@ -491,7 +552,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             .enumerated()
             .map{
                 //let nextMessageExists = messages[$0.offset + 1] != nil
-                let prevMessageIsSameUser = $0.offset != 0 ? messages[$0.offset - 1].sendMember == $0.element.sendMember : false
+                let prevMessageIsSameUser = $0.offset != 0 ? messages[$0.offset - 1].sendMember == $0.element.sendMember && messages[$0.offset - 1].messageType != .userInout  : false
                 let sameDate = $0.offset != 0 ? messages[$0.offset - 1].date == $0.element.date : false
                 let nextMessageIsSameUser = $0.offset != messages.count - 1 ? messages[$0.offset + 1].sendMember == $0.element.sendMember : false
                 let sameTime = $0.offset != messages.count - 1 && $0.offset != 0  ? messages[$0.offset + 1].time == $0.element.time : false

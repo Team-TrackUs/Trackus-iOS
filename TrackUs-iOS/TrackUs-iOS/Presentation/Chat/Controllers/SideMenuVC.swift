@@ -14,7 +14,7 @@ protocol SideMenuDelegate {
 class SideMenuVC: UIViewController {
     
     private let chat: Chat
-    private let userInfo = ChatManager.shared.userInfo
+    private let chatManager = ChatManager.shared
     
     init(chat: Chat) {
         self.chat = chat
@@ -37,7 +37,7 @@ class SideMenuVC: UIViewController {
         if chat.group {
             titleLabel.text = chat.title
         } else {
-            titleLabel.text = (userInfo[chat.nonSelfMembers[0]]?.name ?? "") + "님과 채팅"
+            titleLabel.text = (chatManager.userInfo[chat.nonSelfMembers[0]]?.name ?? "") + "님과 채팅"
         }
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         titleLabel.textColor = .label
@@ -197,7 +197,10 @@ extension SideMenuVC: UITableViewDelegate, UITableViewDataSource {
             cell.configure(with: myInfo)
         } else {
             let memberUid = chat.nonSelfMembers[indexPath.row - 1]
-            if let memberInfo = userInfo[memberUid] {
+            print("chat.nonSelfMembers: \(chat.nonSelfMembers)")
+            print("indexPath.row: \(indexPath.row)")
+            if let memberInfo = chatManager.userInfo[memberUid] {
+                print("memberInfo.uid: \(memberInfo.uid)")
                 cell.configure(with: memberInfo)
             }
         }

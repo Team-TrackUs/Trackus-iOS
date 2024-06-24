@@ -90,6 +90,20 @@ class ChatMessageCell: UITableViewCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    
+    private lazy var overlayerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
+        return view
+    }()
+    
+    private lazy var iconView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.tintColor = .gray3
+        return imageView
+    }()
 
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -112,6 +126,8 @@ class ChatMessageCell: UITableViewCell {
         contentView.addSubview(timeLabel)
         contentView.addSubview(inoutLabel)
         messageBackgroundView.addSubview(messageLabel)
+        profileImageView.addSubview(overlayerView)
+        overlayerView.addSubview(iconView)
         
         // 레이블의 content hugging priority를 설정
         messageBackgroundView.setContentHuggingPriority(UILayoutPriority(rawValue: 251), for: .horizontal)
@@ -126,13 +142,19 @@ class ChatMessageCell: UITableViewCell {
     func configure(messageMap: MessageMap) {
         self.uid = messageMap.message.sendMember
         let message = messageMap.message
+        var sendMember: User
         
         // 제약조건 초기화
         NSLayoutConstraint.deactivate(contentView.constraints)
         
         var constraints = [NSLayoutConstraint]()
         // 사용자 정보 가져오기
-        guard let sendMember = ChatManager.shared.userInfo[message.sendMember] else { return }
+        if let member = ChatManager.shared.userInfo[message.sendMember] {
+            sendMember = member
+        } else {
+            // 탈퇴 회원
+            sendMember = User()
+        }
         
         // 날짜 출력 여부 (공통)
         if messageMap.sameDate {
@@ -228,12 +250,45 @@ class ChatMessageCell: UITableViewCell {
                 // 사용자 이미지 있을 경우 이미지 표시 - 없을경우 기본
                 profileImageView.loadProfileImage(url: sendMember.profileImageUrl) {}
                     
-                userNameLabel.text = sendMember.name.isEmpty ? "탈퇴 회원" : sendMember.name
+                userNameLabel.text = sendMember.name.isEmpty ? "(탈퇴 회원)" : sendMember.name
+                
+                if sendMember.isBlock {
+                    // 정지 사용자
+                    iconView.image = UIImage(systemName: "exclamationmark.circle")
+                    overlayerView.isHidden = false
+                    constraints.append(overlayerView.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor))
+                    constraints.append(overlayerView.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor))
+                    constraints.append(overlayerView.widthAnchor.constraint(equalToConstant: 40))
+                    constraints.append(overlayerView.heightAnchor.constraint(equalToConstant: 40))
+                    constraints.append(iconView.widthAnchor.constraint(equalToConstant: 20))
+                    constraints.append(iconView.heightAnchor.constraint(equalToConstant: 20))
+                    constraints.append(iconView.centerXAnchor.constraint(equalTo: overlayerView.centerXAnchor))
+                    constraints.append(iconView.centerYAnchor.constraint(equalTo: overlayerView.centerYAnchor))
+                } else if let blockedUserList = UserManager.shared.user.blockedUserList, blockedUserList.contains(sendMember.uid) {
+                    // 차단 사용자
+                    iconView.image = UIImage(systemName: "nosign")
+                    overlayerView.isHidden = false
+                    constraints.append(overlayerView.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor))
+                    constraints.append(overlayerView.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor))
+                    constraints.append(overlayerView.widthAnchor.constraint(equalToConstant: 40))
+                    constraints.append(overlayerView.heightAnchor.constraint(equalToConstant: 40))
+                    constraints.append(iconView.widthAnchor.constraint(equalToConstant: 20))
+                    constraints.append(iconView.heightAnchor.constraint(equalToConstant: 20))
+                    constraints.append(iconView.centerXAnchor.constraint(equalTo: overlayerView.centerXAnchor))
+                    constraints.append(iconView.centerYAnchor.constraint(equalTo: overlayerView.centerYAnchor))
+                } else {
+                    overlayerView.isHidden = true
+                }
                 
                 // 탭 제스처 추가
-                tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
-                profileImageView.addGestureRecognizer(tapGestureRecognizer)
+                if !sendMember.name.isEmpty {
+                    tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
+                    profileImageView.addGestureRecognizer(tapGestureRecognizer)
+                }
                 
+                //UIImage(systemName: "exclamationmark.circle")
+                //UIImage(systemName: "nosign")
+
             } else {
                 profileImageView.isHidden = true
                 userNameLabel.isHidden = true

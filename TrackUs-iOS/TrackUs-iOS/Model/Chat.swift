@@ -18,7 +18,9 @@ struct Chat {
     // 본인 제외 사용자 uid -> 채팅 출력 판별용
     var nonSelfMembers: [String] {
         if group{
-            members.filter { $0.value == true && $0.key != User.currentUid }.map { $0.key }
+            members.filter { $0.value == true && $0.key != User.currentUid }
+                .map { $0.key }
+                .sorted()
         } else {
             members.filter { $0.key != User.currentUid }.map { $0.key }
         }

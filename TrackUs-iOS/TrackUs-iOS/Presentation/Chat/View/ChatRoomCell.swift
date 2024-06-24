@@ -125,6 +125,7 @@ class ChatRoomCell: UITableViewCell {
         if chat.group {
             titleLabel.text = chat.title
             membersCountlabel.text = String(chat.members.values.filter{ $0 == true }.count)
+            membersCountlabel.isHidden = false
         } else {
             titleLabel.text = users[chat.nonSelfMembers.first ?? ""]?.name ?? "TrackUs"
             membersCountlabel.text = ""
