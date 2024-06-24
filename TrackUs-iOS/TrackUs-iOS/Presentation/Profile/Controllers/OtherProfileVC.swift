@@ -732,18 +732,21 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
         let db = Firestore.firestore()
         let currentUserUid = UserManager.shared.user.uid
         
-        db.collection("users").document(currentUserUid).updateData([
-            "blockedUserList": FieldValue.arrayRemove([userId])
-        ]) { [weak self] error in
+        let batch = db.batch()
+        
+        let currentUserRef = db.collection("users").document(currentUserUid)
+        batch.updateData(["blockedUserList": FieldValue.arrayRemove([userId])], forDocument: currentUserRef)
+        
+        let blockedUserRef = db.collection("users").document(userId)
+        batch.updateData(["blockingMeList": FieldValue.arrayRemove([currentUserUid])], forDocument: blockedUserRef)
+        
+        batch.commit { [weak self] error in
             if let error = error {
-                print("차단 해제하는 동안 오류 발생: \(error)")
             } else {
-                print("사용자가 성공적으로 차단 해제됨")
                 self?.updateBlockButton(toBlocked: false)
             }
         }
     }
-
     
     private func setupConstraints() {
         let labelsAndViews: [(UILabel, UIView)] = [
@@ -772,13 +775,17 @@ extension OtherProfileVC {
         let db = Firestore.firestore()
         let currentUserUid = UserManager.shared.user.uid
         
-        db.collection("users").document(currentUserUid).updateData([
-            "blockedUserList": FieldValue.arrayUnion([userId])
-        ]) { error in
+        let batch = db.batch()
+
+        let currentUserRef = db.collection("users").document(currentUserUid)
+        batch.updateData(["blockedUserList": FieldValue.arrayUnion([userId])], forDocument: currentUserRef)
+
+        let blockedUserRef = db.collection("users").document(userId)
+        batch.updateData(["blockingMeList": FieldValue.arrayUnion([currentUserUid])], forDocument: blockedUserRef)
+        
+        batch.commit { error in
             if let error = error {
-                print("차단하는 동안 오류 발생: \(error)")
             } else {
-                print("사용자가 성공적으로 차단됨")
                 self.updateBlockButton(toBlocked: true)
             }
         }
@@ -795,4 +802,3 @@ extension OtherProfileVC {
         }
     }
 }
-
