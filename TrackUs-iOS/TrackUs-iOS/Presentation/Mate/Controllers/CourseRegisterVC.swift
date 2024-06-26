@@ -353,6 +353,17 @@ class CourseRegisterVC: UIViewController {
         return label
     }()
     
+    private let warningText: UILabel = {
+        let label = UILabel()
+        label.text = "부적절하거나 불쾌감을 줄 수 있는 컨텐츠는 제재를 받을 수 있습니다."
+        label.font = UIFont.systemFont(ofSize: 12)
+        label.textColor = .gray2
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     let loadingView = LoadingView()
     
     // MARK: - Lifecycle
@@ -807,9 +818,14 @@ class CourseRegisterVC: UIViewController {
         personnelStack.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
         personnelStack.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
         personnelStack.topAnchor.constraint(equalTo: timePickerStack.bottomAnchor, constant: 27).isActive = true
-        personnelStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -32).isActive = true
         personnelStack.widthAnchor.constraint(equalToConstant: 116).isActive = true
         personnelStack.heightAnchor.constraint(equalToConstant: 36).isActive = true
+        
+        scrollView.addSubview(warningText)
+        warningText.topAnchor.constraint(equalTo: personnelStack.bottomAnchor, constant: 27).isActive = true
+        warningText.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 16).isActive = true
+        warningText.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -16).isActive = true
+        warningText.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -16).isActive = true
         
         updateStyleButtonAppearance()
         updateAddCourseButtonAppearance()
