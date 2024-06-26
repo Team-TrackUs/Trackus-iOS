@@ -52,6 +52,34 @@ final class LoginVC: UIViewController {
         return label
     }()
     
+    // MARK: - 테스트 로그인 버튼
+    private lazy var testLoginButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.backgroundColor = .gray2
+        // apple 로고 추가
+        
+        button.setTitle("Test Login", for: .normal)
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+        button.setTitleColor(.systemBackground, for: .normal)
+        
+        button.layer.cornerRadius = 8
+        button.layer.masksToBounds = true
+        
+        // 버튼 액션 추가
+        button.addTarget(self, action: #selector(testLoginButtonTapped), for: .touchUpInside)
+        
+        // 높이 제약
+        button.heightAnchor.constraint(equalToConstant: 56).isActive = true
+        return button
+    }()
+    
+    // MARK: - 테스트 로그인 버튼 실행 함수
+    @objc func testLoginButtonTapped() {
+        Auth.auth().signIn(withEmail: "test@test.com",
+                           password: "asdfasdf12")
+    }
+    
     // MARK: - Apple 로그인 버튼
     private lazy var appleLoginButton: UIButton = {
         let button = UIButton()
@@ -128,7 +156,8 @@ final class LoginVC: UIViewController {
     
     // 소셜 로그인 버튼 스택뷰
     lazy var buttonStackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [ appleLoginButton, kakaoLoginButton])
+        let stackView = UIStackView(arrangedSubviews: [ testLoginButton, appleLoginButton, kakaoLoginButton])
+        //let stackView = UIStackView(arrangedSubviews: [ appleLoginButton, kakaoLoginButton])
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 12
