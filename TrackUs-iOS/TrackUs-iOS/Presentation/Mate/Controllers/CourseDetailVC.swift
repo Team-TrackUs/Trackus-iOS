@@ -205,6 +205,18 @@ class CourseDetailVC: UIViewController {
     var mapUIComplete = false
     var viewUIComplete = false
     
+    let isReportedLabel: UILabel = { // 러닝스타일
+        let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 12)
+        label.backgroundColor = .caution
+        label.textColor = .white
+        label.textAlignment = .center
+        label.text = "신고됨"
+        label.layer.cornerRadius = 5
+        label.clipsToBounds = true
+        return label
+    }()
+    
     var isBack: Bool
     
     // MARK: - Lifecycle
@@ -478,6 +490,14 @@ class CourseDetailVC: UIViewController {
         runningStyleLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
         runningStyleLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
         
+        scrollView.addSubview(isReportedLabel)
+        isReportedLabel.translatesAutoresizingMaskIntoConstraints = false
+        isReportedLabel.topAnchor.constraint(equalTo: preMapView.bottomAnchor, constant: 16).isActive = true
+        isReportedLabel.rightAnchor.constraint(equalTo: runningStyleLabel.leftAnchor, constant: -16).isActive = true
+        isReportedLabel.widthAnchor.constraint(equalToConstant: 54).isActive = true
+        isReportedLabel.heightAnchor.constraint(equalToConstant: 19).isActive = true
+        isReportedLabel.isHidden = true
+        
         let stackView = UIStackView()
         scrollView.addSubview(stackView)
         stackView.axis = .vertical
@@ -734,6 +754,12 @@ class CourseDetailVC: UIViewController {
                 self.memberLimit = post.numberOfPeoples
                 self.imageUrl = post.routeImageUrl
                 self.ownerUid = post.ownerUid
+                
+                if post.whoReportAt.contains(self.uid) {
+                    self.isReportedLabel.isHidden = false
+                } else {
+                    self.isReportedLabel.isHidden = true
+                }
             }
         }
         fetchComplete = true
