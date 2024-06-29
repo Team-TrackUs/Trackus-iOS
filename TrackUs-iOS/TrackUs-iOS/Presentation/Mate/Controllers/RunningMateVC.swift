@@ -131,7 +131,7 @@ class RunningMateVC: UIViewController {
     @objc func moveButtonTapped() {
         let userManager = UserManager.shared
         let userUid = User.currentUid
-        userManager.getUserData(uid: userUid)
+        //userManager.getUserData(uid: userUid)
         let user = userManager.user
         
         let message = """

@@ -84,7 +84,7 @@ class PostService {
         
         let userUid = User.currentUid
         let userManager = UserManager.shared
-        userManager.getUserData(uid: userUid)
+        //userManager.getUserData(uid: userUid)
         let user = userManager.user
         let blockList = user.blockList
         
@@ -138,7 +138,7 @@ class PostService {
         
         let userUid = User.currentUid
         let userManager = UserManager.shared
-        userManager.getUserData(uid: userUid)
+        //userManager.getUserData(uid: userUid)
         let user = userManager.user
         let blockList = user.blockList
         

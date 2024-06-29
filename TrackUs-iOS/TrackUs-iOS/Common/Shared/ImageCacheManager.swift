@@ -34,17 +34,14 @@ final class ImageCacheManager {
         
         if let image = memoryCache.getImage(forKey: keyUrl) {
             // 캐시에 이미지가 있는 경우
-            print("DEBUG: 메모리 불러오기 완료")
             completionHandler(image)
         } else if let image = diskCache.getImage(forKey: keyUrl) {
             // 캐시에 없는 경우 디스크 확인
             // 메모리 캐싱
-            print("DEBUG: 디스크 불러오기 완료")
             memoryCache.setImage(image, forKey: keyUrl)
             completionHandler(image)
         } else {
             // 메모리, 디스크 둘 다 없는 경우
-            print("DEBUG: 이미지 다운로드 및 등록")
             downloadImage(imageUrl: imageUrl, keyUrl: keyUrl) { image in
                 completionHandler(image)
             }
@@ -59,11 +56,9 @@ final class ImageCacheManager {
         
         if let image = memoryCache.getImage(forKey: keyUrl) {
             // 캐시에 이미지가 있는 경우
-            print("DEBUG: 메모리 불러오기 완료")
             completionHandler(image)
         } else {
             // 메모리, 디스크 둘 다 없는 경우
-            print("DEBUG: 이미지 다운로드 및 등록")
             memoryDownloadImage(imageUrl: imageUrl, keyUrl: keyUrl) { image in
                 completionHandler(image)
             }
@@ -80,7 +75,6 @@ final class ImageCacheManager {
         memoryCache.setImage(image, forKey: keyUrl)
         // 디스크 캐싱
         diskCache.setImage(image, forKey: keyUrl)
-        print("DEBUG: 이미지 메모리, 디스크 캐싱 완료")
     }
     
     /// (메모리 전용) 이미지 저장
@@ -90,7 +84,6 @@ final class ImageCacheManager {
         let keyUrl = imageUrl.pathComponents.joined(separator: "-")
         // 메모리 캐싱
         memoryCache.setImage(image, forKey: keyUrl)
-        print("DEBUG: 이미지 메모리 캐싱 완료")
     }
     
     // 이미지 캐시 등록
@@ -109,10 +102,8 @@ final class ImageCacheManager {
             // 캐시 등록
             DispatchQueue.main.async {
                 // 이미지 -> 메모리 캐시 등록
-                print("DEBUG: 메모리 등록")
                 self.memoryCache.setImage(downloadedImage, forKey: keyUrl)
                 // 이미지 -> 디스크 캐시 등록
-                print("DEBUG: 디스크 등록")
                 self.diskCache.setImage(downloadedImage, forKey: keyUrl)
                 completionHandler(downloadedImage)
             }
@@ -135,7 +126,6 @@ final class ImageCacheManager {
             // 캐시 등록
             DispatchQueue.main.async {
                 // 이미지 -> 메모리 캐시 등록
-                print("DEBUG: 메모리 등록")
                 self.memoryCache.setImage(downloadedImage, forKey: keyUrl)
                 completionHandler(downloadedImage)
             }
@@ -154,7 +144,6 @@ class MemoryCache {
     }
     
     func getImage(forKey key: String) -> UIImage? {
-        print("DEBUG: 메모리 불러오기 시도")
         return cache.object(forKey: key as NSString)
     }
     
@@ -178,7 +167,6 @@ class DiskCache {
         if !fileManager.fileExists(atPath: cacheDirectory.path) {
             do {
                 try fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true, attributes: nil)
-                print("DEBUG: 캐시 디렉토리 생성 완료: \(cacheDirectory.path)")
             } catch {
                 print("DEBUG: 캐시 디렉토리 생성 실패: \(error)")
             }
@@ -190,7 +178,6 @@ class DiskCache {
         let fileURL = cacheDirectory.appendingPathComponent(key)
         do {
             try data.write(to: fileURL)
-            print("DEBUG: 이미지 저장 완료: \(fileURL.path)")
         } catch {
             print("DEBUG: 이미지 저장 실패: \(error)")
         }
@@ -198,13 +185,11 @@ class DiskCache {
     }
     
     func getImage(forKey key: String) -> UIImage? {
-        print("DEBUG: 디스크 불러오기 시도")
         let fileURL = cacheDirectory.appendingPathComponent(key)
         guard let data = try? Data(contentsOf: fileURL) else {
             print("DEBUG: 이미지 불러오기 실패: 파일이 존재하지 않음")
             return nil
         }
-        print("DEBUG: 이미지 불러오기 성공: \(fileURL.path)")
         return UIImage(data: data)
     }
     
@@ -246,7 +231,6 @@ extension UIImageView {
     func loadImage(url: String) {
         ImageCacheManager.shared.loadImage(imageUrl: url) { image in
             self.image = image
-            print("extension 캐싱 완료")
         }
     }
     

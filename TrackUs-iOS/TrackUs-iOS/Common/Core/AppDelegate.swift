@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if let error = error {
                 print("Error fetching FCM registration token: \(error)")
             } else if let token = token {
-                print("FCM registration token: \(token)")
+                //print("FCM registration token: \(token)")
             }
         }
         
@@ -94,7 +94,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension AppDelegate : MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("AppDelegate - token: \(String(describing: fcmToken))")
+        //print("AppDelegate - token: \(String(describing: fcmToken))")
         // FCM 토큰 저장
         UserManager.shared.updateToken(token: fcmToken)
     }
