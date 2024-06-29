@@ -84,7 +84,7 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
         case 0:
             return 1
         case 1:
-            return 3
+            return 4
         case 2:
             return 1
         case 3:
@@ -126,7 +126,7 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
         case 0:
             cell.textLabel?.text = "버전 정보"
         case 1:
-            cell.textLabel?.text = indexPath.row == 0 ? "오픈소스/라이센스" : (indexPath.row == 1 ? "위치정보 서비스 및 이용약관" : "개인정보 처리방침")
+            cell.textLabel?.text = indexPath.row == 0 ? "오픈소스/라이센스" : (indexPath.row == 1 ? "이용약관" : (indexPath.row == 2 ? "위치정보 서비스 이용약관" : "개인정보 처리방침"))
         case 2:
             cell.textLabel?.text = "문의하기"
         case 3:
@@ -202,11 +202,13 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
             break
         case 1:
             if indexPath.row == 0 {
-                showWebView(with: "https://lizard-basketball-e41.notion.site/OPEN-SOURCE-LICENSE-a57a3078e21c4821932d2189859b8bcb?pvs=4", title: "오픈소스/라이센스")
+                showWebView(with: "https://spice-game-f38.notion.site/e26655b833484488b18b5659dcdbebfa?pvs=4", title: "오픈소스/라이센스")
             } else if indexPath.row == 1 {
-                showWebView(with: "https://colorful-force-5d2.notion.site/TrackUs-be971d4c799c4c12ab9e984aeafedc1d?pvs=4", title: "위치정보 서비스 및 이용약관")
+                showWebView(with: "https://spice-game-f38.notion.site/268a6acbcd2144569d7164abaebbd6b3?pvs=4", title: "이용약관")
             } else if indexPath.row == 2 {
-                showWebView(with: "https://colorful-force-5d2.notion.site/a3c5eb465e464a4a85ec708f97e0201e?pvs=4", title: "개인정보 처리방침")
+                showWebView(with: "https://spice-game-f38.notion.site/cc9f6755c6f04af39a396f7976c61661?pvs=4", title: "위치정보 서비스 이용약관")
+            } else if indexPath.row == 3 {
+                showWebView(with: "https://spice-game-f38.notion.site/cf7cb34cd1144ff28abf92248061906e?pvs=4", title: "개인정보 처리방침")
             }
         case 2:
             let askusVC = AskusVC()
