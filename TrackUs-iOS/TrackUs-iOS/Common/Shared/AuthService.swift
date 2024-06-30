@@ -29,6 +29,7 @@ final class AuthService: NSObject {
     func logOut() {
         do {
             try Auth.auth().signOut()
+            UserManager.shared.clearUser()
         }
         catch {
             print(error)
@@ -109,7 +110,8 @@ final class AuthService: NSObject {
             if error != nil {
                 return
             }
-            print("success")
+            // 사용자 데이터 리스너 등록
+            UserManager.shared.getUserData(uid: uid)
         }
     }
     

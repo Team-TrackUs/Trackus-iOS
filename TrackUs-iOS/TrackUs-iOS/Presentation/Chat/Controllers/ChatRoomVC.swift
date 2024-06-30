@@ -692,7 +692,12 @@ extension ChatRoomVC: SideMenuDelegate {
     
 extension ChatRoomVC: UserCellDelegate{
     func didTapProfileImage(for uid: String) {
-        let otherProfileVC = OtherProfileVC(userId: uid)
-        navigationController?.pushViewController(otherProfileVC, animated: true)
+        if currentUserUid != uid {
+            let otherProfileVC = OtherProfileVC(userId: uid)
+            navigationController?.pushViewController(otherProfileVC, animated: true)
+        } else {
+            let myProfileVC = MyProfileVC()
+            navigationController?.pushViewController(myProfileVC, animated: true)
+        }
     }
 }
