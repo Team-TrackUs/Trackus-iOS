@@ -8,6 +8,6 @@
 import Foundation
 import MapKit
 
-protocol UserLocationDelegate {
+protocol UserLocationDelegate: AnyObject {
     func userLocationUpated(location: CLLocation)
 }

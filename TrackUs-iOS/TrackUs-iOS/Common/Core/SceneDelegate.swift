@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import KakaoSDKAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -19,9 +20,30 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         
-        LoginCheck()
-        
         guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        
+        window = UIWindow(windowScene: windowScene)
+        // 스플래시 화면 표시
+        window?.rootViewController = SplashView()
+        window?.makeKeyAndVisible()
+        // 로그인 여부 확인
+        loginCheck()
+        if let notificationResponse = connectionOptions.notificationResponse {
+            let userInfo = notificationResponse.notification.request.content.userInfo
+            if let chatUid = userInfo["chatUid"] as? String {
+                showChatRoom(chatUid: chatUid)
+            }
+        }
+    }
+    
+    // Kakao 로그인 관련
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        if let url = URLContexts.first?.url {
+            if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                _ = AuthController.handleOpenUrl(url: url)
+            }
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -52,34 +74,68 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
-    // MARK: - 이전 로그인 여부 확인
-    func LoginCheck() {
-        
-        authListener = Auth.auth().addStateDidChangeListener({ auth, user in
-            // 리스너 등록 해제
-            //Auth.auth().removeStateDidChangeListener(self.authListener!)
-            
-            if user == nil {
-                self.window?.rootViewController = LoginVC()
-                self.window?.makeKeyAndVisible()
+    // MARK: - 로그인 여부 확인 관련 함수 목록
+    
+    // 로그인 여부 확인
+    func loginCheck() {
+        // Firebase 인증 상태 리스너 등록
+        authListener = Auth.auth().addStateDidChangeListener { [weak self] auth, user in
+            guard let self = self else { return }
+            if let user = user {
+                // Firestore에서 사용자 정보 확인
+                checkUserInFirestore(uid: user.uid)
+                // 로그인이 확인되었으므로 리스너 해제
+                //Auth.auth().removeStateDidChangeListener(authListener!)
             } else {
-                DispatchQueue.main.async {
-                    // 회원가입 UI 완성 후. 코드 별도 추가
-                    self.startApp()
+                // 로그인하지 않은 경우 로그인 화면으로 전환
+                self.showLoginView()
+            }
+        }
+    }
+    
+    // 사용자 정보 유무 조건 확인
+    func checkUserInFirestore(uid: String) {
+        // 로그인 사용자 기본 정보 유무 확인
+        UserManager.shared.checkUserData(uid: uid) { userFound in
+            DispatchQueue.main.async {
+                if userFound {
+                    // 메인 화면으로 전환
+                    self.showMainView()
+                } else {
+                    // 회원가입 화면으로 전환
+                    self.showSignUpView()
                 }
             }
-        })
+        }
     }
     
     /// 메인 화면
-    private func startApp() {
-        self.window?.rootViewController = CustomTabBarVC()
-        self.window?.makeKeyAndVisible()
+    func showLoginView() {
+        DispatchQueue.main.async {
+            self.window?.rootViewController = LoginVC()
+        }
     }
-    /// 회원가입 화면
-    private func signUp() {
-        self.window?.rootViewController = SignUpVC()
-        self.window?.makeKeyAndVisible()
+    // 회원가입 화면
+    func showSignUpView() {
+        DispatchQueue.main.async {
+            self.window?.rootViewController = SignUpVC()
+        }
+    }
+    // 메인 화면
+    func showMainView() {
+        DispatchQueue.main.async {
+            self.window?.rootViewController = CustomTabBarVC()
+        }
+    }
+    
+    // MARK: - Notification관련 view 이동
+    func showChatRoom(chatUid: String) {
+        guard let rootViewController = window?.rootViewController as? UINavigationController else {
+            return
+        }
+        
+        let chatRoomVC = ChatRoomVC(chatUId: chatUid)
+        rootViewController.pushViewController(chatRoomVC, animated: true)
     }
 }
 
