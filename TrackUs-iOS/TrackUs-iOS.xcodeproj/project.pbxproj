@@ -50,6 +50,7 @@
 		827F974A2C0DB87400DAD821 /* WidgetAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827F97472C0DB85200DAD821 /* WidgetAttribute.swift */; };
 		8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D26E2BF12BD2002CB7DD /* LoginVC.swift */; };
 		8280D2752BF137E2002CB7DD /* RunningResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8280D2742BF137E2002CB7DD /* RunningResultVC.swift */; };
+		82827F552C32997800412867 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 82827F542C32997800412867 /* GoogleService-Info.plist */; };
 		82ABF3792C10184A002B25CE /* SelectePhotoVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */; };
 		82ABF39B2C1039D7002B25CE /* PhotoEditVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */; };
 		82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BE45572BEFA947007AE54A /* AppDelegate.swift */; };
@@ -81,7 +82,6 @@
 		96D43FA02C0CD2D90059C377 /* UserListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D43F9F2C0CD2D90059C377 /* UserListVC.swift */; };
 		96D43FA22C0D8CEB0059C377 /* ReportUserVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D43FA12C0D8CEB0059C377 /* ReportUserVC.swift */; };
 		984EF3572C16929B0004CB9A /* SideMenuVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 984EF3562C16929B0004CB9A /* SideMenuVC.swift */; };
-		985F660D2C2998DA00473606 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 985F66082C29943700473606 /* GoogleService-Info.plist */; };
 		98601D582C07103E0056E407 /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98601D572C07103E0056E407 /* Chat.swift */; };
 		98601D5D2C07219A0056E407 /* ChatRoomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98601D5C2C07219A0056E407 /* ChatRoomCell.swift */; };
 		9866E6182BFB63ED0031E8B6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9866E6172BFB63ED0031E8B6 /* SplashView.swift */; };
@@ -190,6 +190,8 @@
 		827F974B2C0DBCF400DAD821 /* WidgetTestExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetTestExtensionDebug.entitlements; sourceTree = "<group>"; };
 		8280D26E2BF12BD2002CB7DD /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		8280D2742BF137E2002CB7DD /* RunningResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningResultVC.swift; sourceTree = "<group>"; };
+		82827F522C32995300412867 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		82827F542C32997800412867 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		82ABF3782C10184A002B25CE /* SelectePhotoVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectePhotoVC.swift; sourceTree = "<group>"; };
 		82ABF39A2C1039D7002B25CE /* PhotoEditVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoEditVC.swift; sourceTree = "<group>"; };
 		82BE45542BEFA947007AE54A /* TrackUs-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TrackUs-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -224,9 +226,7 @@
 		96D43FA12C0D8CEB0059C377 /* ReportUserVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportUserVC.swift; sourceTree = "<group>"; };
 		96D43FAA2C1180BF0059C377 /* TrackUs-iOSDebug.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOSDebug.entitlements"; sourceTree = "<group>"; };
 		984EF3562C16929B0004CB9A /* SideMenuVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuVC.swift; sourceTree = "<group>"; };
-		985F66082C29943700473606 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		985F66092C29943700473606 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		985F660A2C29943800473606 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		985F660B2C2996E200473606 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		98601D572C07103E0056E407 /* Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
 		98601D5C2C07219A0056E407 /* ChatRoomCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomCell.swift; sourceTree = "<group>"; };
@@ -430,13 +430,13 @@
 				96D43FAA2C1180BF0059C377 /* TrackUs-iOSDebug.entitlements */,
 				988618342BF353CC002ACB4E /* TrackUs-iOS.entitlements */,
 				985F66092C29943700473606 /* Config.xcconfig */,
-				985F66082C29943700473606 /* GoogleService-Info.plist */,
-				985F660A2C29943800473606 /* Info.plist */,
 				82277FFE2C08C3C700AA59E3 /* Utils */,
 				988618312BF34A6C002ACB4E /* Model */,
 				82BE456E2BEFAE22007AE54A /* Common */,
 				82BE456C2BEFADE2007AE54A /* Presentation */,
 				82BE455D2BEFA948007AE54A /* Main.storyboard */,
+				82827F542C32997800412867 /* GoogleService-Info.plist */,
+				82827F522C32995300412867 /* Info.plist */,
 				82BE45602BEFA94A007AE54A /* Assets.xcassets */,
 				82BE45622BEFA94A007AE54A /* LaunchScreen.storyboard */,
 			);
@@ -767,8 +767,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				985F660D2C2998DA00473606 /* GoogleService-Info.plist in Resources */,
 				615ADADC2C04D45D005CAC75 /* Main.storyboard in Resources */,
+				82827F552C32997800412867 /* GoogleService-Info.plist in Resources */,
 				82BE45612BEFA94A007AE54A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
