@@ -445,6 +445,14 @@ class OtherProfileVC: UIViewController, UITableViewDataSource, UITableViewDelega
     // MARK: - UITableViewDelegate
         
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let record = records[indexPath.row]
+        
+        let runningResultVC = RunningResultVC()
+        runningResultVC.runModel = record
+        runningResultVC.setSaveButtonHidden(true)
+        runningResultVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(runningResultVC, animated: true)
+        
         tableView.deselectRow(at: indexPath, animated: true)
     }
     

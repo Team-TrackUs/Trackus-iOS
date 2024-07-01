@@ -235,13 +235,19 @@ extension SettingVC: UITableViewDelegate, UITableViewDataSource {
             webView.load(request)
             
             let webViewController = UIViewController()
-            webViewController.view.addSubview(webView)
-            webView.frame = webViewController.view.bounds
-            webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            
             webViewController.navigationItem.title = title
             webViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(webViewBackButtonTapped))
             webViewController.navigationItem.leftBarButtonItem?.tintColor = .black
+            
+            webViewController.view.addSubview(webView)
+            
+            webView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                webView.topAnchor.constraint(equalTo: webViewController.view.safeAreaLayoutGuide.topAnchor),
+                webView.leadingAnchor.constraint(equalTo: webViewController.view.leadingAnchor),
+                webView.trailingAnchor.constraint(equalTo: webViewController.view.trailingAnchor),
+                webView.bottomAnchor.constraint(equalTo: webViewController.view.bottomAnchor)
+            ])
             
             navigationController?.pushViewController(webViewController, animated: true)
         }
