@@ -450,12 +450,16 @@ final class RunTrackingVC: UIViewController {
         annotation2 = MKPointAnnotation()
         polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         
+        // 어노테이션, 폴리라인 추가
         guard coordinates.count >= 1, let annotation = annotation else { return }
         annotation.coordinate = coordinates.first!
+        annotation.title = "start"
+        
         annotation2?.coordinate = coordinates.last!
         mapView.addAnnotation(annotation)
         
         guard coordinates.count >= 2, let polyline = polyline, let annotation2 = annotation2 else { return }
+        annotation2.title = "end"
         mapView.addOverlay(polyline)
         mapView.addAnnotations([annotation, annotation2])       
     }
@@ -669,10 +673,34 @@ extension RunTrackingVC: MKMapViewDelegate {
             return MKOverlayRenderer()
         }
         let renderer = MKPolylineRenderer(polyline: polyLine)
-        renderer.strokeColor = .green
-        renderer.lineWidth = 5.0
+        renderer.strokeColor = .mainBlue
+        renderer.lineWidth = 6.0
         renderer.alpha = 1.0
         return renderer
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
+        guard !annotation.isKind(of: MKUserLocation.self) else {
+                 return nil
+             }
+        var annotationView = self.mapView.dequeueReusableAnnotationView(withIdentifier: "Custom")
+        
+        if annotationView == nil {
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "Custom")
+                       annotationView?.canShowCallout = true
+           
+        } else {
+            annotationView?.annotation = annotation
+        }
+        
+        if annotation.title == "start" {
+            annotationView?.image = UIImage(resource: .ellipseImg)
+        }
+        if annotation.title == "end" {
+            annotationView?.image = UIImage(resource: .ellipseBorderImg)
+        }
+        
+        return annotationView
     }
 }
 
