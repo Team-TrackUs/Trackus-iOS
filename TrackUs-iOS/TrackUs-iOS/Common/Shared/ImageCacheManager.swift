@@ -234,6 +234,13 @@ extension UIImageView {
         }
     }
     
+    func loadImage(url: String, completionHandler: @escaping () -> Void) {
+        ImageCacheManager.shared.loadImage(imageUrl: url) { image in
+            self.image = image
+            completionHandler()
+        }
+    }
+    
     /// (메모리 전용) 캐시 이미지 불러오기
     func memoryloadImage(url: String) {
         ImageCacheManager.shared.memoryloadImage(imageUrl: url) { image in
