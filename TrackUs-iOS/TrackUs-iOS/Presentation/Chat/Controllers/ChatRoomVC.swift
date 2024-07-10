@@ -792,7 +792,8 @@ extension ChatRoomVC: SideMenuDelegate {
     }
 }
     
-extension ChatRoomVC: UserCellDelegate{
+extension ChatRoomVC: ChatMessageCellDelegate{
+    // 사용자 프로필 이미지 탭했을 경우
     func didTapProfileImage(for uid: String) {
         if currentUserUid != uid {
             let otherProfileVC = OtherProfileVC(userId: uid)
@@ -804,8 +805,16 @@ extension ChatRoomVC: UserCellDelegate{
     }
     
     // 사용자 전송 이미지 탭했을 경우
-    func didTapImageMessage(for userId: String, imageUrl: UIImage?) {
-        print("이미지 탭")
+    func didTapImageMessage(for userName: String, dateString: String, image: UIImage?) {
+        guard let image = image else { return }
+        let detailVC = ImageDetailVC()
+        detailVC.image = image
+        detailVC.imageName = userName
+        detailVC.imageDate = dateString
+        //self.navigationController?.pushViewController(detailVC, animated: true)
+        let navController = UINavigationController(rootViewController: detailVC)
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true, completion: nil)
     }
 }
 

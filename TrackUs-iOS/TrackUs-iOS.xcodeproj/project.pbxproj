@@ -81,6 +81,7 @@
 		96D43FA02C0CD2D90059C377 /* UserListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D43F9F2C0CD2D90059C377 /* UserListVC.swift */; };
 		96D43FA22C0D8CEB0059C377 /* ReportUserVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D43FA12C0D8CEB0059C377 /* ReportUserVC.swift */; };
 		984EF3572C16929B0004CB9A /* SideMenuVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 984EF3562C16929B0004CB9A /* SideMenuVC.swift */; };
+		985A69FE2C3E7A8D0052DDA4 /* ImageDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985A69FD2C3E7A8C0052DDA4 /* ImageDetailVC.swift */; };
 		985F660D2C2998DA00473606 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 985F66082C29943700473606 /* GoogleService-Info.plist */; };
 		98601D582C07103E0056E407 /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98601D572C07103E0056E407 /* Chat.swift */; };
 		98601D5D2C07219A0056E407 /* ChatRoomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98601D5C2C07219A0056E407 /* ChatRoomCell.swift */; };
@@ -227,6 +228,7 @@
 		96D43FA12C0D8CEB0059C377 /* ReportUserVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportUserVC.swift; sourceTree = "<group>"; };
 		96D43FAA2C1180BF0059C377 /* TrackUs-iOSDebug.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOSDebug.entitlements"; sourceTree = "<group>"; };
 		984EF3562C16929B0004CB9A /* SideMenuVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuVC.swift; sourceTree = "<group>"; };
+		985A69FD2C3E7A8C0052DDA4 /* ImageDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailVC.swift; sourceTree = "<group>"; };
 		985F66082C29943700473606 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		985F66092C29943700473606 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		985F660A2C29943800473606 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -563,6 +565,7 @@
 				989EF7CF2C0B0526005D523C /* ChatRoomVC.swift */,
 				984EF3562C16929B0004CB9A /* SideMenuVC.swift */,
 				987844B32C3292CB003289E4 /* ImagePickerVC.swift */,
+				985A69FD2C3E7A8C0052DDA4 /* ImageDetailVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -801,6 +804,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				985A69FE2C3E7A8D0052DDA4 /* ImageDetailVC.swift in Sources */,
 				822E06B92BF1EEED00636CCC /* UserLocationDelegate.swift in Sources */,
 				989EF7D02C0B0527005D523C /* ChatRoomVC.swift in Sources */,
 				987707292C3BF34E00CC649A /* AspectFitImageView.swift in Sources */,

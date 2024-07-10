@@ -7,15 +7,18 @@
 
 import UIKit
 
-protocol UserCellDelegate: AnyObject {
+protocol ChatMessageCellDelegate: AnyObject {
     func didTapProfileImage(for uid: String)
+    func didTapImageMessage(for userName: String, dateString: String, image: UIImage?)
 }
 
 
 class ChatMessageCell: UITableViewCell {
     
-    weak var delegate: UserCellDelegate?
+    weak var delegate: ChatMessageCellDelegate?
     private var uid: String = ""
+    private var sendMember: User = User()
+    private var sendDate: String = ""
     
     private lazy var dateLabel = {
         let dateLabel = UILabel()
@@ -60,6 +63,7 @@ class ChatMessageCell: UITableViewCell {
         imageView.layer.cornerRadius = 10
         imageView.layer.masksToBounds = true
         imageView.backgroundColor = .gray3
+        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
@@ -145,15 +149,22 @@ class ChatMessageCell: UITableViewCell {
         spacerView.setContentHuggingPriority(UILayoutPriority(rawValue: 249), for: .horizontal)
     }
     
+    // 프로필 이미지 탭 이벤트
     @objc private func didTapProfileImage() {
         delegate?.didTapProfileImage(for: uid)
+    }
+    
+    // 이미지 메세지 탭 이벤트
+    @objc private func didTapImageMessage() {
+        if let delegate = delegate {
+            delegate.didTapImageMessage(for: sendMember.name, dateString: sendDate, image: imageMessageView.image)
+        }
     }
     
     /// ui출력별 종류
     func configure(messageMap: MessageMap) {
         self.uid = messageMap.message.sendMember
         let message = messageMap.message
-        var sendMember: User
         
         // 제약조건 초기화
         NSLayoutConstraint.deactivate(contentView.constraints)
@@ -161,10 +172,10 @@ class ChatMessageCell: UITableViewCell {
         var constraints = [NSLayoutConstraint]()
         // 사용자 정보 가져오기
         if let member = ChatManager.shared.userInfo[message.sendMember] {
-            sendMember = member
+            self.sendMember = member
         } else {
             // 탈퇴 회원
-            sendMember = User()
+            self.sendMember = User()
         }
         
         // 날짜 출력 여부 (공통)
@@ -349,6 +360,12 @@ class ChatMessageCell: UITableViewCell {
         constraints.append(messageStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant:64))
         
         constraints.append(timeLabel.bottomAnchor.constraint(equalTo: messageStackView.bottomAnchor))
+        
+        // 탭 이벤트 추가
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapImageMessage))
+        imageMessageView.addGestureRecognizer(tapGestureRecognizer)
+        
+        self.sendDate = message.date + " " + message.time
         
         // 프로필 이미지파일 출력 여부
         if isMyMessage {

@@ -26,7 +26,7 @@ class SideMenuVC: UIViewController {
     }
     
     var delegate: SideMenuDelegate?
-    var profileImageDelegate: UserCellDelegate?
+    var profileImageDelegate: ChatMessageCellDelegate?
     
     private let menuWidth: CGFloat = 300
     private var menuView: UIView!
