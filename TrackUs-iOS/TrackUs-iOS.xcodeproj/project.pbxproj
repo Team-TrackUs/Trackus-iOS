@@ -82,6 +82,7 @@
 		96D43FA22C0D8CEB0059C377 /* ReportUserVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D43FA12C0D8CEB0059C377 /* ReportUserVC.swift */; };
 		984EF3572C16929B0004CB9A /* SideMenuVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 984EF3562C16929B0004CB9A /* SideMenuVC.swift */; };
 		985A69FE2C3E7A8D0052DDA4 /* ImageDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985A69FD2C3E7A8C0052DDA4 /* ImageDetailVC.swift */; };
+		985A6A022C3E80760052DDA4 /* SendLocationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985A6A012C3E80760052DDA4 /* SendLocationVC.swift */; };
 		985F660D2C2998DA00473606 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 985F66082C29943700473606 /* GoogleService-Info.plist */; };
 		98601D582C07103E0056E407 /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98601D572C07103E0056E407 /* Chat.swift */; };
 		98601D5D2C07219A0056E407 /* ChatRoomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98601D5C2C07219A0056E407 /* ChatRoomCell.swift */; };
@@ -229,6 +230,9 @@
 		96D43FAA2C1180BF0059C377 /* TrackUs-iOSDebug.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "TrackUs-iOSDebug.entitlements"; sourceTree = "<group>"; };
 		984EF3562C16929B0004CB9A /* SideMenuVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuVC.swift; sourceTree = "<group>"; };
 		985A69FD2C3E7A8C0052DDA4 /* ImageDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailVC.swift; sourceTree = "<group>"; };
+		985A69FF2C3E7DC60052DDA4 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Main.strings; sourceTree = "<group>"; };
+		985A6A002C3E7DC60052DDA4 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
+		985A6A012C3E80760052DDA4 /* SendLocationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendLocationVC.swift; sourceTree = "<group>"; };
 		985F66082C29943700473606 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		985F66092C29943700473606 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		985F660A2C29943800473606 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -566,6 +570,7 @@
 				984EF3562C16929B0004CB9A /* SideMenuVC.swift */,
 				987844B32C3292CB003289E4 /* ImagePickerVC.swift */,
 				985A69FD2C3E7A8C0052DDA4 /* ImageDetailVC.swift */,
+				985A6A012C3E80760052DDA4 /* SendLocationVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -745,11 +750,12 @@
 			};
 			buildConfigurationList = 82BE454F2BEFA947007AE54A /* Build configuration list for PBXProject "TrackUs-iOS" */;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = 82BE454B2BEFA947007AE54A;
 			packageReferences = (
@@ -831,6 +837,7 @@
 				82BE45832BEFB137007AE54A /* MyProfileVC.swift in Sources */,
 				98887F922C00938F006F929E /* UserManager.swift in Sources */,
 				82D845922C0E0B7900313CA2 /* WidgetTestLiveActivity.swift in Sources */,
+				985A6A022C3E80760052DDA4 /* SendLocationVC.swift in Sources */,
 				61625E382BFE6EE500E6D1F3 /* Post.swift in Sources */,
 				61B0DED22BFA668F009E360B /* SearchVC.swift in Sources */,
 				8280D26F2BF12BD2002CB7DD /* LoginVC.swift in Sources */,
@@ -909,6 +916,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				82BE455E2BEFA948007AE54A /* Base */,
+				985A69FF2C3E7DC60052DDA4 /* ko */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -917,6 +925,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				82BE45632BEFA94A007AE54A /* Base */,
+				985A6A002C3E7DC60052DDA4 /* ko */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";

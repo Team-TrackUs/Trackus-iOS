@@ -120,7 +120,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     private lazy var sendButton: UIButton = {
         let button = UIButton()
-        //button.setTitle("전송", for: .normal)
         let image = UIImage(systemName: "paperplane.circle.fill")?.withTintColor(.mainBlue).resize(width: 36, height: 36)
         button.setImage(image, for: .normal)
         button.tintColor = .mainBlue
@@ -578,6 +577,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 
                 // 이미지 전송 함수
                 let newMessage = Message(sendMember: self.currentUserUid, timeStamp: Date(), messageType: .image, data: imageUrl)
+                // 이미지 url 포함 메세지 전송
                 self.sendMessage(newMessage: newMessage)
                 return
             }
@@ -849,7 +849,9 @@ extension ChatRoomVC: UICollectionViewDelegate, UICollectionViewDataSource, UICo
                 imagePicker.sourceType = .camera
                 present(imagePicker, animated: true, completion: nil)
             case 2: // 지도
-                return
+                let SendMapVC = SendLocationVC()
+                navigationController?.pushViewController(SendMapVC, animated: true)
+                SendMapVC.delegate = self
             default:
                 return
         }
@@ -871,5 +873,15 @@ extension ChatRoomVC: UIImagePickerControllerDelegate{
             sendImage(image: image)
         }
         picker.dismiss(animated: true, completion: nil)
+    }
+}
+
+extension ChatRoomVC: LocationSelectionDelegate{
+    func didSelectLocation(latitude: Double, longitude: Double) {
+        let geoPoint = GeoPoint(latitude: latitude, longitude: longitude)
+        // 위치값 전송
+        let newMessage = Message(sendMember: self.currentUserUid, timeStamp: Date(), messageType: .location, data: geoPoint)
+        // 이미지 url 포함 메세지 전송
+        self.sendMessage(newMessage: newMessage)
     }
 }
