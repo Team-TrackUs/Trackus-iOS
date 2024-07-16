@@ -9,6 +9,8 @@ import UIKit
 import FirebaseFirestore
 import FirebaseStorage
 
+import MapKit
+
 class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     private var chatUId: String
     private var chat: Chat
@@ -815,6 +817,17 @@ extension ChatRoomVC: ChatMessageCellDelegate{
         let navController = UINavigationController(rootViewController: detailVC)
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true, completion: nil)
+    }
+    
+    // map 상세보기 버튼 탭했을 경우
+    func didTapMapMessage(for coordinate: CLLocationCoordinate2D) {
+        let detailVC = DetailMapViewController()
+        detailVC.coordinate = coordinate
+        navigationController?.pushViewController(detailVC, animated: true)
+        
+//        let navController = UINavigationController(rootViewController: detailVC)
+//        navController.modalPresentationStyle = .fullScreen
+//        present(navController, animated: true, completion: nil)
     }
 }
 

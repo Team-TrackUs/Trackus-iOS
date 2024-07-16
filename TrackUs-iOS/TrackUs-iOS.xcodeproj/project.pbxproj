@@ -91,6 +91,7 @@
 		987707292C3BF34E00CC649A /* AspectFitImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987707282C3BF34E00CC649A /* AspectFitImageView.swift */; };
 		9877072B2C3DA59900CC649A /* CustomButtonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9877072A2C3DA59900CC649A /* CustomButtonCell.swift */; };
 		987844B42C3292CB003289E4 /* ImagePickerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987844B32C3292CB003289E4 /* ImagePickerVC.swift */; };
+		987A7C602C414683005250ED /* DetailMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987A7C5F2C414683005250ED /* DetailMapVC.swift */; };
 		987E2FE52C08548300B1970F /* ChatManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987E2FE42C08548300B1970F /* ChatManager.swift */; };
 		987E2FE72C0860D500B1970F /* ChatProfileImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987E2FE62C0860D500B1970F /* ChatProfileImageView.swift */; };
 		987E2FE92C08645500B1970F /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987E2FE82C08645500B1970F /* Date+.swift */; };
@@ -244,6 +245,7 @@
 		987707282C3BF34E00CC649A /* AspectFitImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AspectFitImageView.swift; sourceTree = "<group>"; };
 		9877072A2C3DA59900CC649A /* CustomButtonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButtonCell.swift; sourceTree = "<group>"; };
 		987844B32C3292CB003289E4 /* ImagePickerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerVC.swift; sourceTree = "<group>"; };
+		987A7C5F2C414683005250ED /* DetailMapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailMapVC.swift; sourceTree = "<group>"; };
 		987E2FE42C08548300B1970F /* ChatManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatManager.swift; sourceTree = "<group>"; };
 		987E2FE62C0860D500B1970F /* ChatProfileImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatProfileImageView.swift; sourceTree = "<group>"; };
 		987E2FE82C08645500B1970F /* Date+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+.swift"; sourceTree = "<group>"; };
@@ -571,6 +573,7 @@
 				987844B32C3292CB003289E4 /* ImagePickerVC.swift */,
 				985A69FD2C3E7A8C0052DDA4 /* ImageDetailVC.swift */,
 				985A6A012C3E80760052DDA4 /* SendLocationVC.swift */,
+				987A7C5F2C414683005250ED /* DetailMapVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -851,6 +854,7 @@
 				82BE45582BEFA947007AE54A /* AppDelegate.swift in Sources */,
 				82C214642C0639DE00D15993 /* MapResultVC.swift in Sources */,
 				826922E72C0487B100D506C2 /* RunTrackingVC.swift in Sources */,
+				987A7C602C414683005250ED /* DetailMapVC.swift in Sources */,
 				967D829B2C0CAD6E00CC1F2A /* RecordService.swift in Sources */,
 				61B0DED02BFA54AB009E360B /* MatePeopleListCell.swift in Sources */,
 				96AC573E2C059D1700F1A73C /* OtherProfileVC.swift in Sources */,

@@ -38,8 +38,6 @@ class SendLocationVC: UIViewController, CLLocationManagerDelegate {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    private var zoomInButton: UIButton!
-    private var zoomOutButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,19 +47,25 @@ class SendLocationVC: UIViewController, CLLocationManagerDelegate {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "위치전송"
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(systemName: "chevron.backward")?.withTintColor(.gray1),
+        let backButton = UIBarButtonItem(
+            image: UIImage(systemName: "chevron.backward"),
             style: .plain,
             target: self,
             action: #selector(backButtonTapped)
         )
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
+        let sendButton = UIBarButtonItem(
             title: "전송",
             style: .done,
             target: self,
             action: #selector(sendButtonTapped)
         )
+        
+        backButton.tintColor = .gray1
+        sendButton.tintColor = .gray1
+
+        navigationItem.title = "위치전송"
+        navigationItem.leftBarButtonItem = backButton
+        navigationItem.rightBarButtonItem = sendButton
     }
     
     private func setupView() {
@@ -81,8 +85,6 @@ class SendLocationVC: UIViewController, CLLocationManagerDelegate {
             
             currentLocationButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             currentLocationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            currentLocationButton.widthAnchor.constraint(equalToConstant: 50),
-            currentLocationButton.heightAnchor.constraint(equalToConstant: 50),
         ])
     }
     

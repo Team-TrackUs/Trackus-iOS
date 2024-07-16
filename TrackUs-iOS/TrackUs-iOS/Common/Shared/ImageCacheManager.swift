@@ -26,6 +26,25 @@ final class ImageCacheManager {
         self.diskCache = DiskCache(diskCacheSize: diskCacheSize)
     }
     
+    /// 이미지 불러오기 -> 없으면 nil  반환
+    func loadImage(location url: String, completionHandler: @escaping (UIImage?) -> Void) {
+        guard let imageUrl = URL(string: url) else { return }
+        // 디스크 저장 가능한 형태로 키값 변경
+        let keyUrl = imageUrl.pathComponents.joined(separator: "-")
+        
+        if let image = memoryCache.getImage(forKey: keyUrl) {
+            // 캐시에 이미지가 있는 경우
+            completionHandler(image)
+        } else if let image = diskCache.getImage(forKey: keyUrl) {
+            // 캐시에 없는 경우 디스크 확인
+            // 메모리 캐싱
+            memoryCache.setImage(image, forKey: keyUrl)
+            completionHandler(image)
+        } else {
+            completionHandler(nil)
+        }
+    }
+    
     /// 이미지 불러오기 -> UIImage 반환
     func loadImage(imageUrl url: String, completionHandler: @escaping (UIImage?) -> Void) {
         guard let imageUrl = URL(string: url) else { return }
