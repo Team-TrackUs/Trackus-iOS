@@ -30,6 +30,8 @@ final class AuthService: NSObject {
         do {
             try Auth.auth().signOut()
             UserManager.shared.clearUser()
+            // 로그아웃시 FCM 토큰 초기화
+            UserManager.shared.updateToken(token: nil)
         }
         catch {
             print(error)
