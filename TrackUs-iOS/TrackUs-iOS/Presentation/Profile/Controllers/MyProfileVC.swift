@@ -436,16 +436,6 @@ class MyProfileVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
             courseDetailVC.hidesBottomBarWhenPushed = true
             courseDetailVC.postUid = post.uid
             
-            let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
-            backButton.tintColor = .black
-            courseDetailVC.navigationItem.leftBarButtonItem = backButton
-            
-            let navigationMenuButton = UIButton(type: .custom)
-            navigationMenuButton.setImage(UIImage(named: "menu_icon"), for: .normal)
-            navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
-            let barButton = UIBarButtonItem(customView: navigationMenuButton)
-            courseDetailVC.navigationItem.rightBarButtonItem = barButton
-            
             navigationController?.pushViewController(courseDetailVC, animated: true)
             tableView.deselectRow(at: indexPath, animated: true)
         } else if tableView == recordsTableView {
