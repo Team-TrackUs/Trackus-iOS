@@ -66,7 +66,7 @@ class SideMenuVC: UIViewController {
         //button.imageView?.image = UIImage(systemName: "arrow.backward")
         button.setTitle("모집글 상세보기", for: .normal)
         button.setImage(UIImage(systemName: "chevron.backward"), for: .normal)
-        button.imageView?.tintColor = .gray1
+        button.imageView?.tintColor = .mainBlue
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.setTitleColor(.gray1, for: .normal)
         button.layer.cornerRadius = 10

@@ -127,7 +127,7 @@ class DetailMapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     }
     
     private func showLocationOnMap(coordinate: CLLocationCoordinate2D) {
-        let region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
+        let region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
         mapView.setRegion(region, animated: true)
         
         //updateMarkerPosition()
@@ -143,7 +143,7 @@ class DetailMapViewController: UIViewController, CLLocationManagerDelegate, MKMa
     
     @objc private func currentLocationButtonTapped() {
         if let userLocation = mapView.userLocation.location {
-            let region = MKCoordinateRegion(center: userLocation.coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
+            let region = MKCoordinateRegion(center: userLocation.coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
             mapView.setRegion(region, animated: true)
         } else {
             locationManager.startUpdatingLocation()

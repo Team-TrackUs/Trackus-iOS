@@ -536,6 +536,7 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
         NSLayoutConstraint.activate(constraints)
     }
     
+    // 맵 썸네일 이미지 처리
     func generateMapThumbnail(center: CLLocationCoordinate2D, completion: @escaping (UIImage) -> Void) {
         let location = String(center.latitude)+String(center.longitude)
         ImageCacheManager.shared.loadImage(location: location) { image in

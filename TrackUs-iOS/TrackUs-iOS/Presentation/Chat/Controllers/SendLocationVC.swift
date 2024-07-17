@@ -39,8 +39,18 @@ class SendLocationVC: UIViewController, CLLocationManagerDelegate {
         return button
     }()
     
+    private lazy var mainButton: MainButton = {
+        let button = MainButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.title = "이 위치 전송하기"
+        button.isEnabled = false
+        button.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        mapView.delegate = self
         setupNavigationBar()
         setupView()
         configureLocationServices()
@@ -53,25 +63,18 @@ class SendLocationVC: UIViewController, CLLocationManagerDelegate {
             target: self,
             action: #selector(backButtonTapped)
         )
-        let sendButton = UIBarButtonItem(
-            title: "전송",
-            style: .done,
-            target: self,
-            action: #selector(sendButtonTapped)
-        )
         
         backButton.tintColor = .gray1
-        sendButton.tintColor = .gray1
 
         navigationItem.title = "위치전송"
         navigationItem.leftBarButtonItem = backButton
-        navigationItem.rightBarButtonItem = sendButton
     }
     
     private func setupView() {
         view.addSubview(mapView)
         view.addSubview(centerMarker)
         view.addSubview(currentLocationButton)
+        view.addSubview(mainButton)
         NSLayoutConstraint.activate([
             mapView.topAnchor.constraint(equalTo: view.topAnchor),
             mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -83,8 +86,12 @@ class SendLocationVC: UIViewController, CLLocationManagerDelegate {
             centerMarker.widthAnchor.constraint(equalToConstant: 36),
             centerMarker.heightAnchor.constraint(equalToConstant: 52),
             
-            currentLocationButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            currentLocationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            currentLocationButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            currentLocationButton.bottomAnchor.constraint(equalTo: mainButton.topAnchor, constant: -16),
+            
+            mainButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
+            mainButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            mainButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
         ])
     }
     
@@ -123,6 +130,23 @@ class SendLocationVC: UIViewController, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedWhenInUse {
             locationManager.startUpdatingLocation()
+        }
+    }
+}
+
+extension SendLocationVC: MKMapViewDelegate {
+    
+    // 맵 드래그 시작할때
+    func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
+        UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
+            self.mainButton.isEnabled = false
+        }
+    }
+    
+    // 맵 드래그가 종료되고 관성이 있을 때 관성이 끝난 후
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
+            self.mainButton.isEnabled = true
         }
     }
 }
