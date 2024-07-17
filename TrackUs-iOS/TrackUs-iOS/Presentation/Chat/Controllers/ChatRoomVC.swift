@@ -729,6 +729,24 @@ extension ChatRoomVC: UITextViewDelegate {
 
 // 사이드바
 extension ChatRoomVC: SideMenuDelegate {
+    func didSelectCourseDetail(postID: String) {
+        
+        let courseDetailVC = CourseDetailVC(isBack: true)
+        courseDetailVC.hidesBottomBarWhenPushed = true
+
+        courseDetailVC.postUid = chat.uid
+        
+//        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
+//        let barButton = UIBarButtonItem(customView: navigationMenuButton)
+//        courseDetailVC.navigationItem.rightBarButtonItem = barButton
+        
+//        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: courseDetailVC, action: #selector(courseDetailVC.backButtonTapped))
+//        backButton.tintColor = .black
+//        courseDetailVC.navigationItem.leftBarButtonItem = backButton
+
+        self.navigationController?.pushViewController(courseDetailVC, animated: true)
+    }
+    
     // 나가기 버튼 함수
     func didSelectLeaveChatRoom(chatRoomID: String) {
         // 채팅방 나가기
