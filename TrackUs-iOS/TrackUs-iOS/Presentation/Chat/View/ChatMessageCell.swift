@@ -343,11 +343,11 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
         let detailButton = UIButton()
         detailButton.translatesAutoresizingMaskIntoConstraints = false
         detailButton.setTitle("상세보기", for: .normal)
-        detailButton.setTitleColor(.label, for: .normal)
+        detailButton.setTitleColor(.white, for: .normal)
         detailButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         detailButton.layer.cornerRadius = 10
         detailButton.layer.masksToBounds = true
-        detailButton.backgroundColor = .gray3
+        detailButton.backgroundColor = .interval
         detailButton.addTarget(self, action: #selector(didTapMapMessage), for: .touchUpInside)
         
         let locationMarker = UIImageView(image: UIImage(named: "MarkerPin"))
@@ -387,9 +387,9 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
         constraints.append(mapImageView.trailingAnchor.constraint(equalTo: mapMessageView.trailingAnchor))
         constraints.append(mapImageView.bottomAnchor.constraint(equalTo: mapMessageView.bottomAnchor))
         
-        constraints.append(detailButton.leadingAnchor.constraint(equalTo: mapMessageView.leadingAnchor, constant: 4))
-        constraints.append(detailButton.trailingAnchor.constraint(equalTo: mapMessageView.trailingAnchor, constant: -4))
-        constraints.append(detailButton.bottomAnchor.constraint(equalTo: mapMessageView.bottomAnchor, constant: -4))
+        constraints.append(detailButton.leadingAnchor.constraint(equalTo: mapMessageView.leadingAnchor, constant: 8))
+        constraints.append(detailButton.trailingAnchor.constraint(equalTo: mapMessageView.trailingAnchor, constant: -8))
+        constraints.append(detailButton.bottomAnchor.constraint(equalTo: mapMessageView.bottomAnchor, constant: -8))
         constraints.append(detailButton.heightAnchor.constraint(equalToConstant: 40))
         
         constraints.append(locationMarker.centerXAnchor.constraint(equalTo: mapImageView.centerXAnchor))
@@ -397,7 +397,6 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
         constraints.append(locationMarker.widthAnchor.constraint(equalToConstant: 27))
         constraints.append(locationMarker.heightAnchor.constraint(equalToConstant: 39))
         
-        self.sendDate = message.date + " " + message.time
         if uid == User.currentUid {
             messageStackView.addArrangedSubview(spacerView)
             messageStackView.addArrangedSubview(mapMessageView)
