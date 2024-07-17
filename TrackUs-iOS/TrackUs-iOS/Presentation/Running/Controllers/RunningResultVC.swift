@@ -140,8 +140,17 @@ class RunningResultVC: ExtensionVC {
     }
     
     @objc func backButtonTapped() {
-        dismiss(animated: true)
+        if presentingViewController != nil {
+            dismiss(animated: true)
+        } else if let navigationController = navigationController {
+            navigationController.popViewController(animated: true)
+        }
     }
+    
+    func setSaveButtonHidden(_ isHidden: Bool) {
+        saveButton.isHidden = isHidden
+    }
+
     
     func setConstraint() {
         view.addSubview(titleLabel)
