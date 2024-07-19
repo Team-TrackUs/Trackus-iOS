@@ -23,10 +23,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) { [self] in
                 // 투명도 수정으로 나타나기 효과주기
                 bottomScrollButton.alpha = isScrolledToBottom ? 0 : 1
-                newMessageButton.alpha = newMessageButton.isHidden ? 0 : (isScrolledToBottom ? 0 : 1)
-            } completion: { [self] _ in
-                bottomScrollButton.isHidden = isScrolledToBottom
-                newMessageButton.isHidden = newMessageButton.alpha == 0
+                if isScrolledToBottom {
+                    newMessageButton.alpha = 0
+                }
             }
         }
     }
@@ -193,9 +192,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         ChatManager.shared.currentChatUid = chatUId
         
-        startListening()
-        resetUnreadCounter()
-        
         // 레이아웃 관련
         setupViews()
         setupNavigationBar()
@@ -222,6 +218,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         // 뷰가 다시 나타날 때마다 호출
         startListening()
+        resetUnreadCounter()
         BlockedCheck()
         ChatManager.shared.currentChatUid = chatUId
     }
@@ -229,9 +226,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // 리스너 종료
-            ChatManger.currentChatUid = ""
-            stopListening()
-            resetUnreadCounter()
+        ChatManger.currentChatUid = ""
+        stopListening()
+        resetUnreadCounter()
     }
     // MARK: - 오토레이아웃 관련
     private func setupNavigationBar() {
@@ -549,19 +546,21 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         guard let baseUrlString = Bundle.main.object(forInfoDictionaryKey: "FCM_NOTIFICATION_SERVER_URL") as? String else { return }
         let urlString = "https://" + baseUrlString
         guard let url = URL(string: urlString), let token = ChatManger.userInfo[OpponentUid]?.token else { return }
-        var body: String
-        
+        var body: String = ""
+        if chat.group {
+            body += "\(UserManager.shared.user.name): "
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         switch message.messageType {
             case .text:
-                body = message.text!
+                body += message.text!
             case .image:
-                body = "사진을 보냈습니다."
+                body += "사진을 보냈습니다."
             case .location:
-                body = "위치 장소를 보냈습니다."
+                body += "위치 장소를 보냈습니다."
             case .userInout:
                 return
         }
@@ -705,8 +704,11 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                         self.tableView.insertRows(at: indexPaths, with: .automatic)
                     }, completion: nil)
                     if !self.messageMap.isEmpty {
-                        self.newMessageButton.isHidden = self.isScrolledToBottom ? true : false
-                        self.scrollToBottom()
+                        UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
+                            // 하단이 아닐때와 신규 메세지 있을 경우만 표시
+                            self.newMessageButton.alpha = self.isScrolledToBottom || newMessages.count == 0 ? 0 : 1
+                            self.scrollToBottom()
+                        }
                     }
                 }
             }
@@ -982,17 +984,15 @@ extension ChatRoomVC: LocationSelectionDelegate{
 
 // MARK: - UIScrollViewDelegate
 extension ChatRoomVC: UIScrollViewDelegate{
+    // 스크롤뷰 움직임 감지
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
         let lastIndexPath = indexPaths.last
         
         if let lastIndexPath = lastIndexPath, lastIndexPath.row < messageMap.count - 4 {
-            print("lastIndexPath: \(lastIndexPath)")
             isScrolledToBottom = false
-            //print("Currently viewing indexPath: \(lastIndexPath), which is not the last item.")
         } else {
             // 메세지 최하단인 경우
-            print("Currently viewing the last item or there are no items. : \(String(describing: lastIndexPath))")
             isScrolledToBottom = true
         }
     }

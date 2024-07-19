@@ -79,6 +79,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
+        // 채팅방에서 사용 종료시 해당 카운트 초기화
+        if ChatManager.shared.currentChatUid != "" {
+            if let chat = ChatManager.shared.chatRooms.first(where: { chatRoom in chatRoom.uid == ChatManager.shared.currentChatUid }){
+                var usersUnreadCountInfo = chat.usersUnreadCountInfo
+                UIApplication.shared.applicationIconBadgeNumber -= usersUnreadCountInfo[UserManager.shared.user.uid] ?? 0
+                usersUnreadCountInfo[UserManager.shared.user.uid] = 0
+                Firestore.firestore().collection("chats").document(chat.uid).updateData(["usersUnreadCountInfo" : usersUnreadCountInfo])
+            }
+        }
         let semaphore = DispatchSemaphore(value: 0)
                 Task.detached
                 {
@@ -88,7 +97,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     semaphore.signal()
                 }
                 semaphore.wait()
-            
     }
 }
 

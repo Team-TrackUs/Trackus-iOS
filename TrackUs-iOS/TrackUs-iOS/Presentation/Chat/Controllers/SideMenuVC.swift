@@ -54,7 +54,7 @@ class SideMenuVC: UIViewController {
         } else {
             countLabel.isHidden = true
         }
-        countLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        countLabel.font = UIFont.systemFont(ofSize: 10, weight: .regular)
         countLabel.textColor = .gray2
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         return countLabel
@@ -64,9 +64,9 @@ class SideMenuVC: UIViewController {
        let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         //button.imageView?.image = UIImage(systemName: "arrow.backward")
-        button.setTitle("모집글 상세보기", for: .normal)
-        button.setImage(UIImage(systemName: "chevron.backward"), for: .normal)
-        button.imageView?.tintColor = .mainBlue
+        button.setTitle("모집글 상세보기 >", for: .normal)
+        //button.setImage(UIImage(systemName: "chevron.backward"), for: .normal)
+        //button.imageView?.tintColor = .mainBlue
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.setTitleColor(.gray1, for: .normal)
         button.layer.cornerRadius = 10
@@ -82,7 +82,7 @@ class SideMenuVC: UIViewController {
         let membersLabel = UILabel()
         membersLabel.text = "채팅방 맴버"
         membersLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        membersLabel.textColor = .gray2
+        membersLabel.textColor = .gray1
         membersLabel.translatesAutoresizingMaskIntoConstraints = false
         return membersLabel
     }()
@@ -138,8 +138,8 @@ class SideMenuVC: UIViewController {
             titleLabel.topAnchor.constraint(equalTo: menuView.safeAreaLayoutGuide.topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
             
-            countLabel.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 8),
-            countLabel.bottomAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+            countLabel.leadingAnchor.constraint(equalTo: membersLabel.trailingAnchor, constant: 4),
+            countLabel.bottomAnchor.constraint(equalTo: membersLabel.bottomAnchor),
             
             membersLabel.topAnchor.constraint(equalTo: chat.group ? postButton.bottomAnchor : titleLabel.bottomAnchor, constant: 16),
             membersLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
