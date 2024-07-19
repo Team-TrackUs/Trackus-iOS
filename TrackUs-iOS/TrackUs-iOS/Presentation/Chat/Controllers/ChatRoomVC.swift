@@ -67,7 +67,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     collectionView.isHidden = false
                     plusButton.setImage(UIImage(systemName: "xmark")?.withTintColor(.gray2), for: .normal)
                 view.endEditing(true)
-                    //hideKeyboard()
             } else {
                     inputViewBottomConstraint.constant = -10
                 collectionViewTopConstraint.constant = 130
@@ -76,6 +75,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             }
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
+                self.scrollToBottom()
             }
         }
     }
@@ -360,7 +360,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     }
     
     @objc private func scrollBottonTapped() {
-        scrollToBottom(scrollRun: true)
+        UIView.animate(withDuration: 0.3) {
+            self.scrollToBottom(scrollRun: true)
+        }
     }
     
     
@@ -704,7 +706,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                         self.tableView.insertRows(at: indexPaths, with: .automatic)
                     }, completion: nil)
                     if !self.messageMap.isEmpty {
-                        UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
+                        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut]) {
                             // 하단이 아닐때와 신규 메세지 있을 경우만 표시
                             self.newMessageButton.alpha = self.isScrolledToBottom || newMessages.count == 0 ? 0 : 1
                             self.scrollToBottom()
@@ -754,7 +756,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         if isScrolledToBottom || scrollRun {
             guard messages.count > 0 else { return }
             let indexPath = IndexPath(row: messages.count - 1, section: 0)
-            tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+            tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
         }
     }
     
