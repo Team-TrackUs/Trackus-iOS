@@ -538,7 +538,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                         self.sendFCMNotification(to: opponentUid, message: message)
                     }
                     self.messageTextView.text = nil
-                    self.scrollToBottom()
+                    self.scrollToBottom(scrollRun: true)
                 }
             }
         }
@@ -688,13 +688,22 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     .compactMap{ firestoreMessage -> Message? in
                         return Message(firestoreMessage: firestoreMessage)
                     }
-                self.messages = firestoreMessages
+                
+                // 신규 메세지 데이터만 확인
+                let newMessages = firestoreMessages.dropFirst(self.messages.count)
+                self.messages.append(contentsOf: newMessages)
+                
                 // 메세지 맵핑
                 self.lock.withLock {
                     self.messageMap = self.messageMapping(self.messages)
                 }
+                
                 DispatchQueue.main.async {
-                    self.tableView.reloadData()
+                    // 신규메세지 부분만 테이블뷰 업데이트
+                    self.tableView.performBatchUpdates({
+                        let indexPaths = (self.messageMap.count - newMessages.count..<self.messageMap.count).map { IndexPath(row: $0, section: 0) }
+                        self.tableView.insertRows(at: indexPaths, with: .automatic)
+                    }, completion: nil)
                     if !self.messageMap.isEmpty {
                         self.newMessageButton.isHidden = self.isScrolledToBottom ? true : false
                         self.scrollToBottom()
@@ -983,7 +992,7 @@ extension ChatRoomVC: UIScrollViewDelegate{
             //print("Currently viewing indexPath: \(lastIndexPath), which is not the last item.")
         } else {
             // 메세지 최하단인 경우
-            print("Currently viewing the last item or there are no items.")
+            print("Currently viewing the last item or there are no items. : \(String(describing: lastIndexPath))")
             isScrolledToBottom = true
         }
     }
