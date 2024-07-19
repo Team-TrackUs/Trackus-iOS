@@ -17,6 +17,19 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     private var newChat: Bool
     private var messageMap: [MessageMap] = []
     private var messages: [Message] = [] // 메시지 배열
+    // 스크롤뷰 최하단 여부 체크
+    private var isScrolledToBottom: Bool = true {
+        didSet {
+            UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) { [self] in
+                // 투명도 수정으로 나타나기 효과주기
+                bottomScrollButton.alpha = isScrolledToBottom ? 0 : 1
+                newMessageButton.alpha = newMessageButton.isHidden ? 0 : (isScrolledToBottom ? 0 : 1)
+            } completion: { [self] _ in
+                bottomScrollButton.isHidden = isScrolledToBottom
+                newMessageButton.isHidden = newMessageButton.alpha == 0
+            }
+        }
+    }
     // ChatManager에 있는 데이터 활용 용도 -> 리스너 활용
     private var currentChatInfo: Chat {
         if let chat = ChatManger.chatRooms.first(where: { $0.uid == chatUId }){
@@ -126,7 +139,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         button.setImage(image, for: .normal)
         button.tintColor = .mainBlue
         button.layer.cornerRadius = 18
-        button.addTarget(self, action: #selector(sendButtionTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -149,6 +162,30 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         return collectionView
+    }()
+    
+    private lazy var bottomScrollButton: UIButton = {
+        let button = UIButton()
+        let image = UIImage(systemName: "arrow.down")
+        button.setImage(image, for: .normal)
+        button.tintColor = .systemBackground
+        button.layer.cornerRadius = 20
+        button.layer.masksToBounds = true
+        button.backgroundColor = .subBlue
+        button.addTarget(self, action: #selector(scrollBottonTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var newMessageButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("신규 메세지", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        button.tintColor = .systemBackground
+        button.layer.cornerRadius = 15
+        button.layer.masksToBounds = true
+        button.backgroundColor = .mainBlue
+        button.addTarget(self, action: #selector(scrollBottonTapped), for: .touchUpInside)
+        return button
     }()
     
     override func viewDidLoad() {
@@ -214,6 +251,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         view.addSubview(tableView)
         view.addSubview(messageInputView)
         view.addSubview(collectionView)
+        view.addSubview(bottomScrollButton)
+        view.addSubview(newMessageButton)
         messageInputView.addSubview(plusButton)
         messageInputView.addSubview(messageTextView)
         messageInputView.addSubview(sendButton)
@@ -223,6 +262,8 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        bottomScrollButton.translatesAutoresizingMaskIntoConstraints = false
+        newMessageButton.translatesAutoresizingMaskIntoConstraints = false
         
         messageTextView.delegate = self
         tableView.delegate = self
@@ -243,6 +284,16 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableViewBottomConstraint,
+            
+            bottomScrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            bottomScrollButton.bottomAnchor.constraint(equalTo: messageInputView.topAnchor, constant: -8),
+            bottomScrollButton.heightAnchor.constraint(equalToConstant: 40),
+            bottomScrollButton.widthAnchor.constraint(equalToConstant: 40),
+            
+            newMessageButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            newMessageButton.bottomAnchor.constraint(equalTo: messageInputView.topAnchor, constant: -8),
+            newMessageButton.heightAnchor.constraint(equalToConstant: 30),
+            newMessageButton.widthAnchor.constraint(equalToConstant: 80),
             
             messageInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             messageInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
@@ -286,9 +337,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
     }
     
-    // MARK: - 액션 관련 함수
+    // MARK: - objc 액션 관련 함수
     // 전송 버튼 이벤트 함수
-    @objc private func sendButtionTapped() {
+    @objc private func sendButtonTapped() {
         guard !UserManager.shared.user.isBlock else {
             let alertController = UIAlertController(title: "메세지 전송 제한", message: "사용자 계정 이용이 제한되어 채팅이 불가능합니다.", preferredStyle: .alert)
             
@@ -309,6 +360,10 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         guard let text = messageTextView.text, !text.isEmpty else { return }
         let newMessage = Message(sendMember: currentUserUid, timeStamp: Date(), messageType: .text, data: text)
         sendMessage(newMessage: newMessage)
+    }
+    
+    @objc private func scrollBottonTapped() {
+        scrollToBottom(scrollRun: true)
     }
     
     
@@ -366,7 +421,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         showButton.toggle()
     }
     
-    // MARK: -
+    // MARK: - 메세지 전송 부분
     private func sendMessage(newMessage: Message){
         if let chat = ChatManger.currentChatInfo {
             self.chat = chat
@@ -638,10 +693,10 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 self.lock.withLock {
                     self.messageMap = self.messageMapping(self.messages)
                 }
-                print(messageMap)
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     if !self.messageMap.isEmpty {
+                        self.newMessageButton.isHidden = self.isScrolledToBottom ? true : false
                         self.scrollToBottom()
                     }
                 }
@@ -683,10 +738,13 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     }
     
     /// 스크롤뷰 하단으로 내리기
-    private func scrollToBottom() {
-        guard messages.count > 0 else { return }
-        let indexPath = IndexPath(row: messages.count - 1, section: 0)
-        tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+    private func scrollToBottom(scrollRun: Bool = false) {
+        // 뷰 다시 들어올때 최근 메세지 보고있을 경우가 아닌경우 스크롤 x (사진, 위치 상세보기, 프로필보기 등)
+        if isScrolledToBottom || scrollRun {
+            guard messages.count > 0 else { return }
+            let indexPath = IndexPath(row: messages.count - 1, section: 0)
+            tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+        }
     }
     
     // MARK: - UITableViewDataSource
@@ -727,7 +785,7 @@ extension ChatRoomVC: UITextViewDelegate {
     }
 }
 
-// 사이드바
+// MARK: - 사이드바
 extension ChatRoomVC: SideMenuDelegate {
     func didSelectCourseDetail(postID: String) {
         
@@ -803,7 +861,8 @@ extension ChatRoomVC: SideMenuDelegate {
         self.navigationController?.popViewController(animated: true)
     }
 }
-    
+
+// MARK: - ChatMessageCellDelegate
 extension ChatRoomVC: ChatMessageCellDelegate{
     // 사용자 프로필 이미지 탭했을 경우
     func didTapProfileImage(for uid: String) {
@@ -881,6 +940,7 @@ extension ChatRoomVC: UICollectionViewDelegate, UICollectionViewDataSource, UICo
     }
 }
 
+// MARK: - ImagePickerDelegate
 extension ChatRoomVC: ImagePickerDelegate{
     // 앨범 선택 전송
     func imagePicker(_ picker: ImagePickerVC, didSelectImage image: UIImage) {
@@ -889,6 +949,7 @@ extension ChatRoomVC: ImagePickerDelegate{
     }
 }
 
+// MARK: - UIImagePickerControllerDelegate
 extension ChatRoomVC: UIImagePickerControllerDelegate{
     // 사진 촬영 전송
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
@@ -899,6 +960,7 @@ extension ChatRoomVC: UIImagePickerControllerDelegate{
     }
 }
 
+// MARK: - LocationSelectionDelegate
 extension ChatRoomVC: LocationSelectionDelegate{
     func didSelectLocation(latitude: Double, longitude: Double) {
         let geoPoint = GeoPoint(latitude: latitude, longitude: longitude)
@@ -906,5 +968,23 @@ extension ChatRoomVC: LocationSelectionDelegate{
         let newMessage = Message(sendMember: self.currentUserUid, timeStamp: Date(), messageType: .location, data: geoPoint)
         // 이미지 url 포함 메세지 전송
         self.sendMessage(newMessage: newMessage)
+    }
+}
+
+// MARK: - UIScrollViewDelegate
+extension ChatRoomVC: UIScrollViewDelegate{
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
+        let lastIndexPath = indexPaths.last
+        
+        if let lastIndexPath = lastIndexPath, lastIndexPath.row < messageMap.count - 4 {
+            print("lastIndexPath: \(lastIndexPath)")
+            isScrolledToBottom = false
+            //print("Currently viewing indexPath: \(lastIndexPath), which is not the last item.")
+        } else {
+            // 메세지 최하단인 경우
+            print("Currently viewing the last item or there are no items.")
+            isScrolledToBottom = true
+        }
     }
 }

@@ -214,13 +214,13 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
         
         switch message.messageType {
             case .text:
-                textMessgeSetup(messageMap: messageMap, sendMember: sendMember)
+                textMessgeSetup(messageMap: messageMap)
             case .image:
-                imageSetUp(messageMap: messageMap, sendMember: sendMember)
+                imageSetUp(messageMap: messageMap)
             case .location:
-                locationSetUp(messageMap: messageMap, sendMember: sendMember)
+                locationSetUp(messageMap: messageMap)
             case .userInout:
-                InOutSetup(messageMap: messageMap, sendMember: sendMember)
+                InOutSetup(messageMap: messageMap)
         }
         
         // 제약조건 추가
@@ -228,8 +228,7 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
     }
     
     /// 사용자 메세지 view 세팅
-    func textMessgeSetup(messageMap: MessageMap, sendMember: User) {
-        let isMyMessage = (messageMap.message.sendMember == User.currentUid)
+    func textMessgeSetup(messageMap: MessageMap) {
         let message = messageMap.message
         
         var constraints = [NSLayoutConstraint]()
@@ -278,8 +277,7 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
     
     
     /// 이미지 메세지 셋업
-    func imageSetUp(messageMap: MessageMap, sendMember: User) {
-        let isMyMessage = (messageMap.message.sendMember == User.currentUid)
+    func imageSetUp(messageMap: MessageMap) {
         let message = messageMap.message
         guard let imageUrl = message.imageUrl else { return }
         var constraints = [NSLayoutConstraint]()
@@ -319,8 +317,7 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
     }
     
     /// 위치정보 셋업
-    func locationSetUp(messageMap: MessageMap, sendMember: User) {
-        let isMyMessage = (messageMap.message.sendMember == User.currentUid)
+    func locationSetUp(messageMap: MessageMap) {
         let message = messageMap.message
         guard let location = message.location else { return }
         var constraints = [NSLayoutConstraint]()
@@ -375,10 +372,9 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
             }
         }
         
-        //mapMessageView.addSubview(mapView)
         mapMessageView.addSubview(mapImageView)
         mapMessageView.addSubview(detailButton)
-        //constraints.append(mapMessageView.widthAnchor.constraint(equalTo: contentView.widthAnchor, constant: -128))
+        
         constraints.append(mapMessageView.widthAnchor.constraint(equalToConstant: 200))
         constraints.append(mapMessageView.heightAnchor.constraint(equalToConstant: 200))
         
@@ -414,7 +410,7 @@ class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
 
     
     /// 사용자 출입 정보 view 셋업
-    func InOutSetup(messageMap: MessageMap, sendMember: User) {
+    func InOutSetup(messageMap: MessageMap) {
         let message = messageMap.message
         
         // 연관 없는 뷰 숨기기
