@@ -117,8 +117,13 @@ class ImagePickerVC: UIViewController, UICollectionViewDelegate, UICollectionVie
             imageView.contentMode = .scaleAspectFill
             imageView.clipsToBounds = true
             
+            // 이미지 불러오기 옵션 지정
+            let options = PHImageRequestOptions()
+            options.resizeMode = .fast
+            options.deliveryMode = .highQualityFormat
+            
             // 이미지 불러오기
-            PHImageManager.default().requestImage(for: asset!, targetSize: cell.contentView.bounds.size, contentMode: .aspectFill, options: nil) { image, _ in
+            PHImageManager.default().requestImage(for: asset!, targetSize: CGSize(width: 250, height: 250), contentMode: .aspectFill, options: options) { image, _ in
                 imageView.image = image
             }
 
@@ -151,7 +156,7 @@ class ImagePickerVC: UIViewController, UICollectionViewDelegate, UICollectionVie
 
     /// 선택 이미지 전달 델리게이트
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // 첫번째
+        // 첫번째셀 사진 촬영
         if indexPath.item == 0 {
             let imagePicker = UIImagePickerController()
             imagePicker.delegate = self
@@ -163,8 +168,20 @@ class ImagePickerVC: UIViewController, UICollectionViewDelegate, UICollectionVie
                 if let data = data, let image = UIImage(data: data) {
                     if self.selectedIndexPath != indexPath {
                         self.selectedImage = image
-                        self.selectedIndexPath = indexPath
-                        self.collectionView.reloadData()
+                        // 선택된 항목만 다시 로드
+                        DispatchQueue.main.async {
+                            if let selectedIndexPath = self.selectedIndexPath {
+                                self.selectedIndexPath = indexPath
+                                // 이전 선택 이미지 다시 로드
+                                self.collectionView.reloadItems(at: [selectedIndexPath])
+                                // 선택 이미지 다시 로드
+                                self.collectionView.reloadItems(at: [indexPath])
+                            } else {
+                                self.selectedIndexPath = indexPath
+                                // 선택 이미지 다시 로드
+                                self.collectionView.reloadItems(at: [indexPath])
+                            }
+                        }
                     }
                 }
             }
