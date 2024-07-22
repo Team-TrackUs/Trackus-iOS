@@ -268,19 +268,8 @@ class WithdrawalVC: UIViewController, UITextViewDelegate {
                     //print("Error deleting user account: \(error)")
                     return
                 }
-                
-                do {
-                    try Auth.auth().signOut()
-                    
-                    // 로그인 화면으로 이동
-                    let loginVC = LoginVC()
-                    UIApplication.shared.windows.first?.rootViewController = loginVC
-                    UIApplication.shared.windows.first?.makeKeyAndVisible()
-                    
-                    
-                } catch let signOutError as NSError {
-                    //print("Error signing out: %@", signOutError)
-                }
+                // 사용자 데이터 리스너 제거 및 초기화
+                UserManager.shared.clearUser()
             }
         }
     }

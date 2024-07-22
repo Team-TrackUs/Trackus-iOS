@@ -124,9 +124,6 @@ final class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 16
-        
-        //stackView.distribution = .fillEqually
-        //stackView.alignment = .fill
         return stackView
     }()
     
@@ -138,7 +135,6 @@ final class SignUpVC: UIViewController, MainButtonEnabledDelegate {
         view2.delegate = self
         view2.textField.delegate = self
         view3.delegate = self
-        //view4.delegate = self
         
         
         // 키보드 메소드 등록

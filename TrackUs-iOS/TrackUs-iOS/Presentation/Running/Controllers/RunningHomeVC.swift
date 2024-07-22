@@ -33,13 +33,6 @@ final class RunningHomeVC: UIViewController {
         return collectionView
     }()
     
-    private lazy var navigationMenuButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(named: "dots_icon"), for: .normal)
-        button.tintColor = .black
-        return button
-    }()
-    
     private lazy var myLocationButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "location_icon")?.withRenderingMode(.alwaysOriginal), for: .normal)
@@ -381,14 +374,6 @@ extension RunningHomeVC: UICollectionViewDelegate, UICollectionViewDataSource, U
         let courseDetailVC = CourseDetailVC(isBack: true)
         courseDetailVC.hidesBottomBarWhenPushed = true
         courseDetailVC.postUid = post.uid
-        
-        navigationMenuButton.addTarget(courseDetailVC, action: #selector(courseDetailVC.menuButtonTapped), for: .touchUpInside)
-        let barButton = UIBarButtonItem(customView: navigationMenuButton)
-        courseDetailVC.navigationItem.rightBarButtonItem = barButton
-        
-        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: courseDetailVC, action: #selector(courseDetailVC.backButtonTapped))
-        backButton.tintColor = .black
-        courseDetailVC.navigationItem.leftBarButtonItem = backButton
         
         self.navigationController?.pushViewController(courseDetailVC, animated: true)
         collectionView.deselectItem(at: indexPath, animated: false)

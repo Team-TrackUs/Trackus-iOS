@@ -50,7 +50,6 @@ final class CustomTabBarVC: UITabBarController {
         addTabItems()
         setupMainButton()
         updateChatBadge()
-        updateChatBadge()
         networkCheck.startCheckingNetwork()
     }
     

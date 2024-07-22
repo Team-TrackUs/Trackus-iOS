@@ -43,7 +43,7 @@ struct Message {
     public let timeStamp: Date
     public let imageUrl: String?
     public let text: String?
-    public let location: String?
+    public let location: GeoPoint?
     public let userInOut: Bool?
     
     public var messageType: MessageType {
@@ -86,7 +86,7 @@ struct Message {
                 self.location = nil
                 self.userInOut = nil
             case .location:
-                self.location = data as? String
+                self.location = data as? GeoPoint
                 self.imageUrl = nil
                 self.text = nil
                 self.userInOut = nil
@@ -187,6 +187,6 @@ struct FirestoreMessage: Codable {
     let timeStamp: Date
     let imageUrl: String?
     let text: String?
-    let location: String?
+    let location: GeoPoint?
     let userInOut: Bool?
 }

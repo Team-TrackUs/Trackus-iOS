@@ -7,13 +7,28 @@
 
 import UIKit
 import FirebaseFirestore
+import FirebaseStorage
 
-class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate {
+import MapKit
+
+class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     private var chatUId: String
     private var chat: Chat
     private var newChat: Bool
     private var messageMap: [MessageMap] = []
     private var messages: [Message] = [] // 메시지 배열
+    // 스크롤뷰 최하단 여부 체크
+    private var isScrolledToBottom: Bool = true {
+        didSet {
+            UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) { [self] in
+                // 투명도 수정으로 나타나기 효과주기
+                bottomScrollButton.alpha = isScrolledToBottom ? 0 : 1
+                if isScrolledToBottom {
+                    newMessageButton.alpha = 0
+                }
+            }
+        }
+    }
     // ChatManager에 있는 데이터 활용 용도 -> 리스너 활용
     private var currentChatInfo: Chat {
         if let chat = ChatManger.chatRooms.first(where: { $0.uid == chatUId }){
@@ -29,12 +44,41 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     private var inputViewBottomConstraint: NSLayoutConstraint!
     private var messageTextViewHeightConstraint: NSLayoutConstraint!
     private var stackViewHeightConstraint: NSLayoutConstraint!
+    private var collectionViewTopConstraint: NSLayoutConstraint!
     
     var lock = NSRecursiveLock()
     
+    // firebase 관련
     private var listener: ListenerRegistration?
-    let currentUserUid = User.currentUid
-    let db = Firestore.firestore().collection("chats")
+    private let currentUserUid = User.currentUid
+    private let db = Firestore.firestore().collection("chats")
+    
+    // 하단 버튼 관련
+    private let buttonData = [
+        ("photo", "앨범", UIColor.interval),
+        ("camera.fill", "카메라", UIColor.mainBlue),
+            ("map", "지도", UIColor.subBlue)
+            ]
+    private var showButton: Bool = false{
+        didSet{
+            if showButton {
+                    inputViewBottomConstraint.constant = -110
+                collectionViewTopConstraint.constant = 0
+                    collectionView.isHidden = false
+                    plusButton.setImage(UIImage(systemName: "xmark")?.withTintColor(.gray2), for: .normal)
+                view.endEditing(true)
+            } else {
+                    inputViewBottomConstraint.constant = -10
+                collectionViewTopConstraint.constant = 130
+                    //collectionView.isHidden = true
+                    plusButton.setImage(UIImage(systemName: "plus"), for: .normal)
+            }
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+                self.scrollToBottom()
+            }
+        }
+    }
     
     /// 그룹채팅용
     init(chatUId: String, newChat: Bool = false) {
@@ -73,8 +117,10 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     private lazy var plusButton: UIButton = {
         let button = UIButton()
-        let image = UIImage(systemName: "plus")?.withTintColor(.gray2).resize(width: 18, height: 18)
+        let image = UIImage(systemName: "plus")?.withTintColor(.gray2)
+        button.tintColor = .gray2
         button.setImage(image, for: .normal)
+        button.addTarget(self, action: #selector(plusButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -88,12 +134,11 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     private lazy var sendButton: UIButton = {
         let button = UIButton()
-        //button.setTitle("전송", for: .normal)
         let image = UIImage(systemName: "paperplane.circle.fill")?.withTintColor(.mainBlue).resize(width: 36, height: 36)
         button.setImage(image, for: .normal)
         button.tintColor = .mainBlue
         button.layer.cornerRadius = 18
-        button.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
+        button.addTarget(self, action: #selector(sendButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -108,13 +153,44 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         return view
     }()
     
+    private let collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumInteritemSpacing = 0
+        layout.minimumLineSpacing = 0
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        return collectionView
+    }()
+    
+    private lazy var bottomScrollButton: UIButton = {
+        let button = UIButton()
+        let image = UIImage(systemName: "arrow.down")
+        button.setImage(image, for: .normal)
+        button.tintColor = .systemBackground
+        button.layer.cornerRadius = 20
+        button.layer.masksToBounds = true
+        button.backgroundColor = .subBlue
+        button.addTarget(self, action: #selector(scrollBottonTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var newMessageButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("신규 메세지", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        button.tintColor = .systemBackground
+        button.layer.cornerRadius = 15
+        button.layer.masksToBounds = true
+        button.backgroundColor = .mainBlue
+        button.addTarget(self, action: #selector(scrollBottonTapped), for: .touchUpInside)
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         ChatManager.shared.currentChatUid = chatUId
-        
-        startListening()
-        resetUnreadCounter()
         
         // 레이아웃 관련
         setupViews()
@@ -142,6 +218,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         // 뷰가 다시 나타날 때마다 호출
         startListening()
+        resetUnreadCounter()
         BlockedCheck()
         ChatManager.shared.currentChatUid = chatUId
     }
@@ -149,9 +226,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // 리스너 종료
-            ChatManger.currentChatUid = ""
-            stopListening()
-            resetUnreadCounter()
+        ChatManger.currentChatUid = ""
+        stopListening()
+        resetUnreadCounter()
     }
     // MARK: - 오토레이아웃 관련
     private func setupNavigationBar() {
@@ -170,49 +247,76 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         view.backgroundColor = .systemBackground
         view.addSubview(tableView)
         view.addSubview(messageInputView)
+        view.addSubview(collectionView)
+        view.addSubview(bottomScrollButton)
+        view.addSubview(newMessageButton)
         messageInputView.addSubview(plusButton)
         messageInputView.addSubview(messageTextView)
         messageInputView.addSubview(sendButton)
-
+        
         tableView.translatesAutoresizingMaskIntoConstraints = false
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         messageTextView.translatesAutoresizingMaskIntoConstraints = false
         sendButton.translatesAutoresizingMaskIntoConstraints = false
-
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        bottomScrollButton.translatesAutoresizingMaskIntoConstraints = false
+        newMessageButton.translatesAutoresizingMaskIntoConstraints = false
+        
         messageTextView.delegate = self
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(ChatMessageCell.self, forCellReuseIdentifier: "ChatMessageCell")
-
+        
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(CustomButtonCell.self, forCellWithReuseIdentifier: "CustomButtonCell")
+        
         tableViewBottomConstraint = tableView.bottomAnchor.constraint(equalTo: messageInputView.topAnchor, constant: -4)
-        inputViewBottomConstraint = messageInputView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8)
-
+        inputViewBottomConstraint = messageInputView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10)
+        collectionViewTopConstraint = collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 130)
+        
         stackViewHeightConstraint = messageInputView.heightAnchor.constraint(equalToConstant: 38)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableViewBottomConstraint,
-
+            
+            bottomScrollButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            bottomScrollButton.bottomAnchor.constraint(equalTo: messageInputView.topAnchor, constant: -8),
+            bottomScrollButton.heightAnchor.constraint(equalToConstant: 40),
+            bottomScrollButton.widthAnchor.constraint(equalToConstant: 40),
+            
+            newMessageButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            newMessageButton.bottomAnchor.constraint(equalTo: messageInputView.topAnchor, constant: -8),
+            newMessageButton.heightAnchor.constraint(equalToConstant: 30),
+            newMessageButton.widthAnchor.constraint(equalToConstant: 80),
+            
             messageInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             messageInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             stackViewHeightConstraint,
             inputViewBottomConstraint,
-
+            
             plusButton.leadingAnchor.constraint(equalTo: messageInputView.leadingAnchor),
             plusButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
             plusButton.heightAnchor.constraint(equalToConstant: 38),
             plusButton.widthAnchor.constraint(equalToConstant: 38),
-
+            
             sendButton.trailingAnchor.constraint(equalTo: messageInputView.trailingAnchor),
             sendButton.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor),
             sendButton.heightAnchor.constraint(equalToConstant: 38),
             sendButton.widthAnchor.constraint(equalToConstant: 38),
-
+            
             messageTextView.leadingAnchor.constraint(equalTo: plusButton.trailingAnchor, constant: 2),
             messageTextView.trailingAnchor.constraint(equalTo: sendButton.leadingAnchor, constant: -2),
             messageTextView.topAnchor.constraint(equalTo: messageInputView.topAnchor, constant: 1),
             messageTextView.bottomAnchor.constraint(equalTo: messageInputView.bottomAnchor, constant: -1),
+            
+            //collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            collectionView.heightAnchor.constraint(equalToConstant: 100),
+            collectionViewTopConstraint
         ])
     }
     
@@ -230,9 +334,9 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
     }
     
-    // MARK: - 액션 관련 함수
+    // MARK: - objc 액션 관련 함수
     // 전송 버튼 이벤트 함수
-    @objc private func sendMessage() {
+    @objc private func sendButtonTapped() {
         guard !UserManager.shared.user.isBlock else {
             let alertController = UIAlertController(title: "메세지 전송 제한", message: "사용자 계정 이용이 제한되어 채팅이 불가능합니다.", preferredStyle: .alert)
             
@@ -252,12 +356,72 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         guard let text = messageTextView.text, !text.isEmpty else { return }
         let newMessage = Message(sendMember: currentUserUid, timeStamp: Date(), messageType: .text, data: text)
-        
-        // 정지 여부 확인
-        
-        // 신고 3회 이상 정지여부 확인
-        
-        
+        sendMessage(newMessage: newMessage)
+    }
+    
+    @objc private func scrollBottonTapped() {
+        UIView.animate(withDuration: 0.3) {
+            self.scrollToBottom(scrollRun: true)
+        }
+    }
+    
+    
+    
+    // 사이드 메뉴 보이기
+    @objc private func showSideMenu() {
+        let sideMenuVC = SideMenuVC(chat: currentChatInfo)
+        sideMenuVC.delegate = self
+        sideMenuVC.profileImageDelegate = self
+        sideMenuVC.modalPresentationStyle = .overFullScreen
+        present(sideMenuVC, animated: false) {
+            sideMenuVC.showMenu()
+        }
+    }
+    
+    // 키보드 나타날 때
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            // 키보드 높이만큼 bottom constraint 조정
+            showButton = false
+            inputViewBottomConstraint.constant = 25 - keyboardSize.height
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+                self.scrollToBottom()
+            }
+        }
+    }
+    
+    // 키보드 사라질 때
+    @objc private func keyboardWillHide(notification: NSNotification) {
+        // 키보드가 사라질 때 원래대로 복귀
+        if !showButton {
+            inputViewBottomConstraint.constant = -10
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    
+    /// 키보드 숨기기
+    @objc func hideKeyboard() {
+        // 모든 입력 필드의 편집을 종료하고 키보드를 숨깁니다.
+        view.endEditing(true)
+        if showButton {
+            showButton = false
+        }
+    }
+    
+    @objc private func backAction() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    // 플러스 버튼 액션
+    @objc private func plusButtonTapped() {
+        showButton.toggle()
+    }
+    
+    // MARK: - 메세지 전송 부분
+    private func sendMessage(newMessage: Message){
         if let chat = ChatManger.currentChatInfo {
             self.chat = chat
         }
@@ -348,49 +512,6 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     }
     
     
-    
-    // 사이드 메뉴 보이기
-    @objc private func showSideMenu() {
-        let sideMenuVC = SideMenuVC(chat: currentChatInfo)
-        sideMenuVC.delegate = self
-        sideMenuVC.profileImageDelegate = self
-        sideMenuVC.modalPresentationStyle = .overFullScreen
-        present(sideMenuVC, animated: false) {
-            sideMenuVC.showMenu()
-        }
-    }
-    
-    // 키보드 나타날 때
-    @objc private func keyboardWillShow(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            // 키보드 높이만큼 bottom constraint 조정
-            inputViewBottomConstraint.constant = 25 - keyboardSize.height
-            UIView.animate(withDuration: 0.3) {
-                self.view.layoutIfNeeded()
-                self.scrollToBottom()
-            }
-        }
-    }
-    
-    // 키보드 사라질 때
-    @objc private func keyboardWillHide(notification: NSNotification) {
-        // 키보드가 사라질 때 원래대로 복귀
-        inputViewBottomConstraint.constant = -10
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
-    }
-    
-    /// 키보드 숨기기
-    @objc func hideKeyboard() {
-        // 모든 입력 필드의 편집을 종료하고 키보드를 숨깁니다.
-        view.endEditing(true)
-    }
-    
-    @objc private func backAction() {
-        self.navigationController?.popViewController(animated: true)
-    }
-    
     // MARK: - Firebase 관련 함수
     // 메세지 전송
     private func sendMessageFireStore(message: Message, opponentUid: String) {
@@ -416,7 +537,7 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                         self.sendFCMNotification(to: opponentUid, message: message)
                     }
                     self.messageTextView.text = nil
-                    self.scrollToBottom()
+                    self.scrollToBottom(scrollRun: true)
                 }
             }
         }
@@ -427,19 +548,21 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         guard let baseUrlString = Bundle.main.object(forInfoDictionaryKey: "FCM_NOTIFICATION_SERVER_URL") as? String else { return }
         let urlString = "https://" + baseUrlString
         guard let url = URL(string: urlString), let token = ChatManger.userInfo[OpponentUid]?.token else { return }
-        var body: String
-        
+        var body: String = ""
+        if chat.group {
+            body += "\(UserManager.shared.user.name): "
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         switch message.messageType {
             case .text:
-                body = message.text!
+                body += message.text!
             case .image:
-                body = "사진을 보냈습니다."
+                body += "사진을 보냈습니다."
             case .location:
-                body = "위치 장소를 보냈습니다."
+                body += "위치 장소를 보냈습니다."
             case .userInout:
                 return
         }
@@ -480,6 +603,43 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
 
         task.resume()
+    }
+    
+    private func sendImage(image: UIImage) {
+        // fireStorage 이미지 등록
+        let ref = Storage.storage().reference().child("chatImages/\(UUID())")
+        // 이미지 포멧 JPEG 변경
+        guard let jpegData = image.jpegData(compressionQuality: 0.5) else { return }
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
+        // 이미지 storage에 저장
+        ref.putData(jpegData, metadata: metadata) { metadata, error in
+            if let error = error {
+                print("Failed to push image to Storage: \(error)")
+                return
+            }
+            // url 받아오기
+            ref.downloadURL { url, error in
+                if let error = error{
+                    print("Failed to retrieve downloadURL: \(error)")
+                    return
+                }
+                print("Successfully stored image with url: \(url?.absoluteString ?? "")")
+                
+                // 이미지 url 저장
+                guard let url = url else { return }
+                let imageUrl = url.absoluteString
+                ImageCacheManager.shared.setImage(image: image, url: imageUrl)
+                
+                // 이미지 전송 함수
+                let newMessage = Message(sendMember: self.currentUserUid, timeStamp: Date(), messageType: .image, data: imageUrl)
+                // 이미지 url 포함 메세지 전송
+                self.sendMessage(newMessage: newMessage)
+                return
+            }
+        }
     }
     
     // 본인 신규 메세지 갯수 초기화
@@ -529,16 +689,28 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     .compactMap{ firestoreMessage -> Message? in
                         return Message(firestoreMessage: firestoreMessage)
                     }
-                self.messages = firestoreMessages
+                
+                // 신규 메세지 데이터만 확인
+                let newMessages = firestoreMessages.dropFirst(self.messages.count)
+                self.messages.append(contentsOf: newMessages)
+                
                 // 메세지 맵핑
                 self.lock.withLock {
                     self.messageMap = self.messageMapping(self.messages)
                 }
-                print(messageMap)
+                
                 DispatchQueue.main.async {
-                    self.tableView.reloadData()
+                    // 신규메세지 부분만 테이블뷰 업데이트
+                    self.tableView.performBatchUpdates({
+                        let indexPaths = (self.messageMap.count - newMessages.count..<self.messageMap.count).map { IndexPath(row: $0, section: 0) }
+                        self.tableView.insertRows(at: indexPaths, with: .automatic)
+                    }, completion: nil)
                     if !self.messageMap.isEmpty {
-                        self.scrollToBottom()
+                        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut]) {
+                            // 하단이 아닐때와 신규 메세지 있을 경우만 표시
+                            self.newMessageButton.alpha = self.isScrolledToBottom || newMessages.count == 0 ? 0 : 1
+                            self.scrollToBottom()
+                        }
                     }
                 }
             }
@@ -579,10 +751,13 @@ class ChatRoomVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     }
     
     /// 스크롤뷰 하단으로 내리기
-    private func scrollToBottom() {
-        guard messages.count > 0 else { return }
-        let indexPath = IndexPath(row: messages.count - 1, section: 0)
-        tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+    private func scrollToBottom(scrollRun: Bool = false) {
+        // 뷰 다시 들어올때 최근 메세지 보고있을 경우가 아닌경우 스크롤 x (사진, 위치 상세보기, 프로필보기 등)
+        if isScrolledToBottom || scrollRun {
+            guard messages.count > 0 else { return }
+            let indexPath = IndexPath(row: messages.count - 1, section: 0)
+            tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+        }
     }
     
     // MARK: - UITableViewDataSource
@@ -623,8 +798,18 @@ extension ChatRoomVC: UITextViewDelegate {
     }
 }
 
-// 사이드바
+// MARK: - 사이드바
 extension ChatRoomVC: SideMenuDelegate {
+    func didSelectCourseDetail(postID: String) {
+        
+        let courseDetailVC = CourseDetailVC(isBack: true)
+        courseDetailVC.hidesBottomBarWhenPushed = true
+
+        courseDetailVC.postUid = chat.uid
+
+        self.navigationController?.pushViewController(courseDetailVC, animated: true)
+    }
+    
     // 나가기 버튼 함수
     func didSelectLeaveChatRoom(chatRoomID: String) {
         // 채팅방 나가기
@@ -689,10 +874,128 @@ extension ChatRoomVC: SideMenuDelegate {
         self.navigationController?.popViewController(animated: true)
     }
 }
-    
-extension ChatRoomVC: UserCellDelegate{
+
+// MARK: - ChatMessageCellDelegate
+extension ChatRoomVC: ChatMessageCellDelegate{
+    // 사용자 프로필 이미지 탭했을 경우
     func didTapProfileImage(for uid: String) {
-        let otherProfileVC = OtherProfileVC(userId: uid)
-        navigationController?.pushViewController(otherProfileVC, animated: true)
+        if currentUserUid != uid {
+            let otherProfileVC = OtherProfileVC(userId: uid)
+            navigationController?.pushViewController(otherProfileVC, animated: true)
+        } else {
+            let myProfileVC = MyProfileVC()
+            navigationController?.pushViewController(myProfileVC, animated: true)
+        }
+    }
+    
+    // 사용자 전송 이미지 탭했을 경우
+    func didTapImageMessage(for userName: String, dateString: String, image: UIImage?) {
+        guard let image = image else { return }
+        let detailVC = ImageDetailVC()
+        detailVC.image = image
+        detailVC.imageName = userName
+        detailVC.imageDate = dateString
+        //self.navigationController?.pushViewController(detailVC, animated: true)
+        let navController = UINavigationController(rootViewController: detailVC)
+        navController.modalPresentationStyle = .fullScreen
+        present(navController, animated: true, completion: nil)
+    }
+    
+    // map 상세보기 버튼 탭했을 경우
+    func didTapMapMessage(for coordinate: CLLocationCoordinate2D) {
+        let detailVC = DetailMapViewController()
+        detailVC.coordinate = coordinate
+        navigationController?.pushViewController(detailVC, animated: true)
+        
+//        let navController = UINavigationController(rootViewController: detailVC)
+//        navController.modalPresentationStyle = .fullScreen
+//        present(navController, animated: true, completion: nil)
+    }
+}
+
+// MARK: - 하단 메뉴 컬랙션뷰
+extension ChatRoomVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return buttonData.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CustomButtonCell", for: indexPath) as! CustomButtonCell
+        let data = buttonData[indexPath.item]
+        cell.configure(imageName: data.0, labelText: data.1, backgroundColor: data.2)
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: view.frame.width / 4, height: 80)
+    }
+    
+    // 컬렉션 뷰 아이템 탭 이벤트
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        switch indexPath.row {
+            case 0: // 앨범
+                let imagePickerVC = ImagePickerVC()
+                self.navigationController?.pushViewController(imagePickerVC, animated: true)
+                imagePickerVC.delegate = self
+            case 1: // 카메라
+                let imagePicker = UIImagePickerController()
+                imagePicker.delegate = self
+                imagePicker.sourceType = .camera
+                present(imagePicker, animated: true, completion: nil)
+            case 2: // 지도
+                let SendMapVC = SendLocationVC()
+                navigationController?.pushViewController(SendMapVC, animated: true)
+                SendMapVC.delegate = self
+            default:
+                return
+        }
+    }
+}
+
+// MARK: - ImagePickerDelegate
+extension ChatRoomVC: ImagePickerDelegate{
+    // 앨범 선택 전송
+    func imagePicker(_ picker: ImagePickerVC, didSelectImage image: UIImage) {
+        // 이미지 전송 함수
+        sendImage(image: image)
+    }
+}
+
+// MARK: - UIImagePickerControllerDelegate
+extension ChatRoomVC: UIImagePickerControllerDelegate{
+    // 사진 촬영 전송
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let image = info[.originalImage] as? UIImage {
+            sendImage(image: image)
+        }
+        picker.dismiss(animated: true, completion: nil)
+    }
+}
+
+// MARK: - LocationSelectionDelegate
+extension ChatRoomVC: LocationSelectionDelegate{
+    func didSelectLocation(latitude: Double, longitude: Double) {
+        let geoPoint = GeoPoint(latitude: latitude, longitude: longitude)
+        // 위치값 전송
+        let newMessage = Message(sendMember: self.currentUserUid, timeStamp: Date(), messageType: .location, data: geoPoint)
+        // 이미지 url 포함 메세지 전송
+        self.sendMessage(newMessage: newMessage)
+    }
+}
+
+// MARK: - UIScrollViewDelegate
+extension ChatRoomVC: UIScrollViewDelegate{
+    // 스크롤뷰 움직임 감지
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let indexPaths = tableView.indexPathsForVisibleRows else { return }
+        let lastIndexPath = indexPaths.last
+        
+        if let lastIndexPath = lastIndexPath, lastIndexPath.row < messageMap.count - 4 {
+            isScrolledToBottom = false
+        } else {
+            // 메세지 최하단인 경우
+            isScrolledToBottom = true
+        }
     }
 }

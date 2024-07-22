@@ -13,6 +13,7 @@ class UserManager {
     static let shared = UserManager()
     
     var user: User
+    private var listener: ListenerRegistration?
     
     private init() {
         self.user = User()
@@ -45,10 +46,9 @@ class UserManager {
     func getUserData(uid: String?) {
         guard let uid = uid else { return }
         
-        let _ = Firestore.firestore().collection("users").document(uid).addSnapshotListener { documentSnapshot, error in
+        self.listener = Firestore.firestore().collection("users").document(uid).addSnapshotListener { documentSnapshot, error in
             if let error = error {
                 print("Error getting documents: \(error)")
-                print("사용자 데이터 불러오기 실패")
                 //completionHandler(true)
             }else {
                 guard let document = documentSnapshot, document.exists, let data = document.data() else {
@@ -108,5 +108,12 @@ class UserManager {
                 print("Token updated successfully")
             }
         }
+    }
+    
+    // 사용자 데이터 초기화 -> 로그아웃, 회원탈퇴 사용
+    func clearUser() {
+        // 리스너 제거 및 사용자 데이터 초기화
+        listener?.remove()
+        self.user = User()
     }
 }
