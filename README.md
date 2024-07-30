@@ -1,7 +1,7 @@
 # 🏃 트랙어스
 > 러닝을 사랑하는 이들을 위한 지도 기반 모바일 앱으로. 사용자들은 다양한 지역에서 함께 러닝을 즐길 수 있으며, 개인의 성장과 목표 달성을 위해 러닝 데이터를 추적할 수 있습니다.
 
-[📱 앱스토어 링크]() <br/>
+
 
 <img src="https://github.com/Team-TrackUs/Trackus-iOS/assets/101062450/5b3b591b-b647-4b9e-afb6-887c3f135cf6" width = 19%/>
 <img src="https://github.com/Team-TrackUs/Trackus-iOS/assets/101062450/8baac104-ee2d-4249-96db-d66a07ca5b9c" width = 19%/>
@@ -9,9 +9,33 @@
 <img src="https://github.com/Team-TrackUs/Trackus-iOS/assets/101062450/cb2ac504-ec62-4150-b5df-6d9ffcb0ef70" width = 19%/>
 <img src="https://github.com/Team-TrackUs/Trackus-iOS/assets/101062450/c14e964d-2070-4a8d-a100-f58602e015a2" width = 19%/>
 
-## Development Stack & Tools
+[📱 앱스토어 링크](https://apps.apple.com/ca/app/trackus-%ED%8A%B8%EB%9E%99%EC%96%B4%EC%8A%A4/id6476967318)
 
-- 📚 Framework & Library
+### 주요 기능
+- 내 주변 러닝 코스 및 러닝메이트를 맵뷰를 통해서 한눈에 확인할 수 있어요.
+- 다른 러너의 러닝 코스에 참여하거나 나만의 러닝 코스를 그릴 수 있어요.
+- 라이브 트래킹을 통해서 러닝 기록을 추적하고 나의 성장을 확인할 수 있어요.
+- 러닝챗을 통해서 나와 함께하는 러너들과 소통할 수 있어요.
+
+## Development Stack & Tools ⚒️
+
+### MVC Pattern
+- 앱의 볼륨이 큰 편이 아니기 때문에 복잡한 설계 패턴의 필요성을 느끼지 못했으며, 명확한 역할 분리를 위해서 선택했습니다.
+- 기존의 SwiftUI + MVVM 프로젝트를 UIKit으로 구축해나가며 UIKit 자체의 학습에 초점을 맞췄기 때문에 선택하게 되었습니다.
+
+### CoreMotion
+- 러닝트래킹 기능을 구현하기 위해서 사용하게 되었습니다.
+- 칼로리, 운동량 뿐만이 아니라 고도, 케이던스와 같은 디테일한 운동정보를 제공하기 때문에 적합하다고 판단했습니다.
+
+### Firebase
+- 간단하게 서버리스 환경을 구성할 수 있어서 선택하게 되었습니다.
+- 데이터베이스 뿐만이 아니라 인증, 스토리지 기능을 제공하기 때문에 적합하다고 판단했습니다.
+
+### Mapkit
+- Mapkit에서 제공하는 마커, 어노테이션만을 이용하여 기능정의서에 명시된 기능 개발에 문제가 없다고 판단하였습니다.
+- Third-Party가 아닌 First-Party를 사용함으로써 메모리, 성능 면에서 이점을 가질 수 있었습니다.
+
+📚 Framework & Library
 
 도구 | 사용 목적 | Keyowrd
 :---------:|:----------:|:---------:
@@ -21,8 +45,6 @@
  CoreMotion | Live Tracking | Live Tracking
  ActivityKit | build widget | widget
 
-Architecture
-- Cocoa MVC
 
 ## Trouble Shooting 🔥
 <details>
@@ -218,10 +240,10 @@ UIEdgeInsets에 하단의 slideView와 상단의 stackView에 좌표값에 추�
 </details>
 
 
-## Coding Convention
-### Git Convention
-
-Branch Naming <br/>
+## Coding Convention 
+<details>
+  <summary><h3>Convention</h3></summary>
+ Branch Naming <br/>
 - 추가: feature 
 - 버그수정: fix 
 - 리팩터링: refactor 
@@ -245,11 +267,15 @@ Commit Message
 | Chore    |  기타 변경사항(빌드 스크립트 수정 등) |
 
 `[Feat] message #issue-number`
+ </details>
 
-### Code Convention Rule
-- 파일, 클래스에서  약어 사용 가능
+<details>
+  <summary><h3>Code Convention Rule</h3></summary>
+ - 파일, 클래스에서  약어 사용 가능
   - ViewController -> VC
   - ViewModel -> VM
 - 기본 명명규칙은 Swift Style Guide, API Design Guidelines , Swift Style Guide를 참고한다.
 - 함수, 메서드, 변수, 상수의 경우 **lowerCamelCase** 사용
 - 클래스, extension은 **UpserCamelCase**
+  </details>
+  
