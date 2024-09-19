@@ -84,7 +84,7 @@ class PostService {
         
         let userUid = User.currentUid
         let userManager = UserManager.shared
-        userManager.getUserData(uid: userUid)
+        //userManager.getUserData(uid: userUid)
         let user = userManager.user
         let blockList = user.blockList
         
@@ -138,7 +138,7 @@ class PostService {
         
         let userUid = User.currentUid
         let userManager = UserManager.shared
-        userManager.getUserData(uid: userUid)
+        //userManager.getUserData(uid: userUid)
         let user = userManager.user
         let blockList = user.blockList
         
@@ -271,7 +271,7 @@ class PostService {
     // 이미지를 스토리지에 업로드
     static func uploadImage(image: UIImage, completion: @escaping (URL?) -> Void) {
         guard let resizedImage = image.resizeWithWidth(width: 100) else { return }
-        guard let imageData = resizedImage.jpegData(compressionQuality: 1.0) else {
+        guard let imageData = resizedImage.jpegData(compressionQuality: 0.6) else {
             print("DEBUG: Failed to convert image to data")
             completion(nil)
             return

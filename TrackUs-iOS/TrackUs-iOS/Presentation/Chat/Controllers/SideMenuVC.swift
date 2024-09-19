@@ -9,6 +9,7 @@ import UIKit
 
 protocol SideMenuDelegate {
     func didSelectLeaveChatRoom(chatRoomID: String)
+    func didSelectCourseDetail(postID: String)
 }
 
 class SideMenuVC: UIViewController {
@@ -26,7 +27,7 @@ class SideMenuVC: UIViewController {
     }
     
     var delegate: SideMenuDelegate?
-    var profileImageDelegate: UserCellDelegate?
+    var profileImageDelegate: ChatMessageCellDelegate?
     
     private let menuWidth: CGFloat = 300
     private var menuView: UIView!
@@ -53,17 +54,35 @@ class SideMenuVC: UIViewController {
         } else {
             countLabel.isHidden = true
         }
-        countLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        countLabel.font = UIFont.systemFont(ofSize: 10, weight: .regular)
         countLabel.textColor = .gray2
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         return countLabel
+    }()
+    
+    private lazy var postButton: UIButton = {
+       let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        //button.imageView?.image = UIImage(systemName: "arrow.backward")
+        button.setTitle("모집글 상세보기 >", for: .normal)
+        //button.setImage(UIImage(systemName: "chevron.backward"), for: .normal)
+        //button.imageView?.tintColor = .mainBlue
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+        button.setTitleColor(.gray1, for: .normal)
+        button.layer.cornerRadius = 10
+        button.layer.masksToBounds = true
+        button.layer.borderColor = UIColor.gray3.cgColor
+        button.layer.borderWidth = 1.0
+        button.addTarget(self, action: #selector(pushCourseDetail), for: .touchUpInside)
+
+        return button
     }()
     
     private lazy var membersLabel: UILabel = {
         let membersLabel = UILabel()
         membersLabel.text = "채팅방 맴버"
         membersLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        membersLabel.textColor = .gray2
+        membersLabel.textColor = .gray1
         membersLabel.translatesAutoresizingMaskIntoConstraints = false
         return membersLabel
     }()
@@ -104,15 +123,25 @@ class SideMenuVC: UIViewController {
         menuView.addSubview(countLabel)
         menuView.addSubview(membersLabel)
         menuView.addSubview(membersTableView)
+        // 그룹채팅방의 경우 메이트 모지글 보기 버튼 추가
+        if chat.group {
+            menuView.addSubview(postButton)
+            NSLayoutConstraint.activate([
+                postButton.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+                postButton.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+                postButton.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+                postButton.heightAnchor.constraint(equalToConstant: 45)
+                ])
+        }
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: menuView.safeAreaLayoutGuide.topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
             
-            countLabel.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 8),
-            countLabel.bottomAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+            countLabel.leadingAnchor.constraint(equalTo: membersLabel.trailingAnchor, constant: 4),
+            countLabel.bottomAnchor.constraint(equalTo: membersLabel.bottomAnchor),
             
-            membersLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            membersLabel.topAnchor.constraint(equalTo: chat.group ? postButton.bottomAnchor : titleLabel.bottomAnchor, constant: 16),
             membersLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
             
             membersTableView.topAnchor.constraint(equalTo: membersLabel.bottomAnchor, constant: 8),
@@ -159,6 +188,11 @@ class SideMenuVC: UIViewController {
     @objc private func leaveChatRoom() {
         delegate?.didSelectLeaveChatRoom(chatRoomID: chat.uid)
         hideMenu()
+    }
+    
+    @objc private func pushCourseDetail() {
+        hideMenu()
+        delegate?.didSelectCourseDetail(postID: chat.uid)
     }
     
     // 메뉴 보이기 애니메이션

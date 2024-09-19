@@ -84,8 +84,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             if let user = user {
                 // Firestore에서 사용자 정보 확인
                 checkUserInFirestore(uid: user.uid)
-                // 로그인이 확인되었으므로 리스너 해제
-                //Auth.auth().removeStateDidChangeListener(authListener!)
             } else {
                 // 로그인하지 않은 경우 로그인 화면으로 전환
                 self.showLoginView()

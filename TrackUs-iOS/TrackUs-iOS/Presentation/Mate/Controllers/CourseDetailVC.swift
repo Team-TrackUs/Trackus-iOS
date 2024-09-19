@@ -263,7 +263,7 @@ class CourseDetailVC: UIViewController {
     @objc func courseEnterButtonTapped() {
         let userManager = UserManager.shared
         let userUid = User.currentUid
-        userManager.getUserData(uid: userUid)
+        //userManager.getUserData(uid: userUid)
         let user = userManager.user
         
         let message = """
@@ -547,6 +547,23 @@ class CourseDetailVC: UIViewController {
         appearance.backgroundColor = UIColor.white
         self.navigationController?.navigationBar.standardAppearance = appearance
         self.navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        // 버튼 지정
+        let backButton = UIBarButtonItem(
+            image: UIImage(systemName: "chevron.backward"),
+            style: .plain,
+            target: self,
+            action: #selector(backButtonTapped)
+        )
+        backButton.tintColor = .gray1
+        
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: "dots_icon"), for: .normal)
+        button.tintColor = .black
+        button.addTarget(self, action: #selector(menuButtonTapped), for: .touchUpInside)
+        let barButton = UIBarButtonItem(customView: button)
+        
+        self.navigationItem.rightBarButtonItem = barButton
+        self.navigationItem.leftBarButtonItem = backButton
     }
     
     func runningStyleColor() {

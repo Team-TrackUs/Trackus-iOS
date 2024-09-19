@@ -6,16 +6,22 @@
 //
 
 import UIKit
+import MapKit
 
-protocol UserCellDelegate: AnyObject {
+protocol ChatMessageCellDelegate: AnyObject {
     func didTapProfileImage(for uid: String)
+    func didTapImageMessage(for userName: String, dateString: String, image: UIImage?)
+    func didTapMapMessage(for coordinate: CLLocationCoordinate2D)
 }
 
 
-class ChatMessageCell: UITableViewCell {
+class ChatMessageCell: UITableViewCell, MKMapViewDelegate {
     
-    weak var delegate: UserCellDelegate?
+    weak var delegate: ChatMessageCellDelegate?
     private var uid: String = ""
+    private var sendMember: User = User()
+    private var sendDate: String = ""
+    private var coordinate: CLLocationCoordinate2D?
     
     private lazy var dateLabel = {
         let dateLabel = UILabel()
@@ -52,6 +58,18 @@ class ChatMessageCell: UITableViewCell {
         return inoutLabel
     }()
     
+    // 이미지 메세지 관련
+    private lazy var imageMessageView: UIImageView = {
+        let imageView = AspectFitImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFit
+        imageView.layer.cornerRadius = 10
+        imageView.layer.masksToBounds = true
+        imageView.backgroundColor = .gray3
+        imageView.isUserInteractionEnabled = true
+        return imageView
+    }()
+    
     // MARK: - 메세지 관련
     private lazy var messageLabel = {
         let messageLabel = UILabel()
@@ -80,9 +98,19 @@ class ChatMessageCell: UITableViewCell {
         stackView.alignment = .bottom
         stackView.distribution = .fill
         stackView.spacing = 8
-        
+        stackView.sizeToFit()
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
+    }()
+    
+    
+    private lazy var mapMessageView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.layer.cornerRadius = 10
+        view.layer.masksToBounds = true
+        view.backgroundColor = .gray3
+        return view
     }()
     
     private lazy var spacerView: UIView = {
@@ -125,6 +153,7 @@ class ChatMessageCell: UITableViewCell {
         contentView.addSubview(messageStackView)
         contentView.addSubview(timeLabel)
         contentView.addSubview(inoutLabel)
+        contentView.addSubview(mapMessageView)
         messageBackgroundView.addSubview(messageLabel)
         profileImageView.addSubview(overlayerView)
         overlayerView.addSubview(iconView)
@@ -134,15 +163,29 @@ class ChatMessageCell: UITableViewCell {
         spacerView.setContentHuggingPriority(UILayoutPriority(rawValue: 249), for: .horizontal)
     }
     
+    // 프로필 이미지 탭 이벤트
     @objc private func didTapProfileImage() {
         delegate?.didTapProfileImage(for: uid)
+    }
+    
+    // 이미지 메세지 탭 이벤트
+    @objc private func didTapImageMessage() {
+        if let delegate = delegate {
+            delegate.didTapImageMessage(for: sendMember.name, dateString: sendDate, image: imageMessageView.image)
+        }
+    }
+    
+    // Map 상세보기 탭 이벤트
+    @objc private func didTapMapMessage() {
+        if let delegate = delegate, let coordinate = coordinate {
+            delegate.didTapMapMessage(for: coordinate)
+        }
     }
     
     /// ui출력별 종류
     func configure(messageMap: MessageMap) {
         self.uid = messageMap.message.sendMember
         let message = messageMap.message
-        var sendMember: User
         
         // 제약조건 초기화
         NSLayoutConstraint.deactivate(contentView.constraints)
@@ -150,10 +193,10 @@ class ChatMessageCell: UITableViewCell {
         var constraints = [NSLayoutConstraint]()
         // 사용자 정보 가져오기
         if let member = ChatManager.shared.userInfo[message.sendMember] {
-            sendMember = member
+            self.sendMember = member
         } else {
             // 탈퇴 회원
-            sendMember = User()
+            self.sendMember = User()
         }
         
         // 날짜 출력 여부 (공통)
@@ -171,13 +214,13 @@ class ChatMessageCell: UITableViewCell {
         
         switch message.messageType {
             case .text:
-                textMessgeSetup(messageMap: messageMap, sendMember: sendMember)
+                textMessgeSetup(messageMap: messageMap)
             case .image:
-                return
+                imageSetUp(messageMap: messageMap)
             case .location:
-                return
+                locationSetUp(messageMap: messageMap)
             case .userInout:
-                InOutSetup(messageMap: messageMap, sendMember: sendMember)
+                InOutSetup(messageMap: messageMap)
         }
         
         // 제약조건 추가
@@ -185,17 +228,20 @@ class ChatMessageCell: UITableViewCell {
     }
     
     /// 사용자 메세지 view 세팅
-    func textMessgeSetup(messageMap: MessageMap, sendMember: User) {
-        let isMyMessage = (messageMap.message.sendMember == User.currentUid)
+    func textMessgeSetup(messageMap: MessageMap) {
         let message = messageMap.message
         
         var constraints = [NSLayoutConstraint]()
         
         // 관련없는 view 숨기기
         inoutLabel.isHidden = true
+        imageMessageView.isHidden = true
+        mapMessageView.isHidden = true
         
         // 공통 view
+        messageLabel.isHidden = false
         messageStackView.isHidden = false
+        messageBackgroundView.isHidden = false
         
         messageLabel.text = message.text
         
@@ -205,32 +251,213 @@ class ChatMessageCell: UITableViewCell {
         constraints.append(messageLabel.leadingAnchor.constraint(equalTo: messageBackgroundView.leadingAnchor, constant: 8))
         constraints.append(messageLabel.trailingAnchor.constraint(equalTo: messageBackgroundView.trailingAnchor, constant: -8))
         
+        //constraints.append(messageStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant:-4))
+        //constraints.append(messageStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant:64))
+        
+        //constraints.append(timeLabel.bottomAnchor.constraint(equalTo: messageStackView.bottomAnchor))
+        
+        if uid == User.currentUid {
+            messageLabel.textColor = .white
+            messageBackgroundView.backgroundColor = .mainBlue
+            messageStackView.addArrangedSubview(spacerView)
+            messageStackView.addArrangedSubview(messageBackgroundView)
+            constraints.append(timeLabel.trailingAnchor.constraint(equalTo: messageBackgroundView.leadingAnchor, constant: -4))
+        }else {
+            messageLabel.textColor = .label
+            messageBackgroundView.backgroundColor = .gray3
+            messageStackView.addArrangedSubview(messageBackgroundView)
+            messageStackView.addArrangedSubview(spacerView)
+            constraints.append(timeLabel.leadingAnchor.constraint(equalTo: messageBackgroundView.trailingAnchor, constant: 4))
+        }
+        // 프로필 사진 출력 여부 세팅
+        profileImageSetUp(messageMap: messageMap)
+        // 제약조건 추가
+        NSLayoutConstraint.activate(constraints)
+    }
+    
+    
+    /// 이미지 메세지 셋업
+    func imageSetUp(messageMap: MessageMap) {
+        let message = messageMap.message
+        guard let imageUrl = message.imageUrl else { return }
+        var constraints = [NSLayoutConstraint]()
+        
+        // 관련없는 view 숨기기
+        inoutLabel.isHidden = true
+        messageBackgroundView.isHidden = true
+        mapMessageView.isHidden = true
+        
+        // 공통 view
+        messageStackView.isHidden = false
+        imageMessageView.isHidden = false
+        
+        constraints.append(imageMessageView.widthAnchor.constraint(equalTo: contentView.widthAnchor, constant:-128))
+        // 이미지 캐싱
+        imageMessageView.loadImage(url: imageUrl) {}
+        
+        // 탭 이벤트 추가
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapImageMessage))
+        imageMessageView.addGestureRecognizer(tapGestureRecognizer)
+        
+        self.sendDate = message.date + " " + message.time
+        
+        if uid == User.currentUid {
+            messageStackView.addArrangedSubview(spacerView)
+            messageStackView.addArrangedSubview(imageMessageView)
+            constraints.append(timeLabel.trailingAnchor.constraint(equalTo: imageMessageView.leadingAnchor, constant: -4))
+        }else {
+            messageStackView.addArrangedSubview(imageMessageView)
+            messageStackView.addArrangedSubview(spacerView)
+            constraints.append(timeLabel.leadingAnchor.constraint(equalTo: imageMessageView.trailingAnchor, constant: 4))
+        }
+        profileImageSetUp(messageMap: messageMap)
+        
+        // 제약조건 추가
+        NSLayoutConstraint.activate(constraints)
+    }
+    
+    /// 위치정보 셋업
+    func locationSetUp(messageMap: MessageMap) {
+        let message = messageMap.message
+        guard let location = message.location else { return }
+        var constraints = [NSLayoutConstraint]()
+        
+        // 관련없는 view 숨기기
+        inoutLabel.isHidden = true
+        messageBackgroundView.isHidden = true
+        imageMessageView.isHidden = true
+        
+        // 공통 view
+        messageStackView.isHidden = false
+        mapMessageView.isHidden = false
+        
+        
+        let mapView = MKMapView()
+        mapView.translatesAutoresizingMaskIntoConstraints = false
+        mapView.isUserInteractionEnabled = false // 썸네일로만 사용하기 위해 상호작용 비활성화
+        mapView.delegate = self
+        
+        let detailButton = UIButton()
+        detailButton.translatesAutoresizingMaskIntoConstraints = false
+        detailButton.setTitle("상세보기", for: .normal)
+        detailButton.setTitleColor(.white, for: .normal)
+        detailButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        detailButton.layer.cornerRadius = 10
+        detailButton.layer.masksToBounds = true
+        detailButton.backgroundColor = .interval
+        detailButton.addTarget(self, action: #selector(didTapMapMessage), for: .touchUpInside)
+        
+        let locationMarker = UIImageView(image: UIImage(named: "MarkerPin"))
+        locationMarker.translatesAutoresizingMaskIntoConstraints = false
+        
+        let mapImageView = UIImageView()
+        mapImageView.translatesAutoresizingMaskIntoConstraints = false
+        mapImageView.contentMode = .scaleAspectFit
+        mapImageView.image = nil
+        
+        // 좌표 이동
+        self.coordinate = CLLocationCoordinate2DMake(location.latitude, location.longitude)
+        guard let coordinate = coordinate else { return }
+        
+        mapImageView.addSubview(locationMarker)
+        // 맵 미리보기 이미지 처리
+        generateMapThumbnail(center: coordinate) { image in
+            mapImageView.image = image
+        }
+        
+        // 기존 남아있는 뷰 제거
+        for subview in mapMessageView.subviews {
+            if subview is UIImageView || subview is MKMapView {
+                subview.removeFromSuperview()
+            }
+        }
+        
+        mapMessageView.addSubview(mapImageView)
+        mapMessageView.addSubview(detailButton)
+        
+        constraints.append(mapMessageView.widthAnchor.constraint(equalToConstant: 200))
+        constraints.append(mapMessageView.heightAnchor.constraint(equalToConstant: 200))
+        
+        constraints.append(mapImageView.topAnchor.constraint(equalTo: mapMessageView.topAnchor))
+        constraints.append(mapImageView.leadingAnchor.constraint(equalTo: mapMessageView.leadingAnchor))
+        constraints.append(mapImageView.trailingAnchor.constraint(equalTo: mapMessageView.trailingAnchor))
+        constraints.append(mapImageView.bottomAnchor.constraint(equalTo: mapMessageView.bottomAnchor))
+        
+        constraints.append(detailButton.leadingAnchor.constraint(equalTo: mapMessageView.leadingAnchor, constant: 8))
+        constraints.append(detailButton.trailingAnchor.constraint(equalTo: mapMessageView.trailingAnchor, constant: -8))
+        constraints.append(detailButton.bottomAnchor.constraint(equalTo: mapMessageView.bottomAnchor, constant: -8))
+        constraints.append(detailButton.heightAnchor.constraint(equalToConstant: 40))
+        
+        constraints.append(locationMarker.centerXAnchor.constraint(equalTo: mapImageView.centerXAnchor))
+        constraints.append(locationMarker.bottomAnchor.constraint(equalTo: mapImageView.centerYAnchor))
+        constraints.append(locationMarker.widthAnchor.constraint(equalToConstant: 27))
+        constraints.append(locationMarker.heightAnchor.constraint(equalToConstant: 39))
+        
+        if uid == User.currentUid {
+            messageStackView.addArrangedSubview(spacerView)
+            messageStackView.addArrangedSubview(mapMessageView)
+            constraints.append(timeLabel.trailingAnchor.constraint(equalTo: mapMessageView.leadingAnchor, constant: -4))
+        }else {
+            messageStackView.addArrangedSubview(mapMessageView)
+            messageStackView.addArrangedSubview(spacerView)
+            constraints.append(timeLabel.leadingAnchor.constraint(equalTo: mapMessageView.trailingAnchor, constant: 4))
+        }
+        profileImageSetUp(messageMap: messageMap)
+        
+        // 제약조건 추가
+        NSLayoutConstraint.activate(constraints)
+    }
+
+    
+    /// 사용자 출입 정보 view 셋업
+    func InOutSetup(messageMap: MessageMap) {
+        let message = messageMap.message
+        
+        // 연관 없는 뷰 숨기기
+        profileImageView.isHidden = true
+        userNameLabel.isHidden = true
+        messageStackView.isHidden = true
+        timeLabel.isHidden = true
+        
+        inoutLabel.isHidden = false
+        
+        guard let userInOut = message.userInOut else { return }
+        
+        var constraints = [NSLayoutConstraint]()
+        
+        constraints.append(inoutLabel.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: dateLabel.isHidden ? 8 : 2))
+        constraints.append(inoutLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+        constraints.append(inoutLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8))
+        
+        // 사용자 나가기, 들어오기 여부 확인, true: 들어오기, false: 나가기
+        inoutLabel.text = userInOut ? sendMember.name + "님이 들어왔습니다." : sendMember.name + "님이 나갔습니다."
+        
+        // 제약조건 추가
+        NSLayoutConstraint.activate(constraints)
+    }
+    
+    /// 프로필 사진 출력 여부 세팅
+    func profileImageSetUp(messageMap: MessageMap) {
+        
+        var constraints = [NSLayoutConstraint]()
+        
         constraints.append(messageStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant:-4))
         constraints.append(messageStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant:64))
         
         constraints.append(timeLabel.bottomAnchor.constraint(equalTo: messageStackView.bottomAnchor))
         
         // 프로필 이미지파일 출력 여부
-        if isMyMessage {
+        if uid == User.currentUid {
             constraints.append(messageStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant:-16))
-            constraints.append(timeLabel.trailingAnchor.constraint(equalTo: messageBackgroundView.leadingAnchor, constant: -4))
-            messageStackView.addArrangedSubview(spacerView)
-            messageStackView.addArrangedSubview(messageBackgroundView)
-            
             
             profileImageView.isHidden = true
             userNameLabel.isHidden = true
             timeLabel.textAlignment = .right
             constraints.append(messageStackView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 2))
-            messageLabel.textColor = .white
-            messageBackgroundView.backgroundColor = .mainBlue
         } else {
-            
-            messageStackView.addArrangedSubview(messageBackgroundView)
-            messageStackView.addArrangedSubview(spacerView)
             timeLabel.textAlignment = .left
             constraints.append(messageStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant:-64))
-            constraints.append(timeLabel.leadingAnchor.constraint(equalTo: messageBackgroundView.trailingAnchor, constant: 4))
+            
             // 프로필, 닉네임 출력 여부
             if !messageMap.sameUser || !messageMap.sameDate {
                 profileImageView.isHidden = false
@@ -245,7 +472,6 @@ class ChatMessageCell: UITableViewCell {
                 constraints.append(userNameLabel.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 8))
                 constraints.append(userNameLabel.heightAnchor.constraint(equalToConstant: 12))
                 constraints.append(messageStackView.topAnchor.constraint(equalTo: profileImageView.topAnchor, constant: 16))
-                //constraints.append(messageBackgroundView.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 8))
                 
                 // 사용자 이미지 있을 경우 이미지 표시 - 없을경우 기본
                 profileImageView.loadProfileImage(url: sendMember.profileImageUrl) {}
@@ -285,20 +511,12 @@ class ChatMessageCell: UITableViewCell {
                     tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapProfileImage))
                     profileImageView.addGestureRecognizer(tapGestureRecognizer)
                 }
-                
-                //UIImage(systemName: "exclamationmark.circle")
-                //UIImage(systemName: "nosign")
 
             } else {
                 profileImageView.isHidden = true
                 userNameLabel.isHidden = true
-                
                 constraints.append(messageStackView.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: 4))
-                constraints.append(messageBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant:64))
-                
             }
-            messageLabel.textColor = .label
-            messageBackgroundView.backgroundColor = .gray3
         }
         
         // 시간 출력 여부
@@ -306,37 +524,45 @@ class ChatMessageCell: UITableViewCell {
             timeLabel.isHidden = true
         }else {
             timeLabel.isHidden = false
-            timeLabel.text = message.time
+            timeLabel.text = messageMap.message.time
         }
         
         // 제약조건 추가
         NSLayoutConstraint.activate(constraints)
     }
     
-    /// 사용자 출입 정보 view 셋업
-    func InOutSetup(messageMap: MessageMap, sendMember: User) {
-        let message = messageMap.message
-        
-        // 연관 없는 뷰 숨기기
-        profileImageView.isHidden = true
-        userNameLabel.isHidden = true
-        messageStackView.isHidden = true
-        timeLabel.isHidden = true
-        
-        inoutLabel.isHidden = false
-        
-        guard let userInOut = message.userInOut else { return }
-        
-        var constraints = [NSLayoutConstraint]()
-        
-        constraints.append(inoutLabel.topAnchor.constraint(equalTo: dateLabel.isHidden ? contentView.topAnchor : dateLabel.bottomAnchor, constant: dateLabel.isHidden ? 8 : 2))
-        constraints.append(inoutLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
-        constraints.append(inoutLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8))
-        
-        // 사용자 나가기, 들어오기 여부 확인, true: 들어오기, false: 나가기
-        inoutLabel.text = userInOut ? sendMember.name + "님이 들어왔습니다." : sendMember.name + "님이 나갔습니다."
-        
-        // 제약조건 추가
-        NSLayoutConstraint.activate(constraints)
+    // 맵 썸네일 이미지 처리
+    func generateMapThumbnail(center: CLLocationCoordinate2D, completion: @escaping (UIImage) -> Void) {
+        let location = String(center.latitude)+String(center.longitude)
+        ImageCacheManager.shared.loadImage(location: location) { image in
+            if let image = image {
+                // 캐싱 되어있는 경우
+                completion(image)
+            } else {
+                // 캐싱 안된 경우
+                let mapView = MKMapView(frame: CGRect(x: 0, y: 0, width: 300, height: 300))
+                let region = MKCoordinateRegion(center: center, latitudinalMeters: 500, longitudinalMeters: 500)
+                    mapView.setRegion(region, animated: false)
+                    
+                let options = MKMapSnapshotter.Options()
+                options.mapType = mapView.mapType
+                options.region = mapView.region
+                options.showsPointsOfInterest = false
+                options.showsBuildings = false
+                options.size = CGSize(width: 200, height: 200) // 원하는 이미지 크기 설정
+
+                let snapshotter = MKMapSnapshotter(options: options)
+                snapshotter.start { snapshot, error in
+                    guard let snapshot = snapshot else {
+                        return
+                    }
+
+                    let image = snapshot.image
+                    // 이미지 캐시 등록
+                    ImageCacheManager.shared.setImage(image: image, url: String(center.latitude)+String(center.longitude))
+                    completion(image)
+                }
+            }
+        }
     }
 }
